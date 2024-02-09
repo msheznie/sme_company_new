@@ -156,7 +156,7 @@ class UserService {
             $userTenantRepository = new UserTenantRepository();
             $is_bid_tender = $userTenantRepository->getUserTenantData($user->id, $tenantId);
             try{
-                $kycStatus = $userTenantRepository->getKycStatus($user->id, $tenantId);
+
             } catch (\Exception $exception){
                 Log::info($exception);
             }

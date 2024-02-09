@@ -98,13 +98,4 @@ class UserController
      * @param Request $request
      * @return JsonResponse
      */
-    public function sendActivationEmail(Request $request): JsonResponse {
-        $isSend = $request->user()->sendEmailVerificationNotification();
-
-        return response()->json([
-            'success'   => $isSend,
-            'data'      => $isSend,
-            'message'   => 'The activation email has been sent'
-        ]);
-    }
 }

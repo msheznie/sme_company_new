@@ -27,7 +27,8 @@ class CreatePermissionTables extends Migration
 
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');       // For MySQL 8.0 use string('name', 125);
+            $table->string('name');
+            $table->string('provider');// For MySQL 8.0 use string('name', 125);
             $table->string('description');       // For MySQL 8.0 use string('name', 125);
             $table->integer('navigation_id');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
@@ -117,8 +118,8 @@ class CreatePermissionTables extends Migration
             $table->primary([PermissionRegistrar::$pivotPermission, PermissionRegistrar::$pivotRole], 'role_has_permissions_permission_id_role_id_primary');
         });
 
-        
-      
+
+
 
 
         app('cache')
@@ -143,6 +144,6 @@ class CreatePermissionTables extends Migration
         Schema::drop($tableNames['model_has_roles']);
         Schema::drop($tableNames['model_has_permissions']);
         Schema::drop($tableNames['roles']);
-        Schema::drop($tableNames['permissions']);  
+        Schema::drop($tableNames['permissions']);
     }
 }

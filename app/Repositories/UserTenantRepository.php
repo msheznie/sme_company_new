@@ -96,24 +96,6 @@ class UserTenantRepository implements UserTenantRepositoryInterface
             ->exists();
     }
 
-    public function getKycStatus($userId, $tenantId){
-        $kysStatus =  UserTenant::select('kyc_status')
-            ->where([
-                ['user_id' , '=',  $userId],
-                ['tenant_id' , '=',  $tenantId],
-                ['status' , '=',  1]
-            ])
-            ->first();
-
-        throw_unless($kysStatus);
-
-        if($kysStatus){
-            return $kysStatus->kyc_status;
-        }
-
-        return null;
-    }
-
     public function getTenantId($api_key){
         $tenantId = Tenant::select('id')->where([
             ['api_key', $api_key],

@@ -19,6 +19,7 @@ class CreateUserTenantTable extends Migration
             $table->integer('tenant_id')->unsigned();
             $table->integer('company_id');
             $table->string('email');
+            $table->string('uuid')->nullable();
             $table->char('status')->default('t');
             $table->timestamps();
         });

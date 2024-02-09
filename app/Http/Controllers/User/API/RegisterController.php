@@ -60,16 +60,6 @@ class RegisterController extends Controller {
         });
     }
 
-    public function isEmailBusinessRegistrationNumberExist($email, $registration_number)
-    {
-        $users = User::select('id', 'email', 'registration_number')
-            ->where('email', '=', $email)
-            ->orWhere('registration_number', '=', $registration_number)
-            ->get();
-
-        return $this->checkValidationUserCreation($users, $email, $registration_number);
-    }
-
     public function checkValidationUserCreation($users, $email, $registration_number)
     {
         if (sizeof($users) === 0){

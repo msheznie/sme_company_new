@@ -10,5 +10,4 @@ interface UserTenantRepositoryInterface
 
     public function isTenantRegistered($userId, $apiKey);
 
-    public function getKycStatus($userId, $tenantId);
 }

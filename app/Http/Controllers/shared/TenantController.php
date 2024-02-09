@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\shared;
 
 use App\Http\Controllers\Controller;
-use App\Interfaces\SupplierDetailsRepositoryInterface;
 use App\Interfaces\UserTenantRepositoryInterface;
 use App\Models\Tenant;
 use App\Models\UserTenant;
@@ -20,25 +19,20 @@ use Illuminate\Support\Facades\Auth;
 class TenantController extends Controller
 {
     private $tenantService = null;
-    /**
-     * @var SupplierDetailsRepositoryInterface
-     */
+
     private $supplierDetailsRepository;
     /**
      * @var UserTenantRepositoryInterface
      */
     private $userTenantRepository;
 
-    private $supplierService = null;
 
     public function __construct(
         TenantService $tenantService,
-        SupplierDetailsRepositoryInterface $supplierDetailsRepository,
         UserTenantRepositoryInterface $userTenantRepository,
         SupplierService $supplierService
     ) {
         $this->tenantService = $tenantService;
-        $this->supplierDetailsRepository = $supplierDetailsRepository;
         $this->userTenantRepository = $userTenantRepository;
         $this->supplierService = $supplierService;
     }
@@ -197,18 +191,6 @@ class TenantController extends Controller
      * @param $tenantId
      * @return JsonResponse
      */
-    public function getKycStatus($userId, $tenantId)
-    {
-        try {
-            return $this->userTenantRepository->getKycStatus($userId, $tenantId);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
-        }
-    }
 
     /**
      * @param $request

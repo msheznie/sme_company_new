@@ -18,15 +18,7 @@ class GeneralService
 
     public static function getTemplateMaster($tenantID)
     {
-        $getTemplate = FormTemplateMaster::select('id')
-            ->where('tenant_id', '=', $tenantID)
-            ->where('status', '=', 1)
-            ->first();
-        if (!empty($getTemplate)) {
-            return $getTemplate['id'];
-        } else {
-            return 0;
-        }
+        return 0;
     }
     public function navigationInsert()
     {
