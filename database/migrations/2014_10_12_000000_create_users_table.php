@@ -34,7 +34,6 @@ class CreateUsersTable extends Migration
             'email_verified_at' => Carbon::now(),
             'password' => bcrypt('Adm@2021'),
             'remember_token' => null,
-            'registration_number' => "0",
         ]);
 
 
