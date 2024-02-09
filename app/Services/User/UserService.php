@@ -138,11 +138,8 @@ class UserService {
         }
 
         $permissions = Permission::select('name')->with(['RoleHasPermission'])
-            ->whereHas('RoleHasPermission', function ($q) use ($role_id, $tenantId) {
+            ->whereHas('RoleHasPermission', function ($q) use ($role_id) {
                 $q->where('role_id', $role_id);
-                if($role_id != 1) {
-                    $q->where('tenant_id', $tenantId);
-                }
             })->get();
 
         $permissions = $permissions->mapWithKeys(function ($item) {

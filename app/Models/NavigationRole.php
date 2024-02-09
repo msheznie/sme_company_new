@@ -28,8 +28,7 @@ class NavigationRole extends Model
 
 
     public $fillable = [
-        'role_id',
-        'tenant_id'
+        'role_id'
     ];
 
     /**
@@ -39,8 +38,7 @@ class NavigationRole extends Model
      */
     protected $casts = [
         'navigation_id' => 'integer',
-        'role_id' => 'integer',
-        'tenant_id' => 'integer'
+        'role_id' => 'integer'
     ];
 
     /**

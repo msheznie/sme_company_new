@@ -46,29 +46,30 @@ class NavigationRepository extends BaseRepository
     {
         return Navigation::class;
     }
-    public function navigationTree($role_id, $tenantId)
+    public function navigationTree($role_id)
     {
         $data = Navigation::select('id','name', 'icon', 'has_children', 'order_index', 'parent_id')
             ->whereNull('parent_id')
-            ->withCount(['navigationHasRole as grant'=> function ($q1) use ($role_id, $tenantId){
-                $q1->where('role_id', $role_id)
-                   ->where('tenant_id', $tenantId);}])
-            ->with(['permissions'=> function ($q) use ($role_id, $tenantId){
-                $q->withCount(['RoleHasPermission as grant' => function ($q1) use ($role_id, $tenantId){
-                    $q1->where('role_id',$role_id)
-                       ->where('tenant_id',$tenantId);
+            ->withCount(['navigationHasRole as grant'=> function ($q1) use ($role_id){
+                $q1->where('role_id', $role_id);
+            }])
+            ->with(['permissions'=> function ($q) use ($role_id){
+                $q->withCount(['RoleHasPermission as grant' => function ($q1) use ($role_id){
+                    $q1->where('role_id',$role_id);
                 }]);
-            }, 'children' => function($q2) use ($role_id, $tenantId){
-                $q2->select('id','name', 'icon', 'has_children', 'order_index', 'parent_id')->withCount(['navigationHasRole as grant'=> function ($q1) use ($role_id, $tenantId){
-                    $q1->where('role_id', $role_id)->where('tenant_id', $tenantId);}])->with(['permissions' => function($q3) use ($role_id, $tenantId){
-                    $q3->withCount(['RoleHasPermission as grant' => function ($q4) use ($role_id, $tenantId){
-                        $q4->where('role_id',$role_id)->where('tenant_id', $tenantId);
+            }, 'children' => function($q2) use ($role_id){
+                $q2->select('id','name', 'icon', 'has_children', 'order_index', 'parent_id')->withCount(['navigationHasRole as grant'=> function ($q1) use ($role_id){
+                    $q1->where('role_id', $role_id)
+                        ->where('tenant_id');
+                }])->with(['permissions' => function($q3) use ($role_id){
+                    $q3->withCount(['RoleHasPermission as grant' => function ($q4) use ($role_id){
+                        $q4->where('role_id',$role_id);
                     }]);
-                }, 'children' => function($q5) use ($role_id, $tenantId){
+                }, 'children' => function($q5) use ($role_id){
                     $q5->select('id','name', 'icon', 'has_children', 'order_index', 'parent_id')
-                        ->with(['permissions' => function($q6) use ($role_id, $tenantId){
-                            $q6->withCount(['RoleHasPermission as grant' => function ($q7) use ($role_id, $tenantId){
-                                $q7->where('role_id',$role_id)->where('tenant_id',$tenantId);
+                        ->with(['permissions' => function($q6) use ($role_id){
+                            $q6->withCount(['RoleHasPermission as grant' => function ($q7) use ($role_id){
+                                $q7->where('role_id',$role_id);
                             }]);
                         }]);
                 }]);

@@ -25,8 +25,7 @@ class RoleHasPermissions extends Model
     const UPDATED_AT = '';
 
     public $fillable = [
-        'role_id',
-        'tenant_id'
+        'role_id'
     ];
 
     /**
@@ -36,8 +35,7 @@ class RoleHasPermissions extends Model
      */
     protected $casts = [
         'permission_id' => 'integer',
-        'role_id' => 'integer',
-        'tenant_id' => 'integer'
+        'role_id' => 'integer'
     ];
 
     /**

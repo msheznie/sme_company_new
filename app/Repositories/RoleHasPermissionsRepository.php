@@ -42,27 +42,26 @@ class RoleHasPermissionsRepository extends BaseRepository
     {
         return RoleHasPermissions::class;
     }
-    public function updateRolePermission($permissions, int $role_id, int $tenant_id)
+    public function updateRolePermission($permissions, int $role_id)
     {
         $role = Role::find($role_id);
         $roleID = $role->id;
         $role_permissions = [];
         $roleHasPermission = new RoleHasPermissions();
-        $roleHasPermission->where('role_id', $roleID)->where('tenant_id', $tenant_id)->delete();
+        $roleHasPermission->where('role_id', $roleID)->delete();
         $data = [];
 
         foreach ($permissions as $val) {
             $data[] = [
                 'permission_id' => $val,
-                'role_id' => $roleID,
-                'tenant_id' => $tenant_id
+                'role_id' => $roleID
             ];
         }
         RoleHasPermissions::insert($data);
 
         //Assign json format value to permission column in roles table start
-        $permission_name = Permission::select('name')->with(['RoleHasPermission'])->whereHas('RoleHasPermission', function ($query) use ($roleID, $tenant_id) {
-            $query->where('role_id', $roleID)->where('tenant_id', $tenant_id);
+        $permission_name = Permission::select('name')->with(['RoleHasPermission'])->whereHas('RoleHasPermission', function ($query) use ($roleID) {
+            $query->where('role_id', $roleID);
         })->get();
 
         foreach ($permission_name as $val) {
@@ -75,30 +74,16 @@ class RoleHasPermissionsRepository extends BaseRepository
     public function updateRoleNavigation($menus, int $role_id, int $tenant_id)
     {
         $role = Role::find($role_id);
-        $roleID = $role->id;
-        NavigationRole::where('role_id', $roleID)->where('tenant_id', $tenant_id)->delete();
-        $data = [];
-
-        foreach ($menus as $val) {
-            $data[] = [
-                'navigation_id' => $val,
-                'role_id' => $roleID,
-                'tenant_id' => $tenant_id
-            ];
-        }
-        
-        NavigationRole::insert($data);
+        $role->navigations()->sync($menus);
     }
     public function getFormData()
     {
         $roles = Role::select(DB::raw("id as value,name as label"))
-            ->whereNotIn('id', [1, 2])
             ->orderBy('id', 'asc')
             ->get();
-        $tenants = GeneralService::tenantList();
+
         return [
-            'roles' => $roles,
-            'tenants' => $tenants
+            'roles' => $roles
         ];
     }
 }

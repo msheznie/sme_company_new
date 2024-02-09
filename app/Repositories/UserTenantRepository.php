@@ -108,11 +108,10 @@ class UserTenantRepository implements UserTenantRepositoryInterface
 
         return $tenantId;
     }
-    public function getUserTenantData($userId, $tenantId){
+    public function getUserTenantData($userId){
         $isBidTender = UserTenant::select('is_bid_tender')
         ->where([
             ['user_id' , '=',  $userId],
-            ['tenant_id' , '=',  $tenantId],
             ['status' , '=',  1]
         ])
         ->first();

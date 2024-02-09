@@ -137,13 +137,12 @@ class RoleHasPermissionsAPIController extends AppBaseController
         $menus = $request->post('menus');
         $permissions = $request->post('permissions');
         $role_id = $request->post('roleID');
-        $tenantId = $request->post('selectedTenantId');
         try {
             if (Role::find($role_id)->name === 'Super Admin') {
                 throw new \Exception('You can not edit super admin permissions');
             }
-            $this->roleHasPermissionsRepository->updateRolePermission($permissions, $role_id, $tenantId);
-            $this->roleHasPermissionsRepository->updateRoleNavigation($menus, $role_id, $tenantId);
+            $this->roleHasPermissionsRepository->updateRolePermission($permissions, $role_id);
+            $this->roleHasPermissionsRepository->updateRoleNavigation($menus, $role_id);
             return $this->sendResponse([], 'Permission updated');
         } catch (\Exception $exception) {
             return $this->sendError($exception->getMessage());

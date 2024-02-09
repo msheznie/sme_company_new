@@ -8,13 +8,11 @@ use Illuminate\Support\Collection;
 class  NavigationService
 {
     protected Role $role;
-    protected Collection $navigations;
-    public $tenant_id;
+    protected Collection $navigations; 
 
-    public function __construct(Role $role, $tenantId)
+    public function __construct(Role $role)
     {
         $this->role = $role;
-        $this->tenant_id = $tenantId;
     }
 
     public function handle()
@@ -24,7 +22,6 @@ class  NavigationService
 
     public function setNavs()
     {
-        $tenantID = $this->tenant_id;
         $this->navigations = collect($this->role->navigations->map(function ($nav) {
             return   [
                 'id' => $nav->id,
@@ -36,17 +33,9 @@ class  NavigationService
                 'active' => false,
                 'parent_id' => $nav->parent_id,
                 'has_children' => $nav->has_children,
-                'order_index' => $nav->order_index,
-                'tenant_id' => $nav->tenant_id,
+                'order_index' => $nav->order_index
             ];
         }));
-
-        if ($this->role->id != 1) {
-            $this->navigations = $this->navigations->where('tenant_id', $tenantID);
-        } else{
-            //for admin users only GSUP-1310
-            $this->navigations = $this->navigations->where('tenant_id', 1);
-        }
 
         $this->navigations = $this->navigations->sortBy('id');
 
@@ -97,7 +86,6 @@ class  NavigationService
 
     public function setNavsBidTender()
     {
-        $tenantID = $this->tenant_id;
         $this->navigations = collect($this->role->navigations->map(function ($nav) {
             return   [
                 'id' => $nav->id,
@@ -109,12 +97,9 @@ class  NavigationService
                 'active' => false,
                 'parent_id' => $nav->parent_id,
                 'has_children' => $nav->has_children,
-                'order_index' => $nav->order_index,
-                'tenant_id' => $nav->tenant_id,
+                'order_index' => $nav->order_index
             ];
         }))->whereIn('id',[10,11,14]);
-
-        $this->navigations = $this->navigations->where('tenant_id', $tenantID);
 
         return $this;
     }

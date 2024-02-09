@@ -191,7 +191,7 @@ class Role extends Model implements RoleContract
     }
     public function navigations()
     {
-        return $this->belongsToMany(Navigation::class)->select(['id', 'name', 'icon', 'parent_id', 'path', 'has_children', 'order_index', 'tenant_id'])->withPivot('tenant_id');
+        return $this->belongsToMany(Navigation::class)->select(['id', 'name', 'icon', 'parent_id', 'path', 'has_children', 'order_index']);
     }
     public function hasPermission(){
         return $this->belongsToMany(RoleHasPermissions::class)->select(['permission_id', 'role_id']);

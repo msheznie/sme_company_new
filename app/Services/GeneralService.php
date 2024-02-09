@@ -94,8 +94,4 @@ class GeneralService
             return '';
         }
     }
-    public static function tenantList()
-    {
-        return Tenant::select(DB::raw("id as value, name as label"))->where('status', 1)->get();
-    }
 }

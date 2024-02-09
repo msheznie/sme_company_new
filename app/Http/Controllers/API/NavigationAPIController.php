@@ -142,7 +142,7 @@ class NavigationAPIController extends AppBaseController
     public function navigationByRole(Request $request)
     {
         try {
-            $tree = $this->navigationRepository->navigationTree($request->get('roleID'), $request->get('selectedTenantID'));
+            $tree = $this->navigationRepository->navigationTree($request->get('roleID'));
             return $this->sendResponse($tree, '');
         } catch (Exception $exception) {
             return $this->sendError($exception->getMessage());
