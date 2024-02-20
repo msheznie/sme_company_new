@@ -2,35 +2,79 @@
 
 namespace App\Models;
 
+use Eloquent as Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Tenant
+ * @package App\Models
+ * @version February 13, 2024, 5:57 pm +04
+ *
+ * @property string $name
+ * @property string $sub_domain
+ * @property string $erp_domain
+ * @property integer $azureLogin
+ * @property string $database
+ * @property string $api_key
+ * @property boolean $is_active
+ */
 class Tenant extends Model
 {
+    use SoftDeletes;
+
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
+    public $table = 'tenant';
+
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+
+
+
+    public $fillable = [
         'name',
+        'sub_domain',
+        'erp_domain',
+        'azureLogin',
+        'database',
         'api_key',
-        'status'
+        'is_active'
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
+     * The attributes that should be casted to native types.
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $casts = [
+        'id' => 'integer',
+        'name' => 'string',
+        'sub_domain' => 'string',
+        'erp_domain' => 'string',
+        'azureLogin' => 'integer',
+        'database' => 'string',
+        'api_key' => 'string',
+        'is_active' => 'boolean'
+    ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Validation rules
      *
      * @var array
      */
-    protected $casts = [];
+    public static $rules = [
+        'name' => 'nullable|string|max:255',
+        'sub_domain' => 'nullable|string|max:255',
+        'erp_domain' => 'nullable|string|max:255',
+        'azureLogin' => 'nullable|integer',
+        'database' => 'nullable|string|max:255',
+        'api_key' => 'nullable|string|max:255',
+        'is_active' => 'nullable|boolean',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable'
+    ];
+
+
 }

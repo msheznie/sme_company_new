@@ -18,50 +18,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['auth:api','navigation_auth']], function () {
-    Route::group(['prefix' => 'user'], function () {
-        Route::get('/', [UserController::class, 'index']);
-        Route::post('/change-password', [UserController::class, 'changePassword']);
-    });
+Route::group(['middleware' => ['tenant']], function () {
+    Route::post('login', 'AuthAPIController@auth');
+    Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
 
-    /**
-     * tenant related routes
-     */
-	Route::group(['prefix' => 'tenants'], function (){
-       // Route::post('apis', [TenantController::class, 'fetch']);
-        Route::get('/list/{userId}', [TenantController::class, 'getTenantList']);
-        Route::post('/create', [TenantController::class, 'storeTenant']);
-    });
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::get('current/user', 'UsersAPIController@getCurrentUser');
+        Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
-    Route::get('navigation/tree', [NavigationAPIController::class, 'navigationByRole'])->name('navigation by role');
-    Route::post('permission/update-role-permission', [RoleHasPermissionsAPIController::class, 'updatePermission'])->name('update role permission');
-    Route::get('role/get-form-data', [RoleHasPermissionsAPIController::class, 'getFormData']);
-    Route::get('nav/get-all-user-nav', [NavigationAPIController::class, 'getAllUserNav'])->name('get all user navigation');
-    Route::post('nav/get-nav-by-type', [NavigationAPIController::class, 'getAllNavByType']);
-
-    Route::resource('navigation_roles', App\Http\Controllers\API\NavigationRoleAPIController::class);
-
-    Route::resource('permissions_models', App\Http\Controllers\API\PermissionsModelAPIController::class);
-
-});
-
-Route::group(['middleware' => ['navigation_auth']], function () {
-    Route::group(['prefix' => 'tenants'], function (){
-        Route::post('apis', [TenantController::class, 'fetch']);
+        /* Routes not in use */
+        Route::resource('users', App\Http\Controllers\API\UsersAPIController::class);
+        Route::resource('employees', App\Http\Controllers\API\EmployeesAPIController::class);
+        Route::resource('web_employee_profiles', App\Http\Controllers\API\WebEmployeeProfileAPIController::class);
+        Route::resource('companies', App\Http\Controllers\API\CompanyAPIController::class);
+        Route::resource('erp_employee_navigations', App\Http\Controllers\API\ErpEmployeeNavigationAPIController::class);
+        Route::resource('navigation_user_group_setups', App\Http\Controllers\API\NavigationUserGroupSetupAPIController::class);
     });
 });
-
-
-Route::post('users', [RegisterController::class, 'store'])->name('user.store');
-Route::get('users/{email}/password-reset', [VerificationController::class, 'resend'])->name('verification resend');
-Route::post('/reset-password', [ResetPasswordController::class, 'update'])->name('password confirm');
-Route::post('/reset-password-attempt', [ResetPasswordController::class, 'isValidAttempt'])->name('reset password attempt');
-Route::post('/forgot-password', [ResetPasswordController::class, 'store'])->name('password reset');
-
-Route::get('artisan-command/{command}', function ($command) {
-    \Illuminate\Support\Facades\Artisan::call($command);
-    return $command .' successfully run';
-});
-
-Route::get('tenants/{userId}/{apiKey}', [TenantController::class, 'isTenantExist']);
-
