@@ -18,7 +18,7 @@
     • Run docker-compose up -d
     • Run docker execc -it contract_management bash 
     • Run composer install to install PHP dependencies.
-    • Copy. env .example to. env and update with your configurations.
+    • Run cp .env.example .env and update with your configurations.
     • Run php artisan key:generate to generate the application key.
     • Run php artisan passport:keys
 
