@@ -6,6 +6,7 @@ use Eloquent as Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
 /**
@@ -26,7 +27,7 @@ use Laravel\Passport\HasApiTokens;
 class Users extends Authenticatable
 {
 
-    use HasApiTokens;
+    use HasApiTokens, Notifiable;
 
     public $table = 'users';
 

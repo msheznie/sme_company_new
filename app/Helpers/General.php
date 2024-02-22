@@ -35,6 +35,11 @@ class General
         return Auth::user()->employee_id;
     }
 
+    public static function getRequestPc()
+    {
+        return gethostname();
+    }
+
     public static function getFileUrlFromS3($key)
     {
         if ($key) {
