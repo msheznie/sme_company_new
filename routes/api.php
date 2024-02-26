@@ -26,6 +26,10 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
+        Route::group(['middleware' => ['company']], function () {
+            //main routes should be written here.
+        });
+
         /* Routes not in use */
         Route::resource('users', App\Http\Controllers\API\UsersAPIController::class);
         Route::resource('employees', App\Http\Controllers\API\EmployeesAPIController::class);
