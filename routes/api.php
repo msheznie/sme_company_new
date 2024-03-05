@@ -36,6 +36,7 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
         Route::group(['middleware' => ['company']], function () {
+            //main routes should be written here.
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])->name('Contract Type store');
             Route::post('/get-contract-type', [CMContractTypesAPIController::class, 'getContractType'])->name('Contract Type index');
             Route::post('/delete-contract-type', [CMContractTypesAPIController::class, 'deleteContractType'])->name('Contract Type destroy');
@@ -45,6 +46,7 @@ Route::group(['middleware' => ['tenant']], function () {
             Route::post('/get-sections-filter-drop', [CMContractTypesAPIController::class, 'getSectionsFilterDrop']);
             Route::post('/update-dynamic-field-detail', [CMContractTypesAPIController::class, 'updateDynamicFieldDetail']);
         });
+
         /* Routes not in use */
         Route::resource('users', App\Http\Controllers\API\UsersAPIController::class);
         Route::resource('employees', App\Http\Controllers\API\EmployeesAPIController::class);
