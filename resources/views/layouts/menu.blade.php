@@ -76,3 +76,45 @@
         <span>Navigation User Group Setups</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('cMPartiesMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMPartiesMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Parties Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMIntentsMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMIntentsMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Intents Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMCounterPartiesMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMCounterPartiesMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Counter Parties Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMContractsMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMContractsMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contracts Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMContractTypes*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMContractTypes.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Types</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMContractTypeSections*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMContractTypeSections.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Type Sections</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('cMContractSectionsMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMContractSectionsMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>C M Contract Sections Masters</span>
+    </a>
+</li>

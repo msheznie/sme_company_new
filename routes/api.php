@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\API\CMContractTypesAPIController;
 use App\Http\Controllers\shared\TenantController;
 use App\Http\Controllers\API\NavigationAPIController;
 use App\Http\Controllers\API\RoleHasPermissionsAPIController;
@@ -22,14 +24,27 @@ Route::group(['middleware' => ['tenant']], function () {
     Route::post('login', 'AuthAPIController@auth');
     Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
 
+    Route::resource('c_m_parties_masters', App\Http\Controllers\API\CMPartiesMasterAPIController::class);
+    Route::resource('c_m_intents_masters', App\Http\Controllers\API\CMIntentsMasterAPIController::class);
+    Route::resource('c_m_counter_parties_masters', App\Http\Controllers\API\CMCounterPartiesMasterAPIController::class);
+    Route::resource('c_m_contracts_masters', App\Http\Controllers\API\CMContractsMasterAPIController::class);
+    Route::resource('c_m_contract_types', App\Http\Controllers\API\CMContractTypesAPIController::class);
+    Route::resource('c_m_contract_type_sections', App\Http\Controllers\API\CMContractTypeSectionsAPIController::class);
+
     Route::group(['middleware' => ['auth:api']], function () {
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
         Route::group(['middleware' => ['company']], function () {
-            //main routes should be written here.
+            Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])->name('Contract Type store');
+            Route::post('/get-contract-type', [CMContractTypesAPIController::class, 'getContractType'])->name('Contract Type index');
+            Route::post('/delete-contract-type', [CMContractTypesAPIController::class, 'deleteContractType'])->name('Contract Type destroy');
+            Route::post('/get-all-contract-filters', [CMContractTypesAPIController::class, 'getAllContractFilters'])->name('Contract Filters');
+            Route::post('/export-contract-types', [CMContractTypesAPIController::class, 'exportContractTypes'])->name('Export Contract Types');
+            Route::post('/delete-file-from-aws', [CMContractTypesAPIController::class, 'deleteFileFromAws'])->name('Delete File From S3');
+            Route::post('/get-sections-filter-drop', [CMContractTypesAPIController::class, 'getSectionsFilterDrop']);
+            Route::post('/update-dynamic-field-detail', [CMContractTypesAPIController::class, 'updateDynamicFieldDetail']);
         });
-
         /* Routes not in use */
         Route::resource('users', App\Http\Controllers\API\UsersAPIController::class);
         Route::resource('employees', App\Http\Controllers\API\EmployeesAPIController::class);
@@ -39,3 +54,6 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::resource('navigation_user_group_setups', App\Http\Controllers\API\NavigationUserGroupSetupAPIController::class);
     });
 });
+
+
+Route::resource('c_m_contract_sections_masters', App\Http\Controllers\API\CMContractSectionsMasterAPIController::class);
