@@ -135,10 +135,12 @@ class UsersAPIController extends AppBaseController
         return $this->sendSuccess('Users deleted successfully');
     }
 
-    public function getCurrentUser()
+    public function getCurrentUser(Request $request)
     {
         $user = General::currentUser();
-        $companySystemID = $user['employee']['empCompanySystemID'] ?? 0;
+        $input = $request->all();
+
+        $companySystemID = $input['selectedCompanyID'] ?? $user['employee']['empCompanySystemID'] ?? 0;
         $user['companies'] = [];
         $user['tenant_id'] = $user['employee']['empCompanySystemID'] ?? 0;
         $user['name'] = $user['employee']['empName'] ?? '';
