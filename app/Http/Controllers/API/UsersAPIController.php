@@ -140,7 +140,11 @@ class UsersAPIController extends AppBaseController
         $user = General::currentUser();
         $input = $request->all();
 
-        $companySystemID = $input['selectedCompanyID'] ?? $user['employee']['empCompanySystemID'] ?? 0;
+        $companySystemID = $input['selectedCompanyID'] ?? 0;
+        if($companySystemID == 0){
+            $companySystemID = $user['employee']['empCompanySystemID'] ?? 0;
+        }
+        $companySystemID;
         $user['companies'] = [];
         $user['tenant_id'] = $user['employee']['empCompanySystemID'] ?? 0;
         $user['name'] = $user['employee']['empName'] ?? '';
