@@ -5,6 +5,7 @@ namespace App\Utilities;
 use App\Helper\General;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractsMaster;
+use App\Models\CMContractTypes;
 use App\Models\CMCounterPartiesMaster;
 use App\Models\CMIntentsMaster;
 use App\Models\CMPartiesMaster;
@@ -26,12 +27,12 @@ class ContractManagementUtils
     {
         return CMPartiesMaster::select('cmParty_id', 'cmParty_name', 'cpm_active')->where('cpm_active', 1)->get();
     }
-    
+
     static function getCounterParties()
     {
         return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name', 'cpt_active')->where('cpt_active', 1)->get();
     }
-    
+
     static function getContractSetions()
     {
         return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->where('csm_active', 1)->get();
@@ -53,5 +54,10 @@ class ContractManagementUtils
     static function getCompanyCurrency($companySystemID)
     {
         return  Company::with(['reporting_currency'])->where('companySystemID', $companySystemID)->first();
+    }
+
+    static function getContractTypes()
+    {
+        return CMContractTypes::select('contract_typeId', 'cm_type_name', 'ct_active')->where('ct_active', 1)->get();
     }
 }
