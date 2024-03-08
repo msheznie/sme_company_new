@@ -1,0 +1,154 @@
+<?php
+
+namespace App\Models;
+
+use Eloquent as Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+/**
+ * Class ContractMaster
+ * @package App\Models
+ * @version March 7, 2024, 2:16 pm +04
+ *
+ * @property string $contractCode
+ * @property string $title
+ * @property integer $contractType
+ * @property integer $counterParty
+ * @property integer $counterPartyName
+ * @property string $referenceCode
+ * @property string|\Carbon\Carbon $startDate
+ * @property string|\Carbon\Carbon $endDate
+ * @property integer $status
+ * @property integer $companySystemID
+ * @property integer $created_by
+ * @property integer $updated_by
+ */
+class ContractMaster extends Model
+{
+    use SoftDeletes;
+
+    use HasFactory;
+
+    public $table = 'cm_contract_master';
+
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+
+    protected $dates = ['deleted_at'];
+
+
+
+    public $fillable = [
+        'contractCode',
+        'title',
+        'contractType',
+        'counterParty',
+        'counterPartyName',
+        'referenceCode',
+        'startDate',
+        'endDate',
+        'status',
+        'companySystemID',
+        'created_by',
+        'updated_by'
+    ];
+
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'integer',
+        'contractCode' => 'string',
+        'title' => 'string',
+        'contractType' => 'integer',
+        'counterParty' => 'integer',
+        'counterPartyName' => 'integer',
+        'referenceCode' => 'string',
+        'startDate' => 'datetime',
+        'endDate' => 'datetime',
+        'status' => 'integer',
+        'companySystemID' => 'integer',
+        'created_by' => 'integer',
+        'updated_by' => 'integer'
+    ];
+
+    /**
+     * Validation rules
+     *
+     * @var array
+     */
+    public static $rules = [
+        'contractCode' => 'required|string|max:255',
+        'title' => 'required|string|max:255',
+        'contractType' => 'required|integer',
+        'counterParty' => 'required|integer',
+        'counterPartyName' => 'required|integer',
+        'referenceCode' => 'required|string|max:255',
+        'startDate' => 'required',
+        'endDate' => 'required',
+        'status' => 'required|integer',
+        'companySystemID' => 'required|integer',
+        'created_by' => 'required|integer',
+        'updated_by' => 'required|integer',
+        'deleted_at' => 'required',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable'
+    ];
+
+    public function contractTypes()
+    {
+        return $this->belongsTo(CMContractTypes::class, 'contractType', 'contract_typeId');
+    }
+    public function counterParties()
+    {
+        return $this->belongsTo(CMCounterPartiesMaster::class, 'counterParty', 'cmCounterParty_id');
+    }
+
+    public function createdUser()
+    {
+        return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
+    }
+
+    public function contractMaster($search, $companyId, $filter)
+    {
+        $query = ContractMaster::with(['contractTypes' => function ($q) {
+            $q->select('contract_typeId', 'cm_type_name');
+        }, 'counterParties' => function ($q1) {
+            $q1->select('cmCounterParty_id', 'cmCounterParty_name');
+        }, 'createdUser' => function ($q2) {
+            $q2->select('employeeSystemID', 'empName');
+        }])->where('companySystemID', $companyId);
+        if ($filter) {
+            if (isset($filter['contractTypeID'])) {
+                $query->where('contractType', $filter['contractTypeID']);
+            }
+            if (isset($filter['counterPartyID'])) {
+                $query->where('counterParty', $filter['counterPartyID']);
+            }
+            if (isset($filter['is_status'])) {
+                $query->where('status', $filter['is_status']);
+            }
+        }
+        if ($search) {
+            $search = str_replace("\\", "\\\\", $search);
+            $query = $query->where(function ($query) use ($search) {
+                $query->orWhere('contractCode', 'LIKE', "%{$search}%");
+                $query->orWhere('title', 'LIKE', "%{$search}%");
+                $query->orWhere('referenceCode', 'LIKE', "%{$search}%");
+                $query->orWhereHas('contractTypes', function ($query1) use ($search) {
+                    $query1->where('cm_type_name', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('counterParties', function ($query2) use ($search) {
+                    $query2->where('cmCounterParty_name', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+        return $query;
+    }
+
+
+}

@@ -36,6 +36,7 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
         Route::group(['middleware' => ['company']], function () {
+            require __DIR__.'/../routes/contracts/contractsRoutes.php';
             //main routes should be written here.
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])->name('Contract Type store');
             Route::post('/get-contract-type', [CMContractTypesAPIController::class, 'getContractType'])->name('Contract Type index');
