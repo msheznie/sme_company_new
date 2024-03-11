@@ -44,6 +44,7 @@ class AuthAPIController extends PassportAccessTokenController
             }
         }
         try {
+            return 'test1';
             $response = $this->server->respondToAccessTokenRequest($request, new \GuzzleHttp\Psr7\Response);
             if($response){
                 $user = Users::where('email',$request2->username)->first();
