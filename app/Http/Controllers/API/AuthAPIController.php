@@ -15,7 +15,7 @@ use InfyOm\Generator\Utils\ResponseUtil;
 class AuthAPIController extends PassportAccessTokenController
 {
     public function auth(ServerRequestInterface $request, Request $request2){
-        return $user = Users::where('email',$request2->username)->first();
+        $user = Users::where('email',$request2->username)->first();
         if($user) {
             $employees = Employees::find($user->employee_id);
 
