@@ -45,7 +45,6 @@ class RouteServiceProvider extends ServiceProvider
         $this->routes(function () use ($subDomain){
             Route::prefix($subDomain. '/api/v1')
                 ->middleware('api')
-                ->as('api.')
                 ->namespace($this->app->getNamespace().'Http\Controllers\API')
                 ->group(base_path('routes/api.php'));
 

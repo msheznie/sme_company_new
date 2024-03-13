@@ -137,7 +137,6 @@ class UsersAPIController extends AppBaseController
 
     public function getCurrentUser(Request $request)
     {
-        return 'test';
         $user = General::currentUser();
         $input = $request->all();
 
