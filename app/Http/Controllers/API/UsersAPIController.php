@@ -137,7 +137,7 @@ class UsersAPIController extends AppBaseController
 
     public function getCurrentUser(Request $request)
     {
-        $user = General::currentUser();
+        return $user = General::currentUser();
         $input = $request->all();
 
         $companySystemID = $input['selectedCompanyID'] ?? 0;
