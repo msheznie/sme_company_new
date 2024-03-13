@@ -19,23 +19,24 @@ class TenantEnforce
     public function handle($request, Closure $next)
     {
         if (env('IS_MULTI_TENANCY', false)) {
-            $url = $request->getHttpHost();
-            $url_array = explode('.', $url);
-            $subDomain = $url_array[0];
+            $url = $request->fullUrl();
+            $host = explode('/', $url);
+            $subDomain = count($host) > 3 ? $host[3] : '';
+
             if ($subDomain == 'www') {
-                $subDomain = $url_array[1];
+                $subDomain = $host[1];
             }
 
             if ($subDomain != 'localhost:8000') {
                 if (!$subDomain) {
-                    return $subDomain . "Not found";
+                    return response(['message' => $subDomain . "Not found"], 404);
                 }
                 $tenant = Tenant::where('sub_domain', 'like', $subDomain)->first();
                 if (!empty($tenant)) {
                     Config::set("database.connections.mysql.database", $tenant->database);
                     DB::reconnect('mysql');
                 } else {
-                    return "Sub domain " . $subDomain . " not found";
+                    return response(['message' => "Sub domain " . $subDomain . " not found"], 404);
                 }
             }
         }
