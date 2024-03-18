@@ -314,5 +314,9 @@ class Employees extends Model
         'uuid' => 'nullable|string|max:255'
     ];
 
+    public function pulledContractUser(){
+        return $this->belongsTo(ContractUsers::class, 'employeeSystemID', 'contractUserId');
+    }
+
 
 }

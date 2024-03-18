@@ -36,8 +36,10 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
 
         Route::group(['middleware' => ['company']], function () {
-            require __DIR__.'/../routes/contracts/contractsRoutes.php';
             //main routes should be written here.
+            require __DIR__.'/../routes/contracts/contractsRoutes.php';
+            require __DIR__.'/../routes/master/masterRoutes.php';
+
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])->name('Contract Type store');
             Route::post('/get-contract-type', [CMContractTypesAPIController::class, 'getContractType'])->name('Contract Type index');
             Route::post('/delete-contract-type', [CMContractTypesAPIController::class, 'deleteContractType'])->name('Contract Type destroy');
@@ -54,8 +56,7 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::resource('companies', App\Http\Controllers\API\CompanyAPIController::class);
         Route::resource('erp_employee_navigations', App\Http\Controllers\API\ErpEmployeeNavigationAPIController::class);
         Route::resource('navigation_user_group_setups', App\Http\Controllers\API\NavigationUserGroupSetupAPIController::class);
+        Route::resource('c_m_contract_sections_masters', App\Http\Controllers\API\CMContractSectionsMasterAPIController::class);
+        Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
 });
-
-
-Route::resource('c_m_contract_sections_masters', App\Http\Controllers\API\CMContractSectionsMasterAPIController::class);
