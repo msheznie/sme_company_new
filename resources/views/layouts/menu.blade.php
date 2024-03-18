@@ -118,6 +118,28 @@
         <span>C M Contract Sections Masters</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('employeesDetails*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('employeesDetails.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Employees Details</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractUsers*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractUsers.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Users</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('supplierMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('supplierMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Supplier Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('customerMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('customerMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Customer Masters</span>
 <li class="nav-item {{ Request::is('contractMasters*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractMasters.index') }}">
         <i class="nav-icon icon-cursor"></i>
