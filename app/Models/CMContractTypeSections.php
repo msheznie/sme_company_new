@@ -22,11 +22,12 @@ class CMContractTypeSections extends Model
     use HasFactory;
 
     public $table = 'cm_contract_type_sections';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
     public $fillable = [
+        'uuid',
         'contract_typeId',
         'cmSection_id',
         'is_enabled',
@@ -41,6 +42,7 @@ class CMContractTypeSections extends Model
      * @var array
      */
     protected $casts = [
+        'uuid' => 'string',
         'ct_sectionId' => 'integer',
         'contract_typeId' => 'integer',
         'cmSection_id' => 'integer',
@@ -56,6 +58,7 @@ class CMContractTypeSections extends Model
      * @var array
      */
     public static $rules = [
+        'uuid' => 'required|unique',
         'contract_typeId' => 'nullable|integer',
         'cmSection_id' => 'nullable|integer',
         'is_enabled' => 'required|boolean',

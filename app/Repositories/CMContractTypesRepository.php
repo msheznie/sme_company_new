@@ -74,11 +74,16 @@ class CMContractTypesRepository extends BaseRepository
 
         $input = $request->all();
         $empId = General::currentEmployeeId();
+        $uuid = $input['uuid'] ?? null;
+        $contractTypeID = 0;
+        if(!empty($uuid)){
+            $contractTypeID = CMContractTypes::where('uuid', $uuid)->pluck('contract_typeId')->first();
+        }
 
         $existingContractType = CMContractTypes::where('cm_type_name', 'LIKE', $input['cm_type_name'])
             ->where('companySystemID', $input['selectedCompanyID'])
-            ->when(isset($input['contract_typeId']), function ($query) use ($input) {
-                $query->where('contract_typeId', '!=', $input['contract_typeId']);
+            ->when($contractTypeID > 0, function ($query) use ($contractTypeID) {
+                $query->where('contract_typeId', '!=', $contractTypeID);
             });
 
         if ($existingContractType->exists()) {
@@ -100,31 +105,33 @@ class CMContractTypesRepository extends BaseRepository
         try {
             $contractSections = $this->getAllContractFilters($request)['contract-setions'];
 
-            if (isset($input['contract_typeId'])) {
+            if ($contractTypeID > 0) {
                 $storeContractType['updated_by'] = $empId;
 
-                $insertResp = CMContractTypes::where('contract_typeId', $input['contract_typeId'])
+                $insertResp = CMContractTypes::where('contract_typeId', $contractTypeID)
                     ->update($storeContractType);
-                $ContractTypeId = $input['contract_typeId'];
+
                 $message = "Update successfully.";
             } else {
                 $storeContractType['created_by'] = $empId;
+                $storeContractType['uuid'] = bin2hex(random_bytes(16));
 
                 $insertResp = CMContractTypes::create($storeContractType);
-                $ContractTypeId = $insertResp->id;
+                $contractTypeID = $insertResp->id;
                 $message = "Saved successfully.";
             }
 
             if ($insertResp) {
                 foreach ($contractSections as $dynamicField) {
-                    $ContractSec = CMContractTypeSections::where('contract_typeId', $ContractTypeId)
+                    $ContractSec = CMContractTypeSections::where('contract_typeId', $contractTypeID)
                         ->where('cmSection_id', $dynamicField['cmSection_id'])
                         ->where('companySystemID', $input['selectedCompanyID'])
                         ->first();
 
                     if (!$ContractSec) {
                         $dynamicArray = [
-                            'contract_typeId' => $ContractTypeId,
+                            'uuid' => bin2hex(random_bytes(16)),
+                            'contract_typeId' => $contractTypeID,
                             'cmSection_id' => $dynamicField['cmSection_id'],
                             'companySystemID' => $input['selectedCompanyID'],
                             'created_by' => $empId,
@@ -135,7 +142,7 @@ class CMContractTypesRepository extends BaseRepository
                 }
 
                 DB::commit();
-                return ['status' => true, 'message' => $message, 'contract_typeId' => $ContractTypeId];
+                return ['status' => true, 'message' => $message];
             }
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -146,9 +153,15 @@ class CMContractTypesRepository extends BaseRepository
     public function deleteContractType(Request $request)
     {
         $input = $request->all();
+        $contractID = $input['id'] ?? null;
 
-        $result = CMContractTypeSections::where('contract_typeId', $input['id'])->delete();
-        $result3 = CMContractTypes::where('contract_typeId', $input['id'])->delete();
+        $existContractID = CMContractTypes::where('uuid', $contractID)->pluck('contract_typeId')->first();
+        if(empty($existContractID)) {
+            return ['status' => false, 'code' => 404, 'message' => 'Contract Type not found.'];
+        }
+
+        $result = CMContractTypeSections::where('contract_typeId', $existContractID)->delete();
+        $result3 = CMContractTypes::where('contract_typeId', $existContractID)->delete();
 
         if ($result3) {
             return ['status' => true, 'code' => 422, 'message' => 'Contract Type has been deleted successfully.'];
@@ -207,18 +220,35 @@ class CMContractTypesRepository extends BaseRepository
     {
         $input = $request->all();
         $companySystemID = $input['selectedCompanyID'];
-        $ContractTypeId = isset($input['contractTypeId']) ? $input['contractTypeId'] : 0;
+        $ContractTypeId = $input['contractTypeId'] ?? null;
 
-        $query = CMContractTypeSections::with(['contratSectionWithtypes'])->where('companySystemID', $companySystemID)
-            ->where('contract_typeId', $ContractTypeId)->get();
-        return $query;
+        $existContractTypeID = CMContractTypes::where('uuid', $ContractTypeId)->pluck('contract_typeId')->first();
+        if(empty($existContractTypeID)) {
+            return ['status' => flase, 'message' => 'Contract Types not found'];
+        }
+
+        $contractTypeSection = CMContractTypeSections::with([
+            'contratSectionWithtypes' => function ($q) {
+                $q->select('cmSection_id', 'cmSection_detail', 'csm_active');
+            }
+        ])->where('companySystemID', $companySystemID)
+            ->where('contract_typeId', $existContractTypeID)
+            ->select('uuid', 'contract_typeId', 'cmSection_id', 'is_enabled')
+            ->get();
+
+        return ['status' => true, 'message' => 'Contract Type Section retrieved successfully', 'data' => $contractTypeSection];
     }
 
     public function updateDynamicFieldDetail(Request $request)
     {
         $input = $request;
-        $dynamicFieldDetailID = $input['ct_sectionId'] ?? 0;
-        $isActive = isset($input['is_enabled']) && $input['is_enabled'] ? 1 : 0;
+        $sectionID = $input['sectionID'] ?? null;
+        $isActive = isset($input['isEnabled']) && $input['isEnabled'] ? 1 : 0;
+
+        $checkDetailExistID = CMContractTypeSections::where('uuid', $sectionID)->pluck('ct_sectionId')->first();
+        if(empty($checkDetailExistID)) {
+            return ['status' => flase, 'message' => 'Contract Type Section not found'];
+        }
 
         DB::beginTransaction();
         try {
@@ -226,7 +256,7 @@ class CMContractTypesRepository extends BaseRepository
                 'is_enabled' => $isActive
             ];
 
-            $updateResp = CMContractTypeSections::where('ct_sectionId', $dynamicFieldDetailID)->update($postData);
+            $updateResp = CMContractTypeSections::where('ct_sectionId', $checkDetailExistID)->update($postData);
             if ($updateResp) {
                 DB::commit();
                 return ['status' => true, 'message' => "Successfully updated!"];

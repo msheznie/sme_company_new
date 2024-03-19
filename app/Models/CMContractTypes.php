@@ -32,6 +32,7 @@ class CMContractTypes extends Model
     const UPDATED_AT = 'updated_at';
 
     public $fillable = [
+        'uuid',
         'cm_type_name',
         'cmMaster_id',
         'cmIntent_id',
@@ -51,6 +52,7 @@ class CMContractTypes extends Model
      * @var array
      */
     protected $casts = [
+        'uuid' => 'string',
         'contract_typeId' => 'integer',
         'cm_type_name' => 'string',
         'cmMaster_id' => 'integer',
@@ -113,7 +115,9 @@ class CMContractTypes extends Model
 
     public function listOfContractTypes($search, $companyId, $filter)
     {
-        $query = CMContractTypes::with(['contratMasterWithtypes' => function ($q) {
+        $query = CMContractTypes::select('uuid', 'cm_type_name', 'cmMaster_id', 'cmIntent_id', 'cmPartyA_id', 'cmPartyB_id', 'cmCounterParty_id', 'cm_type_description', 'ct_active',
+        'companySystemID', 'created_by', 'created_at')
+        ->with(['contratMasterWithtypes' => function ($q) {
             $q->select('cmMaster_id', 'cmMaster_description');
         }, 'intentMasterWithtypes' => function ($q2) {
             $q2->select('cmIntent_id', 'cmIntent_detail');

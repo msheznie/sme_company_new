@@ -139,9 +139,9 @@ class CMContractTypesAPIController extends AppBaseController
         $contractType = $this->cMContractTypesRepository->saveContractType($request);
 
         if ($contractType['status']) {
-            return $this->sendResponse([$contractType['contract_typeId']], $contractType['message']);
+            return $this->sendResponse([], $contractType['message']);
         } else {
-            $statusCode = isset($contractType['code']) ? $contractType['code'] : 404;
+            $statusCode = $contractType['code'] ?? 404;
             return $this->sendError($contractType['message'], $statusCode);
         }
     }
@@ -157,7 +157,7 @@ class CMContractTypesAPIController extends AppBaseController
         if ($contractType['status']) {
             return $this->sendResponse([], 'The Contract Type has been deleted successfully !');
         } else {
-            $statusCode = isset($catMaster['code']) ? $catMaster['code'] : 404;
+            $statusCode = $catMaster['code'] ?? 404;
             return $this->sendError($contractType['message'], $statusCode);
         }
     }
@@ -167,7 +167,7 @@ class CMContractTypesAPIController extends AppBaseController
         $contractFilters = $this->cMContractTypesRepository->getAllContractFilters($request);
         return $this->sendResponse($contractFilters, 'Retrieved successfully');
     }
-  
+
     public function exportContractTypes(Request $request){
         $input = $request->all();
         $type = $request->type;
@@ -199,7 +199,12 @@ class CMContractTypesAPIController extends AppBaseController
 
     public function getSectionsFilterDrop(Request $request){
         $contractSecs = $this->cMContractTypesRepository->getSectionsFilterDrop($request);
-        return $this->sendResponse($contractSecs, 'Retrieved successfully');
+        if(!$contractSecs['status']) {
+            $statusCode = $contractSecs['code'] ?? 404;
+            return $this->sendError($contractSecs['message'], $statusCode);
+        } else {
+            return $this->sendResponse($contractSecs['data'], $contractSecs['message']);
+        }
     }
 
     public function updateDynamicFieldDetail(Request $request){
@@ -207,7 +212,7 @@ class CMContractTypesAPIController extends AppBaseController
         if ($updateDynamicField['status']) {
             return $this->sendResponse([], 'Successfully updated');
         } else {
-            $statusCode = isset($updateDynamicField['code']) ? $updateDynamicField['code'] : 404;
+            $statusCode = $updateDynamicField['code'] ?? 404;
             return $this->sendError($updateDynamicField['message'], $statusCode);
         }
     }
