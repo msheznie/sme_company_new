@@ -83,6 +83,17 @@ class ContractMasterRepository extends BaseRepository
         return $allTypes;
     }
 
+    public function getCounterPartyNames(Request $request)
+    {
+        $input = $request->all();
+        $counterPartyId = $input['counterPartyId'];
+
+        $allTypes = [
+        "counter-party-names" => ContractManagementUtils::counterPartyNames($counterPartyId),
+        ];
+        return $allTypes;
+    }
+
     public function exportContractMasterReport(Request $request)
     {
         $input = $request->all();

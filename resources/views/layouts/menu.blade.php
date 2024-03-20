@@ -140,6 +140,8 @@
     <a class="nav-link" href="{{ route('customerMasters.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Customer Masters</span>
+    </a>
+</li>
 <li class="nav-item {{ Request::is('contractMasters*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractMasters.index') }}">
         <i class="nav-icon icon-cursor"></i>
