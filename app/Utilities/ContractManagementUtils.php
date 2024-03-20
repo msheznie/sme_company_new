@@ -10,6 +10,7 @@ use App\Models\CMCounterPartiesMaster;
 use App\Models\CMIntentsMaster;
 use App\Models\CMPartiesMaster;
 use App\Models\Company;
+use App\Models\ContractUsers;
 
 class ContractManagementUtils
 {
@@ -58,6 +59,56 @@ class ContractManagementUtils
 
     static function getContractTypes()
     {
-        return CMContractTypes::select('contract_typeId', 'cm_type_name', 'ct_active')->where('ct_active', 1)->get();
+        return CMContractTypes::select('uuid', 'cm_type_name', 'ct_active')->where('ct_active', 1)->get();
+    }
+
+    static function counterPartyNames($counterPartyId)
+    {
+
+        $users = ContractUsers::where(function ($query) use ($counterPartyId) {
+                $query->when($counterPartyId == 1, function ($q) {
+                    $q->where('contractUserType', 2);
+                })
+                    ->when($counterPartyId == 2, function ($q) {
+                        $q->where('contractUserType', 3);
+                    });
+            })
+            ->when($counterPartyId == 1, function ($q) {
+                $q->with([
+                    'contractSupplierUser' => function ($q) {
+                        $q->select('supplierCodeSystem','primarySupplierCode', 'supplierName');
+                    }
+                ]);
+            })
+            ->when($counterPartyId == 2, function ($q) {
+                $q->with([
+                    'contractCustomerUser' => function ($q) {
+                        $q->select('customerCodeSystem','CutomerCode', 'CustomerName');
+                    }
+                ]);
+            })
+            ->get();
+
+            $supplier = array();
+
+            foreach ($users as $user){
+                $uuid = $user->uuid;
+                $name = '';
+
+                if($counterPartyId == 1) {
+                    $name = $user['contractSupplierUser']['supplierName'];
+                }
+
+                if($counterPartyId == 2) {
+                    $name = $user['contractCustomerUser']['CustomerName'];
+                }
+
+                $supplier[] = [
+                    "uuid" => $uuid,
+                    'name' => $name
+                ];
+
+            }
+            return $supplier;
     }
 }

@@ -145,6 +145,12 @@ class ContractMasterAPIController extends AppBaseController
         return $this->sendResponse($contractMasterFilters, 'Retrieved successfully');
     }
 
+    public function getCounterPartyNames(Request $request)
+    {
+        $counterPartyNames = $this->contractMasterRepository->getCounterPartyNames($request);
+        return $this->sendResponse($counterPartyNames, 'Retrieved successfully');
+    }
+
     public function exportContractMaster(Request $request)
     {
         $input = $request->all();

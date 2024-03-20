@@ -41,6 +41,7 @@ class ContractMaster extends Model
 
 
     public $fillable = [
+        'uuid',
         'contractCode',
         'title',
         'contractType',
@@ -62,6 +63,7 @@ class ContractMaster extends Model
      */
     protected $casts = [
         'id' => 'integer',
+        'uuid' => 'string',
         'contractCode' => 'string',
         'title' => 'string',
         'contractType' => 'integer',
@@ -82,6 +84,7 @@ class ContractMaster extends Model
      * @var array
      */
     public static $rules = [
+        'uuid' => 'required|unique',
         'contractCode' => 'required|string|max:255',
         'title' => 'required|string|max:255',
         'contractType' => 'required|integer',
@@ -113,19 +116,37 @@ class ContractMaster extends Model
         return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
     }
 
+    public function contractUsers()
+    {
+        return $this->belongsTo(ContractUsers::class, 'counterPartyName', 'id');
+    }
+
     public function contractMaster($search, $companyId, $filter)
     {
+        $contractTypeID = $filter['contractTypeID'] ?? 0;
+        $counterPartyNameID = $filter['counterPartyNameID'] ?? 0;
+
         $query = ContractMaster::with(['contractTypes' => function ($q) {
-            $q->select('contract_typeId', 'cm_type_name');
+            $q->select('contract_typeId', 'cm_type_name', 'uuid');
         }, 'counterParties' => function ($q1) {
             $q1->select('cmCounterParty_id', 'cmCounterParty_name');
         }, 'createdUser' => function ($q2) {
             $q2->select('employeeSystemID', 'empName');
-        }])->where('companySystemID', $companyId);
+        }, 'contractUsers' => function ($q3) {
+            $q3->with(['contractSupplierUser','contractCustomerUser']);
+        }])->where(function ($q) use ($contractTypeID, $counterPartyNameID) {
+            $q->when($contractTypeID > 0, function ($q) use ($contractTypeID) {
+                $q->whereHas('contractTypes', function ($q) use ($contractTypeID) {
+                    $q->where('uuid', $contractTypeID);
+                });
+            });
+            $q->when($counterPartyNameID > 0, function ($q) use ($counterPartyNameID) {
+                $q->whereHas('contractUsers', function ($q) use ($counterPartyNameID) {
+                    $q->where('uuid', $counterPartyNameID);
+                });
+            });
+        })->where('companySystemID', $companyId);
         if ($filter) {
-            if (isset($filter['contractTypeID'])) {
-                $query->where('contractType', $filter['contractTypeID']);
-            }
             if (isset($filter['counterPartyID'])) {
                 $query->where('counterParty', $filter['counterPartyID']);
             }
@@ -144,6 +165,12 @@ class ContractMaster extends Model
                 });
                 $query->orWhereHas('counterParties', function ($query2) use ($search) {
                     $query2->where('cmCounterParty_name', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search) {
+                    $query3->where('supplierName', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search) {
+                        $query4->where('customerName', 'LIKE', "%{$search}%");
                 });
             });
         }
