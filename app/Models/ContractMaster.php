@@ -83,24 +83,7 @@ class ContractMaster extends Model
      *
      * @var array
      */
-    public static $rules = [
-        'uuid' => 'required|unique',
-        'contractCode' => 'required|string|max:255',
-        'title' => 'required|string|max:255',
-        'contractType' => 'required|integer',
-        'counterParty' => 'required|integer',
-        'counterPartyName' => 'required|integer',
-        'referenceCode' => 'required|string|max:255',
-        'startDate' => 'required',
-        'endDate' => 'required',
-        'status' => 'required|integer',
-        'companySystemID' => 'required|integer',
-        'created_by' => 'required|integer',
-        'updated_by' => 'required|integer',
-        'deleted_at' => 'required',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
-    ];
+    public static $rules = [];
 
     public function contractTypes()
     {

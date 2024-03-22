@@ -13,4 +13,5 @@
      "contract_user_retrieved_successfully" => "Contract User retrieved successfully",
      "contract_user_updated_successfully" => "Contract User updated successfully",
      "contract_user_deleted_successfully" => "Contract User deleted successfully",
+     "contract_master_created_successfully" => "Contract Master created successfully",
  ];

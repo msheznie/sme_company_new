@@ -56,13 +56,19 @@ class ContractMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function store(CreateContractMasterAPIRequest $request)
+    public function store(Request $request)
     {
         $input = $request->all();
 
-        $contractMaster = $this->contractMasterRepository->create($input);
+        $contractMaster = $this->contractMasterRepository->createContractMaster($input);
 
-        return $this->sendResponse(new ContractMasterResource($contractMaster), 'Contract Master saved successfully');
+        if($contractMaster['status']){
+            return $this->sendResponse([], $contractMaster['message']);
+        } else{
+            $statusCode = $contractMaster['code'] ?? 404;
+            return $this->sendError($statusCode['message'], $statusCode);
+        }
+
     }
 
     /**
