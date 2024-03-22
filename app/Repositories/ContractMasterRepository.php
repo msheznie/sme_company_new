@@ -2,11 +2,15 @@
 
 namespace App\Repositories;
 
+use App\Helpers\General;
+use App\Models\CMContractTypes;
 use App\Models\ContractMaster;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 /**
@@ -126,5 +130,49 @@ class ContractMasterRepository extends BaseRepository
             }
         }
         return $data;
+    }
+
+    public function createContractMaster($input)
+    {
+
+        $companySystemID = $input['companySystemID'];
+        $title = $input['title'];
+
+        $contractType = CMContractTypes::select('contract_typeId', 'cmCounterParty_id')
+            ->where('uuid', $input['contractType'])
+            ->first();
+
+        $lastSerialNumber = 1;
+        $lastId = ContractMaster::select('id')->orderBy('id', 'desc')->first();
+        if ($lastId) {
+            $lastSerialNumber = intval($lastId->id) + 1;
+        }
+        $contractCode =  ('CO'  . str_pad($lastSerialNumber, 4, '0', STR_PAD_LEFT));
+
+        $insertArray = [];
+
+        DB::beginTransaction();
+        try{
+            $insertArray = [
+                'contractCode' => $contractCode,
+                'title' => $title,
+                'contractType' => $contractType["contract_typeId"],
+                'counterParty' => $contractType["cmCounterParty_id"],
+                'uuid' => bin2hex(random_bytes(16)),
+                'companySystemID' => $companySystemID,
+                'created_by' => General::currentEmployeeId(),
+                'created_at' => Carbon::now()
+                ];
+
+            $insertResponse = ContractMaster::insert($insertArray);
+            if($insertResponse) {
+                DB::commit();
+                return ['status' => true, 'message' => trans('common.contract_master_created_successfully')];
+            }
+
+        } catch (\Exception $ex){
+            DB::rollBack();
+            return ['status' => false, 'message' => $ex->getMessage()];
+        }
     }
 }
