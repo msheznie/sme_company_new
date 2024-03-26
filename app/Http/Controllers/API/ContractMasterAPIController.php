@@ -81,14 +81,26 @@ class ContractMasterAPIController extends AppBaseController
      */
     public function show($id)
     {
-        /** @var ContractMaster $contractMaster */
-        $contractMaster = $this->contractMasterRepository->find($id);
-
+        $contractMaster = $this->contractMasterRepository->findByUuid($id,
+            ['uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner',
+                'contractAmount', 'description', 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate',
+                'startDate', 'endDate', 'notifyDays', 'contractTimePeriod'
+            ],
+            [
+                "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
+                "contractUsers" => ['id', 'uuid'],
+                "contractOwners" => ['id', 'uuid']
+            ]
+        );
         if (empty($contractMaster)) {
-            return $this->sendError('Contract Master not found');
+            return $this->sendError( trans('common.contract_not_found'));
         }
+        $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
+        $editData = $contractMaster;
+        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty']);
+        $response['editData'] = $editData;
 
-        return $this->sendResponse(new ContractMasterResource($contractMaster), 'Contract Master retrieved successfully');
+        return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }
 
     /**
@@ -103,17 +115,23 @@ class ContractMasterAPIController extends AppBaseController
     public function update($id, UpdateContractMasterAPIRequest $request)
     {
         $input = $request->all();
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
 
         /** @var ContractMaster $contractMaster */
-        $contractMaster = $this->contractMasterRepository->find($id);
+        $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id']);
 
         if (empty($contractMaster)) {
-            return $this->sendError('Contract Master not found');
+            return $this->sendError(trans('common.contract_not_found'));
         }
 
-        $contractMaster = $this->contractMasterRepository->update($input, $id);
+        $contractMasterUpdate = $this->contractMasterRepository->updateContract($input, $contractMaster['id'], $selectedCompanyID);
 
-        return $this->sendResponse(new ContractMasterResource($contractMaster), 'ContractMaster updated successfully');
+        if($contractMasterUpdate['status']){
+            return $this->sendResponse(['id' => $id], $contractMasterUpdate['message']);
+        } else{
+            $statusCode = $contractMasterUpdate['code'] ?? 404;
+            return $this->sendError($contractMasterUpdate['message'], $statusCode);
+        }
     }
 
     /**
@@ -132,12 +150,12 @@ class ContractMasterAPIController extends AppBaseController
         $contractMaster = $this->contractMasterRepository->find($id);
 
         if (empty($contractMaster)) {
-            return $this->sendError('Contract Master not found');
+            return $this->sendError(trans('common.contract_not_found'));
         }
 
         $contractMaster->delete();
 
-        return $this->sendSuccess('Contract Master deleted successfully');
+        return $this->sendSuccess(trans('common.contract_deleted_successfully'));
     }
 
     public function getContractMaster(Request $request)
@@ -185,5 +203,21 @@ class ContractMasterAPIController extends AppBaseController
         $path = $request->path;
         $disk = $request->disk;
         DeleteFileFromS3Job::dispatch($path, $disk)->delay(now()->addMinutes(5));
+    }
+
+    public function getUserFormDataContractEdit(Request $request) {
+        $contractType = $request->input('search');
+        $fromContractType = $request->input('fromContractType');
+        $value = $contractType['value'];
+
+        $fromData = $this->contractMasterRepository->userFormData($value, $fromContractType);
+
+        if($fromData['status']){
+            return $this->sendResponse($fromData['data'], $fromData['message']);
+        } else{
+            $statusCode = $fromData['code'] ?? 404;
+            return $this->sendError($fromData['message'], $statusCode);
+        }
+
     }
 }

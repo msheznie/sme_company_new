@@ -9,5 +9,8 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/export-contract-master', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'exportContractMaster'])->name('Export Contract Master');
     Route::post('/delete-file-from-aws', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'deleteFileFromAws'])->name('Delete File From S3');
     Route::post('/get-counter-party-names', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getCounterPartyNames'])->name('Counter Party Names');
-    Route::post('/create-contract-master', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'store'])->name('Create Contract Master');
+    Route::get('/contract-master/{id}', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'show'])->name('Show contract');
+    Route::put('/contract-master/{id}', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'update'])->name('Update contract');
+    Route::post('/contract-master', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'store'])->name('Create Contract Master');
+    Route::post('/user-form-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getUserFormDataContractEdit'])->name('Contract edit form data');
 });

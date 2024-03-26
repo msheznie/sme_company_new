@@ -65,25 +65,25 @@ class ContractManagementUtils
     static function counterPartyNames($counterPartyId)
     {
 
-        $users = ContractUsers::where(function ($query) use ($counterPartyId) {
-                $query->when($counterPartyId == 1, function ($q) {
-                    $q->where('contractUserType', 2);
-                })
-                    ->when($counterPartyId == 2, function ($q) {
-                        $q->where('contractUserType', 3);
-                    });
-            })
+        $users = ContractUsers::where('contractUserType', $counterPartyId)
             ->when($counterPartyId == 1, function ($q) {
                 $q->with([
                     'contractSupplierUser' => function ($q) {
-                        $q->select('supplierCodeSystem','primarySupplierCode', 'supplierName');
+                        $q->selectRaw("supplierCodeSystem, CONCAT(primarySupplierCode, ' | ', supplierName) as name");
                     }
                 ]);
             })
             ->when($counterPartyId == 2, function ($q) {
                 $q->with([
                     'contractCustomerUser' => function ($q) {
-                        $q->select('customerCodeSystem','CutomerCode', 'CustomerName');
+                        $q->selectRaw("customerCodeSystem, CONCAT(CutomerCode, ' | ', CustomerName) as name");
+                    }
+                ]);
+            })
+            ->when($counterPartyId == 3, function ($q) {
+                $q->with([
+                    'contractInternalUser' => function ($q) {
+                        $q->selectRaw("employeeSystemID, CONCAT(empID, ' | ', empName) as name");
                     }
                 ]);
             })
@@ -96,11 +96,11 @@ class ContractManagementUtils
                 $name = '';
 
                 if($counterPartyId == 1) {
-                    $name = $user['contractSupplierUser']['supplierName'];
-                }
-
-                if($counterPartyId == 2) {
-                    $name = $user['contractCustomerUser']['CustomerName'];
+                    $name = $user['contractSupplierUser']['name'];
+                } else if($counterPartyId == 2) {
+                    $name = $user['contractCustomerUser']['name'];
+                } else if($counterPartyId == 3) {
+                    $name = $user['contractInternalUser']['name'];
                 }
 
                 $supplier[] = [
@@ -110,5 +110,9 @@ class ContractManagementUtils
 
             }
             return $supplier;
+    }
+
+    static function getCounterParty(){
+        return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name')->where('cpt_active', 1)->get();
     }
 }

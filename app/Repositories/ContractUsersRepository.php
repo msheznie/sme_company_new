@@ -82,11 +82,11 @@ class ContractUsersRepository extends BaseRepository
         $searchKeyword = $request->input('search.value');
 
         if($selectedUserType == 1) {
-            $contractUsers =  $this->model->getInternalUserList($selectedCompanyId, $searchKeyword);
-        } else if($selectedUserType == 2) {
             $contractUsers =  $this->model->getSupplierUserList($selectedCompanyId, $searchKeyword);
-        } else {
+        } else if($selectedUserType == 2) {
             $contractUsers =  $this->model->getCustomerUserList($selectedCompanyId, $searchKeyword);
+        } else {
+            $contractUsers =  $this->model->getInternalUserList($selectedCompanyId, $searchKeyword);
         }
 
         return DataTables::eloquent($contractUsers)
