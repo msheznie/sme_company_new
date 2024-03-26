@@ -44,12 +44,28 @@ class ContractMaster extends Model
         'uuid',
         'contractCode',
         'title',
+        'description',
         'contractType',
         'counterParty',
         'counterPartyName',
         'referenceCode',
+        'contractOwner',
+        'contractAmount',
         'startDate',
         'endDate',
+        'agreementSignDate',
+        'notifyDays',
+        'contractTimePeriod',
+        'contractRenewalDate',
+        'contractExtensionDate',
+        'contractTerminateDate',
+        'contractRevisionDate',
+        'primaryCounterParty',
+        'primaryEmail',
+        'primaryPhoneNumber',
+        'secondaryCounterParty',
+        'secondaryEmail',
+        'secondaryPhoneNumber',
         'status',
         'companySystemID',
         'created_by',
@@ -66,12 +82,28 @@ class ContractMaster extends Model
         'uuid' => 'string',
         'contractCode' => 'string',
         'title' => 'string',
+        'description' => 'string',
         'contractType' => 'integer',
         'counterParty' => 'integer',
         'counterPartyName' => 'integer',
         'referenceCode' => 'string',
-        'startDate' => 'datetime',
-        'endDate' => 'datetime',
+        'contractOwner' => 'integer',
+        'contractAmount' => 'double',
+        'startDate' => 'string',
+        'endDate' => 'string',
+        'agreementSignDate' => 'string',
+        'notifyDays' => 'integer',
+        'contractTimePeriod' => 'string',
+        'contractRenewalDate' => 'string',
+        'contractExtensionDate' => 'string',
+        'contractTerminateDate' => 'string',
+        'contractRevisionDate' => 'string',
+        'primaryCounterParty' => 'string',
+        'primaryEmail' => 'string',
+        'primaryPhoneNumber' => 'string',
+        'secondaryCounterParty' => 'string',
+        'secondaryEmail' => 'string',
+        'secondaryPhoneNumber' => 'string',
         'status' => 'integer',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
@@ -102,6 +134,11 @@ class ContractMaster extends Model
     public function contractUsers()
     {
         return $this->belongsTo(ContractUsers::class, 'counterPartyName', 'id');
+    }
+
+    public function contractOwners()
+    {
+        return $this->belongsTo(ContractUsers::class, 'contractOwner', 'id');
     }
 
     public function contractMaster($search, $companyId, $filter)

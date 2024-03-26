@@ -109,7 +109,7 @@ class ContractUsersAPIController extends AppBaseController
             return $this->sendResponse([], $contractUsers['message']);
         } else{
             $statusCode = $contractUsers['code'] ?? 404;
-            return $this->sendError($statusCode['message'], $statusCode);
+            return $this->sendError($contractUsers['message'], $statusCode);
         }
     }
 

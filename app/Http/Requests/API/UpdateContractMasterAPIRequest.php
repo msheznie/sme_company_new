@@ -24,8 +24,18 @@ class UpdateContractMasterAPIRequest extends APIRequest
      */
     public function rules()
     {
-        $rules = ContractMaster::$rules;
-        
-        return $rules;
+        return  [
+            'counterPartyName' => 'required',
+            'primaryEmail' => 'nullable',
+            'secondaryEmail' => 'nullable|different:primaryEmail',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'counterPartyName.required' => trans('common.counter_party_name_is_required'),
+            'secondaryEmail.different' => trans('common.counter_party_email_validation'),
+        ];
     }
 }
