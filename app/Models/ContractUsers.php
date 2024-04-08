@@ -98,8 +98,16 @@ class ContractUsers extends Model
         if($search){
             $search = str_replace("\\", "\\\\", $search);
             $contractUsers = $contractUsers->where(function ($query) use ($search) {
-                $query->where('empID', 'LIKE', "%{$search}%")
-                    ->orWhere('empID', 'LIKE', "%{$search}%");
+                $query->orWhere('contractUserCode', 'LIKE', "%{$search}%");
+                $query->orWhereHas('contractSupplierUser', function ($query2) use ($search) {
+                    $query2->where('supplierName', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractCustomerUser', function ($query3) use ($search) {
+                    $query3->where('CustomerName', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractInternalUser', function ($query4) use ($search) {
+                    $query4->where('empName', 'LIKE', "%{$search}%");
+                });
             });
         }
 
