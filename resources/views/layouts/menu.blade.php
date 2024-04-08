@@ -148,3 +148,21 @@
         <span>Contract Masters</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractSectionDetails*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractSectionDetails.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Section Details</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractSettingMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractSettingMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Setting Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractSettingDetails*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractSettingDetails.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Setting Details</span>
+    </a>
+</li>

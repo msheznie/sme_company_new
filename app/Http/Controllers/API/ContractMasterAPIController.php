@@ -61,14 +61,7 @@ class ContractMasterAPIController extends AppBaseController
         $input = $request->all();
 
         $contractMaster = $this->contractMasterRepository->createContractMaster($input);
-
-        if($contractMaster['status']){
-            return $this->sendResponse([], $contractMaster['message']);
-        } else{
-            $statusCode = $contractMaster['code'] ?? 404;
-            return $this->sendError($statusCode['message'], $statusCode);
-        }
-
+        return $this->sendResponse($contractMaster, 'Contract Master created successfully');
     }
 
     /**
@@ -220,4 +213,23 @@ class ContractMasterAPIController extends AppBaseController
         }
 
     }
+
+    public function getContractTypeSectionData(Request $request){
+        $contractSecs = $this->contractMasterRepository->getContractTypeSectionData($request);
+        return $this->sendResponse($contractSecs, 'Retrieved successfully');
+    }
+
+    public function updateContractSettingDetails(Request $request)
+    {
+        $updateContractSetting = $this->contractMasterRepository->updateContractSettingDetails($request);
+
+        if($updateContractSetting['status']){
+            return $this->sendResponse([], $updateContractSetting['message']);
+        } else{
+            $statusCode = $updateContractSetting['code'] ?? 404;
+            return $this->sendError($statusCode['message'], $statusCode);
+        }
+    }
+
+
 }

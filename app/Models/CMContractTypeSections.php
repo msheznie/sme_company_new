@@ -69,8 +69,13 @@ class CMContractTypeSections extends Model
         'updated_at' => 'nullable'
     ];
 
-    public function contratSectionWithtypes()
+    public function contractSectionWithTypes()
     {
         return $this->belongsTo(CMContractSectionsMaster::class, 'cmSection_id', 'cmSection_id');
+    }
+
+    public function sectionDetail()
+    {
+        return $this->belongsTo(ContractSectionDetail::class, 'cmSection_id', 'sectionMasterId');
     }
 }

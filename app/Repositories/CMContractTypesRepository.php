@@ -63,7 +63,8 @@ class CMContractTypesRepository extends BaseRepository
             "intents" => ContractManagementUtils::getIntentMasters(),
             "parties" => ContractManagementUtils::getPartiesMasters(),
             "counter-parties" => ContractManagementUtils::getCounterParties(),
-            "contract-setions" => ContractManagementUtils::getContractSetions()
+            "contract-setions" => ContractManagementUtils::getContractSetions(),
+            "contract-all-setions" => ContractManagementUtils::getAllContractSetions()
         ];
         return $allTypes;
     }
@@ -103,7 +104,7 @@ class CMContractTypesRepository extends BaseRepository
         ];
 
         try {
-            $contractSections = $this->getAllContractFilters($request)['contract-setions'];
+            $contractSections = $this->getAllContractFilters($request)['contract-all-setions'];
 
             if ($contractTypeID > 0) {
                 $storeContractType['updated_by'] = $empId;
@@ -128,11 +129,14 @@ class CMContractTypesRepository extends BaseRepository
                         ->where('companySystemID', $input['selectedCompanyID'])
                         ->first();
 
+                    $csm_active = $dynamicField['csm_active'] == 0 ? 1 : 0;
+
                     if (!$ContractSec) {
                         $dynamicArray = [
                             'uuid' => bin2hex(random_bytes(16)),
                             'contract_typeId' => $contractTypeID,
                             'cmSection_id' => $dynamicField['cmSection_id'],
+                            'is_enabled' => $csm_active,
                             'companySystemID' => $input['selectedCompanyID'],
                             'created_by' => $empId,
                             'created_at' => now(),
@@ -228,7 +232,7 @@ class CMContractTypesRepository extends BaseRepository
         }
 
         $contractTypeSection = CMContractTypeSections::with([
-            'contratSectionWithtypes' => function ($q) {
+            'contractSectionWithTypes' => function ($q) {
                 $q->select('cmSection_id', 'cmSection_detail', 'csm_active');
             }
         ])->where('companySystemID', $companySystemID)
