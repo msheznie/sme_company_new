@@ -3,8 +3,13 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
+use App\Models\CMContractTypeSections;
 use App\Models\ContractMaster;
+use App\Models\ContractSectionDetail;
+use App\Models\ContractSettingDetail;
+use App\Models\ContractSettingMaster;
 use App\Models\ContractUsers;
 use App\Models\Employees;
 use App\Repositories\BaseRepository;
@@ -175,10 +180,63 @@ class ContractMasterRepository extends BaseRepository
                 'created_at' => Carbon::now()
                 ];
 
-            $insertResponse = ContractMaster::insert($insertArray);
+            $insertResponse = ContractMaster::create($insertArray);
+            $contractMasterId = $insertResponse->id;
+
             if($insertResponse) {
+
+                $contractTypeSections = CMContractTypeSections::where('contract_typeId', $contractType["contract_typeId"])
+                    ->where('companySystemID', $companySystemID)
+                    ->where('is_enabled', 1)
+                    ->get();
+
+                foreach ($contractTypeSections as $contractTypeSection) {
+
+                    $contractSettingMasterArray = [
+                        'uuid' => bin2hex(random_bytes(16)),
+                        'contractId' => $contractMasterId,
+                        'contractTypeSectionId' => $contractTypeSection['ct_sectionId'],
+
+                    ];
+                    $contractSettingMaster = ContractSettingMaster::create($contractSettingMasterArray);
+                }
+
+                    $contractTypeSectionDetail = ContractSettingMaster::with([
+                        'contractTypeSection' => function ($q) {
+                            $q->select('ct_sectionId', 'cmSection_id', 'contract_typeId', 'companySystemID')
+                                ->with(['contractSectionWithTypes' => function ($q1) {
+                                    $q1->select('cmSection_id','cmSection_detail')
+                                        ->with(['sectionDetail']);
+                                }]);
+                        }
+                    ])->where('contractId', $contractMasterId)
+                        ->get();
+
+                    $contractSettingDetailArray = [];
+                    $i = 0;
+
+                    foreach ($contractTypeSectionDetail as $contractSectionDetail){
+                        $sectionDetails = $contractSectionDetail['contractTypeSection']['contractSectionWithTypes']['sectionDetail'];
+
+                        foreach ($sectionDetails as $sectionDetail){
+                        $sectionDetailId = $sectionDetail['id'];
+                        $isActiveStatus = ($sectionDetailId == 1 || $sectionDetailId == 2) ? 1 : 0;
+                            $contractSettingDetailArray[$i] = [
+                                'uuid' => bin2hex(random_bytes(16)),
+                                'settingMasterId' => $contractSectionDetail['id'],
+                                'sectionDetailId' => $sectionDetailId,
+                                'isActive' => $isActiveStatus,
+                                'contractId' => $contractMasterId,
+                                'created_at' => Carbon::now(),
+                            ];
+                            $i++;
+                        }
+                    }
+
+                ContractSettingDetail::insert($contractSettingDetailArray);
+
                 DB::commit();
-                return ['status' => true, 'message' => trans('common.contract_master_created_successfully')];
+                return ['status' => true, 'message' => trans('common.contract_master_created_successfully'), 'data' => $insertResponse];
             }
 
         } catch (\Exception $ex){
@@ -311,5 +369,146 @@ class ContractMasterRepository extends BaseRepository
         unset($contract['counterPartyName']);
 
         return $contract;
+    }
+
+    public function getContractTypeSectionData(Request $request)
+    {
+        $input = $request->all();
+        $companySystemID = $input['selectedCompanyID'];
+        $contractTypeId = $input['contractTypeId'] ?? null;
+        $contractuuid = $input['contractId'];
+
+        $contractId = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
+
+        $existContractTypeID = CMContractTypes::where('uuid', $contractTypeId)->pluck('contract_typeId')->first();
+        if(empty($existContractTypeID)) {
+            return ['status' => flase, 'message' => 'Contract Types not found'];
+        }
+
+        $contractTypeSection = ContractSettingMaster::with([
+            'contractTypeSection' => function ($q) {
+                $q->select('ct_sectionId', 'cmSection_id', 'contract_typeId', 'companySystemID')
+                ->with(['contractSectionWithTypes' => function ($q1) {
+                    $q1->select('cmSection_id','cmSection_detail')
+                        ->with(['sectionDetail']);
+                }]);
+            }
+           ])->where('contractId', $contractId['id'])
+            ->get();
+
+        $contractSectionDetail = ContractSectionDetail::get();
+
+        $isActive =  ContractSettingDetail::select('sectionDetailId')
+            ->where('isActive', 1)
+            ->where('contractId', $contractId['id'])
+            ->get();
+
+        $contractSectionMaster = CMContractSectionsMaster::whereIn('cmSection_id', [3, 4, 5])->get();
+
+        $activeSectionMasters = ContractSettingMaster::with([
+            'contractTypeSection' => function ($q) {
+                $q->select('ct_sectionId', 'cmSection_id', 'contract_typeId', 'companySystemID')
+                    ->with(['contractSectionWithTypes' => function ($q1) {
+                        $q1->select('cmSection_id','cmSection_detail');
+                    }]);
+            }
+        ])->where('isActive', 1)
+            ->where('contractId', $contractId['id'])
+            ->get();
+
+        $activeSectionId = [];
+
+        foreach ($activeSectionMasters as $activeSectionMasters){
+            $sectionId = $activeSectionMasters['contractTypeSection']['contractSectionWithTypes']['cmSection_id'];
+            $activeSectionId[] = $sectionId;
+        }
+
+        $response['data'] = $contractTypeSection;
+        $response['sectionDetail'] = $contractSectionDetail;
+        $response['isActive'] = $isActive;
+        $response['contractSectionMaster'] = $contractSectionMaster;
+        $response['sectionId'] = $activeSectionId;
+
+        return $response;
+    }
+
+    public function updateContractSettingDetails(Request $request)
+    {
+        $input = $request->all();
+        $contractuuid = $input['contractId'];
+        $sectionDetails = $input['sectionDetails'];
+        $sectionMaster = $input['sectionMaster'];
+
+        $contract = ContractMaster::select('id', 'contractType')->where('uuid', $contractuuid)->first();
+
+        $settingMasterIds = ContractSettingDetail::select('settingMasterId')
+            ->where('contractId', $contract['id'])
+            ->whereIn('sectionDetailId', [1,2])
+            ->get();
+        $settingMasterIdData = CMContractTypeSections::select('ct_sectionId', 'cmSection_id')
+            ->where('contract_typeId', $contract['contractType'])
+            ->whereIn('cmSection_id', [3, 4, 5])
+            ->get();
+
+        $newSectionMaster = [];
+        foreach ($sectionMaster as $firstItem) {
+            foreach ($settingMasterIdData as $secondItem) {
+                if ($firstItem['id'] === $secondItem['cmSection_id']) {
+                    $newSectionMaster[] = [
+                        'ct_sectionId' => $secondItem['ct_sectionId'],
+                        'checked' => $firstItem['checked']
+                    ];
+                    break;
+                }
+            }
+        }
+
+        DB::beginTransaction();
+        try{
+
+            foreach ($sectionDetails as $sectionDetail) {
+
+                $contractSettingMasterArray = [
+                    'isActive' => $sectionDetail['checked'],
+                ];
+
+                $updateResponse = ContractSettingDetail::where('sectionDetailId', $sectionDetail['id'])
+                    ->where('contractId', $contract['id'])
+                    ->update($contractSettingMasterArray);
+
+
+                if($sectionDetail['id'] == 1 || $sectionDetail['id'] == 2){
+
+                    foreach ($settingMasterIds as $settingMasterId) {
+                        ContractSettingMaster::where('id', $settingMasterId['settingMasterId'])
+                            ->update($contractSettingMasterArray);
+                    }
+                }
+            }
+
+            foreach ($newSectionMaster as $sectionMasterData) {
+
+                $contractSettingMasterNewArray = [
+                    'isActive' => $sectionMasterData['checked'],
+                ];
+
+                ContractSettingMaster::where('contractTypeSectionId', $sectionMasterData['ct_sectionId'])
+                    ->where('contractId', $contract['id'])
+                    ->update($contractSettingMasterNewArray);
+
+            }
+            if($updateResponse) {
+                DB::commit();
+                return ['status' => true, 'message' => trans('common.contract_setting_updated_successfully')];
+            }
+
+        } catch (\Exception $ex){
+            DB::rollBack();
+            return ['status' => false, 'message' => $ex->getMessage()];
+        }
+
+
+
+
     }
 }

@@ -13,4 +13,6 @@ Route::group(['prefix' => 'contract'], function (){
     Route::put('/contract-master/{id}', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'update'])->name('Update contract');
     Route::post('/contract-master', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'store'])->name('Create Contract Master');
     Route::post('/user-form-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getUserFormDataContractEdit'])->name('Contract edit form data');
+    Route::post('/get-contract-type-sections-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractTypeSectionData'])->name('Contract type section data');
+    Route::post('/update-contract-setting-details', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateContractSettingDetails'])->name('Update contract setting detail');
 });

@@ -28,4 +28,5 @@
      "secondary_email_already_exists" => "Secondary Email already exists",
      "primary_email_already_exists_in_employees" => "Primary Email already exists in Employees",
      "secondary_email_already_exists_in_employees" => "Secondary Email already exists in Employees",
+     "contract_setting_updated_successfully" => "Contract setting updated successfully",
  ];

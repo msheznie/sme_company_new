@@ -39,6 +39,11 @@ class ContractManagementUtils
         return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->where('csm_active', 1)->get();
     }
 
+    static function getAllContractSetions()
+    {
+        return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->get();
+    }
+
     static function getStatusDrop()
     {
         $result[0] = [
