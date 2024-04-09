@@ -274,9 +274,10 @@ class ContractMasterRepository extends BaseRepository
     }
 
     public function updateContract($formData, $id, $selectedCompanyID): array {
+        
         $contractOwner = $formData['contractOwner'] ?? '';
 
-        $checkContractTypeID = CMContractTypes::where('uuid', $formData['contractType'])->pluck('contract_typeId')->where('companySystemID', $selectedCompanyID)->first();
+        $checkContractTypeID = CMContractTypes::select('contract_typeId')->where('uuid', $formData['contractType'])->where('companySystemID', $selectedCompanyID)->first();
         if(empty($checkContractTypeID)){
             return ['status' => false, 'message' => trans('common.contract_type_not_found')];
         }
@@ -300,7 +301,7 @@ class ContractMasterRepository extends BaseRepository
                 'contractCode' => $formData['contractCode'] ?? null,
                 'title' => $formData['title'] ?? null,
                 'description' => $formData['description'] ?? null,
-                'contractType' => $checkContractTypeID,
+                'contractType' => $checkContractTypeID['contract_typeId'],
                 'counterParty' => $formData['counterParty'] ?? null,
                 'counterPartyName' => $checkContractPartyNameID,
                 'referenceCode' => $formData['referenceCode'] ?? null,
