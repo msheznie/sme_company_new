@@ -146,6 +146,16 @@ class ContractMaster extends Model
         $contractTypeID = $filter['contractTypeID'] ?? 0;
         $counterPartyNameID = $filter['counterPartyNameID'] ?? 0;
 
+        $contractId = CMContractTypes::select('contract_typeId')
+            ->where('uuid',$contractTypeID)
+            ->where('companySystemID', $companyId)
+            ->first();
+
+        $counterPartyID = ContractUsers::select('id')
+            ->where('uuid',$counterPartyNameID)
+            ->where('companySystemId', $companyId)
+            ->first();
+
         $query = ContractMaster::with(['contractTypes' => function ($q) {
             $q->select('contract_typeId', 'cm_type_name', 'uuid');
         }, 'counterParties' => function ($q1) {
@@ -154,24 +164,19 @@ class ContractMaster extends Model
             $q2->select('employeeSystemID', 'empName');
         }, 'contractUsers' => function ($q3) {
             $q3->with(['contractSupplierUser','contractCustomerUser']);
-        }])->where(function ($q) use ($contractTypeID, $counterPartyNameID) {
-            $q->when($contractTypeID > 0, function ($q) use ($contractTypeID) {
-                $q->whereHas('contractTypes', function ($q) use ($contractTypeID) {
-                    $q->where('uuid', $contractTypeID);
-                });
-            });
-            $q->when($counterPartyNameID > 0, function ($q) use ($counterPartyNameID) {
-                $q->whereHas('contractUsers', function ($q) use ($counterPartyNameID) {
-                    $q->where('uuid', $counterPartyNameID);
-                });
-            });
-        })->where('companySystemID', $companyId);
+        }])->where('companySystemID', $companyId);
         if ($filter) {
             if (isset($filter['counterPartyID'])) {
                 $query->where('counterParty', $filter['counterPartyID']);
             }
             if (isset($filter['is_status'])) {
                 $query->where('status', $filter['is_status']);
+            }
+            if (isset($filter['contractTypeID'])) {
+                $query->where('contractType', $contractId['contract_typeId']);
+            }
+            if (isset($filter['counterPartyNameID'])) {
+                $query->where('counterPartyName', $counterPartyID['id']);
             }
         }
         if ($search) {

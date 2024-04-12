@@ -137,7 +137,7 @@ class ContractMasterRepository extends BaseRepository
                 $data[$count]['Title'] = isset($value['title']) ? preg_replace('/^=/', '-', $value['title']) : '-';
                 $data[$count]['Contract Type'] = isset($value['contractTypes']) ? preg_replace('/^=/', '-', $value['contractTypes']['cm_type_name']) : '-';
                 $data[$count]['Contract Party'] = isset($value['counterParties']) ? preg_replace('/^=/', '-', $value['counterParties']['cmCounterParty_name']) : '-';
-                $data[$count]['Counter Party Name'] = isset($value['counterPartyName']) ? preg_replace('/^=/', '-', $value['counterPartyName']) : '-';
+                $data[$count]['Counter Party Name'] = isset($value['counterPartyName']) ? preg_replace('/^=/', '-', $value['contractUsers']['contractUserName']) : '-';
                 $data[$count]['Reference Code'] = isset($value['referenceCode']) ? preg_replace('/^=/', '-', $value['referenceCode']) : '-';
                 $data[$count]['Start Date'] = Carbon::parse($value['startDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['startDate'])) : '-';
                 $data[$count]['End Date'] = Carbon::parse($value['endDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['endDate'])) : '-';
@@ -274,7 +274,7 @@ class ContractMasterRepository extends BaseRepository
     }
 
     public function updateContract($formData, $id, $selectedCompanyID): array {
-        
+
         $contractOwner = $formData['contractOwner'] ?? '';
 
         $checkContractTypeID = CMContractTypes::select('contract_typeId')->where('uuid', $formData['contractType'])->where('companySystemID', $selectedCompanyID)->first();
