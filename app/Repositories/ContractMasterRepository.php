@@ -298,7 +298,6 @@ class ContractMasterRepository extends BaseRepository
         DB::beginTransaction();
         try{
             $updateData = [
-                'contractCode' => $formData['contractCode'] ?? null,
                 'title' => $formData['title'] ?? null,
                 'description' => $formData['description'] ?? null,
                 'contractType' => $checkContractTypeID['contract_typeId'],
@@ -310,7 +309,7 @@ class ContractMasterRepository extends BaseRepository
                 'startDate' => $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
                 'endDate' => $formData['formatEndDate'] ? Carbon::parse($formData['formatEndDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
                 'agreementSignDate' => $formData['formatAgreementSignDate'] ? Carbon::parse($formData['formatAgreementSignDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
-                'contractTimePeriod' => $formData['formatContractTimePeriod'] ? Carbon::parse($formData['formatContractTimePeriod'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'contractTermPeriod' => $formData['contractTermPeriod'] ?? null,
                 'notifyDays' => $formData['notifyDays'] ?? null,
                 'primaryCounterParty' => $formData['primaryCounterParty'] ?? null,
                 'primaryEmail' => $formData['primaryEmail'] ?? null,

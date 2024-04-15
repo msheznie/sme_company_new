@@ -77,7 +77,7 @@ class ContractMasterAPIController extends AppBaseController
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
             ['uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner',
                 'contractAmount', 'description', 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate',
-                'startDate', 'endDate', 'notifyDays', 'contractTimePeriod'
+                'startDate', 'endDate', 'notifyDays', 'contractTermPeriod'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
