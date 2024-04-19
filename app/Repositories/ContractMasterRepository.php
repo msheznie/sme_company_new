@@ -427,21 +427,21 @@ class ContractMasterRepository extends BaseRepository
     {
         $contractUuid = $request->input('contractId') ?? 0;
         $formData = $request->input('formData') ?? null;
-        $selectedCategories = $formData['selectedCategories'] ?? [];
+        $settingMasters = $formData['settingMasters'] ?? [];
 
         $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
         if(empty($contractID)) {
             return ['status' => false, 'message' => trans('common.contract_not_found'), 'line' => __LINE__];
         }
 
-        if(empty($selectedCategories)){
+        if(empty($settingMasters)){
             return ['status' => false, 'message' => 'Cannot update, no record found', 'line' => __LINE__];
         }
 
         try {
             DB::beginTransaction();
 
-            foreach ($selectedCategories as $master) {
+            foreach ($settingMasters as $master) {
                 $settingMaster = ContractSettingMaster::where('uuid', $master['id'])->first();
 
                 if (!$settingMaster) {
@@ -455,8 +455,8 @@ class ContractMasterRepository extends BaseRepository
                 $masterActive = $master['isActive'] ?? 0;
                 $settingMaster->update(['isActive' => $masterActive ? 1 : 0]);
 
-                if (!empty($master['selectedProducts'])) {
-                    foreach ($master['selectedProducts'] as $details) {
+                if (!empty($master['settingDetail'])) {
+                    foreach ($master['settingDetail'] as $details) {
                         $settingDetail = ContractSettingDetail::where('uuid', $details['settingDetailUuid'])->first();
 
                         if (!$settingDetail) {
