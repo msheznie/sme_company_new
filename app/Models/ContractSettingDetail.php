@@ -63,4 +63,8 @@ class ContractSettingDetail extends Model
     ];
 
 
+    public function contractSectionDetails()
+    {
+        return $this->belongsTo(ContractSectionDetail::class, 'sectionDetailId', 'id');
+    }
 }

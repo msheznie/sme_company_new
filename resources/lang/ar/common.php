@@ -25,4 +25,5 @@ return [
     "secondary_email_already_exists" => "Secondary Email already exists",
     "primary_email_already_exists_in_employees" => "Primary Email already exists in Employees",
     "secondary_email_already_exists_in_employees" => "Secondary Email already exists in Employees",
+    "active_contract_section_details" => "Active Contract Section Details retrieved successfully",
 ];

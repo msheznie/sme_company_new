@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractSettingMaster extends Model
 {
-    
+
     use HasFactory;
 
     public $table = 'cm_contract_setting_master';
@@ -61,6 +61,11 @@ class ContractSettingMaster extends Model
     public function contractTypeSection()
     {
         return $this->belongsTo(CMContractTypeSections::class, 'contractTypeSectionId', 'ct_sectionId');
+    }
+
+    public function contractSettingDetails()
+    {
+        return $this->hasMany(ContractSettingDetail::class, 'settingMasterId', 'id');
     }
 
 

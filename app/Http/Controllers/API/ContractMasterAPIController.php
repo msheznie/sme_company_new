@@ -227,8 +227,13 @@ class ContractMasterAPIController extends AppBaseController
             return $this->sendResponse([], $updateContractSetting['message']);
         } else{
             $statusCode = $updateContractSetting['code'] ?? 404;
-            return $this->sendError($statusCode['message'], $statusCode);
+            return $this->sendError($updateContractSetting['message'], $statusCode);
         }
+    }
+
+    public function getActiveContractSectionDetails(Request $request){
+        $contractSectionDetails = $this->contractMasterRepository->getActiveContractSectionDetails($request);
+        return $this->sendResponse($contractSectionDetails, 'Retrieved successfully');
     }
 
 
