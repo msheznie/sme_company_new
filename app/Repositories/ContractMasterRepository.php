@@ -196,7 +196,7 @@ class ContractMasterRepository extends BaseRepository
                         'uuid' => bin2hex(random_bytes(16)),
                         'contractId' => $contractMasterId,
                         'contractTypeSectionId' => $contractTypeSection['ct_sectionId'],
-
+                        'isActive' => 0
                     ];
                     $contractSettingMaster = ContractSettingMaster::create($contractSettingMasterArray);
                 }
@@ -220,12 +220,11 @@ class ContractMasterRepository extends BaseRepository
 
                     foreach ($sectionDetails as $sectionDetail){
                         $sectionDetailId = $sectionDetail['id'];
-                        $isActiveStatus = ($sectionDetailId == 1 || $sectionDetailId == 2) ? 1 : 0;
                         $contractSettingDetailArray[$i] = [
                             'uuid' => bin2hex(random_bytes(16)),
                             'settingMasterId' => $contractSectionDetail['id'],
                             'sectionDetailId' => $sectionDetailId,
-                            'isActive' => $isActiveStatus,
+                            'isActive' => 0,
                             'contractId' => $contractMasterId,
                             'created_at' => Carbon::now(),
                         ];
@@ -481,21 +480,26 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
-    public function getActiveContractSectionDetails(Request $request): array
+    public function getActiveContractSectionDetails(Request $request)
     {
         $input = $request->all();
-        $companySystemID = $input['selectedCompanyID'];
-        $contractuuid = $input['contractId'];
+        $contractUuid = $input['contractId'];
 
-        $contractId = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
+        $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
 
         $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
             ->where('isActive', 1)
-            ->whereNotNull('updated_at')
+            ->with([
+                'contractTypeSection' => function ($q) {
+                    $q->select('ct_sectionId', 'cmSection_id');
+                }
+            ])
             ->get();
+        $pluckedData = [];
+        foreach ($activeSetting as $setting) {
+            $pluckedData[] = $setting['contractTypeSection']['cmSection_id'];
+        }
 
-        $sectionDetailIds = collect($activeSetting)->pluck('contractTypeSectionId')->toArray();
-
-        return ['status' => true , 'message' => trans('common.active_contract_section_details'), 'data' => $sectionDetailIds];
+        return ['status' => true , 'message' => trans('common.active_contract_section_details'), 'data' => $pluckedData];
     }
 }
