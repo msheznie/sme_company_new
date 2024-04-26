@@ -29,4 +29,6 @@
      "primary_email_already_exists_in_employees" => "Primary Email already exists in Employees",
      "secondary_email_already_exists_in_employees" => "Secondary Email already exists in Employees",
      "contract_setting_updated_successfully" => "Contract settings updated successfully",
+     "contract_overall_retention_retrieved" => "Contract Overall Retention data retrieved successfully",
+     "overall_retention_updated_successfully" => "Overall Retention updated successfully",
  ];

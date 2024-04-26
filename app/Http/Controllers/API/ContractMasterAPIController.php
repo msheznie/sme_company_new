@@ -236,5 +236,15 @@ class ContractMasterAPIController extends AppBaseController
         return $this->sendResponse($contractSectionDetails, 'Retrieved successfully');
     }
 
+    public function getContractOverallRetentionData(Request $request){
+        $contractOverallRetentionData = $this->contractMasterRepository->getContractOverallRetentionData($request);
+        return $this->sendResponse($contractOverallRetentionData, 'Overall Retention data retrieved successfully');
+    }
+
+    public function updateOverallRetention(Request $request){
+        $overallRetention = $this->contractMasterRepository->updateOverallRetention($request);
+        return $this->sendResponse($overallRetention, 'Overall Retention updated successfully');
+    }
+
 
 }
