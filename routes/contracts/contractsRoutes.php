@@ -16,4 +16,6 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/get-contract-type-sections-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractTypeSectionData'])->name('Contract type section data');
     Route::post('/get-active-contract-section-details', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getActiveContractSectionDetails'])->name('Active Contract Section  Details');
     Route::post('/update-contract-setting-details', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateContractSettingDetails'])->name('Update contract setting detail');
+    Route::post('/get-contract-overall-retention-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractOverallRetentionData'])->name('Contract Overall Retention Data');
+    Route::post('/update-overall-retention', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateOverallRetention'])->name('Update Overall Retention');
 });

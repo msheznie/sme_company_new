@@ -166,3 +166,9 @@
         <span>Contract Setting Details</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractOverallRetentions*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractOverallRetentions.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Overall Retentions</span>
+    </a>
+</li>

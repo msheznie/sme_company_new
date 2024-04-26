@@ -7,6 +7,7 @@ use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
 use App\Models\ContractMaster;
+use App\Models\ContractOverallRetention;
 use App\Models\ContractSectionDetail;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
@@ -501,5 +502,94 @@ class ContractMasterRepository extends BaseRepository
         }
 
         return ['status' => true , 'message' => trans('common.active_contract_section_details'), 'data' => $pluckedData];
+    }
+
+    public function getContractOverallRetentionData(Request $request){
+        $input = $request->all();
+        $contractUuid = $input['contractId'];
+        $companySystemID = $input['selectedCompanyID'];
+
+        $contract = ContractMaster::select('id', 'contractAmount')->where('uuid', $contractUuid)->first();
+
+        $activeSections = ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contract['id'])
+            ->where('isActive', 1)
+            ->get();
+
+        $pluckedData = [];
+        foreach ($activeSections as $activeSection) {
+            $pluckedData[] = $activeSection['sectionDetailId'];
+        }
+
+        $overallRetention = ContractOverallRetention::where('contractId', $contract['id'])
+            ->where('companySystemId', $companySystemID)
+            ->with([
+                'contract' => function ($q) {
+                    $q->select('contractAmount', 'id');
+                }
+            ])
+            ->first();
+
+        $response['activeRetention'] = $pluckedData;
+        $response['overallRetention'] = $overallRetention;
+        $response['contractAmount'] =  $contract['contractAmount'];
+
+        return [
+            'status' => true ,
+            'message' => trans('common.contract_overall_retention_retrieved'),
+            'data' => $response];
+    }
+
+    public function updateOverallRetention(Request $request){
+        $input = $request->all();
+        $contractUuid = $input['contractId'];
+        $companySystemID = $input['selectedCompanyID'];
+        $formData = $input['formValue'];
+
+        $contract = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
+
+        $overallRetention = ContractOverallRetention::where('contractId', $contract['id'])
+            ->where('companySystemId', $companySystemID)
+            ->first();
+
+        DB::beginTransaction();
+        try{
+
+            $data = [
+                'retentionPercentage' => $formData['retentionPercentage'] ?? null,
+                'retentionAmount' => $formData['retentionAmount'] ?? null,
+                'startDate' =>
+                    $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])
+                        ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'dueDate' =>
+                    $formData['formatDueDate'] ? Carbon::parse($formData['formatDueDate'])
+                        ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'retentionWithholdPeriod' => $formData['retentionWithholdPeriod'] ?? null,
+            ];
+
+            if (!$overallRetention){
+                $data['uuid'] = bin2hex(random_bytes(16));
+                $data['contractId'] = $contract['id'];
+                $data['contractAmount'] = $formData['contractAmount'] ?? null;
+                $data['companySystemId'] = $companySystemID;
+                $data['created_by'] = General::currentEmployeeId();
+                $data['created_at'] = Carbon::now();
+
+            }else{
+                $data['updated_by'] = General::currentEmployeeId();
+                $data['updated_at'] = Carbon::now();
+            }
+
+
+            ContractOverallRetention::updateOrCreate(
+                ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
+
+            DB::commit();
+            return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];
+
+        } catch (\Exception $ex){
+            DB::rollBack();
+            return ['status' => false, 'message' => $ex->getMessage()];
+        }
     }
 }
