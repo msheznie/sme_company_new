@@ -166,6 +166,19 @@
         <span>Contract Setting Details</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractMilestones*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractMilestones.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Milestones</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractDeliverables*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractDeliverables.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Deliverables</span>
+    </a>
+</li>
+
 <li class="nav-item {{ Request::is('contractOverallRetentions*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractOverallRetentions.index') }}">
         <i class="nav-icon icon-cursor"></i>
