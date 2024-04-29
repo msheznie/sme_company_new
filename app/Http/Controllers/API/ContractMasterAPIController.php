@@ -4,16 +4,24 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\inventory;
 use App\Http\Requests\API\CreateContractMasterAPIRequest;
 use App\Http\Requests\API\UpdateContractMasterAPIRequest;
 use App\Jobs\DeleteFileFromS3Job;
 use App\Models\Company;
 use App\Models\ContractMaster;
+use App\Models\FinanceItemCategoryMaster;
+use App\Models\FinanceItemCategorySub;
+use App\Models\ItemAssigned;
+use App\Repositories\CompanyRepository;
 use App\Repositories\ContractMasterRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMasterResource;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Response;
+use Yajra\DataTables\DataTables;
 
 /**
  * Class ContractMasterController
@@ -24,10 +32,15 @@ class ContractMasterAPIController extends AppBaseController
 {
     /** @var  ContractMasterRepository */
     private $contractMasterRepository;
+    /**
+     * @var CompanyRepository
+     */
+    private $companyRepository;
 
-    public function __construct(ContractMasterRepository $contractMasterRepo)
+    public function __construct(ContractMasterRepository $contractMasterRepo, CompanyRepository $companyRepository)
     {
         $this->contractMasterRepository = $contractMasterRepo;
+        $this->companyRepository = $companyRepository;
     }
 
     /**
@@ -246,5 +259,104 @@ class ContractMasterAPIController extends AppBaseController
         return $this->sendResponse($overallRetention, 'Overall Retention updated successfully');
     }
 
+    public function getItemMasterFormData(Request $request)
+    {
+        $itemCategory = FinanceItemCategoryMaster::all();
+        $itemCategorySubArray = FinanceItemCategorySub::where('isActive',1)->get();
+
+        $output = [
+            'financeItemCategoryMaster' => $itemCategory,
+            'financeItemCategorySub' => $itemCategorySubArray,
+        ];
+
+        return $this->sendResponse($output, 'Record retrieved successfully');
+    }
+
+    public function getAllAssignedItemsByCompany(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $input = $request->all();
+        $itemMasters = $this->getAssignedItemsByCompanyQry($input);
+        if (request()->has('order') && $input['order'][0]['column'] == 0 && $input['order'][0]['dir'] === 'asc') {
+            $sort = 'asc';
+        } else {
+            $sort = 'desc';
+        }
+        return DataTables::eloquent($itemMasters)
+            ->order(function ($query) use ($input) {
+                if (request()->has('order')) {
+                    if ($input['order'][0]['column'] == 0) {
+                        $query->orderBy('idItemAssigned', $input['order'][0]['dir']);
+                    }
+                }
+            })
+            ->addIndexColumn()
+            ->with('orderCondition', $sort)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addColumn('current', function ($row) {
+                $data = array('companySystemID' => $row->companySystemID,
+                    'itemCodeSystem' => $row->itemCodeSystem,
+                    'wareHouseId' => null);
+                $itemCurrentCostAndQty = Inventory::itemCurrentCostAndQty($data);
+
+                return array('local' => $itemCurrentCostAndQty['wacValueLocal'],
+                    'rpt' => $itemCurrentCostAndQty['wacValueReporting'],
+                    'stock' => $itemCurrentCostAndQty['currentStockQty']);
+            })
+            ->make(true);
+    }
+
+    public function getAssignedItemsByCompanyQry($request)
+    {
+        $input = $request;
+        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
+        $contractId = $contractResult->id;
+        $companyId = $input['companyId'];
+
+        $isGroup = $this->companyRepository->checkIsCompanyGroup($companyId);
+
+        if ($isGroup) {
+            $childCompanies = $this->companyRepository->getGroupCompany($companyId);
+        } else {
+            $childCompanies = [$companyId];
+        }
+
+        $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
+            ->whereIn('companySystemID', $childCompanies)
+            ->where('financeCategoryMaster', 1)
+            ->whereDoesntHave('contractBoqItems', function ($query) use ($contractId) {
+                $query->where('contractId', $contractId);
+            });
+
+        if (array_key_exists('financeCategoryMaster', $input)) {
+            if ($input['financeCategoryMaster'] != null && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])) {
+                $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
+            }
+        }
+
+        if (array_key_exists('financeCategorySub', $input)) {
+            if ($input['financeCategorySub'] != null && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])) {
+                $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
+            }
+        }
+
+        $search = $input['search']['value'];
+        if ($search) {
+            $itemMasters = $itemMasters->where(function ($query) use ($search) {
+                $query->where('itemPrimaryCode', 'LIKE', "%{$search}%")
+                    ->orWhere('secondaryItemCode', 'LIKE', "%{$search}%")
+                    ->orWhere('itemDescription', 'LIKE', "%{$search}%");
+            });
+        }
+        return $itemMasters;
+    }
+
+    public function getSubcategoriesByMainCategory(Request $request){
+        if($request->get('itemCategoryID') != 0) {
+            return FinanceItemCategorySub::where('itemCategoryID',$request->get('itemCategoryID'))->where('isActive',1)
+                ->get();
+        } else{
+           return FinanceItemCategorySub::where('isActive',1)->get();
+        }
+    }
 
 }
