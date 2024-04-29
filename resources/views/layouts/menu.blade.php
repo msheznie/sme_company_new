@@ -183,5 +183,9 @@
     <a class="nav-link" href="{{ route('contractOverallRetentions.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Contract Overall Retentions</span>
+<li class="nav-item {{ Request::is('contractBoqItems*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractBoqItems.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Boq Items</span>
     </a>
 </li>

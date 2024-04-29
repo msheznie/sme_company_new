@@ -22,4 +22,13 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/get-contract-deliverables', [\App\Http\Controllers\API\ContractDeliverablesAPIController::class, 'getContractDeliverables'])->name('get contract deliverables');
     Route::post('/get-contract-overall-retention-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractOverallRetentionData'])->name('Contract Overall Retention Data');
     Route::post('/update-overall-retention', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateOverallRetention'])->name('Update Overall Retention');
+    Route::post('/get-item-master-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getItemMasterFormData'])->name('Get item master data');
+    Route::post('/get-all-assigned-items-by-company', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getAllAssignedItemsByCompany'])->name('Get all assigned items by company');
+    Route::post('/get-boq-items-by-company', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'getBoqItemsByCompany'])->name('Get Boq items by company');
+    Route::post('/update-boq-items-qty', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'updateBoqItemsQty'])->name('Update Boq items qty');
+    Route::post('/copy-boq-items-qty', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'copyBoqItemsQty'])->name('Copy Boq items qty');
+    Route::post('/add-boq-items', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'addTenderBoqItems'])->name('Add Boq items qty');
+    Route::delete('/delete-boq-items/{id}', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'destroy'])->name('Delete Boq item');
+    Route::post('/get-subcategories-by-main-category', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSubcategoriesByMainCategory'])->name('Get subcategories by main category');
+    Route::post('/export-boq-items', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'exportBoqItems'])->name('Export Boq Items');
 });
