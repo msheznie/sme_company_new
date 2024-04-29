@@ -10,6 +10,7 @@ use App\Models\CMCounterPartiesMaster;
 use App\Models\CMIntentsMaster;
 use App\Models\CMPartiesMaster;
 use App\Models\Company;
+use App\Models\ContractMilestone;
 use App\Models\ContractUsers;
 
 class ContractManagementUtils
@@ -118,6 +119,14 @@ class ContractManagementUtils
     }
 
     static function getCounterParty(){
-        return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name')->where('cpt_active', 1)->get();
+        return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name')
+            ->where('cpt_active', 1)->get();
+    }
+
+    static function getContractMilestones($contractId, $companySystemID) {
+        return ContractMilestone::select('uuid', 'title')
+            ->where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->get();
     }
 }
