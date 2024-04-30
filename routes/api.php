@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\CMContractTypesAPIController;
+use App\Http\Controllers\API\ConfigurationAPIController;
 use App\Http\Controllers\shared\TenantController;
 use App\Http\Controllers\API\NavigationAPIController;
 use App\Http\Controllers\API\RoleHasPermissionsAPIController;
@@ -34,7 +35,7 @@ Route::group(['middleware' => ['tenant']], function () {
     Route::group(['middleware' => ['auth:api']], function () {
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
-
+        Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
         Route::group(['middleware' => ['company']], function () {
             //main routes should be written here.
             require __DIR__.'/../routes/contracts/contractsRoutes.php';
