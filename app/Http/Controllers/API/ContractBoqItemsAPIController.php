@@ -49,7 +49,7 @@ class ContractBoqItemsAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems), 'Contract Boq Items retrieved successfully');
+        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems), 'BOQ Items retrieved successfully');
     }
 
     /**
@@ -66,7 +66,7 @@ class ContractBoqItemsAPIController extends AppBaseController
 
         $contractBoqItems = $this->contractBoqItemsRepository->create($input);
 
-        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'Contract Boq Items saved successfully');
+        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'BOQ Items saved successfully');
     }
 
     /**
@@ -86,7 +86,7 @@ class ContractBoqItemsAPIController extends AppBaseController
             return $this->sendError('Contract Boq Items not found');
         }
 
-        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'Contract Boq Items retrieved successfully');
+        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'BOQ Items retrieved successfully');
     }
 
     /**
@@ -111,7 +111,7 @@ class ContractBoqItemsAPIController extends AppBaseController
 
         $contractBoqItems = $this->contractBoqItemsRepository->update($input, $id);
 
-        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'ContractBoqItems updated successfully');
+        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'BOQ Items updated successfully');
     }
 
     /**
@@ -135,7 +135,7 @@ class ContractBoqItemsAPIController extends AppBaseController
 
         $contractBoqItems->delete();
 
-        return $this->sendSuccess('Boq Item deleted successfully');
+        return $this->sendSuccess('BOQ Item deleted successfully');
     }
 
     public function getBoqItemsByCompany(Request $request)
@@ -149,7 +149,7 @@ class ContractBoqItemsAPIController extends AppBaseController
         $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
 
         if (empty($contractBoqItems)) {
-            return $this->sendError('Contract Boq Items not found');
+            return $this->sendError('BOQ Item not found');
         }
 
         if($input['type'] == 'minQty') {
@@ -163,7 +163,7 @@ class ContractBoqItemsAPIController extends AppBaseController
         $inputArr['updated_at'] = Carbon::now();
         $contractBoqItems = $this->contractBoqItemsRepository->update($inputArr, $contractBoqItems->id);
 
-        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'ContractBoqItems updated successfully');
+        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'BOQ Item updated successfully');
     }
 
     public function copyBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)
@@ -172,7 +172,7 @@ class ContractBoqItemsAPIController extends AppBaseController
         $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
 
         if (empty($contractBoqItems)) {
-            return $this->sendError('Contract Boq Items not found');
+            return $this->sendError('BOQ Items not found');
         }
 
         $getValidRangeOfIdsToUpdate = $this->contractBoqItemsRepository->copyIdsRange($contractBoqItems);
@@ -207,7 +207,7 @@ class ContractBoqItemsAPIController extends AppBaseController
         try {
             $this->contractBoqItemsRepository->create($insertArray);
             DB::commit();
-            return ['status' => true, 'message' => 'Boq Item added successfully'];
+            return ['status' => true, 'message' => 'BOQ Item added successfully'];
         } catch (\Exception $ex) {
                 DB::rollBack();
                 return ['status' => false, 'message' => $ex->getMessage()];
