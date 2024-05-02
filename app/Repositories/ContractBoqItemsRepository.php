@@ -4,12 +4,10 @@ namespace App\Repositories;
 
 use App\Helpers\inventory;
 use App\Models\ContractBoqItems;
-use App\Repositories\BaseRepository;
-use Carbon\Carbon;
+use App\Models\ContractMaster;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables;
 
 /**
  * Class ContractBoqItemsRepository
@@ -40,7 +38,7 @@ class ContractBoqItemsRepository extends BaseRepository
      *
      * @return array
      */
-    public function getFieldsSearchable()
+    public function getFieldsSearchable(): array
     {
         return $this->fieldSearchable;
     }
@@ -48,26 +46,27 @@ class ContractBoqItemsRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
+    public function model(): string
     {
         return ContractBoqItems::class;
     }
 
-    public function getBoqItems(Request $request)
+    public function getBoqItems(Request $request): \Illuminate\Http\JsonResponse
     {
         $input = $request->all();
         $companyId = $input['companyId'];
+        $uuid = $input['uuid'];
+        $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
         $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId')
-            ->with( ['itemMaster.unit' => function ($query) {
+            ->with(['itemMaster.unit' => function ($query) {
                 $query->select('UnitShortCode');
             }])
-            ->where('companyId', $companyId);
+            ->where('companyId', $companyId)
+            ->where('contractId', $contractId->id);
 
-        if ($request->has('order')) {
-            if ($input['order'][0]['column'] == 0) {
-                $query->orderBy('id', $input['order'][0]['dir']);
-            }
+        if ($request->has('order') && $input['order'][0]['column'] == 0) {
+            $query->orderBy('id', $input['order'][0]['dir']);
         }
 
         return DataTables::eloquent($query)
@@ -85,7 +84,8 @@ class ContractBoqItemsRepository extends BaseRepository
             })
             ->addColumn('unitShortCode', function ($row) {
                 return $row->itemMaster->Unit->UnitShortCode;
-            })->addColumn('primaryCode', function ($row) {
+            })
+            ->addColumn('primaryCode', function ($row) {
                 return $row->itemMaster->primaryCode;
             })
             ->addColumn('local', function ($row) {
@@ -104,30 +104,31 @@ class ContractBoqItemsRepository extends BaseRepository
             ->make(true);
     }
 
-
-    public function findByUuid($id){
-       return ContractBoqItems::where('uuid', $id)->first();
+    public function findByUuid($id)
+    {
+        return ContractBoqItems::where('uuid', $id)->first();
     }
 
-    public function copyIdsRange($row){
-       return ContractBoqItems::select('id')
-           ->where('id', '<',  $row->id)
-           ->where('companyId', $row->companyId)
-           ->where('contractId', $row->contractId)
-           ->get()
-           ->pluck('id')
-           ->toArray();
+    public function copyIdsRange($row)
+    {
+        return ContractBoqItems::select('id')
+            ->where('id', '<', $row->id)
+            ->where('companyId', $row->companyId)
+            ->where('contractId', $row->contractId)
+            ->get()
+            ->pluck('id')
+            ->toArray();
     }
 
     public function copySameQty($id, $arr): array
     {
-        try{
+        try {
             ContractBoqItems::whereIn('id', $id)
                 ->update($arr);
 
             return ['status' => true, 'message' => trans('BoqItems updated successfully')];
 
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
@@ -135,10 +136,23 @@ class ContractBoqItemsRepository extends BaseRepository
 
     public function exportBoqItemsReport(Request $request)
     {
+        define('COL_ITEM', 'Item');
+        define('COL_DESCRIPTION', 'Description');
+        define('COL_MIN_QTY', 'Min Qty');
+        define('COL_MAX_QTY', 'Max Qty');
+        define('COL_UOM', 'UOM');
+        define('COL_QUANTITY', 'Quantity');
+        define('COL_PRICE', 'Price');
+        define('COL_AMOUNT', 'Amount');
+
         $input = $request->all();
-        $search = false;
         $companyId = $input['companySystemID'];
-        $lotData = ContractBoqItems::with(['itemMaster.unit'])->where('companyId', $companyId)->get();
+        $uuid = $input['uuid'];
+        $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
+        $lotData = ContractBoqItems::with(['itemMaster.unit'])
+            ->where('companyId', $companyId)
+            ->where('contractId', $contractId->id)
+            ->get();
         $lotData = $lotData->map(function ($item) {
             $data = [
                 'companySystemID' => $item->companyId,
@@ -153,25 +167,53 @@ class ContractBoqItemsRepository extends BaseRepository
             return $item;
         });
 
-        $data[0]['Item'] = "Item";
-        $data[0]['Description'] = "Description";
-        $data[0]['Min Qty'] = "Min Qty";
-        $data[0]['Max Qty'] = "Max Qty";
-        $data[0]['UOM'] = "UOM";
-        $data[0]['Quantity'] = "Quantity";
-        $data[0]['Price'] = "Price";
-        $data[0]['Amount'] = "Amount";
+        $data[0] = [
+            COL_ITEM => "Item",
+            COL_DESCRIPTION => "Description",
+            COL_MIN_QTY => "Min Qty",
+            COL_MAX_QTY => "Max Qty",
+            COL_UOM => "UOM",
+            COL_QUANTITY => "Quantity",
+            COL_PRICE => "Price",
+            COL_AMOUNT => "Amount"
+        ];
+
         if ($lotData) {
             $count = 1;
             foreach ($lotData as $value) {
-                $data[$count]['Item'] = isset($value['itemMaster']['primaryCode']) ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode']) : '-';
-                $data[$count]['Description'] = isset($value['description']) ? preg_replace('/^=/', '-', $value['description']) : '-';
-                $data[$count]['Min Qty'] = isset($value['minQty']) ? preg_replace('/^=/', '-', $value['minQty']) : '-';
-                $data[$count]['Max Qty'] = isset($value['maxQty']) ? preg_replace('/^=/', '-', $value['maxQty']) : '-';
-                $data[$count]['UOM'] = isset($value['itemMaster']['Unit']['UnitShortCode']) ? preg_replace('/^=/', '-', $value['itemMaster']['Unit']['UnitShortCode']) : '-';
-                $data[$count]['Quantity'] = isset($value['qty']) ? preg_replace('/^=/', '-', $value['qty']) : '-';
-                $data[$count]['Price'] = isset($value['current']['local']) ? preg_replace('/^=/', '-', $value['current']['local']) : '-';
-                $data[$count]['Amount'] = isset($value['current']['local']) ? preg_replace('/^=/', '-', $value['current']['local'] *  $value['qty']) : '-';
+                $data[$count][COL_ITEM] = isset($value['itemMaster']['primaryCode'])
+                    ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode'])
+                    : '-';
+                $data[$count][COL_DESCRIPTION] = isset($value['description'])
+                    ? preg_replace('/^=/', '-', $value['description'])
+                    : '-';
+
+                $data[$count][COL_MIN_QTY] = isset($value['minQty'])
+                    ? preg_replace('/^=/', '-', $value['minQty'])
+                    : '-';
+
+                $data[$count][COL_MAX_QTY] = isset($value['maxQty'])
+                    ? preg_replace('/^=/', '-', $value['maxQty'])
+                    : '-';
+
+                $data[$count][COL_UOM] = isset($value['itemMaster']['Unit']['UnitShortCode'])
+                    ? preg_replace('/^=/', '-', $value['itemMaster']['Unit']['UnitShortCode'])
+                    : '-';
+
+                $data[$count][COL_QUANTITY] = isset($value['qty'])
+                    ? preg_replace('/^=/', '-', $value['qty'])
+                    : '-';
+
+                $data[$count][COL_PRICE] = isset($value['current']['local'])
+                    ? number_format($value['current']['local'], 3, '.', '')
+                    : '-';
+
+                $data[$count][COL_AMOUNT] = isset($value['current']['local']) &&
+                is_numeric($value['current']['local']) &&
+                is_numeric($value['qty'])
+                    ? number_format($value['current']['local'] * $value['qty'], 3, '.', '')
+                    : '-';
+
                 $count++;
             }
         }
