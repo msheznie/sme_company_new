@@ -93,7 +93,7 @@ class ContractMilestoneRepository extends BaseRepository
         if(ContractMilestone::where('uuid', $uuid)->exists()) {
             return [
                 'status' => false,
-                'message' => 'Milestone Uuid already exists'
+                'message' => trans('common.milestone_uuid_exists')
             ];
         }
 
@@ -103,7 +103,7 @@ class ContractMilestoneRepository extends BaseRepository
         if(empty($contractMaster)) {
             return [
                 'status' => false,
-                'message' => 'Contract ID not found'
+                'message' => trans('common.contract_id_not_found')
             ];
         }
         $contractId = $contractMaster['id'];
@@ -124,7 +124,7 @@ class ContractMilestoneRepository extends BaseRepository
             ContractMilestone::insert($insertMilestone);
 
             DB::commit();
-            return ['status' => true, 'message' => 'Contract Milestone created successfully.'];
+            return ['status' => true, 'message' => trans('common.milestone_created_successfully')];
         } catch (\Exception $ex){
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
@@ -146,10 +146,9 @@ class ContractMilestoneRepository extends BaseRepository
         if(empty($contractMaster)) {
             return [
                 'status' => false,
-                'message' => 'Contract ID not found'
+                'message' => trans('common.contract_id_not_found')
             ];
         }
-        $contractId = $contractMaster['id'];
 
         try{
             DB::beginTransaction();
@@ -164,11 +163,57 @@ class ContractMilestoneRepository extends BaseRepository
             ContractMilestone::where('id', $id)->update($insertMilestone);
 
             DB::commit();
-            return ['status' => true, 'message' => 'Contract Milestone updated successfully.'];
+            return ['status' => true, 'message' => trans('common.milestone_updated_successfully')];
         } catch (\Exception $ex){
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
 
+    }
+
+    public function getMilestoneExcelData(Request $request): array {
+        $contractUuid = $request->input('contractUUid') ?? null;
+        $companySystemID = $request->input('companySystemID') ?? 0;
+
+        $contractMaster = ContractMaster::select('id')
+            ->where('uuid', $contractUuid)
+            ->where('companySystemID', $companySystemID)
+            ->first();
+        if(empty($contractMaster)) {
+            return [
+                'status' => false,
+                'message' => trans('common.contract_id_not_found')
+            ];
+        }
+        $contractID = $contractMaster['id'];
+        $deliverables = ContractMilestone::select('title', 'percentage', 'amount', 'status')
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->get();
+
+        $data[0]['Title'] = "Title";
+        $data[0]['Percentage'] = "Percentage";
+        $data[0]['Amount'] = "Amount";
+        $data[0]['Status'] = "Status";
+
+        if($deliverables) {
+            foreach ($deliverables as $key => $deliverable){
+                $status = 'Pending';
+                if($deliverable['status'] == 1) {
+                    $status = 'In Progress';
+                } elseif ($deliverable['status'] == 2) {
+                    $status = 'Completed';
+                }
+                $data[$key+1]['Title'] = $deliverable['title'] ?? '-';
+                $data[$key+1]['Percentage'] = $deliverable['percentage'] ?? '-';
+                $data[$key+1]['Amount'] = $deliverable['amount'] ?? '-';
+                $data[$key+1]['Status'] = $status;
+            }
+        }
+        return [
+            'status' => true,
+            'message' => trans('common.successfully_data_loaded'),
+            'milestones' => $data
+        ];
     }
 }

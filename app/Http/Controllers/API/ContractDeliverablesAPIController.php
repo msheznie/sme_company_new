@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exports\ContractManagmentExport;
+use App\Helpers\CreateExcel;
 use App\Http\Requests\API\CreateContractDeliverablesAPIRequest;
 use App\Http\Requests\API\UpdateContractDeliverablesAPIRequest;
+use App\Models\Company;
 use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
 use App\Repositories\ContractDeliverablesRepository;
@@ -42,7 +45,6 @@ class ContractDeliverablesAPIController extends AppBaseController
             $request->get('skip'),
             $request->get('limit')
         );
-
         return $this->sendResponse(ContractDeliverablesResource::collection($contractDeliverables), 'Contract Deliverables retrieved successfully');
     }
 
@@ -56,11 +58,13 @@ class ContractDeliverablesAPIController extends AppBaseController
      */
     public function store(CreateContractDeliverablesAPIRequest $request)
     {
-        $input = $request->all();
+        $contractDeliverable = $this->contractDeliverablesRepository->createDeliverables($request);
 
-        $contractDeliverables = $this->contractDeliverablesRepository->create($input);
-
-        return $this->sendResponse(new ContractDeliverablesResource($contractDeliverables), 'Contract Deliverables saved successfully');
+        if (!$contractDeliverable['status']) {
+            return $this->sendError($contractDeliverable['message']);
+        } else {
+            return $this->sendResponse([], trans('common.deliverable_created_successfully'));
+        }
     }
 
     /**
@@ -77,10 +81,11 @@ class ContractDeliverablesAPIController extends AppBaseController
         $contractDeliverables = $this->contractDeliverablesRepository->find($id);
 
         if (empty($contractDeliverables)) {
-            return $this->sendError('Contract Deliverables not found');
+            return $this->sendError(trans('common.deliverable_not_found'));
         }
 
-        return $this->sendResponse(new ContractDeliverablesResource($contractDeliverables), 'Contract Deliverables retrieved successfully');
+        return $this->sendResponse(new ContractDeliverablesResource($contractDeliverables),
+            trans('common.deliverable_retrieved_successfully'));
     }
 
     /**
@@ -94,18 +99,23 @@ class ContractDeliverablesAPIController extends AppBaseController
      */
     public function update($id, UpdateContractDeliverablesAPIRequest $request)
     {
-        $input = $request->all();
+        $uuid = $request->input('uuid') ?? null;
 
-        /** @var ContractDeliverables $contractDeliverables */
-        $contractDeliverables = $this->contractDeliverablesRepository->find($id);
+        $contractDeliverables = $this->contractDeliverablesRepository->findByUuid($uuid, ['id']);
 
         if (empty($contractDeliverables)) {
-            return $this->sendError('Contract Deliverables not found');
+            return $this->sendError(trans('common.deliverable_not_found'));
         }
 
-        $contractDeliverables = $this->contractDeliverablesRepository->update($input, $id);
+        $updateDeliverableResp = $this->contractDeliverablesRepository
+            ->updateDeliverable($request, $contractDeliverables['id']);
 
-        return $this->sendResponse(new ContractDeliverablesResource($contractDeliverables), 'ContractDeliverables updated successfully');
+        if(!$updateDeliverableResp['status']) {
+            return $this->sendError($updateDeliverableResp['message']);
+        } else {
+            return $this->sendResponse([],
+                trans('common.deliverable_updated_successfully'));
+        }
     }
 
     /**
@@ -121,15 +131,15 @@ class ContractDeliverablesAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var ContractDeliverables $contractDeliverables */
-        $contractDeliverables = $this->contractDeliverablesRepository->find($id);
+        $contractDeliverables = $this->contractDeliverablesRepository->findByUuid($id, ['id']);
 
         if (empty($contractDeliverables)) {
-            return $this->sendError('Contract Deliverables not found');
+            return $this->sendError(trans('common.deliverable_not_found'));
         }
 
         $contractDeliverables->delete();
 
-        return $this->sendSuccess('Contract Deliverables deleted successfully');
+        return $this->sendSuccess(trans('common.deliverable_deleted_successfully'));
     }
 
     public function getContractDeliverables(Request $request) {
@@ -139,12 +149,39 @@ class ContractDeliverablesAPIController extends AppBaseController
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)->first();
         if(empty($contractMaster)) {
-            return $this->sendError('Contract Master not found');
+            return $this->sendError(trans('common.contract_not_found'));
         }
         $response['contract_deliverables'] = $this->contractDeliverablesRepository
             ->getDeliverables($contractMaster['id'], $companySystemID);
         $response['contract_milestones'] = ContractManagementUtils::getContractMilestones($contractMaster['id'],
             $companySystemID);
-        return $this->sendResponse($response, 'Contract Deliverables form data retrieved successfully');
+        return $this->sendResponse($response, trans('common.deliverable_form_data_retrieved_successfully'));
+    }
+
+    public function exportDeliverables(Request $request) {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('companySystemID') ?? 0;
+
+        $getDeliverables = $this->contractDeliverablesRepository->getDeliverablesExcelData($request);
+        if(!$getDeliverables['status']){
+            return $this->sendError($getDeliverables['message']);
+        }
+
+        $companyMaster = $companySystemID > 0 ? Company::find($companySystemID) : null;
+        $companyCode = $companyMaster['CompanyID'] ?? 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
+
+        $export = new ContractManagmentExport($getDeliverables['deliverable']);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '') {
+            return $this->sendError('unable_to_export_excel');
+        } else {
+            return $this->sendResponse($basePath, trans('success_export'));
+        }
     }
 }

@@ -24,6 +24,23 @@ class CreateContractDeliverablesAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return ContractDeliverables::$rules;
+        return [
+            'companySystemID' => 'required',
+            'contractUuid' => 'required',
+            'description' => 'required',
+            'formattedStartDate' => 'required',
+            'formattedEndDate' => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'companySystemID.required' => 'Company ID is required',
+            'contractUuid.required' => 'Contract ID is required',
+            'description.required' => 'Description is required',
+            'formattedStartDate.required' => 'Start Date is required',
+            'formattedEndDate.required' => 'End Date is required',
+        ];
     }
 }

@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ContractDeliverables extends Model
 {
     use SoftDeletes;
-
     use HasFactory;
 
     public $table = 'cm_contract_deliverables';
@@ -60,8 +59,8 @@ class ContractDeliverables extends Model
         'contractID' => 'integer',
         'milestoneID' => 'integer',
         'description' => 'string',
-        'startDate' => 'datetime',
-        'endDate' => 'datetime',
+        'startDate' => 'string',
+        'endDate' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'

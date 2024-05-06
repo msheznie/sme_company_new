@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exports\ContractManagmentExport;
+use App\Helpers\CreateExcel;
 use App\Http\Requests\API\CreateContractMilestoneAPIRequest;
 use App\Http\Requests\API\UpdateContractMilestoneAPIRequest;
+use App\Models\Company;
+use App\Models\ContractDeliverables;
 use App\Models\ContractMilestone;
 use App\Repositories\ContractMilestoneRepository;
 use Illuminate\Http\Request;
@@ -60,7 +64,7 @@ class ContractMilestoneAPIController extends AppBaseController
         if (!$contractMilestone['status']) {
             return $this->sendError($contractMilestone['message']);
         } else {
-            $this->sendResponse([], 'Contract Milestone created successfully.');
+            return $this->sendResponse([], trans('common.milestone_created_successfully'));
         }
     }
 
@@ -78,11 +82,11 @@ class ContractMilestoneAPIController extends AppBaseController
         $contractMilestone = $this->contractMilestoneRepository->find($id);
 
         if (empty($contractMilestone)) {
-            return $this->sendError('Contract Milestone not found');
+            return $this->sendError(trans('common.milestone_not_found'));
         }
 
         return $this->sendResponse(new ContractMilestoneResource($contractMilestone),
-            'Contract Milestone retrieved successfully');
+            trans('common.milestone_retrieved_successfully'));
     }
 
     /**
@@ -102,15 +106,14 @@ class ContractMilestoneAPIController extends AppBaseController
         $contractMilestone = $this->contractMilestoneRepository->findByUuid($uuid, ['id']);
 
         if (empty($contractMilestone)) {
-            return $this->sendError('Contract Milestone not found');
+            return $this->sendError(trans('common.contract_not_found'));
         }
 
         $contractMilestone = $this->contractMilestoneRepository->updateMilestone($input, $contractMilestone['id']);
         if(!$contractMilestone['status']) {
             return $this->sendError($contractMilestone['message']);
         } else {
-            return $this->sendResponse([],
-                'Contract Milestone updated successfully');
+            return $this->sendResponse([], trans('common.milestone_updated_successfully'));
         }
     }
 
@@ -127,15 +130,19 @@ class ContractMilestoneAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var ContractMilestone $contractMilestone */
-        $contractMilestone = $this->contractMilestoneRepository->find($id);
+        $contractMilestone = $this->contractMilestoneRepository->findByUuid($id, ['id']);
 
         if (empty($contractMilestone)) {
-            return $this->sendError('Contract Milestone not found');
+            return $this->sendError(trans('common.milestone_not_found'));
+        }
+
+        if(ContractDeliverables::where('milestoneID', $contractMilestone['id'])->exists()) {
+            return $this->sendError(trans('common.linked_milestone_delete_error_message'));
         }
 
         $contractMilestone->delete();
 
-        return $this->sendSuccess('Contract Milestone deleted successfully');
+        return $this->sendSuccess(trans('common.mile_stone_deleted_successfully'));
     }
 
     public function getContractMilestones($id, Request $request){
@@ -143,7 +150,34 @@ class ContractMilestoneAPIController extends AppBaseController
         if(!$contractMilestone['status']) {
             return $this->sendError($contractMilestone['message']);
         } else {
-            return $this->sendResponse($contractMilestone, 'Contract Milestone retrieved successfully.');
+            return $this->sendResponse($contractMilestone, trans('common.milestone_retrieved_successfully'));
+        }
+    }
+
+    public function exportMilestone(Request $request) {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('companySystemID') ?? 0;
+
+        $getMilestone = $this->contractMilestoneRepository->getMilestoneExcelData($request);
+        if(!$getMilestone['status']){
+            return $this->sendError($getMilestone['message']);
+        }
+
+        $companyMaster = $companySystemID > 0 ? Company::find($companySystemID) : null;
+        $companyCode = $companyMaster['CompanyID'] ?? 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
+
+        $export = new ContractManagmentExport($getMilestone['milestones']);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '') {
+            return $this->sendError('unable_to_export_excel');
+        } else {
+            return $this->sendResponse($basePath, trans('success_export'));
         }
     }
 }
