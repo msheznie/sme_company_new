@@ -61,7 +61,7 @@ class ContractBoqItemsRepository extends BaseRepository
         $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId')
             ->with(['itemMaster.unit' => function ($query) {
                 $query->select('UnitShortCode');
-            }])
+            }, 'itemMaster.itemAssigned.local_currency'])
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id);
 
@@ -149,7 +149,7 @@ class ContractBoqItemsRepository extends BaseRepository
         $companyId = $input['companySystemID'];
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
-        $lotData = ContractBoqItems::with(['itemMaster.unit'])
+        $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency'])
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id)
             ->get();
@@ -181,6 +181,7 @@ class ContractBoqItemsRepository extends BaseRepository
         if ($lotData) {
             $count = 1;
             foreach ($lotData as $value) {
+                $decimalCount = $value['itemMaster']['itemAssigned']['local_currency']['DecimalPlaces'];
                 $data[$count][COL_ITEM] = isset($value['itemMaster']['primaryCode'])
                     ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode'])
                     : '-';
@@ -205,13 +206,23 @@ class ContractBoqItemsRepository extends BaseRepository
                     : '-';
 
                 $data[$count][COL_PRICE] = isset($value['current']['local'])
-                    ? number_format($value['current']['local'], 3, '.', '')
+                    ? number_format(
+                        $value['current']['local'],
+                        $decimalCount,
+                        '.',
+                        ''
+                    )
                     : '-';
 
                 $data[$count][COL_AMOUNT] = isset($value['current']['local']) &&
                 is_numeric($value['current']['local']) &&
                 is_numeric($value['qty'])
-                    ? number_format($value['current']['local'] * $value['qty'], 3, '.', '')
+                    ? number_format(
+                        $value['current']['local'] * $value['qty'],
+                        $decimalCount,
+                        '.',
+                        ''
+                    )
                     : '-';
 
                 $count++;
