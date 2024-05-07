@@ -6,12 +6,14 @@ use App\Helpers\General;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
+use App\Models\Company;
 use App\Models\ContractMaster;
 use App\Models\ContractOverallRetention;
 use App\Models\ContractSectionDetail;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
 use App\Models\ContractUsers;
+use App\Models\CurrencyMaster;
 use App\Models\Employees;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
@@ -530,8 +532,12 @@ class ContractMasterRepository extends BaseRepository
             ])
             ->first();
 
+        $currencyId = Company::getLocalCurrencyID($companySystemID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+
         $response['activeRetention'] = $pluckedData;
         $response['overallRetention'] = $overallRetention;
+        $response['decimalPlaces'] = $decimalPlaces;
         $response['contractAmount'] =  $contract['contractAmount'];
 
         return [
