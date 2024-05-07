@@ -189,3 +189,9 @@
         <span>Contract Boq Items</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('documentMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('documentMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Document Masters</span>
+    </a>
+</li>
