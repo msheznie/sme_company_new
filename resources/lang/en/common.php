@@ -32,6 +32,8 @@
      "contract_setting_updated_successfully" => "Contract settings updated successfully",
      "contract_overall_retention_retrieved" => "Contract Overall Retention data retrieved successfully",
      "overall_retention_updated_successfully" => "Overall Retention updated successfully",
+     "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully",
+     "milestone_retention_updated_successfully" => "Milestone Retention updated successfully",
      "deliverable_not_found" => "Deliverable not found",
      "linked_milestone_delete_error_message" =>
          "Milestone is linked with the deliverables, delete the deliverables first to delete milestone",
@@ -49,4 +51,8 @@
      "deliverable_created_successfully" => "Deliverable created successfully",
      "deliverable_uuid_already_exists" => "Deliverable Uuid already exists",
      "successfully_data_loaded" => "Successfully data loaded",
+     "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully",
+     "milestone_retention_updated_successfully" => "Milestone Retention updated successfully",
+     "contract_milestone_retention_created_successfully" => "Contract Milestone Retention created successfully",
+     "due_date_must_be_greater_than_start_date" => "Due date must be greater than start date",
  ];
