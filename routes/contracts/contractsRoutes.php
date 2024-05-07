@@ -61,6 +61,30 @@ Route::group(['prefix' => 'contract'], function (){
         ->name('delete contract deliverable');
     Route::delete('/milestone/{id}', [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'destroy'])
         ->name('delete contract milestones');
+Route::
+    post('/milestone_retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'store'])
+        ->name('store contract milestone retention');
+    Route::
+    post('/get-contract-milestone-retention-data',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'getContractMilestoneRetentionData'])
+        ->name('Contract Milestone Retention Data');
+    Route::
+    post('/update-milestone-retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateMilestoneRetention'])
+        ->name('Update Milestone Retention');
+    Route::
+    post('/update-retention-percentage',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateRetentionPercentage'])
+        ->name('Update Retention Percentage');
+    Route::
+    delete('/delete-milestone-retention/{id}',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'destroy'])
+        ->name('Delete Milestone Retention');
+    Route::
+    post('/export-milestone-retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'exportMilestoneRetention'])
+        ->name('Export Milestone Retention');
     Route::post('/get-item-master-data', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getItemMasterFormData'])->name('Get item master data');
     Route::post('/get-all-assigned-items-by-company', [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getAllAssignedItemsByCompany'])->name('Get all assigned items by company');
     Route::post('/get-boq-items-by-company', [\App\Http\Controllers\API\ContractBoqItemsAPIController::class, 'getBoqItemsByCompany'])->name('Get Boq items by company');
@@ -78,5 +102,33 @@ Route::group(['prefix' => 'contract'], function (){
         \App\Http\Controllers\API\ContractDeliverablesAPIController::class,
         'exportDeliverables'
     ])->name('Export deliverables');
+    Route::
+    post('/milestone_retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'store'])
+        ->name('store contract milestone retention');
+    Route::
+    post('/get-contract-milestone-retention-data',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'getContractMilestoneRetentionData'])
+        ->name('Contract Milestone Retention Data');
+    Route::
+    post('/update-milestone-retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateMilestoneRetention'])
+        ->name('Update Milestone Retention');
+    Route::
+    post('/update-retention-percentage',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateRetentionPercentage'])
+        ->name('Update Retention Percentage');
+    Route::
+    delete('/delete-milestone-retention/{id}',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'destroy'])
+        ->name('Delete Milestone Retention');
+    Route::
+    post('/export-milestone-retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'exportMilestoneRetention'])
+        ->name('Export Milestone Retention');
+    Route::
+    post('/update-overall-retention',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateOverallRetention'])
+        ->name('Update Overall Retention');
 
 });

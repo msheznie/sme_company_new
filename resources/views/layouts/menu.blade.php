@@ -183,6 +183,8 @@
     <a class="nav-link" href="{{ route('contractOverallRetentions.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Contract Overall Retentions</span>
+    </a>
+</li>
 <li class="nav-item {{ Request::is('contractBoqItems*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractBoqItems.index') }}">
         <i class="nav-icon icon-cursor"></i>
@@ -193,5 +195,11 @@
     <a class="nav-link" href="{{ route('documentMasters.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Document Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractMilestoneRetentions*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractMilestoneRetentions.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Milestone Retentions</span>
     </a>
 </li>
