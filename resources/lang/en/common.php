@@ -55,4 +55,14 @@
      "milestone_retention_updated_successfully" => "Milestone Retention updated successfully",
      "contract_milestone_retention_created_successfully" => "Contract Milestone Retention created successfully",
      "due_date_must_be_greater_than_start_date" => "Due date must be greater than start date",
+     "document_type_must_be_unique" => "Document type must be unique",
+     "document_status_updated_successfully" => "Document Status updated successfully",
+     "document_master_created_successfully" => "Document Master created successfully",
+     "document_type_is_already_used_in_the_contract" => "Document Type is already used in the Contract",
+     "document_master_not_found" => "Document Master not found",
+     "document_master_deleted_successfully" => "Document Master deleted successfully",
+
+
+
+
  ];

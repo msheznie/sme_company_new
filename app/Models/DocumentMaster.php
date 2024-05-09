@@ -26,7 +26,7 @@ class DocumentMaster extends Model
     use HasFactory;
 
     public $table = 'cm_document_master';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -79,5 +79,9 @@ class DocumentMaster extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+    public function documentMaster($companySystemID)
+    {
+        return DocumentMaster::where('companySystemID', $companySystemID);
+    }
+
 }
