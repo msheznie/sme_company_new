@@ -10,3 +10,13 @@ Route::group(['prefix' => 'contract-users'], function (){
 
     Route::resource('customer_masters', App\Http\Controllers\API\CustomerMasterAPIController::class);
 });
+
+Route::group(['prefix' => 'contract-user-group'], function (){
+    Route::post('/list', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'contractUserListForUserGroup'])->name('contract users List');
+    Route::post('/', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'store'])->name('store contract user group');
+    Route::post('/list-user-groups', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'getContractUserGroupList'])->name('contract user group list');
+    Route::post('/assigned-users', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'getContractUserGroupAssignedUsers'])->name('contract user group list');
+    Route::put('/{id}', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'updateStatus'])->name('update contract user group');
+    Route::delete('/{id}', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'removeAssignedUserFromUserGroup'])->name('remove assigned user from user group');
+    Route::post('/list-user-group', [\App\Http\Controllers\API\ContractUserGroupAPIController::class, 'contractUserList'])->name('Contract Users List');
+});

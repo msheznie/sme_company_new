@@ -61,8 +61,12 @@
      "document_type_is_already_used_in_the_contract" => "Document Type is already used in the Contract",
      "document_master_not_found" => "Document Master not found",
      "document_master_deleted_successfully" => "Document Master deleted successfully",
-
-
-
-
+     "contract_user_group_deleted_successfully" => "User Group deleted successfully",
+     "contract_user_group_updated_successfully" => "User Group updated successfully",
+     "user_group_retrieved_successfully" => "Group retrieved successfully",
+     "group_name_already_exists" => "Group name already exists",
+     "user_group_saved_successfully" => "User Group saved successfully",
+     "database_error" => "Database error ",
+     'contract_user_group_not_found' => 'Contract User Group not found',
+     'user_group_status_updated_successfully' => 'User Group status updated successfully',
  ];

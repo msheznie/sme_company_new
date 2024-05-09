@@ -203,3 +203,9 @@
         <span>Contract Milestone Retentions</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractUserGroups*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractUserGroups.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract User Groups</span>
+    </a>
+</li>
