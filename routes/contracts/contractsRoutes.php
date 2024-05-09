@@ -130,5 +130,20 @@ Route::
     post('/update-overall-retention',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateOverallRetention'])
         ->name('Update Overall Retention');
+    Route::
+    post('/get-document-master-data',
+        [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'getDocumentMasterData'])
+        ->name('Document Master Data');
+    Route::
+    post('/document-master',
+        [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'store'])
+        ->name('Create Document Master');
+    Route::post('/document-status_update',
+            [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'documentStatusUpdate'])
+            ->name('Update Document Status');
+    Route::
+    delete('/delete-document-master/{id}',
+        [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'destroy'])
+        ->name('Delete Document Master');
 
 });

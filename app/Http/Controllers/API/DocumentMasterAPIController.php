@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateDocumentMasterAPIRequest;
 use App\Http\Requests\API\UpdateDocumentMasterAPIRequest;
+use App\Models\ContractMaster;
 use App\Models\DocumentMaster;
 use App\Repositories\DocumentMasterRepository;
 use Illuminate\Http\Request;
@@ -41,7 +42,8 @@ class DocumentMasterAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(DocumentMasterResource::collection($documentMasters), 'Document Masters retrieved successfully');
+        return $this->sendResponse(DocumentMasterResource::collection($documentMasters),
+            'Document Masters retrieved successfully');
     }
 
     /**
@@ -52,13 +54,16 @@ class DocumentMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function store(CreateDocumentMasterAPIRequest $request)
+    public function store(Request $request)
     {
         $input = $request->all();
 
-        $documentMaster = $this->documentMasterRepository->create($input);
-
-        return $this->sendResponse(new DocumentMasterResource($documentMaster), 'Document Master saved successfully');
+        $documentMaster = $this->documentMasterRepository->createDocumentMaster($input);
+        if (!$documentMaster['status']) {
+            return $this->sendError($documentMaster['message']);
+        } else {
+            $this->sendResponse([], trans('common.document_master_created_successfully'));
+        }
     }
 
     /**
@@ -78,7 +83,8 @@ class DocumentMasterAPIController extends AppBaseController
             return $this->sendError('Document Master not found');
         }
 
-        return $this->sendResponse(new DocumentMasterResource($documentMaster), 'Document Master retrieved successfully');
+        return
+            $this->sendResponse(new DocumentMasterResource($documentMaster), 'Document Master retrieved successfully');
     }
 
     /**
@@ -119,14 +125,30 @@ class DocumentMasterAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var DocumentMaster $documentMaster */
-        $documentMaster = $this->documentMasterRepository->find($id);
+        $documentId = DocumentMaster::select('id')->where('uuid', $id)->first();
+        $documentMaster = $this->documentMasterRepository->find($documentId->id);
+
+        $contractMaster = ContractMaster::where('documentMasterId',$documentId->id)->first();
+
+        if ($contractMaster) {
+            return $this->sendError(trans('common.document_type_is_already_used_in_the_contract'));
+        }
 
         if (empty($documentMaster)) {
-            return $this->sendError('Document Master not found');
+            return $this->sendError(trans('common.document_master_not_found'));
         }
 
         $documentMaster->delete();
 
-        return $this->sendSuccess('Document Master deleted successfully');
+        return $this->sendSuccess(trans('common.document_master_deleted_successfully'));
+    }
+
+    public function getDocumentMasterData(Request $request){
+        return $this->documentMasterRepository->getDocumentMasterData($request);
+    }
+
+    public function documentStatusUpdate(Request $request){
+        $documentStatus = $this->documentMasterRepository->documentStatusUpdate($request);
+        return $this->sendResponse($documentStatus, trans('common.document_status_updated_successfully'));
     }
 }
