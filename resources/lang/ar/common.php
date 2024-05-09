@@ -57,4 +57,12 @@ return [
     "document_type_is_already_used_in_the_contract" => "Document Type is already used in the Contract AR",
     "document_master_not_found" => "Document Master not found AR",
     "document_master_deleted_successfully" => "Document Master deleted successfully AR",
+    "contract_user_group_deleted_successfully" => "User Group deleted successfully AR",
+    "contract_user_group_updated_successfully" => "User Group updated successfully AR",
+    "user_group_retrieved_successfully" => "Group retrieved successfully AR",
+    "group_name_already_exists" => "Group name already exists AR",
+    "user_group_saved_successfully" => "User Group saved successfully AR",
+    "database_error" => "Database error AR",
+    'contract_user_group_not_found' => 'Contract User Group not found AR',
+    'user_group_status_updated_successfully' => 'User Group status updated successfully AR',
 ];

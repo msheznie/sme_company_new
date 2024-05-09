@@ -141,6 +141,10 @@ class ContractUsersAPIController extends AppBaseController
         return $this->contractUsersRepository->getContractUserList($request);
     }
 
+    public function contractUserListForUserGroup(Request $request) {
+        return $this->contractUsersRepository->getContractUserListForUserGroup($request);
+    }
+
     public function contractUserFormData(Request $request) {
         return $this->contractUsersRepository->contractUserFormData($request);
     }

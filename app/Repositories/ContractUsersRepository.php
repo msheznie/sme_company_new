@@ -151,4 +151,12 @@ class ContractUsersRepository extends BaseRepository
             return ['status' => false, 'message' => $ex->getMessage()];
         }
     }
+
+    public function getContractUserListForUserGroup(Request $request) {
+        $searchKeyword = $request->input('search.value');
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        return $this->model->getContractUserList($searchKeyword, $companyId, $filter);
+    }
 }

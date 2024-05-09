@@ -62,3 +62,6 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
 });
+
+
+Route::resource('contract_user_groups', App\Http\Controllers\API\ContractUserGroupAPIController::class);
