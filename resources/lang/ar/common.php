@@ -65,4 +65,6 @@ return [
     "database_error" => "Database error AR",
     'contract_user_group_not_found' => 'Contract User Group not found AR',
     'user_group_status_updated_successfully' => 'User Group status updated successfully AR',
+    "retention_percentage_updated_successfully" => "Retention percentage updated successfully AR",
+    "milestone_retention_deleted_successfully" => "Milestone retention deleted successfully AR",
 ];

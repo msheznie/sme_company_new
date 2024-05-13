@@ -132,7 +132,7 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
 
         $contractMilestoneRetention->delete();
 
-        return $this->sendSuccess('Contract Milestone Retention deleted successfully');
+        return $this->sendSuccess(trans('common.milestone_retention_deleted_successfully'));
     }
 
     public function getContractMilestoneRetentionData(Request $request){
@@ -151,7 +151,7 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
 
     public function updateRetentionPercentage(Request $request){
         $retentionPercentage = $this->contractMilestoneRetentionRepository->updateRetentionPercentage($request);
-        return $this->sendResponse($retentionPercentage, 'Retention Percentage updated successfully');
+        return $this->sendResponse($retentionPercentage, trans('common.retention_percentage_updated_successfully'));
     }
 
     public function exportMilestoneRetention(Request $request)

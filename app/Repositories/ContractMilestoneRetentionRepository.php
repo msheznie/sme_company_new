@@ -3,10 +3,12 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\Company;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
 use App\Models\ContractOverallRetention;
+use App\Models\CurrencyMaster;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -239,7 +241,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             }
 
             DB::commit();
-            return ['status' => true, 'message' => trans('common.milestone_retention_updated_successfully')];
+            return ['status' => true, 'message' => trans('common.retention_percentage_updated_successfully')];
 
         } catch (\Exception $ex){
             DB::rollBack();
@@ -259,6 +261,9 @@ class ContractMilestoneRetentionRepository extends BaseRepository
 
         $contractId = $contract['id'];
 
+        $currencyId = Company::getLocalCurrencyID($companySystemID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+
 
         $lotData = $this->model->ContractMilestoneRetention($companySystemID, $contractId)->get();
         $data[0]['Milestone Title'] = "Milestone Title";
@@ -275,16 +280,17 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                 $data[$count]['Milestone Title'] =
                     isset($value['milestoneId']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
                 $data[$count]['Milestone Amount'] =
-                    isset($value['milestoneId']) ? preg_replace('/^=/', '-', $value['milestone']['amount']) : '-';
+                    isset($value['milestoneId']) ? number_format(
+                        (float)preg_replace('/^=/', '-', $value['milestone']['amount']), $decimalPlaces) : '-';
                 $data[$count]['Retention Percentage'] =
                 isset($value['retentionPercentage']) ? preg_replace('/^=/', '-', $value['retentionPercentage']) : '-';
                 $data[$count]['Retention Amount'] =
-                    isset($value['retentionAmount']) ? preg_replace('/^=/', '-', $value['retentionAmount']) : '-';
+                    isset($value['retentionAmount']) ? number_format(
+                        (float)preg_replace('/^=/', '-', $value['retentionAmount']), $decimalPlaces) : '-';
                 $data[$count]['Start Date'] =
-                    Carbon::parse($value['startDate']) ? preg_replace('/^=/', '-',
-                        Carbon::parse($value['startDate'])) : '-';
+                    isset($value['startDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['startDate'])) : '-';
                 $data[$count]['Due Date'] =
-                Carbon::parse($value['endDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['dueDate'])) : '-';
+                    isset($value['dueDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['dueDate'])) : '-';
                 $data[$count]['Withhold Period'] =
                     isset($value['withholdPeriod']) ? preg_replace('/^=/', '-', $value['withholdPeriod']) : '-';
                 $count++;
