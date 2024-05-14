@@ -56,7 +56,7 @@ class ContractUserGroupAssignedUser extends Model
         return $this->belongsTo(ContractUserGroup::class, 'userGroupId', 'id');
     }
 
-    public function user(){
+    public function assignedUser(){
         return $this->belongsTo(ContractUsers::class,'contractUserId','contractUserId');
     }
 

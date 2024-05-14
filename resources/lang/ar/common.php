@@ -89,4 +89,9 @@ return [
     "due_date_is_a_mandatory_field" => "Due Date is a mandatory field AR",
     "contract_amount_is_a_mandatory_field" => "Contract Amount is a mandatory field AR",
     "qty_is_a_mandatory_field" => "Quantity is a mandatory field AR",
+    'contract_user_assigns_retrieved_successfully' => 'Contract User Assigns retrieved successfully AR',
+    'contract_user_assign_saved_successfully' => 'Contract User Assign saved successfully AR',
+    'contract_user_assign_not_found' => 'Contract User Assign not found',
+    'contract_user_assign_updated_successfully' => 'Contract User Assign updated successfully AR',
+    'contract_user_assign_deleted_successfully' => 'Contract User Assign deleted successfully AR',
 ];

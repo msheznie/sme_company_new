@@ -209,3 +209,9 @@
         <span>Contract User Groups</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractUserAssigns*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractUserAssigns.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract User Assigns</span>
+    </a>
+</li>

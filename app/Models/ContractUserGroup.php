@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ContractUserGroup
@@ -75,17 +76,58 @@ class ContractUserGroup extends Model
             $userGroupId = $result->id;
         }
        return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'created_at', 'created_by')
-           ->with(['contractUserGroup', 'user' ,'employee'])
+           ->with(['contractUserGroup', 'assignedUser' ,'employee'])
             ->where('userGroupId', $userGroupId)
             ->where('companySystemID', $companySystemId);
     }
 
     public function getContractUserListForUserGroup($companySystemId, $groupId)
     {
-        return ContractUsers::select('uuid', 'contractUserId', 'contractUserName')
+        return ContractUsers::select('id', 'contractUserId', 'contractUserName as itemName')
             ->whereDoesntHave('assignedContractUserGroup', function ($query) use ($groupId) {
                 $query->where('userGroupId', $groupId);
             })
             ->where('companySystemId', $companySystemId);
+    }
+
+    public function getContractUserListToAssign($companySystemId, $contractId)
+    {
+        $userList =  ContractUsers::select('id', 'contractUserName as itemName')
+            ->whereDoesntHave('assignedContractUserGroup')
+            ->where('companySystemId', $companySystemId)
+        ->get();
+
+        $contractUserAssignedResult = ContractUserAssign::where('contractId', $contractId)
+            ->where('userGroupId', 0)
+            ->pluck('userId')->toArray();
+
+        $selectedUserList =  ContractUsers::select('id', 'contractUserName as itemName')
+            ->whereIn('id', $contractUserAssignedResult)
+            ->whereIn('id', $contractUserAssignedResult)
+            ->get();
+
+        return [
+            'userList' => $userList,
+            'userSelected' => $selectedUserList
+        ];
+    }
+
+    public function contractUserGroupList($companySystemId,$contractuuid)
+    {
+        $userGroup =  ContractUserGroup::selectRaw('id, groupName AS itemName')
+            ->where('companySystemId', $companySystemId)
+            ->where('status', 1)
+            ->get();
+        $contractResult = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
+        $contractUserAssignedResult = ContractUserAssign::where('contractId', $contractResult->id)
+            ->pluck('userGroupId')->toArray();
+        $userGroupSelected =  ContractUserGroup::selectRaw('id, groupName AS itemName')
+            ->where('companySystemId', $companySystemId)
+            ->whereIn('id', $contractUserAssignedResult)
+            ->get();
+        return [
+            'userGroup' => $userGroup,
+            'userGroupSelected' => $userGroupSelected
+        ];
     }
 }

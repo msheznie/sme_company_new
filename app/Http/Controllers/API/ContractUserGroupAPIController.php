@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractUserGroupResource;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ContractUserGroupController
@@ -53,19 +54,25 @@ class ContractUserGroupAPIController extends AppBaseController
             $input = $request->all();
             $uuid = $input['uuid'];
             if($uuid === 0){
-                $input['uuid'] = bin2hex(random_bytes(16));
-                $contractUserGroup = $this->contractUserGroupRepository->create($input);
+                $isExist = ContractUserGroup::where('groupName', $input['groupName'])->exists();
+                if(!$isExist){
+                    $input['uuid'] = bin2hex(random_bytes(16));
+                    $contractUserGroup = $this->contractUserGroupRepository->create($input);
+                } else {
+                    return $this->sendError(trans('common.group_name_already_exists '), 409);
+                }
+
             } else {
                 $contractUserGroup = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
             }
 
-            if (!empty($input['contractUserId'])) {
-                foreach ($input['contractUserId'] as $userId) {
+            if (!empty($input['selectedUsers'])) {
+                foreach ($input['selectedUsers'] as $userId) {
                     $assignedUserInput = [
                         'uuid' => bin2hex(random_bytes(16)),
                         'userGroupId' => $contractUserGroup->id,
                         'companySystemID' => $input['companySystemID'],
-                        'contractUserId' => $userId,
+                        'contractUserId' => $userId['id'],
                         'giveAccessToExistingContracts' => $input['giveAccessToExistingContracts'],
                         'created_by' => General::currentEmployeeId(),
                         'updated_by' => null,
@@ -187,7 +194,15 @@ class ContractUserGroupAPIController extends AppBaseController
     }
 
     public function contractUserList(Request $request) {
+        return $this->contractUserGroupRepository->getContractUserListToAssign($request);
+    }
+
+    public function contractUserListForUserGroup(Request $request) {
         return $this->contractUserGroupRepository->getContractUserListForUserGroup($request);
+    }
+
+    public function contractUserGroupList(Request $request) {
+        return $this->contractUserGroupRepository->contractUserGroupList($request);
     }
 
 }
