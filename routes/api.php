@@ -64,3 +64,6 @@ Route::group(['middleware' => ['tenant']], function () {
 
 
 Route::resource('contract_user_groups', App\Http\Controllers\API\ContractUserGroupAPIController::class);
+
+
+Route::resource('contract_user_assigns', App\Http\Controllers\API\ContractUserAssignAPIController::class);

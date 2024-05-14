@@ -2,9 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Models\ContractMaster;
 use App\Models\ContractUserGroup;
 use App\Repositories\BaseRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 /**
@@ -94,5 +96,36 @@ class ContractUserGroupRepository extends BaseRepository
             })
             ->addIndexColumn()
             ->make(true);
+    }
+
+    public function contractUserGroupList(Request $request){
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $contractuuid =  $input['contractuuid'];
+        return $this->model->contractUserGroupList($companyId, $contractuuid);
+    }
+
+    public function getContractUserListToAssign(Request $request){
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $uuid =  $input['uuid'];
+        $contractId = 0;
+        if(isset($uuid) && $uuid !== 0){
+            $result = ContractMaster::select('id')->where('uuid', $uuid)->first();
+            $contractId = $result->id;
+        }
+        return $this->model->getContractUserListToAssign($companyId, $contractId);
+    }
+
+    public function getContractUserAssignedToUserGroup(Request $request){
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $uuid =  $input['uuid'];
+        $userGroupId = 0;
+        if(isset($uuid) && $uuid !== 0){
+            $result = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
+            $userGroupId = $result->id;
+        }
+        return $this->model->getContractUserAssinedToUserGroup($companyId, $userGroupId);
     }
 }
