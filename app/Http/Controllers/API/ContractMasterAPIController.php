@@ -359,4 +359,20 @@ class ContractMasterAPIController extends AppBaseController
         }
     }
 
+    public function getContractConfirmationData(Request $request)
+    {
+        return $this->contractMasterRepository->getContractConfirmationData($request);
+    }
+
+    public function confirmContract(Request $request){
+        $confirmContract = $this->contractMasterRepository->confirmContract($request);
+
+        if($confirmContract['status']){
+            return $this->sendResponse([], $confirmContract['message']);
+        } else{
+            $statusCode = $confirmContract['code'] ?? 404;
+            return $this->sendError($confirmContract['message'], $statusCode);
+        }
+    }
+
 }

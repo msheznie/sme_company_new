@@ -67,4 +67,26 @@ return [
     'user_group_status_updated_successfully' => 'User Group status updated successfully AR',
     "retention_percentage_updated_successfully" => "Retention percentage updated successfully AR",
     "milestone_retention_deleted_successfully" => "Milestone retention deleted successfully AR",
+    "contract_confirmation_data_retrieved" => "Contract Confirmation Data Retrieved AR",
+    "contract_confirmation_updated_successfully" => "Contract Confirmation updated successfully AR",
+    "at_least_one_boq_item_should_be_available" =>
+        "At least one BOQ item should be available to send the contract for approval AR",
+    "at_least_one_milestone_should_be_available" =>
+        "At least one Milestone should be available to send the contract for approval AR",
+    "at_least_one_overall_retention_should_be_available" =>
+        "At least one Overall Retention should be available to send the contract for approval AR",
+    "at_least_one_milestone_retention_should_be_available" =>
+        "At least one Milestone Retention should be available to send the contract for approval AR",
+    "all_the_mandatory_details_needs_to_be_filled" =>
+        "All the mandatory details needs to be filled to send the document for approval.
+         Please check mandatory fields in all the tabs and confirm for approval AR",
+    "at_least_one_retention_should_be_available" =>
+        "Please fill in overall retention or add at least one record to milestone retention
+         to send the contract for approval AR",
+    "milestone_title_is_a_mandatory_field" => "Milestone Title is a mandatory field AR",
+    "retention_percentage_is_a_mandatory_field" => "Retention Percentage is a mandatory field AR",
+    "start_date_is_a_mandatory_field" => "Start Date is a mandatory field AR",
+    "due_date_is_a_mandatory_field" => "Due Date is a mandatory field AR",
+    "contract_amount_is_a_mandatory_field" => "Contract Amount is a mandatory field AR",
+    "qty_is_a_mandatory_field" => "Quantity is a mandatory field AR",
 ];

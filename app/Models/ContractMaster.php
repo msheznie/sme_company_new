@@ -67,6 +67,13 @@ class ContractMaster extends Model
         'secondaryEmail',
         'secondaryPhoneNumber',
         'status',
+        'confirmed_yn',
+        'confirmed_date',
+        'confirm_by',
+        'confirmed_comment',
+        'rollLevelOrder',
+        'refferedBackYN',
+        'timesReferred',
         'companySystemID',
         'created_by',
         'updated_by'
@@ -105,6 +112,13 @@ class ContractMaster extends Model
         'secondaryEmail' => 'string',
         'secondaryPhoneNumber' => 'string',
         'status' => 'integer',
+        'confirmed_yn' => 'integer',
+        'confirmed_date' => 'datetime',
+        'confirm_by' => 'integer',
+        'confirmed_comment' => 'string',
+        'rollLevelOrder' => 'integer',
+        'refferedBackYN' => 'integer',
+        'timesReferred' => 'integer',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
@@ -139,6 +153,11 @@ class ContractMaster extends Model
     public function contractOwners()
     {
         return $this->belongsTo(ContractUsers::class, 'contractOwner', 'id');
+    }
+
+    public function confirmedBy()
+    {
+        return $this->belongsTo(Employees::class, 'confirm_by', 'employeeSystemID');
     }
 
     public function contractMaster($search, $companyId, $filter)
