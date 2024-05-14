@@ -145,5 +145,13 @@ Route::
     delete('/delete-document-master/{id}',
         [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'destroy'])
         ->name('Delete Document Master');
+    Route::
+    post('/get-contract-confirmation-data',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractConfirmationData'])
+        ->name('Contract Confirmation Data');
+    Route::
+        post('/confirm-contract',
+            [\App\Http\Controllers\API\ContractMasterAPIController::class, 'confirmContract'])
+            ->name('Contract Confirm');
 
 });

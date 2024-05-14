@@ -7,13 +7,18 @@ use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
 use App\Models\Company;
+use App\Models\ContractBoqItems;
+use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
+use App\Models\ContractMilestone;
+use App\Models\ContractMilestoneRetention;
 use App\Models\ContractOverallRetention;
 use App\Models\ContractSectionDetail;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
 use App\Models\ContractUsers;
 use App\Models\CurrencyMaster;
+use App\Models\DocumentMaster;
 use App\Models\Employees;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
@@ -238,7 +243,10 @@ class ContractMasterRepository extends BaseRepository
                 ContractSettingDetail::insert($contractSettingDetailArray);
 
                 DB::commit();
-                return ['status' => true, 'message' => trans('common.contract_master_created_successfully'), 'data' => $insertResponse];
+                return [
+                    'status' => true,
+                    'message' => trans('common.contract_master_created_successfully'), 'data' => $insertResponse
+                ];
             }
 
         } catch (\Exception $ex){
@@ -376,8 +384,6 @@ class ContractMasterRepository extends BaseRepository
     public function getContractTypeSectionData(Request $request)
     {
         $input = $request->all();
-        $companySystemID = $input['selectedCompanyID'];
-        $contractTypeId = $input['contractTypeId'] ?? null;
         $contractuuid = $input['contractId'];
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
@@ -503,7 +509,10 @@ class ContractMasterRepository extends BaseRepository
             $pluckedData[] = $setting['contractTypeSection']['cmSection_id'];
         }
 
-        return ['status' => true , 'message' => trans('common.active_contract_section_details'), 'data' => $pluckedData];
+        return [
+            'status' => true ,
+            'message' => trans('common.active_contract_section_details'), 'data' => $pluckedData
+        ];
     }
 
     public function getContractOverallRetentionData(Request $request){
@@ -598,4 +607,180 @@ class ContractMasterRepository extends BaseRepository
             return ['status' => false, 'message' => $ex->getMessage()];
         }
     }
+
+    public function getContractConfirmationData(Request $request){
+        $input = $request->all();
+        $contractUuid = $input['contractUuid'];
+
+        $contractConfirmation = ContractMaster::select('confirmed_yn', 'confirmed_date', 'confirm_by')
+            ->with(['confirmedBy'])
+            ->where('uuid', $contractUuid)->first();
+
+        return [
+            'status' => true ,
+            'message' => trans('common.contract_confirmation_data_retrieved'),
+            'data' => $contractConfirmation
+        ];
+    }
+
+    public function confirmContract(Request $request){
+        $input = $request->all();
+        $contractUuid = $input['contractUuid'];
+        $confirmed_yn = $input['confirmed_yn'];
+        $companySystemID = $input['selectedCompanyID'];
+        $message = null;
+
+        $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
+
+        $message = $this->checkActiveMasters($contractId['id'], $companySystemID);
+        if ($message) {
+            return ['status' => false, 'message' => $message];
+        }
+
+        $message = $this->checkOverallAndMilestoneRetention($contractId['id'], $companySystemID);
+        if ($message) {
+            return ['status' => false, 'message' => $message];
+        }
+
+        $message = $this->checkMandatoryDetails($contractId['id'], $companySystemID);
+
+        if($message){
+            return [
+                'status' => false,
+                'message' => $message
+            ];
+        }else{
+            DB::beginTransaction();
+            try{
+                $data = [
+                    'confirmed_yn' => $confirmed_yn,
+                    'confirm_by' => General::currentEmployeeId(),
+                    'confirmed_date' => Carbon::now()
+                ];
+
+                ContractMaster::where('uuid', $contractUuid)->update($data);
+
+                DB::commit();
+                return ['status' => true, 'message' => trans('common.contract_confirmation_updated_successfully')];
+
+            } catch (\Exception $ex){
+                DB::rollBack();
+                return ['status' => false, 'message' => $ex->getMessage()];
+            }
+        }
+    }
+
+    private function checkActiveMasters($contractId, $companySystemID){
+        $activeMasters = ContractSettingMaster::select('contractTypeSectionId')
+            ->where('contractId', $contractId)
+            ->where('isActive', 1)
+            ->get();
+
+        $activeSections = ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractId)
+            ->where('isActive', 1)
+            ->get();
+
+        $existRetention = $activeSections->pluck('sectionDetailId')->toArray();
+
+        foreach ($activeMasters as $activeMaster){
+            if($activeMaster['contractTypeSectionId'] == 1){
+                $existBoq = ContractBoqItems::select('qty')->where('contractId', $contractId)
+                    ->where('companyId', $companySystemID)
+                    ->first();
+                if(empty($existBoq)) {
+                    return  trans('common.at_least_one_boq_item_should_be_available');
+                }
+                if(empty($existBoq['qty'])){
+                    return  trans('common.qty_is_a_mandatory_field');
+                }
+            }
+            if($activeMaster['contractTypeSectionId'] == 2){
+                $existMilestone = ContractMilestone::where('contractID', $contractId)
+                    ->where('companySystemID', $companySystemID)
+                    ->first();
+                if(empty($existMilestone)){
+                    return trans('common.at_least_one_milestone_should_be_available');
+                }
+            }
+            if(($activeMaster['contractTypeSectionId'] == 4 && !in_array(4, $existRetention) &&
+                !in_array(5, $existRetention)) || ($activeMaster['contractTypeSectionId'] == 4 &&
+                    $existRetention == null)){
+                return trans('common.at_least_one_retention_should_be_available');
+            }
+        }
+
+        return null;
+    }
+
+    private function checkOverallAndMilestoneRetention($contractId, $companySystemID){
+        $activeSections = ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractId)
+            ->where('isActive', 1)
+            ->get();
+
+        foreach ($activeSections as $activeSection) {
+            if($activeSection['sectionDetailId'] == 4){
+                $existOverallRetention = ContractOverallRetention::where('contractId', $contractId)
+                    ->where('companySystemId', $companySystemID)
+                    ->first();
+                if(empty($existOverallRetention)) {
+                    return trans('common.at_least_one_overall_retention_should_be_available');
+                }
+            }
+            if($activeSection['sectionDetailId'] == 5){
+                $existMilestoneRetention = ContractMilestoneRetention::where('contractId', $contractId)
+                    ->where('companySystemId', $companySystemID)
+                    ->first();
+                if(empty($existMilestoneRetention)) {
+                    return trans('common.at_least_one_milestone_retention_should_be_available');
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function checkMandatoryDetails($contractId, $companySystemID)
+    {
+        $totalRecords = ContractMilestoneRetention::where('contractId', $contractId)
+            ->where('companySystemId', $companySystemID)->count();
+        $recordsWithMilestoneId = ContractMilestoneRetention::whereNotNull('milestoneId')
+            ->where('contractId', $contractId)
+            ->where('companySystemId', $companySystemID)
+            ->count();
+        $recordsWithRetentionPercentage = ContractMilestoneRetention::whereNotNull('retentionPercentage')
+            ->where('contractId', $contractId)
+            ->where('companySystemId', $companySystemID)
+            ->count();
+        $recordsWithStartDate = ContractMilestoneRetention::whereNotNull('startDate')
+            ->where('contractId', $contractId)
+            ->where('companySystemId', $companySystemID)
+            ->count();
+        $recordsWithDueDate = ContractMilestoneRetention::whereNotNull('dueDate')
+            ->where('contractId', $contractId)
+            ->where('companySystemId', $companySystemID)
+            ->count();
+
+        $contract = ContractMaster::select('contractAmount')->where('id', $contractId)->first();
+
+        if($totalRecords != $recordsWithMilestoneId){
+            return trans('common.milestone_title_is_a_mandatory_field');
+        }
+        if($totalRecords != $recordsWithRetentionPercentage){
+            return trans('common.retention_percentage_is_a_mandatory_field');
+        }
+        if($totalRecords != $recordsWithStartDate){
+            return trans('common.start_date_is_a_mandatory_field');
+        }
+        if($totalRecords != $recordsWithDueDate){
+            return trans('common.due_date_is_a_mandatory_field');
+        }
+        if($contract['contractAmount'] == 0){
+            return trans('common.contract_amount_is_a_mandatory_field');
+        }
+
+        return null;
+    }
+
 }
