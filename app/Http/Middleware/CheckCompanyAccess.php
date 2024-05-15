@@ -20,7 +20,7 @@ class CheckCompanyAccess
      */
     public function handle(Request $request, Closure $next)
     {
-        $selectedCompanyId = ($request->hasHeader('selectedcompanyid')) ? $request->header('selectedcompanyid') : 0;
+        $selectedCompanyId = $request->input('selectedCompanyID') ?? 0;
         if(!$selectedCompanyId){
             return $this->sendError('Please select the company',500);
         }

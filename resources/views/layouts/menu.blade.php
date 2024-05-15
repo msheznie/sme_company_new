@@ -197,6 +197,36 @@
         <span>Document Masters</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('erpDocumentAttachments*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('erpDocumentAttachments.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Erp Document Attachments</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractDocuments*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractDocuments.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Documents</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('documentReceivedFormats*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('documentReceivedFormats.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Document Received Formats</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('erpDocumentMasters*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('erpDocumentMasters.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Erp Document Masters</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractAdditionalDocuments*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractAdditionalDocuments.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Additional Documents</span>
+    </a>
+</li>
 <li class="nav-item {{ Request::is('contractMilestoneRetentions*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractMilestoneRetentions.index') }}">
         <i class="nav-icon icon-cursor"></i>

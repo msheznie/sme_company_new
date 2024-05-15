@@ -158,7 +158,7 @@ class ContractMilestoneAPIController extends AppBaseController
         $type = $request->input('type');
         $disk = $request->input('disk');
         $docName = $request->input('doc_name');
-        $companySystemID = $request->input('companySystemID') ?? 0;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
 
         $getMilestone = $this->contractMilestoneRepository->getMilestoneExcelData($request);
         if(!$getMilestone['status']){

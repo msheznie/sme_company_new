@@ -93,7 +93,7 @@ class ContractMilestoneRepository extends BaseRepository
         if(ContractMilestone::where('uuid', $uuid)->exists()) {
             return [
                 'status' => false,
-                'message' => trans('common.milestone_uuid_exists')
+                'message' => trans('common.contract_document_uuid_already_exists')
             ];
         }
 
@@ -173,7 +173,7 @@ class ContractMilestoneRepository extends BaseRepository
 
     public function getMilestoneExcelData(Request $request): array {
         $contractUuid = $request->input('contractUUid') ?? null;
-        $companySystemID = $request->input('companySystemID') ?? 0;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
 
         $contractMaster = ContractMaster::select('id')
             ->where('uuid', $contractUuid)
