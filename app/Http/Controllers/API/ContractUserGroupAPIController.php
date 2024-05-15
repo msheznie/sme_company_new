@@ -179,18 +179,19 @@ class ContractUserGroupAPIController extends AppBaseController
 
     }
 
-    public function removeAssignedUserFromUserGroup($id)
+    public function removeAssignedUserFromUserGroup($id, UpdateContractUserGroupAPIRequest $request)
     {
-
+        $input = $request->all();
         $contractUserGroupAssignedUser = ContractUserGroupAssignedUser::where('uuid', $id)->first();
 
         if (empty($contractUserGroupAssignedUser)) {
             return $this->sendError(trans('common.contract_user_group_not_found'));
         }
 
-        $contractUserGroupAssignedUser->delete();
+        $contractUserGroupAssignedUser->status = $input['status'];
+        $contractUserGroupAssignedUser->save();
 
-        return $this->sendSuccess('User deleted successfully');
+        return $this->sendSuccess(trans('common.user_group_status_updated_successfully'));
     }
 
     public function contractUserList(Request $request) {

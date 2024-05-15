@@ -75,7 +75,7 @@ class ContractUserGroup extends Model
         if(isset($result)){
             $userGroupId = $result->id;
         }
-       return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'created_at', 'created_by')
+       return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'status', 'created_at', 'created_by')
            ->with(['contractUserGroup', 'assignedUser' ,'employee'])
             ->where('userGroupId', $userGroupId)
             ->where('companySystemID', $companySystemId);
@@ -83,7 +83,7 @@ class ContractUserGroup extends Model
 
     public function getContractUserListForUserGroup($companySystemId, $groupId)
     {
-        return ContractUsers::select('id', 'contractUserId', 'contractUserName as itemName')
+        return ContractUsers::select('contractUserId as id', 'contractUserId', 'contractUserName as itemName')
             ->whereDoesntHave('assignedContractUserGroup', function ($query) use ($groupId) {
                 $query->where('userGroupId', $groupId);
             })
