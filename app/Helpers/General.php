@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Company;
 use App\Models\Employees;
 use App\Models\Users;
 use Illuminate\Support\Facades\Auth;
@@ -55,5 +56,21 @@ class General
             return (string)$request->getUri();
         }
         return '';
+    }
+    public static function getArrayIds($data_array): array{
+        return array_filter(array_map(function($data) {
+            return $data['id'] ?? null;
+        }, $data_array));
+    }
+
+    public static function getCompanyById($companySystemID)
+    {
+        $company = Company::select('CompanyID')->where("companySystemID", $companySystemID)->first();
+
+        if (!empty($company)) {
+            return $company->CompanyID;
+        } else {
+            return "";
+        }
     }
 }

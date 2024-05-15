@@ -102,34 +102,67 @@ Route::
         \App\Http\Controllers\API\ContractDeliverablesAPIController::class,
         'exportDeliverables'
     ])->name('Export deliverables');
-    Route::
-    post('/milestone_retention',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'store'])
-        ->name('store contract milestone retention');
-    Route::
-    post('/get-contract-milestone-retention-data',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'getContractMilestoneRetentionData'])
-        ->name('Contract Milestone Retention Data');
-    Route::
-    post('/update-milestone-retention',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateMilestoneRetention'])
-        ->name('Update Milestone Retention');
-    Route::
-    post('/update-retention-percentage',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'updateRetentionPercentage'])
-        ->name('Update Retention Percentage');
-    Route::
-    delete('/delete-milestone-retention/{id}',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'destroy'])
-        ->name('Delete Milestone Retention');
-    Route::
-    post('/export-milestone-retention',
-        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'exportMilestoneRetention'])
-        ->name('Export Milestone Retention');
-    Route::
-    post('/update-overall-retention',
-        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'updateOverallRetention'])
-        ->name('Update Overall Retention');
+    Route::post('contract-document-form-data', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'getContractDocumentFormData'
+    ])->name('Contract document form data');
+    Route::post('contract-document', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'store'
+    ])->name('Store Contract Document');
+    Route::post('contract-document-list', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'getContractDocumentList'
+    ])->name('contract document list');
+    Route::put('contract-document/{id}', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'update'
+    ])->name('contract document update');
+    Route::delete('contract-document/{id}', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'destroy'
+    ])->name('contract document delete');
+    Route::get('contract-document/{id}', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'show'
+    ])->name('contract document show');
+    Route::post('update-document-received', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'updateDocumentReceived'
+    ])->name('update contract document received');
+    Route::get('download-attachment', [
+        \App\Http\Controllers\API\ErpDocumentAttachmentsAPIController::class,
+        'downloadAttachment'
+    ])->name('Download Contract Attachment');
+    Route::post('update-document-return', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'updateDocumentReturn'
+    ])->name('update contract document return');
+    Route::post('additional-document-list', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'getAdditionalDocumentList'
+    ])->name('Contract Additional Document list');
+    Route::post('additional-document', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'store'
+    ])->name('Store Additional Document');
+    Route::put('additional-document/{id}', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'update'
+    ])->name('additional document update');
+    Route::delete('additional-document/{id}', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'destroy'
+    ])->name('additional document delete');
+    Route::post('additional-attachment', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'addAdditionalAttachment'
+    ])->name('Add Additional Document attachment');
+    Route::get('additional-document/{id}', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'show'
+    ])->name('additional document show');
+
     Route::
     post('/get-document-master-data',
         [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'getDocumentMasterData'])

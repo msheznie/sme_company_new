@@ -7,38 +7,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class DocumentMaster
+ * Class DocumentReceivedFormat
  * @package App\Models
- * @version May 6, 2024, 4:50 pm +04
+ * @version May 10, 2024, 6:15 am +04
  *
- * @property string $uuid
- * @property string $documentType
  * @property string $description
- * @property boolean $status
- * @property integer $companySystemID
  * @property integer $created_by
  * @property integer $updated_by
  */
-class DocumentMaster extends Model
+class DocumentReceivedFormat extends Model
 {
     use SoftDeletes;
+
     use HasFactory;
 
-    public $table = 'cm_document_master';
-
+    public $table = 'cm_document_received_format';
+    
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+
     protected $dates = ['deleted_at'];
-    protected $hidden = ['id'];
+
 
 
     public $fillable = [
-        'uuid',
-        'documentType',
         'description',
-        'status',
-        'companySystemID',
         'created_by',
         'updated_by'
     ];
@@ -50,11 +44,7 @@ class DocumentMaster extends Model
      */
     protected $casts = [
         'id' => 'integer',
-        'uuid' => 'string',
-        'documentType' => 'string',
         'description' => 'string',
-        'status' => 'boolean',
-        'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
     ];
@@ -65,11 +55,7 @@ class DocumentMaster extends Model
      * @var array
      */
     public static $rules = [
-        'uuid' => 'required|string|max:255',
-        'documentType' => 'required|string|max:255',
-        'description' => 'nullable|string|max:255',
-        'status' => 'nullable|boolean',
-        'companySystemID' => 'required|integer',
+        'description' => 'required|string|max:255',
         'created_by' => 'nullable|integer',
         'updated_by' => 'nullable|integer',
         'deleted_at' => 'nullable',
@@ -77,13 +63,5 @@ class DocumentMaster extends Model
         'updated_at' => 'nullable'
     ];
 
-
-    public function contractDocument() {
-        return $this->hasMany(ContractDocument::class, 'documentType', 'id');
-    }
-    public function documentMaster($companySystemID)
-    {
-        return DocumentMaster::where('companySystemID', $companySystemID);
-    }
-
+    
 }

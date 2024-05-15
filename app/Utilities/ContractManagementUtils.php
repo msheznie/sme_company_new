@@ -10,8 +10,12 @@ use App\Models\CMCounterPartiesMaster;
 use App\Models\CMIntentsMaster;
 use App\Models\CMPartiesMaster;
 use App\Models\Company;
+use App\Models\ContractDocument;
+use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractUsers;
+use App\Models\DocumentMaster;
+use App\Models\DocumentReceivedFormat;
 
 class ContractManagementUtils
 {
@@ -128,5 +132,22 @@ class ContractManagementUtils
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->get();
+    }
+    static function getDocumentTypeMasters($companySystemID){
+        return DocumentMaster::select('uuid', 'documentType')
+            ->where([
+                'status' => 1,
+                'companySystemID' => $companySystemID
+            ])->get();
+    }
+
+    static function checkContractExist($contractUuid, $companySystemID){
+        return ContractMaster::select('id')
+            ->where('uuid', $contractUuid)
+            ->where('companySystemID', $companySystemID)
+            ->first();
+    }
+    static function getDocumentReceivedFormat(){
+        return DocumentReceivedFormat::select('id', 'description')->get();
     }
 }
