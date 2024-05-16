@@ -80,7 +80,7 @@ return [
     "contract_overall_retention_retrieved" => "Contract Overall Retention data retrieved successfully AR",
     "overall_retention_updated_successfully" => "Overall Retention updated successfully AR",
     "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully AR",
-    "milestone_retention_updated_successfully" => "Milestone Retention updated successfully AR",
+    "milestone_retention_updated_successfully" => "Milestone retention updated successfully AR",
     "contract_milestone_retention_created_successfully" => "Contract Milestone Retention created successfully AR",
     "due_date_must_be_greater_than_start_date" => "Due date must be greater than start date AR",
     "document_type_must_be_unique" => "Document type must be unique AR",
@@ -130,5 +130,6 @@ return [
     'document_description_already_exists' => 'Document description already exists AR',
     'document_name_already_exists' => 'Document name already exists AR',
     'validation_checked_successfully' => 'Validation checked successfully AR',
-    'user_status_updated_successfully' => 'User status updated successfully AR'
+    'user_status_updated_successfully' => 'User status updated successfully AR',
+    'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated AR',
 ];

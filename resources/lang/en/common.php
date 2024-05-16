@@ -33,7 +33,7 @@
      "contract_overall_retention_retrieved" => "Contract Overall Retention data retrieved successfully",
      "overall_retention_updated_successfully" => "Overall Retention updated successfully",
      "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully",
-     "milestone_retention_updated_successfully" => "Milestone Retention updated successfully",
+     "milestone_retention_updated_successfully" => "Milestone retention updated successfully",
      "deliverable_not_found" => "Deliverable not found",
      "linked_milestone_delete_error_message" =>
          "Milestone is linked with the deliverables, delete the deliverables first to delete milestone",
@@ -84,6 +84,7 @@
      "contract_additional_document_retrieved_successfully" => "Contract Additional Documents retrieved successfully",
      "contract_additional_document_not_found" => "Contract Additional Document not found",
      "attachment_successfully_deleted" => "Attachment successfully deleted",
+     "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully",
      "contract_milestone_retention_created_successfully" => "Contract Milestone Retention created successfully",
      "due_date_must_be_greater_than_start_date" => "Due date must be greater than start date",
      "document_type_must_be_unique" => "Document type must be unique",
@@ -134,4 +135,5 @@
      'document_description_already_exists' => 'Document description already exists',
      'document_name_already_exists' => 'Document name already exists',
      'validation_checked_successfully' => 'Validation checked successfully',
+     'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated',
  ];
