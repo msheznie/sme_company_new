@@ -100,34 +100,51 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             ];
         }
 
-        try{
-            DB::beginTransaction();
-            $data = [
-                'uuid' => bin2hex(random_bytes(16)),
-                'contractId' => $contract['id'],
-                'companySystemId' => $companySystemID,
-                'created_by' => General::currentEmployeeId(),
-                'created_at' => Carbon::now()
+        $totalRecords = ContractMilestone::where('contractID', $contract['id'])
+            ->where('companySystemID', $companySystemID)->count();
+        $recordsWithMilestoneId = ContractMilestoneRetention::
+            where('contractId', $contract['id'])
+            ->where('companySystemId', $companySystemID)
+            ->count();
+
+        if($totalRecords == $recordsWithMilestoneId){
+            return [
+                'status' => false,
+                'message' => trans('common.milestone_titles_cannot_be_duplicated')
             ];
-            $milestoneRetention = ContractMilestoneRetention::create($data);
+        }else{
+            try{
+                DB::beginTransaction();
+                $data = [
+                    'uuid' => bin2hex(random_bytes(16)),
+                    'contractId' => $contract['id'],
+                    'companySystemId' => $companySystemID,
+                    'created_by' => General::currentEmployeeId(),
+                    'created_at' => Carbon::now()
+                ];
+                $milestoneRetention = ContractMilestoneRetention::create($data);
 
-            $milestoneRetentionId = $milestoneRetention->id;
+                $milestoneRetentionId = $milestoneRetention->id;
 
-            $firstRecord = ContractMilestoneRetention::where('contractId', $contract['id'])
-                ->where('companySystemId', $companySystemID)
-                ->first();
-
-            if($firstRecord){
-                ContractMilestoneRetention::where('id',$milestoneRetentionId)
+                $firstRecord = ContractMilestoneRetention::where('contractId', $contract['id'])
                     ->where('companySystemId', $companySystemID)
-                    ->update(['retentionPercentage' => $firstRecord['retentionPercentage']]);
-            }
+                    ->first();
 
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.contract_milestone_retention_created_successfully')];
-        } catch (\Exception $ex){
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
+                if($firstRecord){
+                    ContractMilestoneRetention::where('id',$milestoneRetentionId)
+                        ->where('companySystemId', $companySystemID)
+                        ->update(['retentionPercentage' => $firstRecord['retentionPercentage']]);
+                }
+
+                DB::commit();
+                return [
+                    'status' => true,
+                    'message' => trans('common.contract_milestone_retention_created_successfully')
+                ];
+            } catch (\Exception $ex){
+                DB::rollBack();
+                return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
+            }
         }
     }
 
@@ -139,9 +156,20 @@ class ContractMilestoneRetentionRepository extends BaseRepository
 
         $milestoneRetentionData = ContractMilestoneRetention::where('uuid', $milestoneRetentionUuid)->first();
         $retentionPercentage = $milestoneRetentionData['retentionPercentage'];
+        $milestone = ContractMilestone::where('uuid', $milestoneUuid)->first();
+
+        if($input['value'] == 0){
+            $duplicateMilestone = ContractMilestoneRetention::where('milestoneId', $milestone['id'])
+                ->where('contractId', $milestoneRetentionData['contractId'])
+                ->where('companySystemId', $companySystemID)
+                ->first();
+
+            if ($duplicateMilestone) {
+                return ['status' => false, 'message' => trans('common.milestone_titles_cannot_be_duplicated')];
+            }
+        }
 
         if($milestoneUuid){
-            $milestone = ContractMilestone::where('uuid', $milestoneUuid)->first();
             $milestoneId = $milestone['id'];
             $retentionAmount = $milestone['amount'] * ($retentionPercentage / 100);
         }else{
