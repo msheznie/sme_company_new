@@ -84,8 +84,6 @@
      "contract_additional_document_retrieved_successfully" => "Contract Additional Documents retrieved successfully",
      "contract_additional_document_not_found" => "Contract Additional Document not found",
      "attachment_successfully_deleted" => "Attachment successfully deleted",
-     "contract_milestone_retention_retrieved" => "Contract Milestone Retention data retrieved successfully",
-     "milestone_retention_updated_successfully" => "Milestone Retention updated successfully",
      "contract_milestone_retention_created_successfully" => "Contract Milestone Retention created successfully",
      "due_date_must_be_greater_than_start_date" => "Due date must be greater than start date",
      "document_type_must_be_unique" => "Document type must be unique",
@@ -132,4 +130,8 @@
      'contract_user_assign_not_found' => 'Contract User assign not found',
      'contract_user_assign_updated_successfully' => 'Contract user assign updated successfully',
      'contract_user_assign_deleted_successfully' => 'Contract user assign deleted successfully',
+     'attach_document_is_required' => 'Attach document is required',
+     'document_description_already_exists' => 'Document description already exists',
+     'document_name_already_exists' => 'Document name already exists',
+     'validation_checked_successfully' => 'Validation checked successfully',
  ];
