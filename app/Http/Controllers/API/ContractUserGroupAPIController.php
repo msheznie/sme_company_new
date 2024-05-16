@@ -59,7 +59,7 @@ class ContractUserGroupAPIController extends AppBaseController
                     $input['uuid'] = bin2hex(random_bytes(16));
                     $contractUserGroup = $this->contractUserGroupRepository->create($input);
                 } else {
-                    return $this->sendError(trans('common.group_name_already_exists '), 409);
+                    return $this->sendError(trans('common.group_name_already_exists'), 409);
                 }
 
             } else {
@@ -87,7 +87,7 @@ class ContractUserGroupAPIController extends AppBaseController
 
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
-                return $this->sendError(trans('common.group_name_already_exists '), 409);
+                return $this->sendError(trans('common.group_name_already_exists'), 409);
             }
             return $this->sendError(trans('common.database_error'), 500);
         }
@@ -191,7 +191,7 @@ class ContractUserGroupAPIController extends AppBaseController
         $contractUserGroupAssignedUser->status = $input['status'];
         $contractUserGroupAssignedUser->save();
 
-        return $this->sendSuccess(trans('common.user_group_status_updated_successfully'));
+        return $this->sendSuccess(trans('common.user_status_updated_successfully'));
     }
 
     public function contractUserList(Request $request) {

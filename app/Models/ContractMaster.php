@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\General;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -160,10 +161,16 @@ class ContractMaster extends Model
         return $this->belongsTo(Employees::class, 'confirm_by', 'employeeSystemID');
     }
 
+    public function contractAssignedUsers()
+    {
+        return $this->hasMany(ContractUserAssign::class, 'contractId', 'id');
+    }
+
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;
         $counterPartyNameID = $filter['counterPartyNameID'] ?? 0;
+        $currentEmployeeId = General::currentEmployeeId();
 
         $contractId = CMContractTypes::select('contract_typeId')
             ->where('uuid',$contractTypeID)
@@ -183,6 +190,8 @@ class ContractMaster extends Model
             $q2->select('employeeSystemID', 'empName');
         }, 'contractUsers' => function ($q3) {
             $q3->with(['contractSupplierUser','contractCustomerUser']);
+        }, 'contractAssignedUsers' => function ($q4) use ($currentEmployeeId) {
+            $q4->select('contractId', 'userId')->where('userId', $currentEmployeeId);
         }])->where('companySystemID', $companyId);
         if ($filter) {
             if (isset($filter['counterPartyID'])) {
