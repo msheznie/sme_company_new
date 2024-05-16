@@ -62,6 +62,7 @@ class ContractUserAssignAPIController extends AppBaseController
         $selectedUserGroupsUuid = array_column($input['selectedUserGroups'], 'id');
         $userIdsAssignedUserGroup = ContractUserGroupAssignedUser::select('contractUserId', 'userGroupId')
             ->whereIn('userGroupId', $selectedUserGroupsUuid)
+            ->where('status', 1)
             ->get();
         foreach ($userIdsAssignedUserGroup as $user) {
             $contractId = $contractResult->id;
@@ -206,7 +207,7 @@ class ContractUserAssignAPIController extends AppBaseController
             }
         }
 
-        return $this->sendSuccess('',trans('common.contract_user_assign_deleted_successfully'));
+        return $this->sendResponse('',trans('common.contract_user_assign_deleted_successfully'));
     }
 
     public function getAssignedUsers(Request $request) {

@@ -96,7 +96,7 @@ return [
     "user_group_saved_successfully" => "User Group saved successfully AR",
     "database_error" => "Database error AR",
     'contract_user_group_not_found' => 'Contract User Group not found AR',
-    'user_group_status_updated_successfully' => 'User Group status updated successfully AR',
+    'user_group_status_updated_successfully' => 'User group status updated successfully AR',
     "retention_percentage_updated_successfully" => "Retention percentage updated successfully AR",
     "milestone_retention_deleted_successfully" => "Milestone retention deleted successfully AR",
     "contract_confirmation_data_retrieved" => "Contract Confirmation Data Retrieved AR",
@@ -126,4 +126,5 @@ return [
     'contract_user_assign_not_found' => 'Contract User Assign not found',
     'contract_user_assign_updated_successfully' => 'Contract User Assign updated successfully AR',
     'contract_user_assign_deleted_successfully' => 'Contract User Assign deleted successfully AR',
+    'user_status_updated_successfully' => 'User status updated successfully AR',
 ];
