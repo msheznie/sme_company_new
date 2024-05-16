@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\General;
 use App\Models\ContractAdditionalDocuments;
+use App\Models\ContractMaster;
 use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\BaseRepository;
@@ -143,6 +144,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository
         $documentTypeUuid = $formData['documentTypeUuid'] ?? 1;
         $expiryDate = $formData['formattedExpiryDate'] ?? null;
         $selectedCompanyID = $formData['selectedCompanyID'] ?? null;
+        $contractUuid = $formData['contractUuid'] ?? null;
 
         $documentTypeID = DocumentMaster::select('id')
             ->where('uuid', $documentTypeUuid)
@@ -153,7 +155,19 @@ class ContractAdditionalDocumentsRepository extends BaseRepository
                 'message' => trans('common.document_type_not_found')
             ];
         }
-
+        $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
+            ->where('companySystemID', $selectedCompanyID)
+            ->first();
+        if(empty($contractMaster)) {
+            return [
+                'status' => false,
+                'message' => trans('common.contract_not_found')
+            ];
+        }
+        $checkHeaderValid = self::checkHeaderValid($formData, $contractMaster['id'], $additionalDocID);
+        if(!$checkHeaderValid['status']){
+            return $checkHeaderValid;
+        }
         DB::beginTransaction();
         try{
             $updateData = [
@@ -177,6 +191,36 @@ class ContractAdditionalDocumentsRepository extends BaseRepository
         }
     }
 
+    private function checkHeaderValid($formData, $contractID, $additionalDocID){
+        $documentDescription = $formData['documentDescription'] ?? null;
+        $documentName = $formData['documentName'] ?? null;
+        if($documentDescription != null &&
+            ContractAdditionalDocuments::where('documentDescription', $documentDescription)
+                ->where('contractID', $contractID)
+                ->where('id', '!=', $additionalDocID)
+                ->exists()
+        ) {
+            return [
+                'status' => false,
+                'message' => trans('common.document_description_already_exists')
+            ];
+        }
+        if($documentName != null &&
+            ContractAdditionalDocuments::where('documentName', $documentName)
+                ->where('contractID', $contractID)
+                ->where('id', '!=', $additionalDocID)
+                ->exists()
+        ) {
+            return [
+                'status' => false,
+                'message' => trans('common.document_name_already_exists')
+            ];
+        }
+        return [
+            'status' => true,
+            'message' => trans('common.validation_checked_successfully')
+        ];
+    }
     public function deleteFile($documentMasterID, $additionalDocumentID): array{
         $deleteAttachment = ErpDocumentAttachments::deleteAttachment($documentMasterID,
             $additionalDocumentID);

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\General;
 use App\Models\ContractDocument;
+use App\Models\ContractMaster;
 use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\BaseRepository;
@@ -156,6 +157,7 @@ class ContractDocumentRepository extends BaseRepository
         $documentTypeUuid = $formData['documentTypeUuid'] ?? 1;
         $attachedDate = $formData['formattedAttachedDate'] ?? null;
         $selectedCompanyID = $formData['selectedCompanyID'] ?? null;
+        $contractUuid = $formData['contractUuid'] ?? null;
 
         $documentTypeID = DocumentMaster::select('id')
             ->where('uuid', $documentTypeUuid)
@@ -165,6 +167,19 @@ class ContractDocumentRepository extends BaseRepository
                 'status' => false,
                 'message' => trans('common.document_type_not_found')
             ];
+        }
+        $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
+            ->where('companySystemID', $selectedCompanyID)
+            ->first();
+        if(empty($contractMaster)) {
+            return [
+                'status' => false,
+                'message' => trans('common.contract_not_found')
+            ];
+        }
+        $checkHeaderValid = self::checkHeaderValid($formData, $contractMaster['id'], $contractDocumentID);
+        if(!$checkHeaderValid['status']){
+            return $checkHeaderValid;
         }
         DB::beginTransaction();
         try{
@@ -190,6 +205,38 @@ class ContractDocumentRepository extends BaseRepository
         }
 
     }
+
+    private function checkHeaderValid($formData, $contractID, $contractDocumentID){
+        $documentDescription = $formData['documentDescription'] ?? null;
+        $documentName = $formData['documentName'] ?? null;
+        if($documentDescription != null &&
+            ContractDocument::where('documentDescription', $documentDescription)
+                ->where('contractID', $contractID)
+                ->where('id', '!=', $contractDocumentID)
+                ->exists()
+        ) {
+            return [
+                'status' => false,
+                'message' => trans('common.document_description_already_exists')
+            ];
+        }
+        if($documentName != null &&
+            ContractDocument::where('documentName', $documentName)
+                ->where('contractID', $contractID)
+                ->where('id', '!=', $contractDocumentID)
+                ->exists()
+        ) {
+            return [
+                'status' => false,
+                'message' => trans('common.document_name_already_exists')
+            ];
+        }
+        return [
+            'status' => true,
+            'message' => trans('common.validation_checked_successfully')
+        ];
+    }
+
     public function updateDocumentReceived(Request $request): array{
         $formData = $request->all();
         $file = $formData['file'] ?? null;
@@ -274,6 +321,15 @@ class ContractDocumentRepository extends BaseRepository
                 'code' => 422
             ];
         }
+
+        if(!$formData['attachment'] && !$formData['file']) {
+            return [
+                'status' => false,
+                'message' => trans('common.attach_document_is_required'),
+                'code' => 404
+            ];
+        }
+
         return [
           'status' => true,
           'message' => trans('common.document_received_validation_success')

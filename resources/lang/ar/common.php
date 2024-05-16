@@ -126,5 +126,9 @@ return [
     'contract_user_assign_not_found' => 'Contract User Assign not found',
     'contract_user_assign_updated_successfully' => 'Contract User Assign updated successfully AR',
     'contract_user_assign_deleted_successfully' => 'Contract User Assign deleted successfully AR',
-    'user_status_updated_successfully' => 'User status updated successfully AR',
+    'attach_document_is_required' => 'Attach document is required AR',
+    'document_description_already_exists' => 'Document description already exists AR',
+    'document_name_already_exists' => 'Document name already exists AR',
+    'validation_checked_successfully' => 'Validation checked successfully AR',
+    'user_status_updated_successfully' => 'User status updated successfully AR'
 ];
