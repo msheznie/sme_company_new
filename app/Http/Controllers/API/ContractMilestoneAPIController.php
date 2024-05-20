@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateContractMilestoneAPIRequest;
 use App\Http\Requests\API\UpdateContractMilestoneAPIRequest;
 use App\Models\Company;
@@ -165,8 +166,7 @@ class ContractMilestoneAPIController extends AppBaseController
             return $this->sendError($getMilestone['message']);
         }
 
-        $companyMaster = $companySystemID > 0 ? Company::find($companySystemID) : null;
-        $companyCode = $companyMaster['CompanyID'] ?? 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );

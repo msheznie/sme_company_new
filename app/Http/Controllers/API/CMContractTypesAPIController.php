@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateCMContractTypesAPIRequest;
 use App\Http\Requests\API\UpdateCMContractTypesAPIRequest;
 use App\Models\CMContractTypes;
@@ -169,13 +170,12 @@ class CMContractTypesAPIController extends AppBaseController
     }
 
     public function exportContractTypes(Request $request){
-        $input = $request->all();
         $type = $request->type;
         $disk = $request->disk;
         $docName = $request->doc_name;
+        $companySystemID = $request->selectedCompanyID ?? 0;
         $contractTypes = $this->cMContractTypesRepository->exportContractTypesReport($request);
-        $companyMaster = Company::find(isset($input['companySystemID']) ? $input['companySystemID'] : null);
-        $companyCode = isset($companyMaster->CompanyID) ? $companyMaster->CompanyID : 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );

@@ -198,7 +198,7 @@ class CMContractTypesRepository extends BaseRepository
     {
         $input = $request->all();
         $search = false;
-        $companyId = $input['companySystemID'];
+        $companyId = $input['selectedCompanyID'];
 
         $lotData = $this->model->listOfContractTypes($search, $companyId, $input)->get();
         $data[0]['Name'] = "Name";

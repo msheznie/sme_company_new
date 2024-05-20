@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateContractMilestoneRetentionAPIRequest;
 use App\Http\Requests\API\UpdateContractMilestoneRetentionAPIRequest;
 use App\Models\Company;
@@ -156,13 +157,12 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
 
     public function exportMilestoneRetention(Request $request)
     {
-        $input = $request->all();
         $type = $request->type;
         $disk = $request->disk;
         $docName = $request->doc_name;
+        $companySystemID = $request->selectedCompanyID ?? 0;
         $contractMaster = $this->contractMilestoneRetentionRepository->exportMilestoneRetention($request);
-        $companyMaster = Company::find(isset($input['companySystemID']) ? $input['companySystemID'] : null);
-        $companyCode = isset($companyMaster->CompanyID) ? $companyMaster->CompanyID : 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );

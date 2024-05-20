@@ -146,7 +146,7 @@ class ContractBoqItemsRepository extends BaseRepository
         define('COL_AMOUNT', 'Amount');
 
         $input = $request->all();
-        $companyId = $input['companySystemID'];
+        $companyId = $input['selectedCompanyID'];
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
         $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency'])
