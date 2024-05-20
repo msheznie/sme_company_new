@@ -281,7 +281,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
     {
         $input = $request->all();
         $contractUuid = $input['contractUuid'];
-        $companySystemID = $input['companySystemID'];
+        $companySystemID = $input['selectedCompanyID'];
 
         $contract = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
@@ -309,12 +309,12 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                     isset($value['milestoneId']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
                 $data[$count]['Milestone Amount'] =
                     isset($value['milestoneId']) ? number_format(
-                        (float)preg_replace('/^=/', '-', $value['milestone']['amount']), $decimalPlaces) : '-';
+                        (float)preg_replace('/^=/', '-', $value['milestone']['amount']), $decimalPlaces, '.', '') : '-';
                 $data[$count]['Retention Percentage'] =
                 isset($value['retentionPercentage']) ? preg_replace('/^=/', '-', $value['retentionPercentage']) : '-';
                 $data[$count]['Retention Amount'] =
                     isset($value['retentionAmount']) ? number_format(
-                        (float)preg_replace('/^=/', '-', $value['retentionAmount']), $decimalPlaces) : '-';
+                        (float)preg_replace('/^=/', '-', $value['retentionAmount']), $decimalPlaces, '.', '') : '-';
                 $data[$count]['Start Date'] =
                     isset($value['startDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['startDate'])) : '-';
                 $data[$count]['Due Date'] =

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Helpers\inventory;
 use App\Http\Requests\API\CreateContractMasterAPIRequest;
 use App\Http\Requests\API\UpdateContractMasterAPIRequest;
@@ -183,13 +184,12 @@ class ContractMasterAPIController extends AppBaseController
 
     public function exportContractMaster(Request $request)
     {
-        $input = $request->all();
         $type = $request->type;
         $disk = $request->disk;
         $docName = $request->doc_name;
+        $companySystemID = $request->selectedCompanyID ?? 0;
         $contractMaster = $this->contractMasterRepository->exportContractMasterReport($request);
-        $companyMaster = Company::find(isset($input['companySystemID']) ? $input['companySystemID'] : null);
-        $companyCode = isset($companyMaster->CompanyID) ? $companyMaster->CompanyID : 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );

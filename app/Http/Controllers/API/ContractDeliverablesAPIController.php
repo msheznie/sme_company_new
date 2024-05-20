@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateContractDeliverablesAPIRequest;
 use App\Http\Requests\API\UpdateContractDeliverablesAPIRequest;
 use App\Models\Company;
@@ -162,15 +163,14 @@ class ContractDeliverablesAPIController extends AppBaseController
         $type = $request->input('type');
         $disk = $request->input('disk');
         $docName = $request->input('doc_name');
-        $companySystemID = $request->input('companySystemID') ?? 0;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
 
         $getDeliverables = $this->contractDeliverablesRepository->getDeliverablesExcelData($request);
         if(!$getDeliverables['status']){
             return $this->sendError($getDeliverables['message']);
         }
 
-        $companyMaster = $companySystemID > 0 ? Company::find($companySystemID) : null;
-        $companyCode = $companyMaster['CompanyID'] ?? 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );

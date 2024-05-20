@@ -126,7 +126,7 @@ class ContractMasterRepository extends BaseRepository
     {
         $input = $request->all();
         $search = false;
-        $companyId = $input['companySystemID'];
+        $companyId = $input['selectedCompanyID'];
 
         $lotData = $this->model->contractMaster($search, $companyId, $input)->get();
         $data[0]['Contract Code'] = "Contract Code";

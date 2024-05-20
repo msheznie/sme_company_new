@@ -215,7 +215,7 @@ class ContractDeliverablesRepository extends BaseRepository
 
     public function getDeliverablesExcelData(Request $request): array {
         $contractUuid = $request->input('contractUUid') ?? null;
-        $companySystemID = $request->input('companySystemID') ?? 0;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
         $startDateText = 'Start Date';
         $endDateText = 'End Date';
 

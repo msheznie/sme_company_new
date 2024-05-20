@@ -216,13 +216,12 @@ class ContractBoqItemsAPIController extends AppBaseController
 
     public function exportBoqItems(Request $request)
     {
-        $input = $request->all();
         $type = $request->type;
         $disk = $request->disk;
         $docName = $request->doc_name;
+        $companySystemID = $request->selectedCompanyID ?? 0;
         $contractBoqItems = $this->contractBoqItemsRepository->exportBoqItemsReport($request);
-        $companyMaster = Company::find(isset($input['companySystemID']) ? $input['companySystemID'] : null);
-        $companyCode = isset($companyMaster->CompanyID) ? $companyMaster->CompanyID : 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );
