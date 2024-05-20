@@ -203,5 +203,8 @@ Route::
         \App\Http\Controllers\API\ContractUserAssignAPIController::class,
         'deleteAssignedUsers'
     ])->name('Delete contract assign user');
-
+    Route::post('milestone-status_history', [
+        \App\Http\Controllers\API\MilestoneStatusHistoryAPIController::class,
+        'getMilestoneStatusHistory'
+    ])->name('Milestone status history');
 });

@@ -135,5 +135,7 @@
      'document_description_already_exists' => 'Document description already exists',
      'document_name_already_exists' => 'Document name already exists',
      'validation_checked_successfully' => 'Validation checked successfully',
+     'milestone_already_exists' => "Milestone already exists",
+     'deliverable_already_exists' => "Deliverable already exists",
      'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated',
  ];
