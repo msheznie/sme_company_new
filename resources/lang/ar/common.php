@@ -134,4 +134,7 @@ return [
     'milestone_already_exists' => "Milestone already exists",
     'deliverable_already_exists' => "Deliverable already exists",
     'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated AR',
+    'existing_milestones_are_already_used_for_retentions' =>
+        'Existing milestones are already used for retentions, If you want to add more retentions,
+         please add new milestones AR',
 ];
