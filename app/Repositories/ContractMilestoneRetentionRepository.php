@@ -110,7 +110,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         if($totalRecords == $recordsWithMilestoneId){
             return [
                 'status' => false,
-                'message' => trans('common.milestone_titles_cannot_be_duplicated')
+                'message' => trans('common.existing_milestones_are_already_used_for_retentions')
             ];
         }else{
             try{
