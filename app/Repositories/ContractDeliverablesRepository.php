@@ -117,6 +117,10 @@ class ContractDeliverablesRepository extends BaseRepository
             $milestoneID = $milestoneExists['id'] ?? 0;
         }
         $contractId = $contractMaster['id'];
+        $validationInsert = self::checkDeliverableValidation($description, 0, $companySystemID, $contractId);
+        if(!$validationInsert['status']) {
+            return $validationInsert;
+        }
         try{
             DB::beginTransaction();
             $insertDeliverables = [
@@ -158,6 +162,10 @@ class ContractDeliverablesRepository extends BaseRepository
                 'message' => trans('common.contract_id_not_found')
             ];
         }
+        $validationUpdate = self::checkDeliverableValidation($description, $id, $companySystemID, $contractMaster['id']);
+        if(!$validationUpdate['status']) {
+            return $validationUpdate;
+        }
         if($milestone != null) {
             $milestoneExists = ContractMilestone::select('id')
                 ->where('uuid', $milestone)
@@ -184,6 +192,25 @@ class ContractDeliverablesRepository extends BaseRepository
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
+    }
+    public function checkDeliverableValidation($description, $id, $companySystemID, $contractID): array{
+        $milestoneExists = ContractDeliverables::where('description', $description)
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->when($id > 0, function ($q) use ($id) {
+                $q->where('id', '!=', $id);
+            })
+            ->exists();
+        if($milestoneExists) {
+            return [
+                'status' => false,
+                'message' => trans('common.deliverable_already_exists')
+            ];
+        }
+        return [
+            'status' => true,
+            'message' => trans('common.validation_checked_successfully')
+        ];
     }
 
     public function getDeliverablesExcelData(Request $request): array {

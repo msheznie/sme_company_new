@@ -245,3 +245,9 @@
         <span>Contract User Assigns</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('milestoneStatusHistories*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('milestoneStatusHistories.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Milestone Status Histories</span>
+    </a>
+</li>

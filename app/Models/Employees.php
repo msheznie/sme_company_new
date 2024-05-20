@@ -88,7 +88,7 @@ class Employees extends Model
     const CREATED_AT = 'timestamp';
     const UPDATED_AT = 'timestamp';
 
-
+    protected $hidden = ['employeeSystemID', 'empID'];
 
     public $fillable = [
         'empID',

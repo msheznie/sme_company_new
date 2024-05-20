@@ -103,13 +103,13 @@ class ContractMilestoneAPIController extends AppBaseController
         $input = $request->all();
         $uuid = $input['formData']['uuid'] ?? null;
 
-        $contractMilestone = $this->contractMilestoneRepository->findByUuid($uuid, ['id']);
+        $contractMilestone = $this->contractMilestoneRepository->findByUuid($uuid, ['id', 'status']);
 
         if (empty($contractMilestone)) {
             return $this->sendError(trans('common.contract_not_found'));
         }
 
-        $contractMilestone = $this->contractMilestoneRepository->updateMilestone($input, $contractMilestone['id']);
+        $contractMilestone = $this->contractMilestoneRepository->updateMilestone($input, $contractMilestone);
         if(!$contractMilestone['status']) {
             return $this->sendError($contractMilestone['message']);
         } else {

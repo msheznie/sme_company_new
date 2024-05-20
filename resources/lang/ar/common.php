@@ -131,5 +131,7 @@ return [
     'document_name_already_exists' => 'Document name already exists AR',
     'validation_checked_successfully' => 'Validation checked successfully AR',
     'user_status_updated_successfully' => 'User status updated successfully AR',
+    'milestone_already_exists' => "Milestone already exists",
+    'deliverable_already_exists' => "Deliverable already exists",
     'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated AR',
 ];
