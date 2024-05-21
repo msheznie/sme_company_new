@@ -99,7 +99,7 @@ class DocumentMasterRepository extends BaseRepository
             DocumentMaster::create($data);
 
             DB::commit();
-            return ['status' => true, 'message' => trans('common.contract_milestone_retention_created_successfully')];
+            return ['status' => true, 'message' => trans('common.document_master_created_successfully')];
         } catch (\Exception $ex){
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
