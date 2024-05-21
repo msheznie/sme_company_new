@@ -4,12 +4,15 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateDocumentMasterAPIRequest;
 use App\Http\Requests\API\UpdateDocumentMasterAPIRequest;
+use App\Models\ContractAdditionalDocuments;
+use App\Models\ContractDocument;
 use App\Models\ContractMaster;
 use App\Models\DocumentMaster;
 use App\Repositories\DocumentMasterRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\DocumentMasterResource;
+use Illuminate\Support\Facades\Log;
 use Response;
 
 /**
@@ -59,10 +62,12 @@ class DocumentMasterAPIController extends AppBaseController
         $input = $request->all();
 
         $documentMaster = $this->documentMasterRepository->createDocumentMaster($input);
-        if (!$documentMaster['status']) {
-            return $this->sendError($documentMaster['message']);
-        } else {
-            $this->sendResponse([], trans('common.document_master_created_successfully'));
+
+        if($documentMaster['status']){
+            return $this->sendResponse([], $documentMaster['message']);
+        } else{
+            $statusCode = $documentMaster['code'] ?? 404;
+            return $this->sendError($documentMaster['message'], $statusCode);
         }
     }
 
@@ -125,12 +130,15 @@ class DocumentMasterAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var DocumentMaster $documentMaster */
-        $documentId = DocumentMaster::select('id')->where('uuid', $id)->first();
+        $documentId = DocumentMaster::select('id', 'companySystemID')->where('uuid', $id)->first();
         $documentMaster = $this->documentMasterRepository->find($documentId->id);
 
-        $contractMaster = ContractMaster::where('documentMasterId',$documentId->id)->first();
+        $contractDocument = ContractDocument::where('documentType', $documentId->id)
+            ->where('companySystemID', $documentId->companySystemID)->first();
+        $contractAdditionalDocument = ContractAdditionalDocuments::where('documentType', $documentId->id)
+            ->where('companySystemID', $documentId->companySystemID)->first();
 
-        if ($contractMaster) {
+        if ($contractDocument || $contractAdditionalDocument) {
             return $this->sendError(trans('common.document_type_is_already_used_in_the_contract'));
         }
 
