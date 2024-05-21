@@ -64,6 +64,17 @@ class ContractUserGroupAPIController extends AppBaseController
 
             } else {
                 $contractUserGroup = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
+
+                $assignedUserCount = ContractUserGroupAssignedUser::where('userGroupId', $contractUserGroup->id)
+                    ->where('status', 1)
+                    ->count();
+
+                if( $input['isDefault'] == true && $assignedUserCount == 0){
+                    return $this->sendError(trans('common.active_user_should_jn_default_user_group'));
+                }
+
+                $contractUserGroup->isDefault = $input['isDefault'];
+                $contractUserGroup->save();
             }
 
             if (!empty($input['selectedUsers'])) {
@@ -89,6 +100,7 @@ class ContractUserGroupAPIController extends AppBaseController
             if ($e->errorInfo[1] == 1062) {
                 return $this->sendError(trans('common.group_name_already_exists'), 409);
             }
+
             return $this->sendError(trans('common.database_error'), 500);
         }
     }
@@ -183,6 +195,16 @@ class ContractUserGroupAPIController extends AppBaseController
     {
         $input = $request->all();
         $contractUserGroupAssignedUser = ContractUserGroupAssignedUser::where('uuid', $id)->first();
+        $userGroupId = $contractUserGroupAssignedUser->userGroupId;
+        $activeUserCountOfTheContract = ContractUserGroupAssignedUser::where('userGroupId', $userGroupId)
+            ->where('status', 1)
+            ->count();
+
+        $userGroup = ContractUserGroup::where('id', $userGroupId )->first();
+
+        if($input['status'] == 0 && $activeUserCountOfTheContract == 1 && $userGroup->isDefault == 1){
+            return $this->sendError(trans('common.active_user_should_jn_default_user_group'));
+        }
 
         if (empty($contractUserGroupAssignedUser)) {
             return $this->sendError(trans('common.contract_user_group_not_found'));

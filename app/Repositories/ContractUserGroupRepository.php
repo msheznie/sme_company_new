@@ -24,6 +24,7 @@ class ContractUserGroupRepository extends BaseRepository
         'uuid',
         'groupName',
         'companySystemID',
+        'isDefault',
         'status'
     ];
 

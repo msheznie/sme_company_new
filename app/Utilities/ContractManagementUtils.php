@@ -13,6 +13,7 @@ use App\Models\Company;
 use App\Models\ContractDocument;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\ContractUserGroup;
 use App\Models\ContractUsers;
 use App\Models\DocumentMaster;
 use App\Models\DocumentReceivedFormat;
@@ -48,6 +49,15 @@ class ContractManagementUtils
     {
         return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->get();
     }
+
+    static function getContractDefaultUserGroup($request)
+    {
+        $input = $request->all();
+        return ContractUserGroup::where('isDefault', 1)
+            ->where('companySystemID', $input['selectedCompanyID'])
+            ->count();
+    }
+
 
     static function getStatusDrop()
     {

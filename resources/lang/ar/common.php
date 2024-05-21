@@ -137,6 +137,6 @@ return [
     'existing_milestones_are_already_used_for_retentions' =>
         'Existing milestones are already used for retentions, If you want to add more retentions,
          please add new milestones AR',
-    'user_status_updated_successfully' => 'User status updated successfully AR'
-
+    'user_status_updated_successfully' => 'User status updated successfully AR',
+    'active_user_should_jn_default_user_group' => 'At least one active user should be there in a default user group',
 ];
