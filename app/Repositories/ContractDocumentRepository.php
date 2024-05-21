@@ -145,11 +145,6 @@ class ContractDocumentRepository extends BaseRepository
         $languages =  $this->model->contractDocuments($selectedCompanyID, $contractID);
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order') && $input['order'][0]['column'] == 0) {
-                    $query->orderBy('id', $input['order'][0]['dir']);
-                }
-            })
             ->addIndexColumn()
             ->make(true);
     }
@@ -303,15 +298,13 @@ class ContractDocumentRepository extends BaseRepository
         $messages = [
             'uuid.required' => trans('common.contract_document_id_not_found'),
             'receivedBy.required' => trans('common.received_by_is_required'),
-            'formattedReceivedDate.required' => trans('common.received_date_and_time_is_required'),
-            'documentVersionNumber.regex' => trans('common.document_version_number_validation_message'),
+            'formattedReceivedDate.required' => trans('common.received_date_and_time_is_required')
         ];
 
         $validator = Validator::make($formData, [
             'uuid' => 'required',
             'receivedBy' => 'required',
-            'formattedReceivedDate' => 'required',
-            'documentVersionNumber' => ['regex:/^\d+(\.\d{1,3})?$/']
+            'formattedReceivedDate' => 'required'
         ], $messages);
 
         if ($validator->fails()) {

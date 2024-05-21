@@ -87,9 +87,9 @@ class ContractDocument extends Model
         'receivedBy' => 'string',
         'receivedDate' => 'string',
         'receivedFormat' => 'integer',
-        'documentVersionNumber' => 'float',
+        'documentVersionNumber' => 'string',
         'documentResponsiblePerson' => 'string',
-        'documentExpiryDate' => 'date',
+        'documentExpiryDate' => 'string',
         'returnedBy' => 'string',
         'returnedDate' => 'string',
         'returnedTo' => 'string',
@@ -121,6 +121,7 @@ class ContractDocument extends Model
             ->where([
                 'contractID' => $contractID,
                 'companySystemID' => $selectedCompanyID
-            ]);
+            ])
+            ->orderBy('id', 'desc');
     }
 }

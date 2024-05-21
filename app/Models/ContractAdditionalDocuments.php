@@ -99,6 +99,7 @@ class ContractAdditionalDocuments extends Model
             ->where([
                 'contractID' => $contractID,
                 'companySystemID' => $selectedCompanyID
-            ]);
+            ])
+            ->orderBy('id', 'desc');
     }
 }
