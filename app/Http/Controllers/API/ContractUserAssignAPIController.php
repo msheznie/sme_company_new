@@ -5,13 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserAssignAPIRequest;
 use App\Http\Requests\API\UpdateContractUserAssignAPIRequest;
-use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
-use App\Models\ContractUserGroupAssignedUser;
 use App\Repositories\ContractUserAssignRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
-use App\Http\Resources\ContractUserAssignResource;
 use Response;
 
 /**
@@ -58,58 +55,7 @@ class ContractUserAssignAPIController extends AppBaseController
     public function store(CreateContractUserAssignAPIRequest $request)
     {
         $input = $request->all();
-        $contractResult = ContractMaster::select()->where('uuid', $input['contractuuid'])->first();
-        $selectedUserGroupsUuid = array_column($input['selectedUserGroups'], 'id');
-        $userIdsAssignedUserGroup = ContractUserGroupAssignedUser::select('contractUserId', 'userGroupId')
-            ->whereIn('userGroupId', $selectedUserGroupsUuid)
-            ->where('status', 1)
-            ->get();
-        foreach ($userIdsAssignedUserGroup as $user) {
-            $contractId = $contractResult->id;
-            $userGroupId = $user['userGroupId'];
-            $existingRecord = ContractUserAssign::where('contractId', $contractId)
-                ->where('userGroupId', $userGroupId)
-                ->where('status', 1)
-                ->first();
-
-            if (!$existingRecord) {
-                $input['uuid'] = bin2hex(random_bytes(16));
-                $input['contractId'] = $contractId;
-                $input['userGroupId'] = $userGroupId;
-                $input['userId'] = $user['contractUserId'];
-                $input['createdBy'] = General::currentEmployeeId();
-                $input['updated_at'] = null;
-                $this->contractUserAssignRepository->create($input);
-            }
-        }
-
-        foreach ($input['selectedUsers'] as $user) {
-            $contractId = $contractResult->id;
-            $userGroupId = 0;
-            $userId = $user['id'];
-            // Check if a record exists for the given contractId and userGroupId where status is 1
-            $existingRecord = ContractUserAssign::where('contractId', $contractId)
-                ->where('userGroupId', 0)
-                ->where('userId', $userId)
-                ->where('status', 1)
-                ->first();
-
-            if (!$existingRecord) {
-                $newRecord = [
-                    'uuid' => bin2hex(random_bytes(16)),
-                    'contractId' => $contractId,
-                    'userGroupId' => $userGroupId,
-                    'userId' => $userId,
-                    'status' => 1,
-                    'createdBy' => General::currentEmployeeId(),
-                    'updated_at' => null
-                ];
-
-                $this->contractUserAssignRepository->create($newRecord);
-            }
-        }
-
-        return $this->sendResponse('',trans('common.contract_user_assign_saved_successfully'));
+        $this->contractUserAssignRepository->createRecord($input);
     }
 
     /**
@@ -178,7 +124,7 @@ class ContractUserAssignAPIController extends AppBaseController
 
         $contractUserAssign->delete();
 
-        return $this->sendSuccess('',trans('common.contract_user_assign_deleted_successfully'));
+        return $this->sendResponse('',trans('common.contract_user_assign_deleted_successfully'));
     }
 
     public function deleteAssignedUsers(CreateContractUserAssignAPIRequest $request)

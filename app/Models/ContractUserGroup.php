@@ -33,6 +33,7 @@ class ContractUserGroup extends Model
         'uuid',
         'groupName',
         'status',
+        'isDefault',
         'companySystemID'
     ];
 
@@ -46,7 +47,8 @@ class ContractUserGroup extends Model
         'uuid' => 'string',
         'groupName' => 'string',
         'companySystemID' => 'integer',
-        'status' => 'integer'
+        'status' => 'integer',
+        'isDefault' => 'integer'
     ];
 
     /**
@@ -64,7 +66,7 @@ class ContractUserGroup extends Model
 
     public function getContractUserGroupList($companySystemId)
     {
-        return ContractUserGroup::select('uuid', 'groupName', 'status')
+        return ContractUserGroup::select('uuid', 'groupName', 'status', 'isDefault')
             ->where('companySystemId', $companySystemId);
     }
 
@@ -76,7 +78,7 @@ class ContractUserGroup extends Model
             $userGroupId = $result->id;
         }
        return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'status', 'created_at', 'created_by')
-           ->with(['contractUserGroup', 'assignedUser' ,'employee'])
+           ->with(['assignedUser' ,'employee'])
             ->where('userGroupId', $userGroupId)
             ->where('companySystemID', $companySystemId);
     }

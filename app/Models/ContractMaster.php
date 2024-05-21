@@ -191,7 +191,9 @@ class ContractMaster extends Model
         }, 'contractUsers' => function ($q3) {
             $q3->with(['contractSupplierUser','contractCustomerUser']);
         }, 'contractAssignedUsers' => function ($q4) use ($currentEmployeeId) {
-            $q4->select('contractId', 'userId')->where('userId', $currentEmployeeId);
+            $q4->select('contractId', 'userId')
+                ->where('userId', $currentEmployeeId)
+                ->where('status', 1);
         }])->where('companySystemID', $companyId);
         if ($filter) {
             if (isset($filter['counterPartyID'])) {

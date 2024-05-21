@@ -16,6 +16,9 @@ use App\Models\ContractOverallRetention;
 use App\Models\ContractSectionDetail;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
+use App\Models\ContractUserAssign;
+use App\Models\ContractUserGroup;
+use App\Models\ContractUserGroupAssignedUser;
 use App\Models\ContractUsers;
 use App\Models\CurrencyMaster;
 use App\Models\DocumentMaster;
@@ -101,12 +104,12 @@ class ContractMasterRepository extends BaseRepository
             ->make(true);
     }
 
-    public function getAllContractMasterFilters()
+    public function getAllContractMasterFilters($request)
     {
         $allTypes = [
-
             "counter-parties" => ContractManagementUtils::getCounterParties(),
-            "contract_types" => ContractManagementUtils::getContractTypes()
+            "contract_types" => ContractManagementUtils::getContractTypes(),
+            "default_user_group_count" => ContractManagementUtils::getContractDefaultUserGroup($request)
         ];
         return $allTypes;
     }
@@ -241,6 +244,8 @@ class ContractMasterRepository extends BaseRepository
                 }
 
                 ContractSettingDetail::insert($contractSettingDetailArray);
+
+                $this->assignDefaultUserForContract($contractMasterId, $companySystemID);
 
                 DB::commit();
                 return [
@@ -781,6 +786,42 @@ class ContractMasterRepository extends BaseRepository
         }
 
         return null;
+    }
+
+    private function assignDefaultUserForContract($contractId, $companySystemID)
+    {
+        $defaultUserIds = ContractUserGroup::where('companySystemID', $companySystemID)
+            ->where('isDefault', 1)
+            ->pluck('id')
+            ->toArray();
+
+        $userIdsAssignedUserGroup = ContractUserGroupAssignedUser::select('contractUserId', 'userGroupId')
+            ->whereIn('userGroupId', $defaultUserIds)
+            ->where('status', 1)
+            ->get();
+        foreach ($userIdsAssignedUserGroup as $user) {
+            $userGroupId = $user['userGroupId'];
+            $userId = $user['contractUserId'];
+            $existingRecord = ContractUserAssign::where('contractId', $contractId)
+                ->where('userGroupId', $userGroupId)
+                ->where('userId', $userId)
+                ->where('status', 1)
+                ->first();
+
+            if (!$existingRecord) {
+                $input = [
+                    'uuid' => bin2hex(random_bytes(16)),
+                    'contractId' => $contractId,
+                    'userGroupId' => $userGroupId,
+                    'userId' => $userId,
+                    'status' => 1,
+                    'createdBy' => General::currentEmployeeId(),
+                    'updated_at' => null
+                ];
+
+                ContractUserAssign::create($input);
+            }
+        }
     }
 
 }
