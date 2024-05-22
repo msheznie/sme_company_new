@@ -183,13 +183,6 @@ class CMContractTypesRepository extends BaseRepository
         $languages =  $this->model->listOfContractTypes($search_keyword, $companyId, $filter);
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order')) {
-                    if ($input['order'][0]['column'] == 0) {
-                        $query->orderBy('contract_typeId', $input['order'][0]['dir']);
-                    }
-                }
-            })
             ->addIndexColumn()
             ->make(true);
     }

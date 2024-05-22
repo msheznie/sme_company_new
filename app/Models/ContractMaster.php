@@ -38,6 +38,7 @@ class ContractMaster extends Model
 
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['id', 'contractType', 'counterParty', 'counterPartyName', 'created_by'];
 
 
 
@@ -194,7 +195,8 @@ class ContractMaster extends Model
             $q4->select('contractId', 'userId')
                 ->where('userId', $currentEmployeeId)
                 ->where('status', 1);
-        }])->where('companySystemID', $companyId);
+        }])->where('companySystemID', $companyId)
+            ->orderBy('id', 'desc');
         if ($filter) {
             if (isset($filter['counterPartyID'])) {
                 $query->where('counterParty', $filter['counterPartyID']);

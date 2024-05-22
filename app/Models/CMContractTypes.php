@@ -31,6 +31,9 @@ class CMContractTypes extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    protected $hidden = ['contract_typeId', 'cmMaster_id', 'cmIntent_id', 'cmParty_id',
+        'cmCounterParty_id', 'created_by', 'cmPartyA_id', 'cmPartyB_id'];
+
     public $fillable = [
         'uuid',
         'cm_type_name',
@@ -115,7 +118,9 @@ class CMContractTypes extends Model
 
     public function listOfContractTypes($search, $companyId, $filter)
     {
-        $query = CMContractTypes::select('uuid', 'cm_type_name', 'cmMaster_id', 'cmIntent_id', 'cmPartyA_id', 'cmPartyB_id', 'cmCounterParty_id', 'cm_type_description', 'ct_active',
+        $query = CMContractTypes::select
+        ('uuid', 'cm_type_name', 'cmMaster_id', 'cmIntent_id', 'cmPartyA_id', 'cmPartyB_id',
+            'cmCounterParty_id', 'cm_type_description', 'ct_active',
         'companySystemID', 'created_by', 'created_at')
         ->with(['contratMasterWithtypes' => function ($q) {
             $q->select('cmMaster_id', 'cmMaster_description');
@@ -127,7 +132,8 @@ class CMContractTypes extends Model
             $q4->select('cmCounterParty_id', 'cmCounterParty_name');
         }, 'createdUserWithtypes' => function ($q5) {
             $q5->select('employeeSystemID', 'empName');
-        }])->where('companySystemID', $companyId);
+        }])->where('companySystemID', $companyId)
+            ->orderBy('contract_typeId', 'desc');
         if ($filter) {
             if (isset($filter['catTypeID'])) {
                 $query->where('cmMaster_id', $filter['catTypeID']);

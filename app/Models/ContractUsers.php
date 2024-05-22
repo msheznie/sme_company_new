@@ -25,6 +25,8 @@ class ContractUsers extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    protected $hidden = ['id', 'contractUserId'];
+
 
     public $fillable = [
         'contractUserId',
@@ -93,11 +95,13 @@ class ContractUsers extends Model
     {
         $contractUserType = $filter['contractUserType'] ?? 0;
 
-        $contractUsers = ContractUsers::select('uuid', 'contractUserId', 'contractUserType', 'contractUserCode', 'contractUserName', 'isActive')
+        $contractUsers = ContractUsers::select
+        ('uuid', 'contractUserId', 'contractUserType', 'contractUserCode', 'contractUserName', 'isActive')
             ->where('companySystemId', $companySystemId)
             ->when($contractUserType > 0, function ($q) use ($contractUserType) {
                 $q->where('contractUserType', $contractUserType);
-            });
+            })
+            ->orderBy('id', 'desc');
 
         if($search){
             $search = str_replace("\\", "\\\\", $search);
@@ -117,7 +121,8 @@ class ContractUsers extends Model
             ->where('empActive', 1)
             ->where(function ($q) {
                 $q->whereDoesntHave('pulledContractUser');
-            });
+            })
+            ->orderBy('id', 'desc');
 
         if ($searchKeyword) {
             $search = str_replace("\\", "\\\\", $searchKeyword);
@@ -130,13 +135,15 @@ class ContractUsers extends Model
     }
 
     public function getSupplierUserList($companySystemId, $searchKeyword){
-        $supplierMaster = SupplierMaster::selectRaw('supplierCodeSystem as id, supplierName as name, primarySupplierCode as code')
+        $supplierMaster = SupplierMaster::selectRaw
+        ('supplierCodeSystem as id, supplierName as name, primarySupplierCode as code')
             ->where('primaryCompanySystemID', $companySystemId)
             ->where('approvedYN', 1)
             ->where('isActive', 1)
             ->where(function ($q) {
                 $q->whereDoesntHave('pulledContractUser');
-            });
+            })
+            ->orderBy('id', 'desc');
         if ($searchKeyword) {
             $search = str_replace("\\", "\\\\", $searchKeyword);
             $supplierMaster = $supplierMaster->where(function ($query) use ($search) {
@@ -148,13 +155,15 @@ class ContractUsers extends Model
     }
 
     public function getCustomerUserList($companySystemId, $searchKeyword){
-        $customerMaster = CustomerMaster::selectRaw('customerCodeSystem as id, CustomerName as name, CutomerCode as code')
+        $customerMaster = CustomerMaster::selectRaw
+        ('customerCodeSystem as id, CustomerName as name, CutomerCode as code')
             ->where('primaryCompanySystemID', $companySystemId)
             ->where('isCustomerActive', 1)
             ->where('approvedYN', 1)
             ->where(function ($q) {
                 $q->whereDoesntHave('pulledContractUser');
-            });
+            })
+            ->orderBy('id', 'desc');
 
         if ($searchKeyword) {
             $search = str_replace("\\", "\\\\", $searchKeyword);

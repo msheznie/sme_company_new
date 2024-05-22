@@ -276,21 +276,10 @@ class ContractMasterAPIController extends AppBaseController
     {
         $input = $request->all();
         $itemMasters = $this->getAssignedItemsByCompanyQry($input);
-        if (request()->has('order') && $input['order'][0]['column'] == 0 && $input['order'][0]['dir'] === 'asc') {
-            $sort = 'asc';
-        } else {
-            $sort = 'desc';
-        }
+
         return DataTables::eloquent($itemMasters)
-            ->order(function ($query) use ($input) {
-                if (request()->has('order')) {
-                    if ($input['order'][0]['column'] == 0) {
-                        $query->orderBy('idItemAssigned', $input['order'][0]['dir']);
-                    }
-                }
-            })
             ->addIndexColumn()
-            ->with('orderCondition', $sort)
+            ->with('orderCondition')
             ->addColumn('Actions', 'Actions', "Actions")
             ->addColumn('current', function ($row) {
                 $data = array('companySystemID' => $row->companySystemID,
@@ -325,7 +314,8 @@ class ContractMasterAPIController extends AppBaseController
             ->where('financeCategoryMaster', 1)
             ->whereDoesntHave('contractBoqItems', function ($query) use ($contractId) {
                 $query->where('contractId', $contractId);
-            });
+            })
+            ->orderBy('idItemAssigned', 'desc');
 
         if (array_key_exists('financeCategoryMaster', $input)) {
             if ($input['financeCategoryMaster'] != null && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])) {

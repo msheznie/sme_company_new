@@ -60,6 +60,8 @@ class ItemAssigned extends Model
     protected $primaryKey  = 'idItemAssigned';
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['idItemAssigned', 'itemCodeSystem',
+        'itemUnitOfMeasure', 'financeCategoryMaster', 'financeCategorySub' ];
 
     public $fillable = [
         'itemCodeSystem',

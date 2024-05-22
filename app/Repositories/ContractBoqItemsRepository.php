@@ -63,11 +63,8 @@ class ContractBoqItemsRepository extends BaseRepository
                 $query->select('UnitShortCode');
             }, 'itemMaster.itemAssigned.local_currency'])
             ->where('companyId', $companyId)
-            ->where('contractId', $contractId->id);
-
-        if ($request->has('order') && $input['order'][0]['column'] == 0) {
-            $query->orderBy('id', $input['order'][0]['dir']);
-        }
+            ->where('contractId', $contractId->id)
+            ->orderBy('id', 'desc');
 
         return DataTables::eloquent($query)
             ->addColumn('itemDescription', function ($row) {
