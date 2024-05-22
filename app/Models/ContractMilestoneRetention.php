@@ -39,6 +39,7 @@ class ContractMilestoneRetention extends Model
 
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['id', 'contractId'];
 
 
 
@@ -100,7 +101,8 @@ class ContractMilestoneRetention extends Model
                 $q->select('title', 'id', 'amount', 'uuid');
             }
         ])->where('contractId', $contractId)
-            ->where('companySystemId', $companySystemID);
+            ->where('companySystemId', $companySystemID)
+            ->orderBy('id', 'desc');
     }
 
 

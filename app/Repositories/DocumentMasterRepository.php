@@ -59,11 +59,6 @@ class DocumentMasterRepository extends BaseRepository
         $languages =  $this->model->documentMaster($companySystemID);
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order') && $input['order'][0]['column'] == 0) {
-                    $query->orderBy('id', $input['order'][0]['dir']);
-                }
-            })
             ->addIndexColumn()
             ->make(true);
     }

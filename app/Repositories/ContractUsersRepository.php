@@ -64,13 +64,6 @@ class ContractUsersRepository extends BaseRepository
         $contractUserList =  $this->model->getContractUserList($searchKeyword, $companyId, $filter);
         return DataTables::eloquent($contractUserList)
             ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order')) {
-                    if ($input['order'][0]['column'] == 0) {
-                        $query->orderBy('id', $input['order'][0]['dir']);
-                    }
-                }
-            })
             ->addIndexColumn()
             ->make(true);
     }
@@ -91,13 +84,6 @@ class ContractUsersRepository extends BaseRepository
 
         return DataTables::eloquent($contractUsers)
             ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order')) {
-                    if ($input['order'][0]['column'] == 0) {
-                        $query->orderBy('id', $input['order'][0]['dir']);
-                    }
-                }
-            })
             ->addIndexColumn()
             ->make(true);
     }

@@ -65,6 +65,7 @@ class ItemMaster extends Model
     const CREATED_AT = 'createdDateTime';
     const UPDATED_AT = 'timeStamp';
     protected $primaryKey  = 'itemCodeSystem';
+    protected $hidden = ['itemCodeSystem'];
 
 
     protected $dates = ['deleted_at'];

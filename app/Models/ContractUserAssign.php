@@ -32,6 +32,7 @@ class ContractUserAssign extends Model
     const UPDATED_AT = 'updated_at';
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['id', 'userGroupId', 'userId', 'createdBy', 'updatedBy'];
 
     public $fillable = [
         'uuid',
@@ -88,7 +89,8 @@ class ContractUserAssign extends Model
         $allRecords = ContractUserAssign::with(['userGroup', 'assignedUsers', 'employee', 'updatedByEmployee'])
             ->select('cm_contract_user_assign.*')
             ->where('userGroupId', '=', 0)
-            ->where('contractId', $contractResults->id);
+            ->where('contractId', $contractResults->id)
+            ->orderBy('id', 'desc');
 
         // Union the two queries
         return $distinctRecords->union($allRecords);

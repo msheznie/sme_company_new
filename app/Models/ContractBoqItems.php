@@ -34,6 +34,8 @@ class ContractBoqItems extends Model
 
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['id', 'itemId'];
+
 
 
 

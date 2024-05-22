@@ -26,6 +26,7 @@ class ContractUserGroup extends Model
 
 
     protected $dates = ['deleted_at'];
+    protected $hidden = ['id'];
 
 
 
@@ -67,7 +68,7 @@ class ContractUserGroup extends Model
     public function getContractUserGroupList($companySystemId)
     {
         return ContractUserGroup::select('uuid', 'groupName', 'status', 'isDefault')
-            ->where('companySystemId', $companySystemId);
+            ->where('companySystemId', $companySystemId)->orderBy('id', 'desc');
     }
 
     public function getContractUserGroupAssignedUsers($companySystemId, $selectUserGroup)
@@ -80,7 +81,8 @@ class ContractUserGroup extends Model
        return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'status', 'created_at', 'created_by')
            ->with(['assignedUser' ,'employee'])
             ->where('userGroupId', $userGroupId)
-            ->where('companySystemID', $companySystemId);
+            ->where('companySystemID', $companySystemId)
+           ->orderBy('id', 'desc');
     }
 
     public function getContractUserListForUserGroup($companySystemId, $groupId)

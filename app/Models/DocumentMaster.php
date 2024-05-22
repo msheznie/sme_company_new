@@ -83,7 +83,7 @@ class DocumentMaster extends Model
     }
     public function documentMaster($companySystemID)
     {
-        return DocumentMaster::where('companySystemID', $companySystemID);
+        return DocumentMaster::where('companySystemID', $companySystemID)->orderBy('id', 'desc');
     }
 
 }
