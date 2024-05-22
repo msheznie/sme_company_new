@@ -7,6 +7,7 @@ use App\Http\Requests\API\CreateContractUserGroupAPIRequest;
 use App\Http\Requests\API\UpdateContractUserGroupAPIRequest;
 use App\Models\ContractUserGroup;
 use App\Models\ContractUserGroupAssignedUser;
+use App\Models\ContractUsers;
 use App\Repositories\ContractUserGroupAssignedUserRepository;
 use App\Repositories\ContractUserGroupRepository;
 use Illuminate\Http\Request;
@@ -77,13 +78,17 @@ class ContractUserGroupAPIController extends AppBaseController
                 $contractUserGroup->save();
             }
 
+
+
             if (!empty($input['selectedUsers'])) {
                 foreach ($input['selectedUsers'] as $userId) {
+
+                    $contractUserId = ContractUsers::select('id')->where('uuid',$userId['id'])->first();
                     $assignedUserInput = [
                         'uuid' => bin2hex(random_bytes(16)),
                         'userGroupId' => $contractUserGroup->id,
                         'companySystemID' => $input['companySystemID'],
-                        'contractUserId' => $userId['id'],
+                        'contractUserId' => $contractUserId['id'],
                         'giveAccessToExistingContracts' => $input['giveAccessToExistingContracts'],
                         'created_by' => General::currentEmployeeId(),
                         'updated_by' => null,

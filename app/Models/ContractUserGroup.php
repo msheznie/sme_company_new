@@ -87,7 +87,7 @@ class ContractUserGroup extends Model
 
     public function getContractUserListForUserGroup($companySystemId, $groupId)
     {
-        return ContractUsers::select('contractUserId as id', 'contractUserId', 'contractUserName as itemName')
+        return ContractUsers::select('uuid', 'contractUserId', 'contractUserName as itemName')
             ->whereDoesntHave('assignedContractUserGroup', function ($query) use ($groupId) {
                 $query->where('userGroupId', $groupId);
             })

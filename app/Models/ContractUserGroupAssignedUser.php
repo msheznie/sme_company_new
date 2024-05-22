@@ -60,7 +60,7 @@ class ContractUserGroupAssignedUser extends Model
     }
 
     public function assignedUser(){
-        return $this->belongsTo(ContractUsers::class,'contractUserId','contractUserId');
+        return $this->belongsTo(ContractUsers::class,'contractUserId','id');
     }
 
     public function employee(){
