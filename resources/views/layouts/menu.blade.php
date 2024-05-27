@@ -251,3 +251,27 @@
         <span>Milestone Status Histories</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('erpDocumentApproveds*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('erpDocumentApproveds.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Erp Document Approveds</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('companyDocumentAttachments*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('companyDocumentAttachments.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Company Document Attachments</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('erpApprovalLevels*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('erpApprovalLevels.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Erp Approval Levels</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('erpApprovalRoles*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('erpApprovalRoles.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Erp Approval Roles</span>
+    </a>
+</li>

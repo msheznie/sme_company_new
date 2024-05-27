@@ -101,6 +101,7 @@ class ContractUserAssignRepository extends BaseRepository
                 $input['userId'] = $user['contractUserId'];
                 $input['createdBy'] = General::currentEmployeeId();
                 $input['updated_at'] = null;
+
                 $this->create($input);
             }
         }

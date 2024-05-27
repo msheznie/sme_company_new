@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserGroupAPIRequest;
 use App\Http\Requests\API\UpdateContractUserGroupAPIRequest;
+use App\Models\ContractUserAssign;
 use App\Models\ContractUserGroup;
 use App\Models\ContractUserGroupAssignedUser;
 use App\Models\ContractUsers;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractUserGroupResource;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -27,12 +29,16 @@ class ContractUserGroupAPIController extends AppBaseController
     private $contractUserGroupRepository;
     private $contractUserGroupAssignedRepository;
 
+    private $contractUserAssignRepository;
+
     public function __construct(ContractUserGroupRepository $contractUserGroupRepo,
-                                ContractUserGroupAssignedUserRepository $contractUserGroupAssignedRepository
+                                ContractUserGroupAssignedUserRepository $contractUserGroupAssignedRepository,
+                                ContractUserAssign $contractUserAssignRepository
     )
     {
         $this->contractUserGroupRepository = $contractUserGroupRepo;
         $this->contractUserGroupAssignedRepository = $contractUserGroupAssignedRepository;
+        $this->contractUserAssignRepository = $contractUserAssignRepository;
     }
 
     public function index(Request $request)
@@ -51,64 +57,14 @@ class ContractUserGroupAPIController extends AppBaseController
 
     public function store(CreateContractUserGroupAPIRequest $request)
     {
-        try {
-            $input = $request->all();
-            $uuid = $input['uuid'];
-            if($uuid === 0){
-                $isExist = ContractUserGroup::where('groupName', $input['groupName'])->exists();
-                if(!$isExist){
-                    $input['uuid'] = bin2hex(random_bytes(16));
-                    $contractUserGroup = $this->contractUserGroupRepository->create($input);
-                } else {
-                    return $this->sendError(trans('common.group_name_already_exists'), 409);
-                }
-
-            } else {
-                $contractUserGroup = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
-
-                $assignedUserCount = ContractUserGroupAssignedUser::where('userGroupId', $contractUserGroup->id)
-                    ->where('status', 1)
-                    ->count();
-
-                if( $input['isDefault'] == true && $assignedUserCount == 0){
-                    return $this->sendError(trans('common.active_user_should_jn_default_user_group'));
-                }
-
-                $contractUserGroup->isDefault = $input['isDefault'];
-                $contractUserGroup->save();
-            }
-
-
-
-            if (!empty($input['selectedUsers'])) {
-                foreach ($input['selectedUsers'] as $userId) {
-
-                    $contractUserId = ContractUsers::select('id')->where('uuid',$userId['id'])->first();
-                    $assignedUserInput = [
-                        'uuid' => bin2hex(random_bytes(16)),
-                        'userGroupId' => $contractUserGroup->id,
-                        'companySystemID' => $input['companySystemID'],
-                        'contractUserId' => $contractUserId['id'],
-                        'giveAccessToExistingContracts' => $input['giveAccessToExistingContracts'],
-                        'created_by' => General::currentEmployeeId(),
-                        'updated_by' => null,
-                    ];
-                    ContractUserGroupAssignedUser::create($assignedUserInput);
-                }
-            }
-            return $this->sendResponse(
-                new ContractUserGroupResource($contractUserGroup),
-                trans('common.user_group_saved_successfully')
-            );
-
-        } catch (QueryException $e) {
-            if ($e->errorInfo[1] == 1062) {
-                return $this->sendError(trans('common.group_name_already_exists'), 409);
-            }
-
-            return $this->sendError(trans('common.database_error'), 500);
+        $result = $this->contractUserGroupRepository->createRecord($request);
+        if ($result['success']) {
+            return $this->sendResponse('', trans('common.user_group_saved_successfully'));
+        } else {
+            return $this->sendError($result['message'], $result['code']);
         }
     }
+
 
     public function show($id)
     {

@@ -58,7 +58,8 @@
         },
         "files": [
             "./app/Helpers/permission.php",
-            "./app/Helpers/General.php"
+            "./app/Helpers/General.php",
+            "./app/Helpers/ConfirmDocument.php"
         ]
     },
     "autoload-dev": {
