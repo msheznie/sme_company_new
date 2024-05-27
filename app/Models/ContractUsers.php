@@ -88,7 +88,7 @@ class ContractUsers extends Model
     }
 
     public function assignedContractUserGroup(){
-        return $this->belongsTo(ContractUserGroupAssignedUser::class, 'contractUserId', 'contractUserId');
+        return $this->belongsTo(ContractUserGroupAssignedUser::class, 'id', 'contractUserId');
     }
 
     public function getContractUserList($search, $companySystemId, $filter)

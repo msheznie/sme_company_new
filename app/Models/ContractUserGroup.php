@@ -96,7 +96,7 @@ class ContractUserGroup extends Model
 
     public function getContractUserListToAssign($companySystemId, $contractId)
     {
-        $userList =  ContractUsers::select('id', 'contractUserName as itemName')
+        $userList =  ContractUsers::select('uuid', 'contractUserId', 'contractUserName as itemName')
             ->whereDoesntHave('assignedContractUserGroup')
             ->where('companySystemId', $companySystemId)
         ->get();
@@ -105,7 +105,7 @@ class ContractUserGroup extends Model
             ->where('userGroupId', 0)
             ->pluck('userId')->toArray();
 
-        $selectedUserList =  ContractUsers::select('id', 'contractUserName as itemName')
+        $selectedUserList =  ContractUsers::select('uuid', 'contractUserId','contractUserName as itemName')
             ->whereIn('id', $contractUserAssignedResult)
             ->whereIn('id', $contractUserAssignedResult)
             ->get();
@@ -118,14 +118,14 @@ class ContractUserGroup extends Model
 
     public function contractUserGroupList($companySystemId,$contractuuid)
     {
-        $userGroup =  ContractUserGroup::selectRaw('id, groupName AS itemName')
+        $userGroup =  ContractUserGroup::selectRaw('uuid, groupName AS itemName')
             ->where('companySystemId', $companySystemId)
             ->where('status', 1)
             ->get();
         $contractResult = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
         $contractUserAssignedResult = ContractUserAssign::where('contractId', $contractResult->id)
             ->pluck('userGroupId')->toArray();
-        $userGroupSelected =  ContractUserGroup::selectRaw('id, groupName AS itemName')
+        $userGroupSelected =  ContractUserGroup::selectRaw('uuid, groupName AS itemName')
             ->where('companySystemId', $companySystemId)
             ->whereIn('id', $contractUserAssignedResult)
             ->get();

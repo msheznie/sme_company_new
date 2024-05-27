@@ -55,7 +55,13 @@ class ContractUserAssignAPIController extends AppBaseController
     public function store(CreateContractUserAssignAPIRequest $request)
     {
         $input = $request->all();
-        $this->contractUserAssignRepository->createRecord($input);
+        $result =  $this->contractUserAssignRepository->createRecord($input);
+
+        if ($result) {
+            return $this->sendResponse('', trans('common.contract_user_assign_saved_successfully'));
+        } else {
+            return $this->sendError('Failed to assign users to contract.');
+        }
     }
 
     /**

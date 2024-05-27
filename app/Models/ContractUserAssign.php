@@ -111,4 +111,9 @@ class ContractUserAssign extends Model
         return $this->belongsTo(Employees::class, 'updatedBy', 'employeeSystemID');
     }
 
+    public function contractUserGroupAssignedUser()
+    {
+        return $this->belongsTo(ContractUserGroupAssignedUser::class, 'userId', 'contractUserId');
+    }
+
 }

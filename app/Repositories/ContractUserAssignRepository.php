@@ -5,9 +5,12 @@ namespace App\Repositories;
 use App\Helpers\General;
 use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
+use App\Models\ContractUserGroup;
 use App\Models\ContractUserGroupAssignedUser;
+use App\Models\ContractUsers;
 use App\Repositories\BaseRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 /**
@@ -62,12 +65,25 @@ class ContractUserAssignRepository extends BaseRepository
 
     public function createRecord($input)
     {
-        $contractResult = ContractMaster::select()->where('uuid', $input['contractuuid'])->first();
+        $contractResult = ContractMaster::where('uuid', $input['contractuuid'])->first();
+        if (!$contractResult) {
+            return false;
+        }
+
         $selectedUserGroupsUuid = array_column($input['selectedUserGroups'], 'id');
+
+        $userGroupIdList = ContractUserGroup::select('id as i')
+            ->whereIn('uuid', $selectedUserGroupsUuid)
+            ->get()
+            ->toArray();
+
+        $groupIdList = array_column($userGroupIdList, 'i');
+
         $userIdsAssignedUserGroup = ContractUserGroupAssignedUser::select('contractUserId', 'userGroupId')
-            ->whereIn('userGroupId', $selectedUserGroupsUuid)
+            ->whereIn('userGroupId', $groupIdList)
             ->where('status', 1)
             ->get();
+
         foreach ($userIdsAssignedUserGroup as $user) {
             $contractId = $contractResult->id;
             $userGroupId = $user['userGroupId'];
@@ -85,36 +101,42 @@ class ContractUserAssignRepository extends BaseRepository
                 $input['userId'] = $user['contractUserId'];
                 $input['createdBy'] = General::currentEmployeeId();
                 $input['updated_at'] = null;
-                $this->contractUserAssignRepository->create($input);
+                $this->create($input);
             }
         }
 
         foreach ($input['selectedUsers'] as $user) {
             $contractId = $contractResult->id;
             $userGroupId = 0;
-            $userId = $user['id'];
-            // Check if a record exists for the given contractId and userGroupId where status is 1
-            $existingRecord = ContractUserAssign::where('contractId', $contractId)
-                ->where('userGroupId', 0)
-                ->where('userId', $userId)
-                ->where('status', 1)
+            $user = ContractUsers::select('id')
+                ->where('uuid', $user['id'])
                 ->first();
 
-            if (!$existingRecord) {
-                $newRecord = [
-                    'uuid' => bin2hex(random_bytes(16)),
-                    'contractId' => $contractId,
-                    'userGroupId' => $userGroupId,
-                    'userId' => $userId,
-                    'status' => 1,
-                    'createdBy' => General::currentEmployeeId(),
-                    'updated_at' => null
-                ];
+            if ($user) {
+                $userId = $user->id;
+                $existingRecord = ContractUserAssign::where('contractId', $contractId)
+                    ->where('userGroupId', $userGroupId)
+                    ->where('userId', $userId)
+                    ->where('status', 1)
+                    ->first();
 
-                $this->contractUserAssignRepository->create($newRecord);
+                if (!$existingRecord) {
+                    $newRecord = [
+                        'uuid' => bin2hex(random_bytes(16)),
+                        'contractId' => $contractId,
+                        'userGroupId' => $userGroupId,
+                        'userId' => $userId,
+                        'status' => 1,
+                        'createdBy' => General::currentEmployeeId(),
+                        'updated_at' => null
+                    ];
+
+                    $this->create($newRecord);
+                }
             }
         }
 
-        return $this->sendResponse('',trans('common.contract_user_assign_saved_successfully'));
+        return true;
     }
+
 }
