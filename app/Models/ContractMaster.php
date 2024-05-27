@@ -183,6 +183,10 @@ class ContractMaster extends Model
             ->where('companySystemId', $companyId)
             ->first();
 
+        $contractUserId = ContractUsers::select('id')
+            ->where('contractUserId',$currentEmployeeId)
+            ->first();
+
         $query = ContractMaster::with(['contractTypes' => function ($q) {
             $q->select('contract_typeId', 'cm_type_name', 'uuid');
         }, 'counterParties' => function ($q1) {
@@ -191,11 +195,11 @@ class ContractMaster extends Model
             $q2->select('employeeSystemID', 'empName');
         }, 'contractUsers' => function ($q3) {
             $q3->with(['contractSupplierUser','contractCustomerUser']);
-        }, 'contractAssignedUsers' => function ($q4) use ($currentEmployeeId) {
+        }, 'contractAssignedUsers' => function ($q4) use ($contractUserId) {
             $q4->select('contractId', 'userId')
-                ->where('userId', $currentEmployeeId)
+                ->where('userId', $contractUserId->id)
                 ->where('status', 1);
-        }])->where('companySystemID', $companyId)
+        }, 'contractAssignedUsers.contractUserGroupAssignedUser'])->where('companySystemID', $companyId)
             ->orderBy('id', 'desc');
         if ($filter) {
             if (isset($filter['counterPartyID'])) {
