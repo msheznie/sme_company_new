@@ -141,4 +141,19 @@
          'Existing milestones are already used for retentions, If you want to add more retentions,
          please add new milestones',
      'active_user_should_jn_default_user_group' => 'At least one active user should be there in a default user group',
+     'document_not_found' => 'Document not found',
+     'company_not_found' => 'Company not found',
+     'document_system_id_not_found' => 'Document system id not found',
+     'document_id_not_found' => 'Document id not found',
+     'document_approval_data_already_generated' => 'Document approval data is already generated',
+     'document_is_already_confirmed' => 'Document is already confirmed',
+     'error_occurred' => 'Error Occurred',
+     'document_attachment_error_message' =>
+         'There is no attachments attached. Please attach an attachment before you confirm the document',
+     'policy_not_available_for_this_document' => 'Policy not available for this document.',
+     'no_approval_level_for_this-document' => 'No approval setup created for this document',
+     'please_set_the_approval_group' => 'Please set the approval group',
+     'no_approval_setup_created_for_this_document' => 'No approval setup created for this document',
+     'document_confirmed_successfully' => 'Document confirmed successfully',
+     'failed_to_confirm_document' => 'Failed to confirm document'
  ];

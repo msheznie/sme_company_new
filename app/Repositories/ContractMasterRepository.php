@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Helpers\ConfirmDocument;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
@@ -179,6 +180,7 @@ class ContractMasterRepository extends BaseRepository
                 'contractType' => $contractType["contract_typeId"],
                 'counterParty' => $contractType["cmCounterParty_id"],
                 'uuid' => bin2hex(random_bytes(16)),
+                'documentMasterId' => 123,
                 'companySystemID' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
@@ -624,11 +626,10 @@ class ContractMasterRepository extends BaseRepository
     public function confirmContract(Request $request){
         $input = $request->all();
         $contractUuid = $input['contractUuid'];
-        $confirmed_yn = $input['confirmed_yn'];
         $companySystemID = $input['selectedCompanyID'];
         $message = null;
 
-        $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
+        $contractId = ContractMaster::select('id', 'contractCode')->where('uuid', $contractUuid)->first();
 
         $message = $this->checkActiveMasters($contractId['id'], $companySystemID);
         if ($message) {
@@ -650,14 +651,20 @@ class ContractMasterRepository extends BaseRepository
         }else{
             DB::beginTransaction();
             try{
-                $data = [
-                    'confirmed_yn' => $confirmed_yn,
-                    'confirm_by' => General::currentEmployeeId(),
-                    'confirmed_date' => Carbon::now()
+                $insertData = [
+                    'autoID' => $contractId['id'],
+                    'company' => $companySystemID,
+                    'document' => 123,
+                    'documentCode' => $contractId['contractCode'] ?? null,
                 ];
-
-                ContractMaster::where('uuid', $contractUuid)->update($data);
-
+                $resConfirm = ConfirmDocument::confirmDocument($insertData);
+                if (!$resConfirm['success']) {
+                    DB::rollBack();
+                    return [
+                        'status' => false,
+                        'message' => $resConfirm['message']
+                    ];
+                }
                 DB::commit();
                 return ['status' => true, 'message' => trans('common.contract_confirmation_updated_successfully')];
 

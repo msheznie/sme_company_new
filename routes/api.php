@@ -50,6 +50,7 @@ Route::group(['middleware' => ['tenant']], function () {
             Route::post('/get-sections-filter-drop', [CMContractTypesAPIController::class, 'getSectionsFilterDrop']);
             Route::post('/update-dynamic-field-detail', [CMContractTypesAPIController::class, 'updateDynamicFieldDetail']);
         });
+
         /* Routes not in use */
         Route::resource('users', App\Http\Controllers\API\UsersAPIController::class);
         Route::resource('employees', App\Http\Controllers\API\EmployeesAPIController::class);

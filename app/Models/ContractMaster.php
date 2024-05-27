@@ -45,6 +45,7 @@ class ContractMaster extends Model
     public $fillable = [
         'uuid',
         'contractCode',
+        'documentMasterId',
         'title',
         'description',
         'contractType',
@@ -90,6 +91,7 @@ class ContractMaster extends Model
         'id' => 'integer',
         'uuid' => 'string',
         'contractCode' => 'string',
+        'documentMasterId' => 'integer',
         'title' => 'string',
         'description' => 'string',
         'contractType' => 'integer',
