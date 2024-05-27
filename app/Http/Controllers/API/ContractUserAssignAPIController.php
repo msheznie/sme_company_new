@@ -6,9 +6,12 @@ use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserAssignAPIRequest;
 use App\Http\Requests\API\UpdateContractUserAssignAPIRequest;
 use App\Models\ContractUserAssign;
+use App\Models\ContractUserGroup;
+use App\Models\ContractUsers;
 use App\Repositories\ContractUserAssignRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
+use Illuminate\Support\Facades\Log;
 use Response;
 
 /**
@@ -55,6 +58,7 @@ class ContractUserAssignAPIController extends AppBaseController
     public function store(CreateContractUserAssignAPIRequest $request)
     {
         $input = $request->all();
+
         $result =  $this->contractUserAssignRepository->createRecord($input);
 
         if ($result) {
@@ -137,25 +141,32 @@ class ContractUserAssignAPIController extends AppBaseController
     {
         $input = $request->all();
         /** @var ContractUserAssign $contractUserAssign */
-        if($input['userGroupId'] == 0){
-            $contractUserAssign = $this->contractUserAssignRepository->find($input['id']);
+        if($input['userGroupId'] == null){
+            $contractUserAssignedId = ContractUserAssign::select('id')->where('uuid', $input['id'])->first();
+            $contractUserAssign = $this->contractUserAssignRepository->find($contractUserAssignedId->id);
 
             if (empty($contractUserAssign)) {
                 return $this->sendError('',trans('common.contract_user_assign_not_found'));
             }
+            $input['userGroupId'] = 0;
             $input['status'] = 0;
             $input['updatedBy'] = General::currentEmployeeId();
-            $this->contractUserAssignRepository->update($input, $input['id']);
+            $this->contractUserAssignRepository->update($input, $contractUserAssignedId->id);
         } else {
+            $getUserGroupId = ContractUserGroup::select('id')
+                ->where('uuid', $input['userGroupId'])
+                ->first();
+
             $contractUserAssigns = ContractUserAssign::where('contractId', $input['contractId'])
-                ->where('userGroupId', $input['userGroupId'])
+                ->where('userGroupId', $getUserGroupId->id)
+                ->select('id as i')
                 ->get();
 
             foreach ($contractUserAssigns as $contractUserAssign) {
                 $this->contractUserAssignRepository->update([
                     'status' => 0,
                     'updatedBy' => General::currentEmployeeId()
-                ], $contractUserAssign->id);
+                ], $contractUserAssign->i);
             }
         }
 

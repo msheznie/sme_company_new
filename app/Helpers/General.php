@@ -73,6 +73,7 @@ class General
             return "";
         }
     }
+
     public static function getEmployeeCode($empId)
     {
         $employee = Employees::find($empId);

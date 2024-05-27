@@ -185,6 +185,7 @@ class ContractMaster extends Model
             ->where('companySystemId', $companyId)
             ->first();
 
+
         $contractUserId = ContractUsers::select('id')
             ->where('contractUserId',$currentEmployeeId)
             ->first();

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+
 use App\Helpers\ConfirmDocument;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
@@ -628,7 +629,6 @@ class ContractMasterRepository extends BaseRepository
         $contractUuid = $input['contractUuid'];
         $companySystemID = $input['selectedCompanyID'];
         $message = null;
-
         $contractId = ContractMaster::select('id', 'contractCode')->where('uuid', $contractUuid)->first();
 
         $message = $this->checkActiveMasters($contractId['id'], $companySystemID);
