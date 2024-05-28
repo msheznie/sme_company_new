@@ -255,10 +255,12 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                 ->update($data);
 
             foreach ($milestoneRetentionData as $milestoneRetention){
-                $retentionAmount = $milestoneRetention['milestone']['amount'];
+                if($milestoneRetention['milestoneId'] != null){
+                    $retentionAmount = $milestoneRetention['milestone']['amount'];
+                    ContractMilestoneRetention::where('id', $milestoneRetention['id'])
+                        ->update(['retentionAmount' => $retentionAmount * ($retentionPercentage / 100)]);
+                }
 
-                ContractMilestoneRetention::where('id', $milestoneRetention['id'])
-                    ->update(['retentionAmount' => $retentionAmount * ($retentionPercentage / 100)]);
             }
 
             DB::commit();

@@ -102,7 +102,7 @@ class ContractMilestoneRetention extends Model
             }
         ])->where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)
-            ->orderBy('id', 'desc');
+            ->orderBy('id', 'asc');
     }
 
 

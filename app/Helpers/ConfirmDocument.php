@@ -34,7 +34,7 @@ class ConfirmDocument
         }
 
         $employeeSystemID = General::currentEmployeeId();
-        $document = ErpDocumentMaster::select('documentSystemID', 'documentID')
+        $document = ErpDocumentMaster::select('documentSystemID', 'documentID', 'departmentSystemID')
             ->where('documentSystemID', $params["document"])->first();
 
         DB::beginTransaction();
@@ -64,7 +64,7 @@ class ConfirmDocument
                 DB::rollback();
                 return [
                     'success' => false,
-                    'message' => trans('common.no_approval_level_for_this')
+                    'message' => trans('common.no_approval_level_for_this_document')
                 ];
             }
 
