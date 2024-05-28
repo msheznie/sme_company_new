@@ -37,6 +37,7 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
         Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
         Route::group(['middleware' => ['company']], function () {
+            require __DIR__.'/../routes/contracts/contractsRoutes.php';
             //main routes should be written here.
             require __DIR__.'/../routes/contracts/contractsRoutes.php';
             require __DIR__.'/../routes/master/masterRoutes.php';

@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\Company;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\CurrencyMaster;
 use App\Models\MilestoneStatusHistory;
 use App\Repositories\BaseRepository;
 use Illuminate\Http\Request;
@@ -74,10 +76,16 @@ class ContractMilestoneRepository extends BaseRepository
         $contractMilestones = ContractMilestone::select('uuid', 'title', 'percentage', 'amount', 'status')
             ->where('contractID', $contractMaster['id'])->get();
 
+        $currencyId = Company::getLocalCurrencyID($companySystemID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+
+        $response['contractMilestones'] = $contractMilestones;
+        $response['decimalPlaces'] = $decimalPlaces;
+
         return [
             'status' => true,
             'message' => 'Contract Milestone retrieved successfully',
-            'data' => $contractMilestones
+            'data' => $response
         ];
     }
 
