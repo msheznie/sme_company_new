@@ -139,5 +139,4 @@ class ContractUserAssignRepository extends BaseRepository
 
         return true;
     }
-
 }
