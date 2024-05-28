@@ -31,8 +31,7 @@ class CMContractTypes extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $hidden = ['contract_typeId', 'cmMaster_id', 'cmIntent_id', 'cmParty_id',
-        'cmCounterParty_id', 'created_by', 'cmPartyA_id', 'cmPartyB_id'];
+    protected $hidden = ['contract_typeId', 'cmParty_id', 'created_by'];
 
     public $fillable = [
         'uuid',

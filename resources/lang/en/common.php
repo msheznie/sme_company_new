@@ -151,9 +151,8 @@
      'document_attachment_error_message' =>
          'There is no attachments attached. Please attach an attachment before you confirm the document',
      'policy_not_available_for_this_document' => 'Policy not available for this document.',
-     'no_approval_level_for_this-document' => 'No approval setup created for this document',
+     'no_approval_level_for_this_document' => 'No approval setup created for this document',
      'please_set_the_approval_group' => 'Please set the approval group',
-     'no_approval_setup_created_for_this_document' => 'No approval setup created for this document',
      'document_confirmed_successfully' => 'Document confirmed successfully',
      'failed_to_confirm_document' => 'Failed to confirm document'
  ];

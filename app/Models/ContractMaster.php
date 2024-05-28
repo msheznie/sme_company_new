@@ -38,7 +38,7 @@ class ContractMaster extends Model
 
 
     protected $dates = ['deleted_at'];
-    protected $hidden = ['id', 'contractType', 'counterParty', 'counterPartyName', 'created_by'];
+    protected $hidden = ['id', 'contractType', 'counterPartyName', 'created_by'];
 
 
 
