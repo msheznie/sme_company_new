@@ -129,7 +129,7 @@
      'contract_user_assign_saved_successfully' => 'Contract user assign saved successfully',
      'contract_user_assign_not_found' => 'Contract User assign not found',
      'contract_user_assign_updated_successfully' => 'Contract user assign updated successfully',
-     'contract_user_assign_deleted_successfully' => 'Contract user assign deleted successfully',
+     'contract_user_assign_deleted_successfully' => 'Assigned user/user group deleted successfully',
      'attach_document_is_required' => 'Attach document is required',
      'document_description_already_exists' => 'Document description already exists',
      'document_name_already_exists' => 'Document name already exists',
