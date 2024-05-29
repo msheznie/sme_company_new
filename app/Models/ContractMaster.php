@@ -82,7 +82,14 @@ class ContractMaster extends Model
         'timesReferred',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'is_amendment',
+        'is_addendum',
+        'is_renewal',
+        'is_extension',
+        'is_revision',
+        'is_termination',
+        'parent_id',
     ];
 
     /**
@@ -131,7 +138,14 @@ class ContractMaster extends Model
         'approved_date' => 'datetime',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'is_amendment' => 'integer',
+        'is_addendum' => 'integer',
+        'is_renewal' => 'integer',
+        'is_extension' => 'integer',
+        'is_revision' => 'integer',
+        'is_termination' => 'integer',
+        'parent_id' => 'integer',
     ];
 
     /**

@@ -69,3 +69,6 @@ Route::resource('contract_user_groups', App\Http\Controllers\API\ContractUserGro
 
 
 Route::resource('contract_user_assigns', App\Http\Controllers\API\ContractUserAssignAPIController::class);
+
+
+Route::resource('contract_histories', App\Http\Controllers\API\ContractHistoryAPIController::class);

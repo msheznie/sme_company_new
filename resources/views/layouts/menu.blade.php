@@ -275,3 +275,9 @@
         <span>Erp Approval Roles</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('contractHistories*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractHistories.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Histories</span>
+    </a>
+</li>
