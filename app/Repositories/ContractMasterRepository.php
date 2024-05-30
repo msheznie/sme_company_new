@@ -628,7 +628,16 @@ class ContractMasterRepository extends BaseRepository
         $contractUuid = $input['contractUuid'];
         $companySystemID = $input['selectedCompanyID'];
         $message = null;
-        $contractId = ContractMaster::select('id', 'contractCode')->where('uuid', $contractUuid)->first();
+        $contractId = ContractMaster::select('id', 'contractCode', 'contractAmount')
+            ->where('uuid', $contractUuid)
+            ->first();
+
+        if($contractId['contractAmount'] == 0){
+            return [
+                'status' => false,
+                'message' => trans('common.contract_amount_is_a_mandatory_field')
+            ];
+        }
 
         $message = $this->checkActiveMasters($contractId['id'], $companySystemID);
         if ($message) {
@@ -675,9 +684,13 @@ class ContractMasterRepository extends BaseRepository
     }
 
     private function checkActiveMasters($contractId, $companySystemID){
-        $activeMasters = ContractSettingMaster::select('contractTypeSectionId')
-            ->where('contractId', $contractId)
+        $activeMasters = ContractSettingMaster::where('contractId', $contractId)
             ->where('isActive', 1)
+            ->with([
+                'contractTypeSection' => function ($q) {
+                    $q->select('ct_sectionId', 'cmSection_id');
+                }
+            ])
             ->get();
 
         $activeSections = ContractSettingDetail::select('sectionDetailId')
@@ -688,7 +701,7 @@ class ContractMasterRepository extends BaseRepository
         $existRetention = $activeSections->pluck('sectionDetailId')->toArray();
 
         foreach ($activeMasters as $activeMaster){
-            if($activeMaster['contractTypeSectionId'] == 1){
+            if($activeMaster['contractTypeSection']['cmSection_id'] == 1){
                 $existBoq = ContractBoqItems::select('qty')->where('contractId', $contractId)
                     ->where('companyId', $companySystemID)
                     ->first();
@@ -699,7 +712,7 @@ class ContractMasterRepository extends BaseRepository
                     return  trans('common.qty_is_a_mandatory_field');
                 }
             }
-            if($activeMaster['contractTypeSectionId'] == 2){
+            if($activeMaster['contractTypeSection']['cmSection_id'] == 2){
                 $existMilestone = ContractMilestone::where('contractID', $contractId)
                     ->where('companySystemID', $companySystemID)
                     ->first();
@@ -707,7 +720,7 @@ class ContractMasterRepository extends BaseRepository
                     return trans('common.at_least_one_milestone_should_be_available');
                 }
             }
-            if(($activeMaster['contractTypeSectionId'] == 4 && !in_array(4, $existRetention) &&
+            if(($activeMaster['contractTypeSection']['cmSection_id'] == 4 && !in_array(4, $existRetention) &&
                 !in_array(5, $existRetention)) || ($activeMaster['contractTypeSectionId'] == 4 &&
                     $existRetention == null)){
                 return trans('common.at_least_one_retention_should_be_available');
