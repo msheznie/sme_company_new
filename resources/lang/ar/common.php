@@ -105,23 +105,24 @@ return [
     "at_least_one_boq_item_should_be_available" =>
         "At least one BOQ item should be available to send the contract for approval AR",
     "at_least_one_milestone_should_be_available" =>
-        "At least one Milestone should be available to send the contract for approval AR",
+        "At least one milestone should be available to send the contract for approval AR",
     "at_least_one_overall_retention_should_be_available" =>
-        "At least one Overall Retention should be available to send the contract for approval AR",
+        "Fill all the mandatory fields in overall retention AR",
     "at_least_one_milestone_retention_should_be_available" =>
-        "At least one Milestone Retention should be available to send the contract for approval AR",
+        "At least one milestone retention should be available to send the contract for approval AR",
     "all_the_mandatory_details_needs_to_be_filled" =>
         "All the mandatory details needs to be filled to send the document for approval.
          Please check mandatory fields in all the tabs and confirm for approval AR",
     "at_least_one_retention_should_be_available" =>
-        "Please fill in overall retention or add at least one record to milestone retention
-         to send the contract for approval AR",
-    "milestone_title_is_a_mandatory_field" => "Milestone title is a mandatory field AR",
-    "retention_percentage_is_a_mandatory_field" => "Retention percentage is a mandatory field AR",
-    "start_date_is_a_mandatory_field" => "Start date is a mandatory field AR",
-    "due_date_is_a_mandatory_field" => "Due date is a mandatory field AR",
-    "contract_amount_is_a_mandatory_field" => "Contract amount is a mandatory field AR",
-    "qty_is_a_mandatory_field" => "Quantity is a mandatory field AR",
+        "Please enable overall retention or milestone retention to send the contract for approval AR",
+    "milestone_title_is_a_mandatory_field" => "Milestone title is a mandatory field for milestone retentions AR",
+    "retention_percentage_is_a_mandatory_field" =>
+        "Retention percentage is a mandatory field for milestone retentions AR",
+    "start_date_is_a_mandatory_field" => "Start date is a mandatory field for milestone retentions AR",
+    "due_date_is_a_mandatory_field" => "Due date is a mandatory field for milestone retentions AR",
+    "contract_amount_is_a_mandatory_field" =>
+        "Please fill and save all the mandatory fields in the contact info page AR",
+    "qty_is_a_mandatory_field" => "Quantity is a mandatory field for added BOQ Items AR",
     'contract_user_assigns_retrieved_successfully' => 'Contract user assigns retrieved successfully AR',
     'contract_user_assign_saved_successfully' => 'Contract user assign saved successfully AR',
     'contract_user_assign_not_found' => 'Contract user assign not found',
@@ -152,5 +153,7 @@ return [
     'no_approval_level_for_this_document' => 'No approval setup created for this document AR',
     'please_set_the_approval_group' => 'Please set the approval group AR',
     'document_confirmed_successfully' => 'Document confirmed successfully AR',
-    'failed_to_confirm_document' => 'Failed to confirm document AR'
+    'failed_to_confirm_document' => 'Failed to confirm document AR',
+    'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first AR'
+
 ];

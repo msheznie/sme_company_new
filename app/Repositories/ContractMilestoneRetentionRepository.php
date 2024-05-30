@@ -95,6 +95,13 @@ class ContractMilestoneRetentionRepository extends BaseRepository
 
         $totalRecords = ContractMilestone::where('contractID', $contract['id'])
             ->where('companySystemID', $companySystemID)->count();
+
+        if($totalRecords == 0){
+            return [
+                'status' => false,
+                'message' => trans('common.add_new_milestones')
+            ];
+        }
         $recordsWithMilestoneId = ContractMilestoneRetention::
             where('contractId', $contract['id'])
             ->where('companySystemId', $companySystemID)

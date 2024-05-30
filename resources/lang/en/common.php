@@ -107,23 +107,23 @@
      "at_least_one_boq_item_should_be_available" =>
          "At least one BOQ item should be available to send the contract for approval",
      "at_least_one_milestone_should_be_available" =>
-         "At least one Milestone should be available to send the contract for approval",
+         "At least one milestone should be available to send the contract for approval",
      "at_least_one_overall_retention_should_be_available" =>
-         "At least one Overall Retention should be available to send the contract for approval",
+         "Fill all the mandatory fields in overall retention",
      "at_least_one_milestone_retention_should_be_available" =>
-         "At least one Milestone Retention should be available to send the contract for approval",
+         "At least one milestone retention should be available to send the contract for approval",
      "all_the_mandatory_details_needs_to_be_filled" =>
          "All the mandatory details needs to be filled to send the document for approval.
          Please check mandatory fields in all the tabs and confirm for approval",
      "at_least_one_retention_should_be_available" =>
-         "Please fill in overall retention or add at least one record to milestone retention
-         to send the contract for approval.",
-     "milestone_title_is_a_mandatory_field" => "Milestone title is a mandatory field",
-     "retention_percentage_is_a_mandatory_field" => "Retention Percentage is a mandatory field",
-     "start_date_is_a_mandatory_field" => "Start Date is a mandatory field",
-     "due_date_is_a_mandatory_field" => "Due Date is a mandatory field",
-     "contract_amount_is_a_mandatory_field" => "Contract Amount is a mandatory field",
-     "qty_is_a_mandatory_field" => "Quantity is a mandatory field",
+         "Please enable overall retention or milestone retention to send the contract for approval",
+     "milestone_title_is_a_mandatory_field" => "Milestone title is a mandatory field for milestone retentions",
+     "retention_percentage_is_a_mandatory_field" =>
+         "Retention percentage is a mandatory field for milestone retentions",
+     "start_date_is_a_mandatory_field" => "Start date is a mandatory field for milestone retentions",
+     "due_date_is_a_mandatory_field" => "Due date is a mandatory field for milestone retentions",
+     "contract_amount_is_a_mandatory_field" => "Please fill and save all the mandatory fields in the contact info page",
+     "qty_is_a_mandatory_field" => "Quantity is a mandatory field for added BOQ Items",
      'user_status_updated_successfully' => 'User status updated successfully',
      'contract_user_assigns_retrieved_successfully' => 'Contract user assign retrieved successfully',
      'contract_user_assign_saved_successfully' => 'Contract user assign saved successfully',
@@ -154,5 +154,6 @@
      'no_approval_level_for_this_document' => 'No approval setup created for this document',
      'please_set_the_approval_group' => 'Please set the approval group',
      'document_confirmed_successfully' => 'Document confirmed successfully',
-     'failed_to_confirm_document' => 'Failed to confirm document'
+     'failed_to_confirm_document' => 'Failed to confirm document',
+     'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first'
  ];
