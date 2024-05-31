@@ -555,56 +555,77 @@ class ContractMasterRepository extends BaseRepository
             'data' => $response];
     }
 
-    public function updateOverallRetention(Request $request){
+    public function updateOverallRetention(Request $request)
+    {
         $input = $request->all();
         $contractUuid = $input['contractId'];
         $companySystemID = $input['selectedCompanyID'];
         $formData = $input['formValue'];
 
-        $contract = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
+        $contract = ContractMaster::select('id', 'contractAmount')->where('uuid', $contractUuid)->first();
 
         $overallRetention = ContractOverallRetention::where('contractId', $contract['id'])
             ->where('companySystemId', $companySystemID)
             ->first();
 
-        DB::beginTransaction();
-        try{
-
-            $data = [
-                'retentionPercentage' => $formData['retentionPercentage'] ?? null,
-                'retentionAmount' => $formData['retentionAmount'] ?? null,
-                'startDate' =>
-                    $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])
-                        ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
-                'dueDate' =>
-                    $formData['formatDueDate'] ? Carbon::parse($formData['formatDueDate'])
-                        ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
-                'retentionWithholdPeriod' => $formData['retentionWithholdPeriod'] ?? null,
+        if ($contract['contractAmount'] == 0)
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.add_contract_amount_before_adding_overall_retention')
             ];
+        } else
+        {
+            DB::beginTransaction();
+            try{
+                
+                $data = [
+                    'retentionPercentage' => $formData['retentionPercentage'] ?? null,
+                    'retentionAmount' => $formData['retentionAmount'] ?? null,
+                    'startDate' =>
+                        $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])
+                            ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                    'dueDate' =>
+                        $formData['formatDueDate'] ? Carbon::parse($formData['formatDueDate'])
+                            ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                    'retentionWithholdPeriod' => $formData['retentionWithholdPeriod'] ?? null,
+                ];
 
-            if (!$overallRetention){
-                $data['uuid'] = bin2hex(random_bytes(16));
-                $data['contractId'] = $contract['id'];
-                $data['contractAmount'] = $formData['contractAmount'] ?? null;
-                $data['companySystemId'] = $companySystemID;
-                $data['created_by'] = General::currentEmployeeId();
-                $data['created_at'] = Carbon::now();
+                if (!$overallRetention)
+                {
 
-            }else{
-                $data['updated_by'] = General::currentEmployeeId();
-                $data['updated_at'] = Carbon::now();
+                    $additionalData = [
+                        'uuid' => bin2hex(random_bytes(16)),
+                        'contractId' => $contract['id'],
+                        'contractAmount' => $formData['contractAmount'] ?? null,
+                        'companySystemId' => $companySystemID,
+                        'created_by' => General::currentEmployeeId(),
+                        'created_at' => Carbon::now(),
+                    ];
+
+                    $data = array_merge($data, $additionalData);
+
+                } else
+                {
+                    $additionalData = [
+                        'updated_by' => General::currentEmployeeId(),
+                        'updated_at' => Carbon::now(),
+                    ];
+
+                    $data = array_merge($data, $additionalData);
+                }
+
+
+                ContractOverallRetention::updateOrCreate(
+                    ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
+
+                DB::commit();
+                return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];
+
+            } catch (\Exception $ex){
+                DB::rollBack();
+                return ['status' => false, 'message' => $ex->getMessage()];
             }
-
-
-            ContractOverallRetention::updateOrCreate(
-                ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
-
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];
-
-        } catch (\Exception $ex){
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage()];
         }
     }
 
