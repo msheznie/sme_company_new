@@ -154,6 +154,6 @@ return [
     'please_set_the_approval_group' => 'Please set the approval group AR',
     'document_confirmed_successfully' => 'Document confirmed successfully AR',
     'failed_to_confirm_document' => 'Failed to confirm document AR',
-    'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first AR'
-
+    'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first AR',
+    'add_contract_amount_before_adding_overall_retention' => 'Add contract amount before adding overall retention'
 ];

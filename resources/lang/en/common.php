@@ -155,5 +155,6 @@
      'please_set_the_approval_group' => 'Please set the approval group',
      'document_confirmed_successfully' => 'Document confirmed successfully',
      'failed_to_confirm_document' => 'Failed to confirm document',
-     'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first'
+     'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first',
+     'add_contract_amount_before_adding_overall_retention' => 'Add contract amount before adding overall retention'
  ];
