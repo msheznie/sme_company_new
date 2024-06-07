@@ -27,7 +27,7 @@ class ContractHistory extends Model
     use HasFactory;
 
     public $table = 'cm_contract_history';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -40,9 +40,9 @@ class ContractHistory extends Model
         'category',
         'date',
         'end_date',
+        'uuid',
         'contract_id',
         'company_id',
-        'contract_title',
         'created_date',
         'created_by'
     ];
@@ -55,11 +55,11 @@ class ContractHistory extends Model
     protected $casts = [
         'id' => 'integer',
         'category' => 'integer',
+        'uuid' => 'string',
         'date' => 'date',
         'end_date' => 'date',
         'contract_id' => 'integer',
         'company_id' => 'integer',
-        'contract_title' => 'string',
         'created_date' => 'date',
         'created_by' => 'integer'
     ];
@@ -82,5 +82,5 @@ class ContractHistory extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+
 }

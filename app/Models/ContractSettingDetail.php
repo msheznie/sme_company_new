@@ -67,4 +67,12 @@ class ContractSettingDetail extends Model
     {
         return $this->belongsTo(ContractSectionDetail::class, 'sectionDetailId', 'id');
     }
+
+    public static function getSettingDetails($contractId, $id)
+    {
+        return self::where('contractId', $contractId)
+            ->where('settingMasterId', $id)
+            ->get();
+    }
+
 }

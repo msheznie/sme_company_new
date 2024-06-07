@@ -132,7 +132,7 @@ class ContractUserAssignRepository extends BaseRepository
                         'updated_at' => null
                     ];
 
-                    $this->create($newRecord);
+                        $this->create($newRecord);
                 }
             }
         }

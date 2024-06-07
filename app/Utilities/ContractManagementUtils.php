@@ -152,12 +152,21 @@ class ContractManagementUtils
     }
 
     static function checkContractExist($contractUuid, $companySystemID){
-        return ContractMaster::select('id')
-            ->where('uuid', $contractUuid)
+        return ContractMaster::where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
     }
     static function getDocumentReceivedFormat(){
         return DocumentReceivedFormat::select('id', 'description')->get();
+    }
+
+    static function generateUuid($length=16) : string
+    {
+        return bin2hex(random_bytes($length));
+    }
+
+    static function generateCode($lastSerialNumber, $documentCode, $length=4) : string
+    {
+            return ($documentCode  . str_pad($lastSerialNumber, $length, '0', STR_PAD_LEFT));
     }
 }

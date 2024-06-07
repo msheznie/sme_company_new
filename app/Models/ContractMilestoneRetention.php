@@ -106,7 +106,8 @@ class ContractMilestoneRetention extends Model
     }
 
 
-    public function setStartDateAttribute($value){
+    public function setStartDateAttribute($value)
+    {
         $this->attributes['startDate'] = General::convertDateTime($value);
     }
 }

@@ -38,8 +38,6 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
         Route::group(['middleware' => ['company']], function () {
             require __DIR__.'/../routes/contracts/contractsRoutes.php';
-            //main routes should be written here.
-            require __DIR__.'/../routes/contracts/contractsRoutes.php';
             require __DIR__.'/../routes/master/masterRoutes.php';
 
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])->name('Contract Type store');
@@ -63,12 +61,3 @@ Route::group(['middleware' => ['tenant']], function () {
         Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
 });
-
-
-Route::resource('contract_user_groups', App\Http\Controllers\API\ContractUserGroupAPIController::class);
-
-
-Route::resource('contract_user_assigns', App\Http\Controllers\API\ContractUserAssignAPIController::class);
-
-
-Route::resource('contract_histories', App\Http\Controllers\API\ContractHistoryAPIController::class);

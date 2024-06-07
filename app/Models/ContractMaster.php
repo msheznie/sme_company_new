@@ -261,5 +261,10 @@ class ContractMaster extends Model
         return $query;
     }
 
+    public function getMaxContractId()
+    {
+        return  (self::max('id') ?? 0) + 1;
+    }
+
 
 }

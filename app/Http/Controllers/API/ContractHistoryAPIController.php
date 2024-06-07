@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\ContractCreationException;
 use App\Http\Requests\API\CreateContractHistoryAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
-use App\Models\ContractHistory;
+use App\Http\Requests\CreateContractRequest;
 use App\Repositories\ContractHistoryRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -41,7 +42,10 @@ class ContractHistoryAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractHistoryResource::collection($contractHistories), 'Contract Histories retrieved successfully');
+        return $this->sendResponse
+        (
+            ContractHistoryResource::collection($contractHistories), 'Contract Histories retrieved successfully'
+        );
     }
 
     /**
@@ -58,7 +62,10 @@ class ContractHistoryAPIController extends AppBaseController
 
         $contractHistory = $this->contractHistoryRepository->create($input);
 
-        return $this->sendResponse(new ContractHistoryResource($contractHistory), 'Contract History saved successfully');
+        return $this->sendResponse
+        (
+            new ContractHistoryResource($contractHistory), 'Contract History saved successfully'
+        );
     }
 
     /**
@@ -74,11 +81,15 @@ class ContractHistoryAPIController extends AppBaseController
         /** @var ContractHistory $contractHistory */
         $contractHistory = $this->contractHistoryRepository->find($id);
 
-        if (empty($contractHistory)) {
+        if (empty($contractHistory))
+        {
             return $this->sendError('Contract History not found');
         }
 
-        return $this->sendResponse(new ContractHistoryResource($contractHistory), 'Contract History retrieved successfully');
+        return $this->sendResponse
+        (
+            new ContractHistoryResource($contractHistory), 'Contract History retrieved successfully'
+        );
     }
 
     /**
@@ -97,13 +108,17 @@ class ContractHistoryAPIController extends AppBaseController
         /** @var ContractHistory $contractHistory */
         $contractHistory = $this->contractHistoryRepository->find($id);
 
-        if (empty($contractHistory)) {
+        if (empty($contractHistory))
+        {
             return $this->sendError('Contract History not found');
         }
 
         $contractHistory = $this->contractHistoryRepository->update($input, $id);
 
-        return $this->sendResponse(new ContractHistoryResource($contractHistory), 'ContractHistory updated successfully');
+        return $this->sendResponse
+        (
+            new ContractHistoryResource($contractHistory), 'ContractHistory updated successfully'
+        );
     }
 
     /**
@@ -121,7 +136,8 @@ class ContractHistoryAPIController extends AppBaseController
         /** @var ContractHistory $contractHistory */
         $contractHistory = $this->contractHistoryRepository->find($id);
 
-        if (empty($contractHistory)) {
+        if (empty($contractHistory))
+        {
             return $this->sendError('Contract History not found');
         }
 
@@ -129,4 +145,21 @@ class ContractHistoryAPIController extends AppBaseController
 
         return $this->sendSuccess('Contract History deleted successfully');
     }
+
+    public function createContractHistory(CreateContractRequest $request)
+    {
+        $request->validated();
+        try
+        {
+            $this->contractHistoryRepository->createContractHistory($request);
+            return $this->sendSuccess('Successfully Created');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError('An unexpected error occurred. '.$e->getMessage() , 500);
+        }
+    }
+
 }

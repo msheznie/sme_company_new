@@ -207,4 +207,9 @@ Route::
         \App\Http\Controllers\API\MilestoneStatusHistoryAPIController::class,
         'getMilestoneStatusHistory'
     ])->name('Milestone status history');
+
+    Route::post('create-contract-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'createContractHistory'
+    ])->name('Create Contract History');
 });

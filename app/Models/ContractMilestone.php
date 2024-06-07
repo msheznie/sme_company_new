@@ -86,5 +86,18 @@ class ContractMilestone extends Model
         'updated_at' => 'nullable'
     ];
 
+    public static function getMilestoneDataByTitle($contractId,$title)
+    {
+            return self::where('title', $title)
+                ->where('contractID', $contractId)
+                ->first();
+    }
+    public static function getMilestoneData($contractId,$id)
+    {
+        return self::where('contractID', $contractId)
+            ->where('id', $id)
+            ->first();
+    }
+
 
 }

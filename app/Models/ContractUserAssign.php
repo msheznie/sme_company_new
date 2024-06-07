@@ -116,4 +116,10 @@ class ContractUserAssign extends Model
     {
         return $this->belongsTo(ContractUserGroupAssignedUser::class, 'userId', 'contractUserId');
     }
+
+    public static function getUserAssignDetailsByContractId($contractId)
+    {
+            return self::where('contractId', $contractId)
+                ->get();
+    }
 }

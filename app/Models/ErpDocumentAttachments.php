@@ -144,4 +144,13 @@ class ErpDocumentAttachments extends Model
             'message' => trans('common.attachment_document_deleted_successfully')
         ];
     }
+
+    public function getAttachmentDocumentWise($documentSystemID,$documentSystemCode,$companySystemID)
+    {
+        return self::where('companySystemID', $companySystemID)
+            ->where('documentSystemID',$documentSystemID)
+            ->where('documentSystemCode',$documentSystemCode)
+            ->get();
+
+    }
 }

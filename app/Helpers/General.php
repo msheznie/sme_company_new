@@ -82,4 +82,10 @@ class General
         }
         return 0;
     }
+
+    public static function convertDateTime($date)
+    {
+        return $date;
+    }
+
 }
