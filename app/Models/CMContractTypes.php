@@ -161,4 +161,9 @@ class CMContractTypes extends Model
         }
         return $query;
     }
+
+    public function getContractType($uuid)
+    {
+        return self::where('uuid',$uuid)->first();
+    }
 }

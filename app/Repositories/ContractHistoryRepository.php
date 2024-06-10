@@ -15,13 +15,12 @@ use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class ContractHistoryRepository
  * @package App\Repositories
  * @version May 29, 2024, 2:49 pm +04
-*/
+ */
 
 class ContractHistoryRepository extends BaseRepository
 {
@@ -62,48 +61,61 @@ class ContractHistoryRepository extends BaseRepository
         $input = $request->all();
         return DB::transaction(function () use ($input)
         {
+            $contractUuid = $input['contractUuid'];
+            $companyId = $input['companySystemId'];
             $categoryId = $input['contractCategoryId'];
+            $currentContractDetails = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
+            if (!$currentContractDetails)
+            {
+                throw new ContractCreationException('Contract not found');
+            }
 
             switch ($categoryId)
             {
                 case 2:
-                    return $this->createAddendumContract($input);
+                    return $this->createAddendumContract($input,$currentContractDetails,$companyId);
                 default:
-                    return $this->createContract($input);
+                    return $this->createContract($input,$currentContractDetails,$companyId);
             }
         });
     }
 
-    private function createAddendumContract($input)
+    private function createAddendumContract($input,$currentContractDetails,$companyId)
     {
-
-        return $this->createContract($input);
+        $input = $this->convertAndFormatInputData($input,$currentContractDetails['id']);
+        $mergedContractDetails = $this->mergeSelectedInputWithContractDetails($currentContractDetails, $input);
+        $this->createContract($input,$mergedContractDetails,$companyId);
+        return true;
     }
 
-    private function createContract($input)
+    private function createContract($input,$currentContractDetails,$companyId)
     {
-        $contractUuid = $input['contractUuid'];
-        $companyId = $input['companySystemId'];
-        $categoryId = $input['contractCategoryId'];
-        $currentContractDetails = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
 
-        if (!$currentContractDetails)
-        {
-            throw new ContractCreationException('Contract not found');
-        }
+        $categoryId = $input['contractCategoryId'];
 
         $contractId = $this->createContractInfo($currentContractDetails, $companyId, $categoryId);
         $this->createContractSetting($contractId, $currentContractDetails);
         $this->createUserAssign($currentContractDetails['id'],$contractId);
         $this->addSectionWiseRecords($currentContractDetails['id'],$contractId,$companyId);
-        $this->createHistory($input,$contractId);
+        $this->createHistory($input,$currentContractDetails['id']);
         return true;
+    }
+
+
+    private function mergeSelectedInputWithContractDetails($contractDetails, $input)
+    {
+        $contractDetailsArray = $contractDetails->toArray();
+        foreach ($input as $key => $value)
+        {
+                $contractDetailsArray[$key] = $value;
+        }
+        return $contractDetailsArray;
     }
 
     private function createContractInfo($currentContractDetails, $companyId, $categoryId)
     {
         $contactMaster = new ContractMaster();
-        $lastSerialNumber = $contactMaster->getMaxContractId();
+        $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
         $uuid = ContractManagementUtils::generateUuid();
 
@@ -215,33 +227,33 @@ class ContractHistoryRepository extends BaseRepository
 
     private function createUserAssign($cloningContractId, $contractId)
     {
-         try
-         {
+        try
+        {
             $getUserAssignById = ContractUserAssign::getUserAssignDetailsByContractId($cloningContractId);
 
             foreach ($getUserAssignById as $details)
-             {
-                 $uuid = ContractManagementUtils::generateUuid();
-                 $data = [
-                     'uuid'=> $uuid,
-                     'contractId'=> $contractId,
-                     'userGroupId'=> $details['userGroupId'],
-                     'userId'=> $details['userId'],
-                     'status'=>$details['status'],
-                     'createdBy'=> $details['createdBy'],
-                     'created_at'=> $details['created_at'],
-                     'updated_at' => $details['updated_at'],
-                     'updatedBy' => $details['updatedBy'],
-                     'isActive'=> $details['isActive'],
-                 ];
+            {
+                $uuid = ContractManagementUtils::generateUuid();
+                $data = [
+                    'uuid'=> $uuid,
+                    'contractId'=> $contractId,
+                    'userGroupId'=> $details['userGroupId'],
+                    'userId'=> $details['userId'],
+                    'status'=>$details['status'],
+                    'createdBy'=> $details['createdBy'],
+                    'created_at'=> $details['created_at'],
+                    'updated_at' => $details['updated_at'],
+                    'updatedBy' => $details['updatedBy'],
+                    'isActive'=> $details['isActive'],
+                ];
 
-                 ContractUserAssign::create($data);
-             }
+                ContractUserAssign::create($data);
+            }
 
-         }catch (Exception $e)
-         {
-             throw new ContractCreationException('Failed to create user settings '.$e->getMessage());
-         }
+        }catch (Exception $e)
+        {
+            throw new ContractCreationException('Failed to create user settings '.$e->getMessage());
+        }
     }
 
     private function addSectionWiseRecords($cloningContractId, $contractId,$companyId)
@@ -260,8 +272,8 @@ class ContractHistoryRepository extends BaseRepository
                 {
                     $createdIds = array_merge(
                         $createdIds, $this->cloneContractSettingMaster(
-                            $cmSectionId, $cloningContractId, $contractId, $companyId
-                        )
+                        $cmSectionId, $cloningContractId, $contractId, $companyId
+                    )
                     );
                 }
 
@@ -291,9 +303,11 @@ class ContractHistoryRepository extends BaseRepository
             $table = $model->getTable();
             $columns = \Schema::getColumnListing($table);
 
-            $records = $model::where('contractId', $cloningContractId)->get();
-
             $contractColumn = self::getContractColumn($columns);
+
+            $records = $model::where($contractColumn, $cloningContractId)->get();
+
+
 
             foreach ($records as $record)
             {
@@ -403,7 +417,7 @@ class ContractHistoryRepository extends BaseRepository
         }
     }
 
-    private function createHistory($data,$contractId)
+    private function createHistory($data,$cloningContractId)
     {
         $contractCategoryId = $data['contractCategoryId'];
         $companySystemId = $data['companySystemId'];
@@ -413,7 +427,7 @@ class ContractHistoryRepository extends BaseRepository
             $insert = [
                 'category' => $contractCategoryId,
                 'uuid' =>$uuid,
-                'contract_id' =>$contractId,
+                'contract_id' =>$cloningContractId,
                 'company_id' => $companySystemId,
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => now()
@@ -507,5 +521,90 @@ class ContractHistoryRepository extends BaseRepository
 
         return $contractColumn;
 
+    }
+
+    private function convertAndFormatInputData($input,$currentContractId)
+    {
+        $input['id'] = $currentContractId;
+        $fieldMappings = [
+            'contractType' => [
+                'model' => 'App\\Models\\CMContractTypes',
+                'function' => 'getContractType',
+                'colName' => 'contract_typeId'
+            ],
+
+            'counterPartyName' => [
+                'model' => 'App\\Models\\ContractUsers',
+                'function' => 'getUserData',
+                'colName' => 'id'
+            ],
+
+            'contractOwner' => [
+                'model' => 'App\\Models\\ContractUsers',
+                'function' => 'getUserData',
+                'colName' => 'id'
+            ]
+        ];
+
+        $convertedIds = [];
+
+        foreach ($fieldMappings as $inputField => $mapping)
+        {
+            if (isset($input[$inputField]))
+            {
+                $id = $this->getIdFromUuid(
+                    $mapping['model'], $input[$inputField],$mapping['function'], $mapping['colName']
+                );
+                $convertedIds[$inputField] = $id;
+
+            }
+        }
+
+        foreach ($convertedIds as $inputField => $id)
+        {
+            $input[$inputField] = $id;
+        }
+
+        if (isset($input['startDate']))
+        {
+            $input['startDate'] = self::convertDate($input['startDate'],true);
+        }
+
+        if (isset($input['endDate']))
+        {
+            $input['endDate'] =  self::convertDate($input['endDate'],true);
+        }
+
+        return $input;
+    }
+
+    private function getIdFromUuid($model, $uuid, $function, $colName)
+    {
+        $data =  new $model();
+        $result = $data->$function($uuid);
+        return $result ? $result->$colName : null;
+    }
+
+    private function convertDate($date,$isTimeFormat=false)
+    {
+        if ($isTimeFormat)
+        {
+            $formattedDate = Carbon::parse($date)->setTime(
+                Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second
+            );
+
+        } else
+        {
+            $formattedDate = Carbon::parse($date);
+        }
+
+        return $formattedDate;
+    }
+
+    public function getAllAddendumData($input)
+    {
+        $uuid = $input['contractId'];
+
+        return $uuid;
     }
 }

@@ -81,7 +81,12 @@ class ContractSettingMaster extends Model
             ->with(['contractTypeSection' => function ($q)
             {
                 $q->select('ct_sectionId', 'cmSection_id', 'is_enabled')
-                ->where('is_enabled', 1);
+                    ->where('is_enabled', 1);
+            }])
+            ->with(['contractSettingDetails' => function ($q)
+            {
+                $q->select('id', 'contractId', 'settingMasterId','sectionDetailId','isActive')
+                    ->where('isActive', 1);
             }])
             ->with(['contractSettingDetails' => function ($q)
             {

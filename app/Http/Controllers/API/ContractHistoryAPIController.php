@@ -162,4 +162,11 @@ class ContractHistoryAPIController extends AppBaseController
         }
     }
 
+    public function getAllAddendumData(Request $request)
+    {
+        $input = $request->all();
+        $data = $this->contractHistoryRepository->getAllAddendumData($input);
+        return response()->json($data);
+    }
+
 }

@@ -175,4 +175,9 @@ class ContractUsers extends Model
         return $customerMaster;
     }
 
+    public function getUserData($uuid)
+    {
+        return self::where('uuid', $uuid)->first();
+    }
+
 }

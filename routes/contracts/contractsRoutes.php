@@ -212,4 +212,9 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'createContractHistory'
     ])->name('Create Contract History');
+
+    Route::post('get-all-addendum-data', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getAllAddendumData'
+    ])->name('get Addendum Data');
 });
