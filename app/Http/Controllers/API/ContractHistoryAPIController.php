@@ -151,8 +151,8 @@ class ContractHistoryAPIController extends AppBaseController
         $request->validated();
         try
         {
-            $this->contractHistoryRepository->createContractHistory($request);
-            return $this->sendSuccess('Successfully Created');
+            $contractUuid =  $this->contractHistoryRepository->createContractHistory($request);
+            return $this->sendResponse($contractUuid,'Successfully Created');
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -165,8 +165,15 @@ class ContractHistoryAPIController extends AppBaseController
     public function getAllAddendumData(Request $request)
     {
         $input = $request->all();
-        $data = $this->contractHistoryRepository->getAllAddendumData($input);
-        return response()->json($data);
+        try
+        {
+            $data = $this->contractHistoryRepository->getAllAddendumData($input);
+            $responseData = ['data' => $data];
+            return response()->json($responseData);
+        } catch (\Exception $e)
+        {
+            return ['error' => $e->getMessage()];
+        }
     }
 
 }

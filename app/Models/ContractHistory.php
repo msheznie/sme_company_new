@@ -22,8 +22,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractHistory extends Model
 {
-    use SoftDeletes;
-
     use HasFactory;
 
     public $table = 'cm_contract_history';
@@ -31,17 +29,13 @@ class ContractHistory extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
-    protected $dates = ['deleted_at'];
-
-
-
     public $fillable = [
         'category',
         'date',
         'end_date',
         'uuid',
         'contract_id',
+        'cloning_contract_id',
         'company_id',
         'created_date',
         'created_by'
@@ -59,6 +53,7 @@ class ContractHistory extends Model
         'date' => 'date',
         'end_date' => 'date',
         'contract_id' => 'integer',
+        'cloning_contract_id' => 'integer',
         'company_id' => 'integer',
         'created_date' => 'date',
         'created_by' => 'integer'
@@ -81,6 +76,31 @@ class ContractHistory extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable'
     ];
+
+    public static function addendumData($contractId, $companyId)
+    {
+        return self::select('id', 'uuid', 'contract_id', 'company_id', 'created_at', 'created_by')
+            ->with(['employees' => function ($query)
+            {
+                $query->select('employeeSystemID', 'empName');
+            } , 'contractMaster' => function ($query)
+            {
+                $query->select('id', 'contractCode','startDate','endDate','parent_id','uuid');
+            }])
+            ->where('company_id', $companyId)
+            ->where('cloning_contract_id', $contractId)
+            ->get();
+    }
+
+    public function employees()
+    {
+        return $this->hasOne(Employees::class, 'employeeSystemID', 'created_by');
+    }
+
+    public function contractMaster()
+    {
+        return $this->hasOne(ContractMaster::class, 'id', 'contract_id');
+    }
 
 
 }
