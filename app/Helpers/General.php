@@ -88,4 +88,21 @@ class General
         return $date;
     }
 
+    public static function checkEmployeeDischargedYN(): bool
+    {
+        $user = Users::find(Auth::id());
+        if(!empty($user))
+        {
+            $employee = Employees::find($user->employee_id);
+            if ($employee->discharegedYN == -1)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+
 }

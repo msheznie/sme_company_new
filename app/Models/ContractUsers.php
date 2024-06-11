@@ -26,7 +26,7 @@ class ContractUsers extends Model
     const UPDATED_AT = 'updated_at';
 
     protected $hidden = ['id', 'contractUserId'];
-
+    protected $primaryKey = 'id';
 
     public $fillable = [
         'contractUserId',

@@ -62,7 +62,8 @@ class ErpDocumentMaster extends Model
         'timeStamp' => 'nullable'
     ];
 
-    public function documentMasterData($documentMasterID){
+    public function documentMasterData($documentMasterID)
+    {
         return ErpDocumentMaster::where('documentSystemID', $documentMasterID)->first();
     }
 

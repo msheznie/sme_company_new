@@ -2,6 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Exceptions\CommonException;
+use App\Helpers\ApproveDocument;
+use App\Helpers\RejectDocument;
 use App\Helpers\General;
 use App\Helpers\ConfirmDocument;
 use App\Models\CMContractSectionsMaster;
@@ -578,7 +581,7 @@ class ContractMasterRepository extends BaseRepository
         {
             DB::beginTransaction();
             try{
-                
+
                 $data = [
                     'retentionPercentage' => $formData['retentionPercentage'] ?? null,
                     'retentionAmount' => $formData['retentionAmount'] ?? null,
@@ -644,64 +647,50 @@ class ContractMasterRepository extends BaseRepository
         ];
     }
 
-    public function confirmContract(Request $request){
+    public function confirmContract($request)
+    {
         $input = $request->all();
-        $contractUuid = $input['contractUuid'];
-        $companySystemID = $input['selectedCompanyID'];
-        $message = null;
-        $contractId = ContractMaster::select('id', 'contractCode', 'contractAmount')
-            ->where('uuid', $contractUuid)
-            ->first();
+        return DB::transaction( function() use ($input)
+        {
+            $contractUuid = $input['contractUuid'];
+            $companySystemID = $input['selectedCompanyID'];
+            $documentSystemID = $input['documentSystemID'];
+            $contractMaster = self::findByUuid($contractUuid);
 
-        if($contractId['contractAmount'] == 0){
-            return [
-                'status' => false,
-                'message' => trans('common.contract_amount_is_a_mandatory_field')
-            ];
-        }
-
-        $message = $this->checkActiveMasters($contractId['id'], $companySystemID);
-        if ($message) {
-            return ['status' => false, 'message' => $message];
-        }
-
-        $message = $this->checkOverallAndMilestoneRetention($contractId['id'], $companySystemID);
-        if ($message) {
-            return ['status' => false, 'message' => $message];
-        }
-
-        $message = $this->checkMandatoryDetails($contractId['id'], $companySystemID);
-
-        if($message){
-            return [
-                'status' => false,
-                'message' => $message
-            ];
-        }else{
-            DB::beginTransaction();
-            try{
-                $insertData = [
-                    'autoID' => $contractId['id'],
-                    'company' => $companySystemID,
-                    'document' => 123,
-                    'documentCode' => $contractId['contractCode'] ?? null,
-                ];
-                $resConfirm = ConfirmDocument::confirmDocument($insertData);
-                if (!$resConfirm['success']) {
-                    DB::rollBack();
-                    return [
-                        'status' => false,
-                        'message' => $resConfirm['message']
-                    ];
-                }
-                DB::commit();
-                return ['status' => true, 'message' => trans('common.contract_confirmation_updated_successfully')];
-
-            } catch (\Exception $ex){
-                DB::rollBack();
-                return ['status' => false, 'message' => $ex->getMessage()];
+            if($contractMaster['contractAmount'] == 0)
+            {
+                throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
             }
-        }
+
+            $message = $this->checkActiveMasters($contractMaster['id'], $companySystemID);
+            if ($message)
+            {
+                throw new CommonException($message);
+            }
+
+            $message = $this->checkOverallAndMilestoneRetention($contractMaster['id'], $companySystemID);
+            if ($message)
+            {
+                throw new CommonException($message);
+            }
+
+            $message = $this->checkMandatoryDetails($contractMaster['id'], $companySystemID);
+
+            if($message)
+            {
+                throw new CommonException($message);
+            } else
+            {
+                $insertData = [
+                    'autoID' => $contractMaster['id'],
+                    'company' => $companySystemID,
+                    'document' => $documentSystemID,
+                    'documentCode' => $contractMaster['title'] ?? null,
+                    'amount' => $contractMaster['contractAmount'] ?? 0
+                ];
+                return ConfirmDocument::confirmDocument($insertData, $contractMaster);
+            }
+        });
     }
 
     private function checkActiveMasters($contractId, $companySystemID){
@@ -857,4 +846,62 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
+    public function getContractApprovals(Request $request)
+    {
+        $search = $request->input('search.value');
+        $isPending = $request->input('isPending') ?? 0;
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $approvals = $this->getApprovalQuery($isPending, $selectedCompanyID, $search);
+
+        return \DataTables::of($approvals)
+            ->addIndexColumn()
+            ->make(true);
+    }
+    public function getApprovalQuery($isPending, $selectedCompanyID, $search)
+    {
+        $contractMaster = $this->model->getContractApprovals(
+            $isPending,
+            $selectedCompanyID,
+            $search,
+            General::currentEmployeeId()
+        );
+        $checkEmployeeDischarged = General::checkEmployeeDischargedYN();
+        if ($checkEmployeeDischarged && $isPending == 1)
+        {
+            $contractMaster = [];
+        }
+        return $contractMaster;
+    }
+    public function approveContract($request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ( $input )
+        {
+            $contractUuid = $input['contractUuid'] ?? null;
+            $contractMaster = $this->findByUuid($contractUuid);
+            if(empty($contractMaster))
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+            return ApproveDocument::approveDocument($input, $contractMaster);
+        });
+    }
+    public function rejectContract(Request $request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ($input)
+        {
+            $contractUuid = $input['contractUuid'] ?? null;
+            $contractMaster = $this->findByUuid($contractUuid);
+            if(empty($contractMaster))
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+
+            return RejectDocument::rejectDocument($input, $contractMaster);
+        });
+    }
 }
+

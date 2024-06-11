@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\CommonException;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -84,8 +85,58 @@ class ErpApprovalLevel extends Model
 
     ];
 
-    public function approvalRole(){
+    public function approvalRole()
+    {
         return $this->hasMany(ErpApprovalRole::class,'approvalLevelID','approvalLevelID');
     }
+    public static function getApprovalLevel($approvalLevelID)
+    {
+        return ErpApprovalLevel::select('approvalLevelID', 'companySystemID', 'departmentSystemID', 'departmentID',
+            'serviceLineWise', 'serviceLineSystemID', 'serviceLineCode', 'documentSystemID', 'documentID',
+            'levelDescription', 'noOfLevels', 'valueWise', 'valueFrom', 'valueTo', 'isCategoryWiseApproval',
+            'categoryID', 'isActive'
+        )
+            ->where('approvalLevelID', $approvalLevelID)
+            ->first();
+    }
+    public static function approvalLevelValidation($params, $document, $policy)
+    {
+        $approvalLevel = ErpApprovalLevel::select('approvalLevelID')
+            ->with([
+                'approvalRole' => function ($q)
+                {
+                    $q->select('rollDescription', 'documentSystemID', 'documentID', 'companySystemID', 'companyID',
+                        'departmentSystemID', 'departmentID', 'serviceLineSystemID', 'serviceLineID', 'rollLevel',
+                        'approvalLevelID', 'approvalGroupID');
+                }
+            ])
+            ->where('companySystemID', $params['company'])
+            ->where('documentSystemID', $params['document'])
+            ->where('departmentSystemID', $document['departmentSystemID'])
+            ->where('isActive', -1);
 
+        if($policy->isAmountApproval)
+        {
+            if(array_key_exists('amount', $params))
+            {
+                if ($params["amount"] >= 0)
+                {
+                    $amount = $params["amount"];
+                    $approvalLevel->where(function ($query) use ($amount)
+                    {
+                        $query->where('valueFrom', '<=', $amount);
+                        $query->where('valueTo', '>=', $amount);
+                    });
+                    $approvalLevel->where('valueWise', 1);
+                } else
+                {
+                    throw new CommonException(trans('common.no_approval_level_for_this_document'));
+                }
+            } else
+            {
+                throw new CommonException(trans('common.amount_parameter_are_missing'));
+            }
+        }
+        return $approvalLevel->first();
+    }
 }
