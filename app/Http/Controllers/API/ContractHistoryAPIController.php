@@ -7,6 +7,7 @@ use App\Http\Requests\API\CreateContractHistoryAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
 use App\Http\Requests\CreateContractRequest;
 use App\Repositories\ContractHistoryRepository;
+use App\Services\ContractHistoryService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractHistoryResource;
@@ -21,10 +22,11 @@ class ContractHistoryAPIController extends AppBaseController
 {
     /** @var  ContractHistoryRepository */
     private $contractHistoryRepository;
-
-    public function __construct(ContractHistoryRepository $contractHistoryRepo)
+    protected $contractHistoryService;
+    public function __construct(ContractHistoryRepository $contractHistoryRepo , ContractHistoryService $contractHistoryService)
     {
         $this->contractHistoryRepository = $contractHistoryRepo;
+        $this->contractHistoryService = $contractHistoryService;
     }
 
     /**
@@ -110,7 +112,7 @@ class ContractHistoryAPIController extends AppBaseController
 
         if (empty($contractHistory))
         {
-            return $this->sendError('Contract History not found');
+            return $this->sendError('Contract History not found to update');
         }
 
         $contractHistory = $this->contractHistoryRepository->update($input, $id);
@@ -138,7 +140,7 @@ class ContractHistoryAPIController extends AppBaseController
 
         if (empty($contractHistory))
         {
-            return $this->sendError('Contract History not found');
+            return $this->sendError('Contract History not found to delete');
         }
 
         $contractHistory->delete();
@@ -167,12 +169,27 @@ class ContractHistoryAPIController extends AppBaseController
         $input = $request->all();
         try
         {
-            $data = $this->contractHistoryRepository->getAllAddendumData($input);
+            $data = $this->contractHistoryService->getAllAddendumData($input);
             $responseData = ['data' => $data];
             return response()->json($responseData);
         } catch (\Exception $e)
         {
             return ['error' => $e->getMessage()];
+        }
+    }
+
+    public function deleteContractHistory(Request $request)
+    {
+        try
+        {
+            $this->contractHistoryService->deleteContractHistory($request->all());
+            return $this->sendSuccess('Successfully deleted');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError('An unexpected error occurred. ' . $e->getMessage(), 500);
         }
     }
 

@@ -27,8 +27,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractMaster extends Model
 {
-    use SoftDeletes;
-
     use HasFactory;
 
     public $table = 'cm_contract_master';

@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
+use App\Models\ContractAdditionalDocuments;
+use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
@@ -11,6 +13,7 @@ use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
 use App\Models\ContractUserAssign;
 use App\Models\ErpDocumentAttachments;
+use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -83,10 +86,9 @@ class ContractHistoryRepository extends BaseRepository
 
     private function createAddendumContract($input,$currentContractDetails,$companyId)
     {
-        $input = $this->convertAndFormatInputData($input,$currentContractDetails['id']);
+        $input = ContractHistoryService::convertAndFormatInputData($input,$currentContractDetails['id']);
         $mergedContractDetails = $this->mergeSelectedInputWithContractDetails($currentContractDetails, $input);
-        $contract = $this->createContract($input,$mergedContractDetails,$companyId);
-        return $contract;
+        return $this->createContract($input,$mergedContractDetails,$companyId);
     }
 
     private function createContract($input,$currentContractDetails,$companyId)
@@ -512,7 +514,7 @@ class ContractHistoryRepository extends BaseRepository
         return $createdIds;
     }
 
-    private function getContractColumn($columns)
+    public function getContractColumn($columns)
     {
         $contractColumn = null;
         if (in_array('contractId', $columns))
@@ -521,102 +523,17 @@ class ContractHistoryRepository extends BaseRepository
         } elseif (in_array('contractID', $columns))
         {
             $contractColumn = 'contractID';
-        }else
+        }
+        elseif (in_array('contract_id', $columns))
         {
-            $contractColumn = null;
+            return 'contract_id';
+        }
+        else
+        {
+            $contractColumn = 'null';
         }
 
         return $contractColumn;
 
-    }
-
-    private function convertAndFormatInputData($input,$currentContractId)
-    {
-        $input['id'] = $currentContractId;
-        $fieldMappings = [
-            'contractType' => [
-                'model' => 'App\\Models\\CMContractTypes',
-                'function' => 'getContractType',
-                'colName' => 'contract_typeId'
-            ],
-
-            'counterPartyName' => [
-                'model' => 'App\\Models\\ContractUsers',
-                'function' => 'getUserData',
-                'colName' => 'id'
-            ],
-
-            'contractOwner' => [
-                'model' => 'App\\Models\\ContractUsers',
-                'function' => 'getUserData',
-                'colName' => 'id'
-            ]
-        ];
-
-        $convertedIds = [];
-
-        foreach ($fieldMappings as $inputField => $mapping)
-        {
-            if (isset($input[$inputField]))
-            {
-                $id = $this->getIdFromUuid(
-                    $mapping['model'], $input[$inputField],$mapping['function'], $mapping['colName']
-                );
-                $convertedIds[$inputField] = $id;
-
-            }
-        }
-
-        foreach ($convertedIds as $inputField => $id)
-        {
-            $input[$inputField] = $id;
-        }
-
-        if (isset($input['startDate']))
-        {
-            $input['startDate'] = self::convertDate($input['startDate'],true);
-        }
-
-        if (isset($input['endDate']))
-        {
-            $input['endDate'] =  self::convertDate($input['endDate'],true);
-        }
-
-        return $input;
-    }
-
-    private function getIdFromUuid($model, $uuid, $function, $colName)
-    {
-        $data =  new $model();
-        $result = $data->$function($uuid);
-        return $result ? $result->$colName : null;
-    }
-
-    private function convertDate($date,$isTimeFormat=false)
-    {
-        if ($isTimeFormat)
-        {
-            $formattedDate = Carbon::parse($date)->setTime(
-                Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second
-            );
-
-        } else
-        {
-            $formattedDate = Carbon::parse($date);
-        }
-
-        return $formattedDate;
-    }
-
-    public function getAllAddendumData($input)
-    {
-        $uuid = $input['contractId'];
-        $companyId = $input['selectedCompanyID'];
-        $contractData = ContractManagementUtils::checkContractExist($uuid,$companyId);
-        if (!$contractData)
-        {
-            throw new ContractCreationException('Contract not found');
-        }
-        return ContractHistory::addendumData($contractData->id,$companyId);
     }
 }

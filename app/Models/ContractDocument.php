@@ -33,7 +33,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractDocument extends Model
 {
-    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_contract_document';
@@ -41,7 +40,6 @@ class ContractDocument extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $dates = ['deleted_at'];
     protected $hidden = ['id', 'documentType'];
 
     public $fillable = [
@@ -123,5 +121,12 @@ class ContractDocument extends Model
                 'companySystemID' => $selectedCompanyID
             ])
             ->orderBy('id', 'desc');
+    }
+
+    public static function getContractDocuments($contractId, $selectedCompanyID)
+    {
+            return self::where('companySystemID',$selectedCompanyID)
+            ->where('contractID',$contractId)
+            ->get();
     }
 }

@@ -17,40 +17,41 @@ use App\Models\ContractUserGroup;
 use App\Models\ContractUsers;
 use App\Models\DocumentMaster;
 use App\Models\DocumentReceivedFormat;
+use Carbon\Carbon;
 
 class ContractManagementUtils
 {
-    static function getContractsMasters()
+    public static function getContractsMasters()
     {
         return CMContractsMaster::select('cmMaster_id', 'cmMaster_description', 'ctm_active')->where('ctm_active', 1)->get();
     }
 
-    static function getIntentMasters()
+    public static function getIntentMasters()
     {
         return CMIntentsMaster::select('cmIntent_id', 'cmIntent_detail', 'cim_active')->where('cim_active', 1)->get();
     }
 
-    static function getPartiesMasters()
+    public static function getPartiesMasters()
     {
         return CMPartiesMaster::select('cmParty_id', 'cmParty_name', 'cpm_active')->where('cpm_active', 1)->get();
     }
 
-    static function getCounterParties()
+    public static function getCounterParties()
     {
         return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name', 'cpt_active')->where('cpt_active', 1)->get();
     }
 
-    static function getContractSetions()
+    public static function getContractSetions()
     {
         return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->where('csm_active', 1)->get();
     }
 
-    static function getAllContractSetions()
+    public static function getAllContractSetions()
     {
         return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->get();
     }
 
-    static function getContractDefaultUserGroup($request)
+    public static function getContractDefaultUserGroup($request)
     {
         $input = $request->all();
         return ContractUserGroup::where('isDefault', 1)
@@ -59,7 +60,7 @@ class ContractManagementUtils
     }
 
 
-    static function getStatusDrop()
+    public static function getStatusDrop()
     {
         $result[0] = [
             'id' => 1,
@@ -72,17 +73,17 @@ class ContractManagementUtils
         return $result;
     }
 
-    static function getCompanyCurrency($companySystemID)
+    public static function getCompanyCurrency($companySystemID)
     {
         return  Company::with(['reporting_currency'])->where('companySystemID', $companySystemID)->first();
     }
 
-    static function getContractTypes()
+    public static function getContractTypes()
     {
         return CMContractTypes::select('uuid', 'cm_type_name', 'ct_active')->where('ct_active', 1)->get();
     }
 
-    static function counterPartyNames($counterPartyId)
+    public static function counterPartyNames($counterPartyId)
     {
 
         $users = ContractUsers::where('contractUserType', $counterPartyId)
@@ -117,9 +118,9 @@ class ContractManagementUtils
 
                 if($counterPartyId == 1) {
                     $name = $user['contractSupplierUser']['name'];
-                } else if($counterPartyId == 2) {
+                } elseif($counterPartyId == 2) {
                     $name = $user['contractCustomerUser']['name'];
-                } else if($counterPartyId == 3) {
+                } elseif($counterPartyId == 3) {
                     $name = $user['contractInternalUser']['name'];
                 }
 
@@ -132,18 +133,18 @@ class ContractManagementUtils
             return $supplier;
     }
 
-    static function getCounterParty(){
+    public static function getCounterParty(){
         return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name')
             ->where('cpt_active', 1)->get();
     }
 
-    static function getContractMilestones($contractId, $companySystemID) {
+    public static function getContractMilestones($contractId, $companySystemID) {
         return ContractMilestone::select('uuid', 'title')
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->get();
     }
-    static function getDocumentTypeMasters($companySystemID){
+    public static function getDocumentTypeMasters($companySystemID){
         return DocumentMaster::select('uuid', 'documentType')
             ->where([
                 'status' => 1,
@@ -151,22 +152,39 @@ class ContractManagementUtils
             ])->get();
     }
 
-    static function checkContractExist($contractUuid, $companySystemID){
+    public static function checkContractExist($contractUuid, $companySystemID)
+    {
         return ContractMaster::where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
     }
-    static function getDocumentReceivedFormat(){
+    public static function getDocumentReceivedFormat(){
         return DocumentReceivedFormat::select('id', 'description')->get();
     }
 
-    static function generateUuid($length=16) : string
+    public static function generateUuid($length=16) : string
     {
         return bin2hex(random_bytes($length));
     }
 
-    static function generateCode($lastSerialNumber, $documentCode, $length=4) : string
+    public static function generateCode($lastSerialNumber, $documentCode, $length=4) : string
     {
-            return ($documentCode  . str_pad($lastSerialNumber, $length, '0', STR_PAD_LEFT));
+        return $documentCode . str_pad($lastSerialNumber, $length, '0', STR_PAD_LEFT);
+    }
+
+    public static function convertDate($date,$isTimeFormat=false)
+    {
+        if ($isTimeFormat)
+        {
+            $formattedDate = Carbon::parse($date)->setTime(
+                Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second
+            );
+
+        } else
+        {
+            $formattedDate = Carbon::parse($date);
+        }
+
+        return $formattedDate;
     }
 }

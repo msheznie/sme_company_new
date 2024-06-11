@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractDeliverables extends Model
 {
-    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_contract_deliverables';
@@ -32,7 +31,6 @@ class ContractDeliverables extends Model
     const UPDATED_AT = 'updated_at';
 
 
-    protected $dates = ['deleted_at'];
 
 
 

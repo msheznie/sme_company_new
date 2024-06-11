@@ -27,7 +27,6 @@ use Awobaz\Compoships\Compoships;
 class ContractAdditionalDocuments extends Model
 {
     use Compoships;
-    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_contract_additional_document';
@@ -35,7 +34,6 @@ class ContractAdditionalDocuments extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $dates = ['deleted_at'];
     protected $hidden = ['id', 'documentType'];
 
     public $fillable = [
@@ -101,5 +99,12 @@ class ContractAdditionalDocuments extends Model
                 'companySystemID' => $selectedCompanyID
             ])
             ->orderBy('id', 'desc');
+    }
+
+    public static function getContractAdditionalDocuments($contractId, $selectedCompanyID)
+    {
+        return self::where('companySystemID',$selectedCompanyID)
+            ->where('contractID',$contractId)
+            ->get();
     }
 }
