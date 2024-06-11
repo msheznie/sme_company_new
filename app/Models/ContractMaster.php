@@ -284,7 +284,7 @@ class ContractMaster extends Model
     {
         return  (self::max('id') ?? 0) + 1;
     }
-    
+
     public function getContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
     {
         $approvals = DB::table('erp_documentapproved')

@@ -17,8 +17,11 @@ use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Container\Container as Application;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Yajra\DataTables\DataTables;
+use Illuminate\Http\Request;
 
 /**
  * Class ContractHistoryRepository
@@ -41,6 +44,15 @@ class ContractHistoryRepository extends BaseRepository
         'created_date',
         'created_by'
     ];
+    /**
+     * @var ContractMaster
+     */
+    private $contractMaster;
+
+    public function __construct(ContractMaster $contractMaster)
+    {
+        $this->contractMaster = $contractMaster;
+    }
 
     /**
      * Return searchable fields
@@ -78,6 +90,10 @@ class ContractHistoryRepository extends BaseRepository
             {
                 case 2:
                     return $this->createAddendumContract($input,$currentContractDetails,$companyId);
+                case 4:
+                case 6:
+                     $this->createHistory($input, null, $currentContractDetails->id);
+                     break;
                 default:
                     return $this->createContract($input,$currentContractDetails,$companyId);
             }
@@ -447,9 +463,24 @@ class ContractHistoryRepository extends BaseRepository
                 $insert['date'] = $data['date'];
             }
 
+            if (isset($data['contractTerminationDate']))
+            {
+                $insert['date'] = $this->convertDate($data['contractTerminationDate']);
+            }
+
+            if (isset($data['revisedEndDate']))
+            {
+                $insert['date'] = $this->convertDate($data['revisedEndDate']);
+            }
+
             if (isset($data['end_date']))
             {
                 $insert['end_date'] = $data['end_date'];
+            }
+
+            if (isset($data['reason']))
+            {
+                $insert['comment'] = $data['reason'];
             }
 
             $insertResponse = ContractHistory::create($insert);
@@ -535,5 +566,21 @@ class ContractHistoryRepository extends BaseRepository
 
         return $contractColumn;
 
+    }
+
+    public function getContractHistory(Request $request)
+    {
+        $input = $request->all();
+        $contractUuid = $input['contractUuid'];
+        $categoryId = $input['category'];
+        $companySystemID = $input['selectedCompanyID'];
+
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+
+       $languages = ContractHistory::contractHistory($contract->id, $categoryId, $companySystemID);
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
     }
 }

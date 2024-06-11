@@ -23,6 +23,8 @@ class ContractHistoryAPIController extends AppBaseController
     /** @var  ContractHistoryRepository */
     private $contractHistoryRepository;
     protected $contractHistoryService;
+
+    const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
     public function __construct(ContractHistoryRepository $contractHistoryRepo , ContractHistoryService $contractHistoryService)
     {
         $this->contractHistoryRepository = $contractHistoryRepo;
@@ -160,7 +162,7 @@ class ContractHistoryAPIController extends AppBaseController
             return $this->sendError($e->getMessage(), 500);
         } catch (\Exception $e)
         {
-            return $this->sendError('An unexpected error occurred. '.$e->getMessage() , 500);
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' .$e->getMessage() , 500);
         }
     }
 
@@ -189,7 +191,18 @@ class ContractHistoryAPIController extends AppBaseController
             return $this->sendError($e->getMessage(), 500);
         } catch (\Exception $e)
         {
-            return $this->sendError('An unexpected error occurred. ' . $e->getMessage(), 500);
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function getContractHistory(Request $request)
+    {
+        try
+        {
+            return $this->contractHistoryRepository->getContractHistory($request);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
         }
     }
 

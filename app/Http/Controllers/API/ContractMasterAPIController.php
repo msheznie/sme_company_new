@@ -20,6 +20,7 @@ use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
 use App\Repositories\CompanyRepository;
 use App\Repositories\ContractMasterRepository;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMasterResource;
@@ -113,7 +114,11 @@ class ContractMasterAPIController extends AppBaseController
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
         $editData = $contractMaster;
         $response = $this->contractMasterRepository->getEditFormData($editData['counterParty']);
+        $contactMaster = new ContractMaster();
+        $lastSerialNumber  = $contactMaster->getMaxContractId();
+        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
         $response['editData'] = $editData;
+        $response['newContractCode'] = $contractCode;
 
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }

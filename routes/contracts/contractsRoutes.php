@@ -217,10 +217,12 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'getAllAddendumData'
     ])->name('get Addendum Data');
-
     Route::post('delete-contract-history', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'deleteContractHistory'
     ])->name('Delete Contract History');
-
+    Route::post('get-contract-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractHistory'
+    ])->name('Get Contract History');
 });

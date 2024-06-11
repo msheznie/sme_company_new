@@ -37,8 +37,8 @@ class ContractHistory extends Model
         'contract_id',
         'cloning_contract_id',
         'company_id',
-        'created_date',
-        'created_by'
+        'created_by',
+        'comment'
     ];
 
     /**
@@ -55,8 +55,8 @@ class ContractHistory extends Model
         'contract_id' => 'integer',
         'cloning_contract_id' => 'integer',
         'company_id' => 'integer',
-        'created_date' => 'date',
-        'created_by' => 'integer'
+        'created_by' => 'integer',
+        'comment' => 'string'
     ];
 
     /**
@@ -71,10 +71,10 @@ class ContractHistory extends Model
         'contract_id' => 'required|integer',
         'company_id' => 'required|integer',
         'contract_title' => 'required|string|max:255',
-        'created_date' => 'required',
         'created_by' => 'required|integer',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'comment' => 'nullable',
     ];
 
     public static function addendumData($contractId, $companyId)
@@ -102,5 +102,29 @@ class ContractHistory extends Model
         return $this->hasOne(ContractMaster::class, 'id', 'contract_id');
     }
 
+    public function contractOldMaster()
+    {
+        return $this->belongsTo(ContractMaster::class, 'contract_id', 'id');
+    }
 
+    public function createdUser()
+    {
+        return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
+    }
+
+    public static function contractHistory($contractId, $categoryId, $companySystemID)
+    {
+        return ContractHistory::with([
+            'contractOldMaster' => function ($q)
+            {
+                $q->select('title', 'id', );
+            }, 'createdUser' => function ($q1)
+            {
+                $q1->select('employeeSystemID', 'empName');
+            }
+        ])->where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->where('category', $categoryId)
+            ->orderBy('id', 'asc');
+    }
 }
