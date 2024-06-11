@@ -99,12 +99,14 @@ class ContractMasterAPIController extends AppBaseController
                 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
-                'notifyDays', 'contractTermPeriod'
+                'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+                'is_revision','is_termination','parent_id'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
                 "contractUsers" => ['id', 'uuid'],
-                "contractOwners" => ['id', 'uuid']
+                "contractOwners" => ['id', 'uuid'],
+                "contractMasterHistory" => ['id', 'uuid','contractCode']
             ]
         );
         if (empty($contractMaster))
