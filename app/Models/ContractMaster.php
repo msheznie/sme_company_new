@@ -213,50 +213,66 @@ class ContractMaster extends Model
             ->where('contractUserId',$currentEmployeeId)
             ->first();
 
-        $query = ContractMaster::with(['contractTypes' => function ($q) {
+        $query = ContractMaster::with(['contractTypes' => function ($q)
+        {
             $q->select('contract_typeId', 'cm_type_name', 'uuid');
-        }, 'counterParties' => function ($q1) {
+        }, 'counterParties' => function ($q1)
+        {
             $q1->select('cmCounterParty_id', 'cmCounterParty_name');
-        }, 'createdUser' => function ($q2) {
+        }, 'createdUser' => function ($q2)
+        {
             $q2->select('employeeSystemID', 'empName');
-        }, 'contractUsers' => function ($q3) {
+        }, 'contractUsers' => function ($q3)
+        {
             $q3->with(['contractSupplierUser','contractCustomerUser']);
-        }, 'contractAssignedUsers' => function ($q4) use ($contractUserId) {
+        }, 'contractAssignedUsers' => function ($q4) use ($contractUserId)
+        {
             $q4->select('contractId', 'userId')
                 ->where('userId', $contractUserId->id)
                 ->where('status', 1);
         }, 'contractAssignedUsers.contractUserGroupAssignedUser'])->where('companySystemID', $companyId)
             ->orderBy('id', 'desc');
-        if ($filter) {
-            if (isset($filter['counterPartyID'])) {
+        if ($filter)
+        {
+            if (isset($filter['counterPartyID']))
+            {
                 $query->where('counterParty', $filter['counterPartyID']);
             }
-            if (isset($filter['is_status'])) {
+            if (isset($filter['is_status']))
+            {
                 $query->where('status', $filter['is_status']);
             }
-            if (isset($filter['contractTypeID'])) {
+            if (isset($filter['contractTypeID']))
+            {
                 $query->where('contractType', $contractId['contract_typeId']);
             }
-            if (isset($filter['counterPartyNameID'])) {
+            if (isset($filter['counterPartyNameID']))
+            {
                 $query->where('counterPartyName', $counterPartyID['id']);
             }
         }
-        if ($search) {
+        if ($search)
+        {
             $search = str_replace("\\", "\\\\", $search);
-            $query = $query->where(function ($query) use ($search) {
+            $query = $query->where(function ($query) use ($search)
+            {
                 $query->orWhere('contractCode', 'LIKE', "%{$search}%");
                 $query->orWhere('title', 'LIKE', "%{$search}%");
                 $query->orWhere('referenceCode', 'LIKE', "%{$search}%");
-                $query->orWhereHas('contractTypes', function ($query1) use ($search) {
+                $query->orWhereHas('contractTypes', function ($query1) use ($search)
+                {
                     $query1->where('cm_type_name', 'LIKE', "%{$search}%");
                 });
-                $query->orWhereHas('counterParties', function ($query2) use ($search) {
+                $query->orWhereHas('counterParties', function ($query2) use ($search)
+                {
                     $query2->where('cmCounterParty_name', 'LIKE', "%{$search}%");
                 });
-                $query->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search) {
+                $query->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search)
+                {
                     $query3->where('supplierName', 'LIKE', "%{$search}%");
                 });
-                $query->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search) {
+                $query->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search)
+                {
                         $query4->where('customerName', 'LIKE', "%{$search}%");
                 });
             });
@@ -268,8 +284,7 @@ class ContractMaster extends Model
     {
         return  (self::max('id') ?? 0) + 1;
     }
-
-
+    
     public function getContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
     {
         $approvals = DB::table('erp_documentapproved')
@@ -361,5 +376,10 @@ class ContractMaster extends Model
             });
         }
         return $approvals;
+    }
+
+    public function contractMasterHistory()
+    {
+        return $this->hasOne(ContractMaster::class, 'id', 'parent_id');
     }
 }

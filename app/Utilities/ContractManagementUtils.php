@@ -23,7 +23,9 @@ class ContractManagementUtils
 {
     public static function getContractsMasters()
     {
-        return CMContractsMaster::select('cmMaster_id', 'cmMaster_description', 'ctm_active')->where('ctm_active', 1)->get();
+        return CMContractsMaster::select('cmMaster_id', 'cmMaster_description', 'ctm_active')
+            ->where('ctm_active', 1)
+            ->get();
     }
 
     public static function getIntentMasters()
@@ -38,12 +40,16 @@ class ContractManagementUtils
 
     public static function getCounterParties()
     {
-        return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name', 'cpt_active')->where('cpt_active', 1)->get();
+        return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name', 'cpt_active')
+            ->where('cpt_active', 1)
+            ->get();
     }
 
     public static function getContractSetions()
     {
-        return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->where('csm_active', 1)->get();
+        return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')
+            ->where('csm_active', 1)
+            ->get();
     }
 
     public static function getAllContractSetions()
@@ -87,23 +93,29 @@ class ContractManagementUtils
     {
 
         $users = ContractUsers::where('contractUserType', $counterPartyId)
-            ->when($counterPartyId == 1, function ($q) {
+            ->when($counterPartyId == 1, function ($q)
+            {
                 $q->with([
-                    'contractSupplierUser' => function ($q) {
+                    'contractSupplierUser' => function ($q)
+                    {
                         $q->selectRaw("supplierCodeSystem, CONCAT(primarySupplierCode, ' | ', supplierName) as name");
                     }
                 ]);
             })
-            ->when($counterPartyId == 2, function ($q) {
+            ->when($counterPartyId == 2, function ($q)
+            {
                 $q->with([
-                    'contractCustomerUser' => function ($q) {
+                    'contractCustomerUser' => function ($q)
+                    {
                         $q->selectRaw("customerCodeSystem, CONCAT(CutomerCode, ' | ', CustomerName) as name");
                     }
                 ]);
             })
-            ->when($counterPartyId == 3, function ($q) {
+            ->when($counterPartyId == 3, function ($q)
+            {
                 $q->with([
-                    'contractInternalUser' => function ($q) {
+                    'contractInternalUser' => function ($q)
+                    {
                         $q->selectRaw("employeeSystemID, CONCAT(empID, ' | ', empName) as name");
                     }
                 ]);
@@ -112,15 +124,19 @@ class ContractManagementUtils
 
             $supplier = array();
 
-            foreach ($users as $user){
+            foreach ($users as $user)
+            {
                 $uuid = $user->uuid;
                 $name = '';
 
-                if($counterPartyId == 1) {
+                if($counterPartyId == 1)
+                {
                     $name = $user['contractSupplierUser']['name'];
-                } elseif($counterPartyId == 2) {
+                } elseif($counterPartyId == 2)
+                {
                     $name = $user['contractCustomerUser']['name'];
-                } elseif($counterPartyId == 3) {
+                } else
+                {
                     $name = $user['contractInternalUser']['name'];
                 }
 
@@ -133,18 +149,21 @@ class ContractManagementUtils
             return $supplier;
     }
 
-    public static function getCounterParty(){
+    public static function getCounterParty()
+    {
         return CMCounterPartiesMaster::select('cmCounterParty_id', 'cmCounterParty_name')
             ->where('cpt_active', 1)->get();
     }
 
-    public static function getContractMilestones($contractId, $companySystemID) {
+    public static function getContractMilestones($contractId, $companySystemID)
+    {
         return ContractMilestone::select('uuid', 'title')
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->get();
     }
-    public static function getDocumentTypeMasters($companySystemID){
+    public static function getDocumentTypeMasters($companySystemID)
+    {
         return DocumentMaster::select('uuid', 'documentType')
             ->where([
                 'status' => 1,
@@ -158,7 +177,8 @@ class ContractManagementUtils
             ->where('companySystemID', $companySystemID)
             ->first();
     }
-    public static function getDocumentReceivedFormat(){
+    public static function getDocumentReceivedFormat()
+    {
         return DocumentReceivedFormat::select('id', 'description')->get();
     }
 
