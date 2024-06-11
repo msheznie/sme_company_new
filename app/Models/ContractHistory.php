@@ -77,7 +77,7 @@ class ContractHistory extends Model
         'comment' => 'nullable',
     ];
 
-    public static function addendumData($contractId, $companyId)
+    public static function addendumData($contractId, $companyId,$contractCategory)
     {
         return self::select('id', 'uuid', 'contract_id', 'company_id', 'created_at', 'created_by')
             ->with(['employees' => function ($query)
@@ -85,9 +85,12 @@ class ContractHistory extends Model
                 $query->select('employeeSystemID', 'empName');
             } , 'contractMaster' => function ($query)
             {
-                $query->select('id', 'contractCode','startDate','endDate','parent_id','uuid');
+                $query->select('id', 'contractCode','startDate','endDate','parent_id','uuid','confirmed_yn',
+                'approved_yn','refferedBackYN','timesReferred'
+                );
             }])
             ->where('company_id', $companyId)
+            ->where('category', $contractCategory)
             ->where('cloning_contract_id', $contractId)
             ->get();
     }

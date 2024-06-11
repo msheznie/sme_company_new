@@ -28,7 +28,9 @@ class ContractHistoryService
                 $categoryId = $input['category'];
                 $getContractId = ContractManagementUtils::checkContractExist($uuid, $companyId);
                 $contractDocuments = ContractDocument::getContractDocuments($getContractId['id'], $companyId);
-                $contractAdditionalDocuments = ContractAdditionalDocuments::getContractAdditionalDocuments($getContractId['id'], $companyId);
+                $contractAdditionalDocuments = ContractAdditionalDocuments::getContractAdditionalDocuments(
+                    $getContractId['id'], $companyId
+                );
                 $this->deleteRelatedModels($getContractId['id'], $companyId, $categoryId);
                 $this->deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments);
             });
@@ -99,12 +101,13 @@ class ContractHistoryService
     {
         $uuid = $input['contractId'];
         $companyId = $input['selectedCompanyID'];
+        $contractCategory = $input['contractCategory'];
         $contractData = ContractManagementUtils::checkContractExist($uuid,$companyId);
         if (!$contractData)
         {
             throw new ContractCreationException('Contract not found');
         }
-        return ContractHistory::addendumData($contractData->id,$companyId);
+        return ContractHistory::addendumData($contractData->id,$companyId,$contractCategory);
     }
 
     public static function convertAndFormatInputData($input,$currentContractId)
