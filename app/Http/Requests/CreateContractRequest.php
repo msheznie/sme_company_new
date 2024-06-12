@@ -23,11 +23,27 @@ class CreateContractRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules =
+        [
             'companySystemId' => 'required|string',
             'contractCategoryId' => 'required|integer',
-            'contractUuid' => 'required|string',
+            'contractUuid' => 'required',
         ];
+
+       if ($this->input('contractCategoryId') == 2)
+        {
+             $rules = [
+                 'counterParty' => 'required',
+                 'title' => 'required',
+                 'contractType' => 'required',
+                 'description' => 'required',
+                 'contractOwner' => 'required',
+                 'contractAmount' => 'required'
+
+             ];
+        }
+
+        return $rules;
     }
 
     public function messages()

@@ -225,4 +225,11 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'getContractHistory'
     ])->name('Get Contract History');
+
+    Route::post('update-contract-status', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateContractStatus'
+    ])->name('Update Contract Status');
+
+
 });

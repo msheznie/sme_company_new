@@ -4,9 +4,12 @@ namespace App\Services;
 use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
+use App\Models\ContractMaster;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\ContractHistoryRepository;
 use App\Utilities\ContractManagementUtils;
+use AWS\CRT\Log;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
 class ContractHistoryService
@@ -170,5 +173,75 @@ class ContractHistoryService
         $data =  new $model();
         $result = $data->$function($uuid);
         return $result ? $result->$colName : null;
+    }
+
+    public function updateContractStatus($input)
+    {
+        try
+        {
+            return DB::transaction(function () use ($input)
+            {
+                $contractId = $input['contractId'];
+                $cloneContractId = $input['cloneContractId'];
+                $companyId = $input['selectedCompanyID'];
+                $categoryId = $input['category'];
+                $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
+                $cloneContractId = ContractManagementUtils::checkContractExist($cloneContractId, $companyId);
+
+                if (!$getContractId)
+                {
+                    throw new ContractCreationException("Contract does not exist.");
+                }
+
+                $contractId = $getContractId->id;
+                $cloningContractId = $cloneContractId->id;
+
+                self::updateContractMaster($contractId, $companyId,$categoryId);
+                self::updateContractMaster($cloningContractId, $companyId,-1);
+                self::updateContractHistory($cloningContractId, $companyId);
+
+            });
+        }catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to update status: " . $e->getMessage());
+        }
+    }
+
+    public function updateContractMaster($contractId, $companyId,$status)
+    {
+        try
+        {
+            $data = [
+                'status'  => $status
+            ];
+
+            ContractMaster::where('companySystemID', $companyId)
+                ->where('id', $contractId)
+                ->update($data);
+        }
+
+        catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+        }
+    }
+
+    public function updateContractHistory($contractId, $companyId)
+    {
+        try
+        {
+            $data = [
+                'date'  => carbon::now()->format('Y-m-d'),
+            ];
+
+            ContractHistory::where('company_id', $companyId)
+                ->where('contract_id', $contractId)
+                ->update($data);
+        }
+
+        catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+        }
     }
 }

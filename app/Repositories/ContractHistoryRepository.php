@@ -165,7 +165,7 @@ class ContractHistoryRepository extends BaseRepository
             'secondaryEmail' => $currentContractDetails["secondaryEmail"],
             'secondaryPhoneNumber' => $currentContractDetails["secondaryPhoneNumber"],
             'documentMasterId' => $currentContractDetails["documentMasterId"],
-            'status' => $currentContractDetails["status"],
+            'status' => 0,
             'uuid' => $uuid,
             'companySystemID' => $companyId,
             'created_by' => General::currentEmployeeId(),
