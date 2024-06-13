@@ -232,4 +232,8 @@ Route::
     ])->name('Update Contract Status');
 
 
+    Route::post('get-contract-view-data', [
+        \App\Http\Controllers\API\ContractMasterAPIController::class,
+        'getContractViewData'
+    ])->name('get contract view data');
 });

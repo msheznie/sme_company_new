@@ -6,6 +6,7 @@ use App\Http\Requests\API\CreateErpDocumentAttachmentsAPIRequest;
 use App\Http\Requests\API\UpdateErpDocumentAttachmentsAPIRequest;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\AttachmentService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ErpDocumentAttachmentsResource;
@@ -20,10 +21,15 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
 {
     /** @var  ErpDocumentAttachmentsRepository */
     private $erpDocumentAttachmentsRepository;
+    private $attachmentService;
 
-    public function __construct(ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo)
+    public function __construct(
+        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo,
+        AttachmentService  $attachmentService
+    )
     {
         $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepo;
+        $this->attachmentService = $attachmentService;
     }
 
     /**
@@ -139,5 +145,19 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         } else {
             return $this->sendError($documentAttachments['message'], $documentAttachments['code']);
         }
+    }
+    public function getDocumentAttachments(Request $request)
+    {
+        $documentSystemID = $request->input('documentSystemID') ?? 0;
+        $documentSystemUuid = $request->input('documentSystemUuid') ?? 0;
+        $search = $request->input('search.value');
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $ids = $this->attachmentService->getDocumentSystemID($documentSystemUuid, $documentSystemID);
+        return $this->erpDocumentAttachmentsRepository->getDocumentAttachments(
+            $documentSystemID,
+            $search,
+            $selectedCompanyID,
+            $ids
+        );
     }
 }

@@ -138,5 +138,6 @@ class ConfirmDocument
             throw new CommonException(trans('common.document_is_already_confirmed'));
         }
         return true;
+
     }
 }

@@ -20,6 +20,7 @@ use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
 use App\Repositories\CompanyRepository;
 use App\Repositories\ContractMasterRepository;
+use App\Services\ContractMasterService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -38,15 +39,21 @@ class ContractMasterAPIController extends AppBaseController
 {
     /** @var  ContractMasterRepository */
     private $contractMasterRepository;
+    private $contractMasterService;
     /**
      * @var CompanyRepository
      */
     private $companyRepository;
 
-    public function __construct(ContractMasterRepository $contractMasterRepo, CompanyRepository $companyRepository)
+    public function __construct(
+        ContractMasterRepository $contractMasterRepo,
+        CompanyRepository $companyRepository,
+        ContractMasterService $contractMasterService
+    )
     {
         $this->contractMasterRepository = $contractMasterRepo;
         $this->companyRepository = $companyRepository;
+        $this->contractMasterService = $contractMasterService;
     }
 
     /**
@@ -448,6 +455,23 @@ class ContractMasterAPIController extends AppBaseController
             return $this->sendResponse([], trans('common.document_successfully_rejected'));
         }
         catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+    public function getContractViewData(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid') ?? null;
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        try
+        {
+            $response = $this->contractMasterService->getContractViewData($contractUuid, $selectedCompanyID);
+            return $this->sendResponse($response, trans('common.retrieved_successfully'));
+        } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), 500);
         }

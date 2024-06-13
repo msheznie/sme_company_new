@@ -8,9 +8,12 @@ use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
 use App\Models\ErpDocumentMaster;
 use App\Repositories\BaseRepository;
+use App\Services\AttachmentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\DataTables;
+
 /**
  * Class ErpDocumentAttachmentsRepository
  * @package App\Repositories
@@ -177,5 +180,18 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
             ];
         }
 
+    }
+    public function getDocumentAttachments($documentSystemID, $search, $selectedCompanyID, $ids)
+    {
+        $languages =  $this->model->getDocumentAttachments(
+            $search,
+            $documentSystemID,
+            $selectedCompanyID,
+            $ids
+        );
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
     }
 }
