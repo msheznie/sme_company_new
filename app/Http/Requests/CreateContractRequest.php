@@ -26,7 +26,6 @@ class CreateContractRequest extends FormRequest
 
         $rules =
         [
-
             'companySystemId' => 'required|string',
             'contractCategoryId' => 'required|integer',
             'contractUuid' => 'required',
@@ -41,9 +40,10 @@ class CreateContractRequest extends FormRequest
                  'description' => 'required',
                  'contractOwner' => 'required',
                  'contractAmount' => 'required'
-
              ];
         }
+
+
         if ($this->input('contractCategoryId') == 4)
         {
             $rules =
@@ -51,7 +51,6 @@ class CreateContractRequest extends FormRequest
                     'revisedEndDate'=> 'required',
                     'reason'=> 'required|string'
                 ];
-
         }
 
         return $rules;

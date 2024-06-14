@@ -124,7 +124,7 @@ class ContractHistory extends Model
         return ContractHistory::with([
             'contractOldMaster' => function ($q)
             {
-                $q->select('title', 'id', );
+                $q->select('title', 'id', 'status' );
             }, 'createdUser' => function ($q1)
             {
                 $q1->select('employeeSystemID', 'empName');
@@ -134,6 +134,7 @@ class ContractHistory extends Model
             ->where('category', $categoryId)
             ->orderBy('id', 'asc');
     }
+
     public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
     {
         $approvals = DB::table('erp_documentapproved')

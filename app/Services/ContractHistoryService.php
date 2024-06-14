@@ -409,6 +409,7 @@ class ContractHistoryService
         {
             throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
         }
+
     }
 
     public function getCategoryWiseContractCount($contractMasterData,$comapnyId)

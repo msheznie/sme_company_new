@@ -284,7 +284,6 @@ class ContractHistoryAPIController extends AppBaseController
         } catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
-
         }
     }
 
