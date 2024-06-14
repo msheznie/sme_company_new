@@ -685,7 +685,7 @@ class ContractMasterRepository extends BaseRepository
                     'autoID' => $contractMaster['id'],
                     'company' => $companySystemID,
                     'document' => $documentSystemID,
-                    'documentCode' => $contractMaster['title'] ?? null,
+                    'documentCode' => $contractMaster['contractCode'] ?? null,
                     'amount' => $contractMaster['contractAmount'] ?? 0
                 ];
                 return ConfirmDocument::confirmDocument($insertData, $contractMaster);
