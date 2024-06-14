@@ -380,6 +380,8 @@ class ContractMasterRepository extends BaseRepository
         unset($contract['contractOwner']);
         unset($contract['contractType']);
         unset($contract['counterPartyName']);
+        $contract['parent_id'] = $contract['parent_id'] ?? null;
+        unset($contract['parent_id']);
 
         return $contract;
     }

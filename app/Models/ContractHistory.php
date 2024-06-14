@@ -116,7 +116,10 @@ class ContractHistory extends Model
         return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
     }
 
-    public static function contractHistory($contractId, $categoryId, $companySystemID)
+    public static function contractHistory
+    (
+        $contractId, $categoryId, $companySystemID,$contractColumnName = 'contract_id'
+    )
     {
         return ContractHistory::with([
             'contractOldMaster' => function ($q)
@@ -126,12 +129,11 @@ class ContractHistory extends Model
             {
                 $q1->select('employeeSystemID', 'empName');
             }
-        ])->where('contract_id', $contractId)
+        ])->where($contractColumnName, $contractId)
             ->where('company_id', $companySystemID)
             ->where('category', $categoryId)
             ->orderBy('id', 'asc');
     }
-
     public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
     {
         $approvals = DB::table('erp_documentapproved')

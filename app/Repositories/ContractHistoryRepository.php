@@ -588,4 +588,12 @@ class ContractHistoryRepository extends BaseRepository
             ->addIndexColumn()
             ->make(true);
     }
+
+    public function getCategoryWiseData($params)
+    {
+        $contractId = $params['contractId'];
+        $category = $params['category'];
+        $companyId = $params['companyId'];
+        return ContractHistory::contractHistory($contractId,$category,$companyId,'cloning_contract_id')->get();
+    }
 }

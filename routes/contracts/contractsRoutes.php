@@ -213,10 +213,10 @@ Route::
         'createContractHistory'
     ])->name('Create Contract History');
 
-    Route::post('get-all-addendum-data', [
+    Route::post('get-category-wise-contract-data', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
-        'getAllAddendumData'
-    ])->name('get Addendum Data');
+        'getCategoryWiseContractData'
+    ])->name('get Contract History Category Wise Data');
     Route::post('delete-contract-history', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'deleteContractHistory'

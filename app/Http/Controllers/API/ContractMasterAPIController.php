@@ -19,8 +19,10 @@ use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
 use App\Repositories\CompanyRepository;
+use App\Repositories\ContractHistoryRepository;
 use App\Repositories\ContractMasterRepository;
 use App\Services\ContractMasterService;
+use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -99,10 +101,12 @@ class ContractMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function show($id)
+    public function show($id,Request $request,ContractHistoryService $contractHistoryService)
     {
+        $input = $request->all();
+        $comapnyId = $input['selectedCompanyID'];
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
-            ['uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode',
+            [   'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode',
                 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
@@ -120,6 +124,14 @@ class ContractMasterAPIController extends AppBaseController
         {
             return $this->sendError( trans('common.contract_not_found'));
         }
+
+        $contractCategoryWiseData =  $contractHistoryService->getCategoryWiseContractCount($contractMaster,$comapnyId);
+        if($contractCategoryWiseData)
+        {
+            $contractMaster['contractCategoryWiseCount'] = count($contractCategoryWiseData);
+        }
+
+
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
         $editData = $contractMaster;
         $response = $this->contractMasterRepository->getEditFormData($editData['counterParty']);

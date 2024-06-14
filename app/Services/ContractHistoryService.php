@@ -106,7 +106,7 @@ class ContractHistoryService
                 ->delete();
         }
     }
-    public function getAllAddendumData($input)
+    public function getCategoryWiseContractData($input)
     {
         $uuid = $input['contractId'];
         $companyId = $input['selectedCompanyID'];
@@ -409,5 +409,34 @@ class ContractHistoryService
         {
             throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
         }
+    }
+
+    public function getCategoryWiseContractCount($contractMasterData,$comapnyId)
+    {
+        $category = self::getContractCategory($contractMasterData);
+
+        if($category == 0)
+        {
+            return 0;
+        }
+
+        $data =
+        [
+            'contractId' => $contractMasterData->parent_id,
+            'category' => $category,
+            'companyId'=>$comapnyId
+        ];
+
+        return $this->contractHistoryRepository->getCategoryWiseData($data);
+    }
+
+    protected function getContractCategory($contractMaster) : int
+    {
+        if ($contractMaster['is_addendum'])
+        {
+            return 2;
+        }
+
+        return 0;
     }
 }

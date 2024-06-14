@@ -174,12 +174,12 @@ class ContractHistoryAPIController extends AppBaseController
         }
     }
 
-    public function getAllAddendumData(Request $request)
+    public function getCategoryWiseContractData(Request $request)
     {
         $input = $request->all();
         try
         {
-            $data = $this->contractHistoryService->getAllAddendumData($input);
+            $data = $this->contractHistoryService->getCategoryWiseContractData($input);
             $responseData = ['data' => $data];
             return response()->json($responseData);
         } catch (\Exception $e)

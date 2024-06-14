@@ -32,8 +32,7 @@ class CreateContractRequest extends FormRequest
             'contractUuid' => 'required',
         ];
 
-
-       if ($this->input('contractCategoryId') == 2)
+       if ($this->input('contractCategoryId') == 2 || $this->input('contractCategoryId') == 5)
         {
              $rules = [
                  'counterParty' => 'required',

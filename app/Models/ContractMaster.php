@@ -7,7 +7,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-
+use Awobaz\Compoships\Compoships;
 /**
  * Class ContractMaster
  * @package App\Models
@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 class ContractMaster extends Model
 {
     use HasFactory;
+    use Compoships;
 
     public $table = 'cm_contract_master';
 
