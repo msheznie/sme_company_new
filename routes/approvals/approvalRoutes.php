@@ -16,4 +16,16 @@ Route::group(['prefix' => 'approvals'], function ()
         \App\Http\Controllers\API\ContractMasterAPIController::class,
         'rejectContract'
     ])->name('Reject Contract');
+    Route::post('extend-contract-approvals', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractApprovals'
+    ])->name('Extend Contract approval list');
+    Route::post('approve-extend-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'approveContract'
+    ])->name('Approve Contract');
+    Route::post('reject-extend-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'rejectContract'
+    ])->name('Reject Contract');
 });

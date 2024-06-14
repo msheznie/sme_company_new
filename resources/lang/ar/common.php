@@ -171,5 +171,8 @@ return [
     'failed_to_reject_document' => 'Failed to reject document. AR',
     'retrieved_successfully' => 'Retrieved successfully AR',
     'amount_parameter_are_missing' => 'Amount parameter are missing AR',
-    'employees_department_is_not_found' => 'Employees Departments not found AR'
+    'employees_department_is_not_found' => 'Employees Departments not found AR',
+    'contract_history_not_found' => 'Contract History  not found AR',
+    "contract_history_id_is_required" => "Contract History ID is required AR",
+    "failed_to_update_contract" => "Failed to update ContractMaster AR",
 ];

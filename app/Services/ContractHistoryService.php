@@ -1,6 +1,11 @@
 <?php
 namespace App\Services;
 
+use App\Exceptions\CommonException;
+use App\Helpers\ApproveDocument;
+use App\Helpers\ConfirmDocument;
+use App\Helpers\General;
+use App\Helpers\RejectDocument;
 use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
@@ -10,6 +15,7 @@ use App\Repositories\ContractHistoryRepository;
 use App\Utilities\ContractManagementUtils;
 use AWS\CRT\Log;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
 class ContractHistoryService
@@ -236,6 +242,166 @@ class ContractHistoryService
 
             ContractHistory::where('company_id', $companyId)
                 ->where('contract_id', $contractId)
+                ->update($data);
+        }
+
+        catch (\Exception $e)
+        {
+            throw new ContractCreationException(trans('common.failed_to_update_contract: ' . $e->getMessage()));
+        }
+
+    }
+
+    public function confirmHistoryDocument($historyId,$contractId,$companySystemId,$contractCategoryId)
+    {
+        return DB::transaction( function() use ($historyId,$contractId,$companySystemId,$contractCategoryId)
+        {
+            if($contractCategoryId == 4)
+            {
+                $documentSystemID = 125;
+            }
+            if($contractCategoryId == 6)
+            {
+                $documentSystemID = 124;
+            }
+
+            $contractMaster = ContractMaster::where('id', $contractId)
+                ->where('companySystemID', $companySystemId)
+                ->first();
+            $historyMaster = ContractHistory::where('id', $historyId)
+                ->where('company_id', $companySystemId)
+                ->first();
+
+            if(!$contractMaster)
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+
+            if(!$historyMaster)
+            {
+                throw new CommonException(trans('common.contract_history_not_found'));
+            }
+
+            if($contractMaster['contractAmount'] == 0)
+            {
+                throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
+            }
+
+            $insertData = [
+                'autoID' => $historyId,
+                'company' => $companySystemId,
+                'document' => $documentSystemID,
+                'documentCode' => $contractMaster['contractCode'] ?? null,
+                'amount' => $contractMaster['contractAmount'] ?? 0
+            ];
+            return ConfirmDocument::confirmDocument($insertData, $historyMaster);
+
+        });
+    }
+
+    public function getContractApprovals(Request $request)
+    {
+        $search = $request->input('search.value');
+        $isPending = $request->input('isPending') ?? 0;
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $categoryId = $request->input('categoryId') ?? null;
+        $approvals = $this->getApprovalData($isPending, $selectedCompanyID, $search, $categoryId);
+
+        return \DataTables::of($approvals)
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    public function getApprovalData($isPending, $selectedCompanyID, $search, $categoryId)
+    {
+        if($categoryId ==  4)
+        {
+            $historyMaster = ContractHistory::getExtendContractApprovals(
+                $isPending,
+                $selectedCompanyID,
+                $search,
+                General::currentEmployeeId()
+            );
+        }
+
+        $checkEmployeeDischarged = General::checkEmployeeDischargedYN();
+        if ($checkEmployeeDischarged && $isPending == 1)
+        {
+            $historyMaster = [];
+        }
+        return $historyMaster;
+    }
+
+    public function approveContract($request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ( $input )
+        {
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+            $contractHistoryMaster = ContractHistory::where('uuid', $contractHistoryUuid)->first();
+            if(empty($contractHistoryMaster))
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+            return ApproveDocument::approveDocument($input, $contractHistoryMaster);
+        });
+    }
+
+    public function rejectContract(Request $request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ($input)
+        {
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+            $contractHistoryMaster = ContractHistory::where('uuid', $contractHistoryUuid)->first();
+            if (empty($contractHistoryMaster))
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+
+            return RejectDocument::rejectDocument($input, $contractHistoryMaster);
+        });
+    }
+
+    public function updateExtendStatus($input)
+    {
+        try
+        {
+            return DB::transaction(function () use ($input)
+            {
+                $contractId = $input['contractId'];
+                $contractEndDate = $input['contractEndDate'];
+                $companyId = $input['selectedCompanyID'];
+                $categoryId = $input['category'];
+                $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
+
+                if (!$getContractId)
+                {
+                    throw new ContractCreationException("Contract does not exist.");
+                }
+
+                $contractId = $getContractId->id;
+                self::updateContractMasterEndDate($contractId, $companyId,$categoryId,$contractEndDate);
+            });
+        }catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to update status: " . $e->getMessage());
+        }
+    }
+
+    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate)
+    {
+        try
+        {
+            $data = [
+                'endDate'  => ContractManagementUtils::convertDate($contractEndDate),
+                'status'  => $status
+            ];
+
+            ContractMaster::where('companySystemID', $companyId)
+                ->where('id', $contractId)
                 ->update($data);
         }
 

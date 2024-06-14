@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class ContractHistory
@@ -129,5 +130,100 @@ class ContractHistory extends Model
             ->where('company_id', $companySystemID)
             ->where('category', $categoryId)
             ->orderBy('id', 'asc');
+    }
+
+    public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
+    {
+        $approvals = DB::table('erp_documentapproved')
+            ->select(
+                'erp_documentapproved.rollLevelOrder',
+                'erp_documentapproved.documentApprovedID',
+                'erp_documentapproved.documentSystemID',
+                'approvalLevelID',
+                'cm_contract_master.contractCode',
+                'cm_contract_history.uuid',
+                'cm_contract_master.title',
+                'cm_contract_master.contractAmount',
+                'cm_contract_types.cm_type_name',
+                'cm_counter_parties_master.cmCounterParty_name',
+                'employees.empName As created_user',
+                'cm_contract_history.created_at',
+                'currencymaster.CurrencyCode',
+                'currencymaster.DecimalPlaces',
+                DB::raw('CASE
+                    WHEN cm_counter_parties_master.cmCounterParty_name = "Supplier" THEN suppliermaster.supplierName
+                    WHEN cm_counter_parties_master.cmCounterParty_name = "Customer" THEN customermaster.CustomerName
+                    ELSE NULL
+                 END as contractUserName')
+            )
+            ->join('cm_contract_history', function ($query) use ($selectedCompanyID, $isPending)
+            {
+                $query->on('erp_documentapproved.documentSystemCode', '=', 'cm_contract_history.id')
+                    ->when($isPending == 1, function ($query1)
+                    {
+                        $query1->on('erp_documentapproved.rollLevelOrder', '=', 'cm_contract_history.rollLevelOrder');
+                        $query1->where('cm_contract_history.approved_yn', 0)
+                            ->where('cm_contract_history.confirmed_yn', 1);
+                    })
+                    ->when($isPending == 0, function ($query1)
+                    {
+                        $query1->where('cm_contract_history.approved_yn', 1)
+                            ->where('cm_contract_history.confirmed_yn', 1);
+                    })
+                    ->where('cm_contract_history.company_id', $selectedCompanyID);
+            })
+            ->join('cm_contract_master',
+                'cm_contract_history.contract_id', '=', 'cm_contract_master.id')
+            ->join('cm_contract_types',
+                'cm_contract_master.contractType', '=', 'cm_contract_types.contract_typeId')
+            ->join('cm_counter_parties_master',
+                'cm_contract_master.counterParty', '=', 'cm_counter_parties_master.cmCounterParty_id')
+            ->join('cm_contract_users as first',
+                'cm_contract_master.counterPartyName', '=', 'first.id')
+            ->leftJoin('customermaster',
+                'first.contractUserId', 'customermaster.customerCodeSystem')
+            ->join('cm_contract_users as sec',
+                'cm_contract_master.counterPartyName', '=', 'sec.id')
+            ->leftJoin('suppliermaster',
+                'sec.contractUserId', 'suppliermaster.supplierCodeSystem')
+            ->join('employees', 'cm_contract_history.created_by', 'employees.employeeSystemID')
+            ->join('companymaster',
+                'cm_contract_master.companySystemID', '=', 'companymaster.companySystemID')
+            ->join('currencymaster',
+                'companymaster.localCurrencyID', '=', 'currencymaster.currencyID')
+            ->where('erp_documentapproved.documentSystemID', 125)
+            ->where('erp_documentapproved.companySystemID', $selectedCompanyID);
+        if ($isPending == 1)
+        {
+            $approvals = $approvals->where('erp_documentapproved.rejectedYN', 0)
+                ->where('erp_documentapproved.approvedYN', 0)
+                ->join('employeesdepartments', function ($query) use ($selectedCompanyID, $employeeID)
+                {
+                    $query->on('erp_documentapproved.approvalGroupID', '=', 'employeesdepartments.employeeGroupID')
+                        ->on('erp_documentapproved.documentSystemID', '=', 'employeesdepartments.documentSystemID')
+                        ->on('erp_documentapproved.companySystemID', '=', 'employeesdepartments.companySystemID')
+                        ->where('employeesdepartments.documentSystemID', 125)
+                        ->where('employeesdepartments.companySystemID', $selectedCompanyID)
+                        ->where('employeesdepartments.employeeSystemID', $employeeID)
+                        ->where('employeesdepartments.isActive', 1)
+                        ->where('employeesdepartments.removedYN', 0);
+                });
+        }
+        else
+        {
+            $approvals = $approvals->where('erp_documentapproved.employeeSystemID', $employeeID)
+                ->where('erp_documentapproved.approvedYN', -1);
+        }
+        $approvals = $approvals->orderBy('documentApprovedID', 'desc');
+        if ($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $approvals = $approvals->where(function ($query) use ($search)
+            {
+                $query->where('cm_contract_master.title', 'LIKE', "%{$search}%")
+                    ->orWhere('cm_contract_master.contractCode', 'LIKE', "%{$search}%");
+            });
+        }
+        return $approvals;
     }
 }

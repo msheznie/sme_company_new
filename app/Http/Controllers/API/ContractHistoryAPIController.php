@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Exceptions\ContractCreationException;
+use App\Http\Requests\API\ApproveDocumentRequest;
 use App\Http\Requests\API\CreateContractHistoryAPIRequest;
+use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
 use App\Http\Requests\CreateContractRequest;
 use App\Repositories\ContractHistoryRepository;
@@ -223,6 +226,65 @@ class ContractHistoryAPIController extends AppBaseController
         } catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+
+        }
+    }
+
+    public function getContractApprovals(Request $request)
+    {
+        try
+        {
+            return $this->contractHistoryService->getContractApprovals($request);
+
+        } catch (\Exception $e)
+        {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    public function approveContract(ApproveDocumentRequest $request)
+    {
+        try
+        {
+            $this->contractHistoryService->approveContract($request);
+            return $this->sendResponse([], trans('common.document_approved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+    }
+
+    public function rejectContract(RejectDocumentAPIRequest $request)
+    {
+        try
+        {
+            $this->contractHistoryService->rejectContract($request);
+            return $this->sendResponse([], trans('common.document_successfully_rejected'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
+    public function updateExtendStatus(Request $request)
+    {
+        try
+        {
+            $this->contractHistoryService->updateExtendStatus($request->all());
+            return $this->sendSuccess('Successfully Status Updated');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+
         }
     }
 

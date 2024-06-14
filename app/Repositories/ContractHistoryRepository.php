@@ -465,12 +465,12 @@ class ContractHistoryRepository extends BaseRepository
 
             if (isset($data['contractTerminationDate']))
             {
-                $insert['date'] = $this->convertDate($data['contractTerminationDate']);
+                $insert['date'] = ContractManagementUtils::convertDate($data['contractTerminationDate']);
             }
 
             if (isset($data['revisedEndDate']))
             {
-                $insert['date'] = $this->convertDate($data['revisedEndDate']);
+                $insert['date'] = ContractManagementUtils::convertDate($data['revisedEndDate']);
             }
 
             if (isset($data['end_date']))
@@ -487,6 +487,11 @@ class ContractHistoryRepository extends BaseRepository
             if (!$insertResponse)
             {
                 throw new ContractCreationException('Something went wrong while creating the contract history.');
+            }
+            if($contractCategoryId == 4 || $contractCategoryId == 6)
+            {
+                ContractHistoryService::
+                confirmHistoryDocument($insertResponse->id,$contractId,$companySystemId,$contractCategoryId);
             }
 
         } catch (Exception $e)

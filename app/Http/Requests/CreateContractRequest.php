@@ -23,12 +23,15 @@ class CreateContractRequest extends FormRequest
      */
     public function rules()
     {
+
         $rules =
         [
+
             'companySystemId' => 'required|string',
             'contractCategoryId' => 'required|integer',
             'contractUuid' => 'required',
         ];
+
 
        if ($this->input('contractCategoryId') == 2)
         {
@@ -42,6 +45,15 @@ class CreateContractRequest extends FormRequest
 
              ];
         }
+        if ($this->input('contractCategoryId') == 4)
+        {
+            $rules =
+                [
+                    'revisedEndDate'=> 'required',
+                    'reason'=> 'required|string'
+                ];
+
+        }
 
         return $rules;
     }
@@ -52,6 +64,8 @@ class CreateContractRequest extends FormRequest
             'companySystemId.required' =>  'Company id is required',
             'contractCategoryId.required' => 'Category id is different',
             'contractUuid.required' => 'contract uuid is required',
+            'revisedEndDate.required' => 'Revised End Date is required',
+            'reason.required' => 'Reason is required',
         ];
     }
 }

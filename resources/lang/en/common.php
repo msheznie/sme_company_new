@@ -174,5 +174,8 @@
      'failed_to_reject_document' => 'Failed to reject document.',
      'retrieved_successfully' => 'Retrieved successfully',
      'amount_parameter_are_missing' => 'Amount parameter are missing',
-     'employees_department_is_not_found' => 'Employees Departments not found'
+     'employees_department_is_not_found' => 'Employees Departments not found',
+     'contract_history_not_found' => 'Contract History  not found',
+     "contract_history_id_is_required" => "Contract History ID is required",
+     "failed_to_update_contract" => "Failed to update ContractMaster",
  ];
