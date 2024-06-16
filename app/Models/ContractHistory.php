@@ -152,7 +152,6 @@ class ContractHistory extends Model
             ->orderBy('id', 'asc');
     }
 
-
     public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID, $documentSystemID)
     {
         $approvals = DB::table('erp_documentapproved')

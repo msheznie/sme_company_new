@@ -27,8 +27,6 @@ use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMasterResource;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Response;
 use Yajra\DataTables\DataTables;
 
