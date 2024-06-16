@@ -175,4 +175,7 @@ return [
     'contract_history_not_found' => 'Contract History  not found AR',
     "contract_history_id_is_required" => "Contract History ID is required AR",
     "failed_to_update_contract" => "Failed to update ContractMaster AR",
+    "contract_does_not_exist" => "Contract does not exist AR",
+    "failed_to_update_status" => "Failed to update status AR",
+    "successfully_status_updated" => "Successfully Status Updated AR",
 ];

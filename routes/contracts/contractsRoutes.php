@@ -225,13 +225,10 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'getContractHistory'
     ])->name('Get Contract History');
-
     Route::post('update-contract-status', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'updateContractStatus'
     ])->name('Update Contract Status');
-
-
     Route::post('get-contract-view-data', [
         \App\Http\Controllers\API\ContractMasterAPIController::class,
         'getContractViewData'
@@ -240,4 +237,20 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'updateExtendStatus'
     ])->name('Update Extend Contract Status');
+    Route::post('contract-history-attachments', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractHistoryAttachments'
+    ])->name('Contract History Attachments');
+    Route::post('get-contract-history-attachments', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractHistoryAttachments'
+    ])->name('Get Contract History Attachments');
+    Route::post('delete-contract-history-attachment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteHistoryAttachment'
+    ])->name('Delete Contract History Attachments');
+    Route::post('update-terminate-contract-status', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateTerminateStatus'
+    ])->name('Update Terminate Contract Status');
 });

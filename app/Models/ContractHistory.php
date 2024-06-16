@@ -39,7 +39,17 @@ class ContractHistory extends Model
         'cloning_contract_id',
         'company_id',
         'created_by',
-        'comment'
+        'comment',
+        'confirmed_yn',
+        'confirmed_date',
+        'confirm_by',
+        'confirmed_comment',
+        'rollLevelOrder',
+        'refferedBackYN',
+        'approved_yn',
+        'approved_by',
+        'approved_date',
+        'timesReferred',
     ];
 
     /**
@@ -57,7 +67,14 @@ class ContractHistory extends Model
         'cloning_contract_id' => 'integer',
         'company_id' => 'integer',
         'created_by' => 'integer',
-        'comment' => 'string'
+        'comment' => 'string',
+        'confirmed_yn' => 'integer',
+        'confirmed_date' => 'datetime',
+        'confirm_by' => 'integer',
+        'confirmed_comment' => 'string',
+        'rollLevelOrder' => 'integer',
+        'refferedBackYN' => 'integer',
+        'timesReferred' => 'integer',
     ];
 
     /**
@@ -135,7 +152,8 @@ class ContractHistory extends Model
             ->orderBy('id', 'asc');
     }
 
-    public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID)
+
+    public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID, $documentSystemID)
     {
         $approvals = DB::table('erp_documentapproved')
             ->select(
@@ -194,18 +212,20 @@ class ContractHistory extends Model
                 'cm_contract_master.companySystemID', '=', 'companymaster.companySystemID')
             ->join('currencymaster',
                 'companymaster.localCurrencyID', '=', 'currencymaster.currencyID')
-            ->where('erp_documentapproved.documentSystemID', 125)
+            ->where('erp_documentapproved.documentSystemID', $documentSystemID)
             ->where('erp_documentapproved.companySystemID', $selectedCompanyID);
         if ($isPending == 1)
         {
             $approvals = $approvals->where('erp_documentapproved.rejectedYN', 0)
                 ->where('erp_documentapproved.approvedYN', 0)
-                ->join('employeesdepartments', function ($query) use ($selectedCompanyID, $employeeID)
+                ->join('employeesdepartments', function ($query) use ($selectedCompanyID,
+                    $employeeID,
+                    $documentSystemID)
                 {
                     $query->on('erp_documentapproved.approvalGroupID', '=', 'employeesdepartments.employeeGroupID')
                         ->on('erp_documentapproved.documentSystemID', '=', 'employeesdepartments.documentSystemID')
                         ->on('erp_documentapproved.companySystemID', '=', 'employeesdepartments.companySystemID')
-                        ->where('employeesdepartments.documentSystemID', 125)
+                        ->where('employeesdepartments.documentSystemID', $documentSystemID)
                         ->where('employeesdepartments.companySystemID', $selectedCompanyID)
                         ->where('employeesdepartments.employeeSystemID', $employeeID)
                         ->where('employeesdepartments.isActive', 1)

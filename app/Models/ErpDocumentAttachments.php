@@ -39,6 +39,7 @@ class ErpDocumentAttachments extends Model
     use HasFactory;
 
     public $table = 'erp_documentattachments';
+    protected $primaryKey = 'attachmentID';
 
     const CREATED_AT = 'timeStamp';
     const UPDATED_AT = 'timeStamp';
@@ -123,6 +124,24 @@ class ErpDocumentAttachments extends Model
                 ];
             }
         }
+        return [
+            'status' => true,
+            'message' => trans('common.attachment_document_deleted_successfully')
+        ];
+    }
+
+    public static function deleteHistoryAttachment($attachmentID): array
+    {
+
+        $delete = ErpDocumentAttachments::where('attachmentID', $attachmentID)->delete();
+        if(!$delete)
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.could_not_delete_attachment')
+            ];
+        }
+
         return [
             'status' => true,
             'message' => trans('common.attachment_document_deleted_successfully')

@@ -178,4 +178,7 @@
      'contract_history_not_found' => 'Contract History  not found',
      "contract_history_id_is_required" => "Contract History ID is required",
      "failed_to_update_contract" => "Failed to update ContractMaster",
+     "contract_does_not_exist" => "Contract does not exist",
+     "failed_to_update_status" => "Failed to update status",
+     "successfully_status_updated" => "Successfully Status Updated",
  ];

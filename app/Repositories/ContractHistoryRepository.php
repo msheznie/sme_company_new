@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
+use App\Models\Company;
 use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
@@ -12,6 +13,7 @@ use App\Models\ContractMilestone;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
 use App\Models\ContractUserAssign;
+use App\Models\DocumentAttachments;
 use App\Models\ErpDocumentAttachments;
 use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;

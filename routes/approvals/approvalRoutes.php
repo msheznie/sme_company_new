@@ -20,12 +20,24 @@ Route::group(['prefix' => 'approvals'], function ()
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'getContractApprovals'
     ])->name('Extend Contract approval list');
+    Route::post('terminate-contract-approvals', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractApprovals'
+    ])->name('Terminate Contract approval list');
     Route::post('approve-extend-contract', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'approveContract'
-    ])->name('Approve Contract');
+    ])->name('Approve Extend Contract');
+    Route::post('approve-terminate-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'approveContract'
+    ])->name('Approve Terminate Contract');
     Route::post('reject-extend-contract', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'rejectContract'
-    ])->name('Reject Contract');
+    ])->name('Reject Extend Contract');
+    Route::post('reject-terminate-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'rejectContract'
+    ])->name('Reject Terminate Contract');
 });

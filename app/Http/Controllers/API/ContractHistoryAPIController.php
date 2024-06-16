@@ -9,11 +9,15 @@ use App\Http\Requests\API\CreateContractHistoryAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
 use App\Http\Requests\CreateContractRequest;
+use App\Http\Requests\CreateContractHistoryAttachmentRequest;
 use App\Repositories\ContractHistoryRepository;
+use App\Repositories\ErpDocumentAttachmentsRepository;
 use App\Services\ContractHistoryService;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractHistoryResource;
+use Illuminate\Support\Facades\Log;
 use Response;
 
 /**
@@ -26,17 +30,17 @@ class ContractHistoryAPIController extends AppBaseController
     /** @var  ContractHistoryRepository */
     private $contractHistoryRepository;
     protected $contractHistoryService;
+    protected $erpDocumentAttachmentsRepository ;
 
     const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
-    public function __construct
-    (
-    ContractHistoryRepository $contractHistoryRepo,
-    ContractHistoryService $contractHistoryService
-    )
 
+    public function __construct(ContractHistoryRepository $contractHistoryRepo,
+                                ContractHistoryService $contractHistoryService,
+                                ErpDocumentAttachmentsRepository  $erpDocumentAttachmentsRepository)
     {
         $this->contractHistoryRepository = $contractHistoryRepo;
         $this->contractHistoryService = $contractHistoryService;
+        $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepository;
     }
 
     /**
@@ -219,7 +223,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $this->contractHistoryService->updateContractStatus($request->all());
-            return $this->sendSuccess('Successfully Status Updated');
+            return $this->sendSuccess(trans('common.successfully_status_updated'));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -277,7 +281,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $this->contractHistoryService->updateExtendStatus($request->all());
-            return $this->sendSuccess('Successfully Status Updated');
+            return $this->sendSuccess(trans('common.successfully_status_updated'));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -285,6 +289,84 @@ class ContractHistoryAPIController extends AppBaseController
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
         }
+
     }
 
+    public function updateTerminateStatus(Request $request)
+    {
+        try
+        {
+            $this->contractHistoryService->updateTerminateStatus($request->all());
+            return $this->sendSuccess('Successfully Status Updated');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+
+        }
+
+    }
+
+    public function contractHistoryAttachments(CreateContractHistoryAttachmentRequest $request)
+    {
+        try
+        {
+            $formData = $request->all();
+            $companySystemID = $formData['selectedCompanyID'] ?? 0;
+            $currentContractDetails = ContractManagementUtils::checkContractExist($formData['uuid'], $companySystemID);
+
+            if ($request->has('attachmentID') && $request->input('attachmentID'))
+            {
+                $attachment = $this->erpDocumentAttachmentsRepository
+                    ->updateDocumentAttachments($request, $request->input('attachmentID'));
+            } else
+            {
+                $attachment = $this->erpDocumentAttachmentsRepository
+                    ->saveDocumentAttachments($request, $currentContractDetails->id);
+            }
+
+            if (!$attachment['status'])
+            {
+                $errorCode = $attachment['code'] ?? 404;
+                return $this->sendError($attachment['message'], $errorCode);
+            }
+
+
+            return $this->sendResponse([], 'Successfully Created');
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+
+    public function getContractHistoryAttachments(Request $request)
+    {
+        try
+        {
+            $attachment = $this->erpDocumentAttachmentsRepository
+                ->getHistoryAttachments($request);
+
+            return $this->sendResponse($attachment, 'Successfully Retrieved');
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteHistoryAttachment(Request $request)
+    {
+        try
+        {
+            $formData = $request->all();
+            $attachmentId = $formData['attachmentID'];
+            return $this->erpDocumentAttachmentsRepository
+                ->deleteHistoryAttachment($attachmentId);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
 }

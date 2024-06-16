@@ -196,7 +196,7 @@ class ContractHistoryService
 
                 if (!$getContractId)
                 {
-                    throw new ContractCreationException("Contract does not exist.");
+                    throw new ContractCreationException(trans('common.contract_does_not_exist'));
                 }
 
                 $contractId = $getContractId->id;
@@ -209,7 +209,7 @@ class ContractHistoryService
             });
         }catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update status: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_status: ' . $e->getMessage()));
         }
     }
 
@@ -320,7 +320,17 @@ class ContractHistoryService
                 $isPending,
                 $selectedCompanyID,
                 $search,
-                General::currentEmployeeId()
+                General::currentEmployeeId(),
+                125
+            );
+        } else
+        {
+            $historyMaster = ContractHistory::getExtendContractApprovals(
+                $isPending,
+                $selectedCompanyID,
+                $search,
+                General::currentEmployeeId(),
+                124
             );
         }
 
@@ -379,7 +389,7 @@ class ContractHistoryService
 
                 if (!$getContractId)
                 {
-                    throw new ContractCreationException("Contract does not exist.");
+                    throw new ContractCreationException(trans('common.contract_does_not_exist'));
                 }
 
                 $contractId = $getContractId->id;
@@ -388,6 +398,32 @@ class ContractHistoryService
         }catch (\Exception $e)
         {
             throw new ContractCreationException("Failed to update status: " . $e->getMessage());
+        }
+    }
+
+    public function updateTerminateStatus($input)
+    {
+        try
+        {
+            return DB::transaction(function () use ($input)
+            {
+                $contractId = $input['contractId'];
+                $companyId = $input['selectedCompanyID'];
+                $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
+
+                if (!$getContractId)
+                {
+                    throw new ContractCreationException(trans('common.contract_does_not_exist'));
+                }
+
+                $contractId = $getContractId->id;
+                ContractMaster::where('companySystemID', $companyId)
+                    ->where('id', $contractId)
+                    ->update(['is_termination'  => 1]);
+            });
+        }catch (\Exception $e)
+        {
+            throw new ContractCreationException(trans('common.failed_to_update_status: ' . $e->getMessage()));
         }
     }
 
