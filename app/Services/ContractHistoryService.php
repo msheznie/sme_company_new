@@ -10,6 +10,7 @@ use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
+use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\ContractHistoryRepository;
 use App\Utilities\ContractManagementUtils;
@@ -385,6 +386,7 @@ class ContractHistoryService
                 $contractEndDate = $input['contractEndDate'];
                 $companyId = $input['selectedCompanyID'];
                 $categoryId = $input['category'];
+                $newContractTermPeriod = $input['newContractTermPeriod'];
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
 
                 if (!$getContractId)
@@ -393,7 +395,8 @@ class ContractHistoryService
                 }
 
                 $contractId = $getContractId->id;
-                self::updateContractMasterEndDate($contractId, $companyId,$categoryId,$contractEndDate);
+                self::updateContractMasterEndDate
+                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod);
             });
         }catch (\Exception $e)
         {
@@ -427,13 +430,15 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate)
+    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod)
+
     {
         try
         {
             $data = [
                 'endDate'  => ContractManagementUtils::convertDate($contractEndDate),
-                'status'  => $status
+                'status'  => $status,
+                'contractTermPeriod'  => $newContractTermPeriod,
             ];
 
             ContractMaster::where('companySystemID', $companyId)
@@ -445,7 +450,6 @@ class ContractHistoryService
         {
             throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
         }
-
     }
 
     public function getCategoryWiseContractCount($contractMasterData,$comapnyId)
@@ -475,5 +479,25 @@ class ContractHistoryService
         }
 
         return 0;
+    }
+
+    public function contractHistoryDelete($input)
+    {
+        try
+        {
+            return DB::transaction(function () use ($input)
+            {
+                $contractHistoryUuid = $input['contractHistoryUuid'];
+                $historyId = ContractHistory::select('id')->where('uuid',$contractHistoryUuid)->first();
+
+                if (!empty($historyId))
+                {
+                    ContractHistory::where('id', $historyId->id)->delete();
+                }
+            });
+        } catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to delete contract history: " . $e->getMessage());
+        }
     }
 }

@@ -253,4 +253,8 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'updateTerminateStatus'
     ])->name('Update Terminate Contract Status');
+    Route::post('contract-history-delete', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractHistoryDelete'
+    ])->name('Contract History Delete');
 });

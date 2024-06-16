@@ -304,7 +304,6 @@ class ContractHistoryAPIController extends AppBaseController
         } catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
-
         }
 
     }
@@ -341,7 +340,6 @@ class ContractHistoryAPIController extends AppBaseController
         }
     }
 
-
     public function getContractHistoryAttachments(Request $request)
     {
         try
@@ -364,6 +362,20 @@ class ContractHistoryAPIController extends AppBaseController
             $attachmentId = $formData['attachmentID'];
             return $this->erpDocumentAttachmentsRepository
                 ->deleteHistoryAttachment($attachmentId);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+    public function contractHistoryDelete(Request $request)
+    {
+        try
+        {
+            $this->contractHistoryService->contractHistoryDelete($request->all());
+            return $this->sendSuccess('Successfully deleted');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
         } catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);

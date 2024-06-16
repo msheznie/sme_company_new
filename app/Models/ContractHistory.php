@@ -153,6 +153,7 @@ class ContractHistory extends Model
     }
 
     public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID, $documentSystemID)
+
     {
         $approvals = DB::table('erp_documentapproved')
             ->select(
@@ -161,6 +162,7 @@ class ContractHistory extends Model
                 'erp_documentapproved.documentSystemID',
                 'approvalLevelID',
                 'cm_contract_master.contractCode',
+                'cm_contract_master.uuid As contract_uuid',
                 'cm_contract_history.uuid',
                 'cm_contract_master.title',
                 'cm_contract_master.contractAmount',
