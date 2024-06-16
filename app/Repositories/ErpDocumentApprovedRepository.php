@@ -2,8 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Exceptions\CommonException;
+use App\Models\CompanyDocumentAttachment;
 use App\Models\ErpDocumentApproved;
+use App\Models\ErpEmployeesDepartments;
 use App\Repositories\BaseRepository;
+use Yajra\DataTables\DataTables;
 
 /**
  * Class ErpDocumentApprovedRepository
@@ -70,5 +74,40 @@ class ErpDocumentApprovedRepository extends BaseRepository
     public function model()
     {
         return ErpDocumentApproved::class;
+    }
+
+    public function getApprovedRecords($selectedCompanyID, $documentSystemID, $ids)
+    {
+
+        $approveDetails = ErpDocumentApproved::documentApprovedList(
+            $documentSystemID,
+            $ids,
+            $selectedCompanyID
+        );
+
+        $approvalGroupIDs = $approveDetails->where('approvedYN', 0)->pluck('approvalGroupID')->unique();
+
+        $approvalLists = ErpEmployeesDepartments::getApprovalList($approvalGroupIDs, $selectedCompanyID,
+            $documentSystemID);
+
+        foreach ($approveDetails as $value)
+        {
+            if ($value['approvedYN'] == 0)
+            {
+                $companyDocument = CompanyDocumentAttachment::companyDocumentAttachment(
+                    $selectedCompanyID,
+                    $documentSystemID
+                );
+
+                if (empty($companyDocument))
+                {
+                    throw new CommonException(trans('common.policy_not_found'));
+                }
+
+                $value['approval_list'] = $approvalLists->get($value['approvalGroupID'], collect());
+            }
+        }
+
+        return $approveDetails;
     }
 }

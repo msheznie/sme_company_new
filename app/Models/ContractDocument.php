@@ -104,16 +104,20 @@ class ContractDocument extends Model
     public static $rules = [
 
     ];
-    public function documentMaster() {
+    public function documentMaster()
+    {
         return $this->belongsTo(DocumentMaster::class, 'documentType', 'id');
     }
-    public function attachment(){
+    public function attachment()
+    {
         return $this->belongsTo(ErpDocumentAttachments::class, 'documentMasterID', 'documentSystemID');
     }
-    public function contractDocuments($selectedCompanyID, $contractID) {
+    public function contractDocuments($selectedCompanyID, $contractID)
+    {
         return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
             'followingRequest', 'attachedDate', 'status')
-            ->with(['documentMaster' => function ($query) {
+            ->with(['documentMaster' => function ($query)
+            {
                 $query->select('id', 'uuid', 'documentType');
             }])
             ->where([
@@ -128,5 +132,9 @@ class ContractDocument extends Model
             return self::where('companySystemID',$selectedCompanyID)
             ->where('contractID',$contractId)
             ->get();
+    }
+    public function pluckContractDocumentID($contractID)
+    {
+        return ContractDocument::where('contractID', $contractID)->pluck('id');
     }
 }

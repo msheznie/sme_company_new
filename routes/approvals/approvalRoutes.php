@@ -40,4 +40,8 @@ Route::group(['prefix' => 'approvals'], function ()
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'rejectContract'
     ])->name('Reject Terminate Contract');
+    Route::post('approved-records', [
+        \App\Http\Controllers\API\ErpDocumentApprovedAPIController::class,
+        'getApprovedRecords'
+    ])->name('Get approved records');
 });

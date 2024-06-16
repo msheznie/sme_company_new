@@ -383,4 +383,20 @@ class ContractMaster extends Model
     {
         return $this->hasOne(ContractMaster::class, 'id', 'parent_id');
     }
+    public static function emailValidation($id, $companySystemID, $email, $type)
+    {
+        return ContractMaster::where('id', '!=' ,$id)
+            ->when($type == 'primary', function ($q) use ($email)
+            {
+                $q->where('primaryEmail', $email)
+                    ->orWhere('secondaryEmail', $email);
+            })
+            ->when($type == 'secondary', function ($q) use ($email)
+            {
+                $q->where('secondaryEmail', $email)
+                    ->orWhere('primaryEmail', $email);
+            })
+            ->where('companySystemID', $companySystemID)
+            ->exists();
+    }
 }

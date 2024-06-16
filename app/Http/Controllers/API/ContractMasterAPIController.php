@@ -111,7 +111,7 @@ class ContractMasterAPIController extends AppBaseController
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
                 'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
-                'is_revision','is_termination','parent_id'
+                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
@@ -159,26 +159,27 @@ class ContractMasterAPIController extends AppBaseController
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
 
         /** @var ContractMaster $contractMaster */
-        $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id']);
 
-        if (empty($contractMaster))
+        try
         {
-            return $this->sendError(trans('common.contract_not_found'));
-        }
+            $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id']);
 
-        $contractMasterUpdate = $this->contractMasterRepository->updateContract(
-            $input,
-            $contractMaster['id'],
-            $selectedCompanyID
-        );
-
-        if($contractMasterUpdate['status'])
+            if (empty($contractMaster))
+            {
+                throw new CommonException(trans('common.contract_not_found'));
+            }
+            $this->contractMasterRepository->updateContract(
+                $input,
+                $contractMaster['id'],
+                $selectedCompanyID
+            );
+            return $this->sendResponse(['id' => $id], trans('common.contract_updated_successfully'));
+        } catch (CommonException $ex)
         {
-            return $this->sendResponse(['id' => $id], $contractMasterUpdate['message']);
-        } else
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
         {
-            $statusCode = $contractMasterUpdate['code'] ?? 404;
-            return $this->sendError($contractMasterUpdate['message'], $statusCode);
+            return $this->sendError($ex->getMessage(), 500);
         }
     }
 

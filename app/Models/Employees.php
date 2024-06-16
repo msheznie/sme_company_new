@@ -317,6 +317,8 @@ class Employees extends Model
     public function pulledContractUser(){
         return $this->belongsTo(ContractUsers::class, 'employeeSystemID', 'contractUserId');
     }
-
-
+    public static function employeeEmailValidation($email, $selectedCompanyID)
+    {
+        return Employees::where('empEmail', $email)->where('empCompanySystemID', $selectedCompanyID)->exists();
+    }
 }

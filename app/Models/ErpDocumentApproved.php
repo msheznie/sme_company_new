@@ -203,4 +203,19 @@ class ErpDocumentApproved extends Model
             })
             ->first();
     }
+    public function approved_by()
+    {
+        return $this->belongsTo(Employees::class,'employeeSystemID','employeeSystemID');
+    }
+    public function documentApprovedList($documentSystemID, $ids, $companySystemID)
+    {
+        return ErpDocumentApproved::select('documentApprovedID', 'approvedYN', 'rollLevelOrder', 'employeeSystemID',
+            'approvalGroupID', 'rejectedYN', 'rejectedComments', 'rejectedDate', 'approvedComments', 'approvedDate'
+        )
+            ->where('documentSystemID', $documentSystemID)
+            ->whereIn('documentSystemCode', $ids)
+            ->where('companySystemID', $companySystemID)
+            ->with(['approved_by'])
+            ->get();
+    }
 }

@@ -181,4 +181,7 @@
      "contract_does_not_exist" => "Contract does not exist",
      "failed_to_update_status" => "Failed to update status",
      "successfully_status_updated" => "Successfully Status Updated",
+     'document_approved_not_found' => 'Document Approved not found',
+     'document_attachment_not_found' => 'Document Attachments not found',
+     'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully'
  ];

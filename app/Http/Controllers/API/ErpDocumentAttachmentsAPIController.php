@@ -47,7 +47,8 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ErpDocumentAttachmentsResource::collection($erpDocumentAttachments), 'Erp Document Attachments retrieved successfully');
+        return $this->sendResponse(ErpDocumentAttachmentsResource::collection($erpDocumentAttachments),
+            'Erp Document Attachments retrieved successfully');
     }
 
     /**
@@ -64,7 +65,8 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
 
         $erpDocumentAttachments = $this->erpDocumentAttachmentsRepository->create($input);
 
-        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments), 'Erp Document Attachments saved successfully');
+        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments),
+            'Erp Document Attachments saved successfully');
     }
 
     /**
@@ -80,11 +82,13 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         /** @var ErpDocumentAttachments $erpDocumentAttachments */
         $erpDocumentAttachments = $this->erpDocumentAttachmentsRepository->find($id);
 
-        if (empty($erpDocumentAttachments)) {
-            return $this->sendError('Erp Document Attachments not found');
+        if (empty($erpDocumentAttachments))
+        {
+            return $this->sendError(trans('common.document_attachment_not_found'));
         }
 
-        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments), 'Erp Document Attachments retrieved successfully');
+        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments),
+            'Erp Document Attachments retrieved successfully');
     }
 
     /**
@@ -103,13 +107,15 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         /** @var ErpDocumentAttachments $erpDocumentAttachments */
         $erpDocumentAttachments = $this->erpDocumentAttachmentsRepository->find($id);
 
-        if (empty($erpDocumentAttachments)) {
-            return $this->sendError('Erp Document Attachments not found');
+        if (empty($erpDocumentAttachments))
+        {
+            return $this->sendError(trans('common.document_attachment_not_found'));
         }
 
         $erpDocumentAttachments = $this->erpDocumentAttachmentsRepository->update($input, $id);
 
-        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments), 'ErpDocumentAttachments updated successfully');
+        return $this->sendResponse(new ErpDocumentAttachmentsResource($erpDocumentAttachments),
+            'ErpDocumentAttachments updated successfully');
     }
 
     /**
@@ -127,8 +133,9 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         /** @var ErpDocumentAttachments $erpDocumentAttachments */
         $erpDocumentAttachments = $this->erpDocumentAttachmentsRepository->find($id);
 
-        if (empty($erpDocumentAttachments)) {
-            return $this->sendError('Erp Document Attachments not found');
+        if (empty($erpDocumentAttachments))
+        {
+            return $this->sendError(trans('common.document_attachment_not_found'));
         }
 
         $erpDocumentAttachments->delete();
@@ -136,13 +143,16 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         return $this->sendSuccess('Erp Document Attachments deleted successfully');
     }
 
-    public function downloadAttachment(Request $request) {
+    public function downloadAttachment(Request $request)
+    {
         $id = $request->input('id') ?? 0;
 
         $documentAttachments = $this->erpDocumentAttachmentsRepository->downloadFile($id);
-        if ($documentAttachments['status']) {
+        if ($documentAttachments['status'])
+        {
             return $documentAttachments['data'];
-        } else {
+        } else
+        {
             return $this->sendError($documentAttachments['message'], $documentAttachments['code']);
         }
     }
@@ -152,7 +162,10 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
         $documentSystemUuid = $request->input('documentSystemUuid') ?? 0;
         $search = $request->input('search.value');
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
-        $ids = $this->attachmentService->getDocumentSystemID($documentSystemUuid, $documentSystemID);
+        $ids = $this->attachmentService->getDocumentSystemID($documentSystemUuid,
+            $documentSystemID,
+            $selectedCompanyID
+        );
         return $this->erpDocumentAttachmentsRepository->getDocumentAttachments(
             $documentSystemID,
             $search,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Http\Requests\API\CreateErpDocumentApprovedAPIRequest;
 use App\Http\Requests\API\UpdateErpDocumentApprovedAPIRequest;
 use App\Models\ErpDocumentApproved;
@@ -9,6 +10,7 @@ use App\Repositories\ErpDocumentApprovedRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ErpDocumentApprovedResource;
+use App\Services\AttachmentService;
 use Response;
 
 /**
@@ -20,10 +22,15 @@ class ErpDocumentApprovedAPIController extends AppBaseController
 {
     /** @var  ErpDocumentApprovedRepository */
     private $erpDocumentApprovedRepository;
+    private $attachmentService;
 
-    public function __construct(ErpDocumentApprovedRepository $erpDocumentApprovedRepo)
+    public function __construct(
+        ErpDocumentApprovedRepository $erpDocumentApprovedRepo,
+        AttachmentService  $attachmentService
+    )
     {
         $this->erpDocumentApprovedRepository = $erpDocumentApprovedRepo;
+        $this->attachmentService = $attachmentService;
     }
 
     /**
@@ -41,7 +48,8 @@ class ErpDocumentApprovedAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ErpDocumentApprovedResource::collection($erpDocumentApproveds), 'Erp Document Approveds retrieved successfully');
+        return $this->sendResponse(ErpDocumentApprovedResource::collection($erpDocumentApproveds),
+            'Erp Document Approveds retrieved successfully');
     }
 
     /**
@@ -58,7 +66,8 @@ class ErpDocumentApprovedAPIController extends AppBaseController
 
         $erpDocumentApproved = $this->erpDocumentApprovedRepository->create($input);
 
-        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved), 'Erp Document Approved saved successfully');
+        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved),
+            'Erp Document Approved saved successfully');
     }
 
     /**
@@ -74,11 +83,13 @@ class ErpDocumentApprovedAPIController extends AppBaseController
         /** @var ErpDocumentApproved $erpDocumentApproved */
         $erpDocumentApproved = $this->erpDocumentApprovedRepository->find($id);
 
-        if (empty($erpDocumentApproved)) {
-            return $this->sendError('Erp Document Approved not found');
+        if (empty($erpDocumentApproved))
+        {
+            return $this->sendError(trans('common.document_approved_not_found'));
         }
 
-        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved), 'Erp Document Approved retrieved successfully');
+        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved),
+            'Erp Document Approved retrieved successfully');
     }
 
     /**
@@ -97,13 +108,15 @@ class ErpDocumentApprovedAPIController extends AppBaseController
         /** @var ErpDocumentApproved $erpDocumentApproved */
         $erpDocumentApproved = $this->erpDocumentApprovedRepository->find($id);
 
-        if (empty($erpDocumentApproved)) {
-            return $this->sendError('Erp Document Approved not found');
+        if (empty($erpDocumentApproved))
+        {
+            return $this->sendError(trans('common.document_approved_not_found'));
         }
 
         $erpDocumentApproved = $this->erpDocumentApprovedRepository->update($input, $id);
 
-        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved), 'ErpDocumentApproved updated successfully');
+        return $this->sendResponse(new ErpDocumentApprovedResource($erpDocumentApproved),
+            'ErpDocumentApproved updated successfully');
     }
 
     /**
@@ -121,12 +134,41 @@ class ErpDocumentApprovedAPIController extends AppBaseController
         /** @var ErpDocumentApproved $erpDocumentApproved */
         $erpDocumentApproved = $this->erpDocumentApprovedRepository->find($id);
 
-        if (empty($erpDocumentApproved)) {
-            return $this->sendError('Erp Document Approved not found');
+        if (empty($erpDocumentApproved))
+        {
+            return $this->sendError(trans('common.document_approved_not_found'));
         }
 
         $erpDocumentApproved->delete();
 
         return $this->sendSuccess('Erp Document Approved deleted successfully');
+    }
+    public function getApprovedRecords(Request $request)
+    {
+        try
+        {
+            $input  = $request->all();
+            $selectedCompanyID = $input['selectedCompanyID'];
+            $documentSystemID = $input['documentSystemID'] ?? 0;
+            $documentSystemUuid = $input['documentSystemCode'] ?? 0;
+
+            $ids = $this->attachmentService->getDocumentSystemID($documentSystemUuid,
+                $documentSystemID,
+                $selectedCompanyID
+            );
+            $response = $this->erpDocumentApprovedRepository->getApprovedRecords(
+                $selectedCompanyID,
+                $documentSystemID,
+                $ids
+            );
+            return $this->sendResponse($response, trans('common.approval_status_record_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
     }
 }

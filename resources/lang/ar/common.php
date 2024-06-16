@@ -178,4 +178,7 @@ return [
     "contract_does_not_exist" => "Contract does not exist AR",
     "failed_to_update_status" => "Failed to update status AR",
     "successfully_status_updated" => "Successfully Status Updated AR",
+    'document_approved_not_found' => 'Document approved not found AR',
+    'document_attachment_not_found' => 'Document Attachments not found AR',
+    'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully AR'
 ];

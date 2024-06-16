@@ -165,4 +165,21 @@ class ErpEmployeesDepartments extends Model
         ->groupBy('employeeSystemID')
         ->exists();
     }
+
+    public static function getApprovalList($approvalGroupIDs, $selectedCompanyID, $documentSystemID)
+    {
+        return ErpEmployeesDepartments::select('employeesDepartmentsID', 'employeeSystemID', 'employeeGroupID')
+            ->whereIn('employeeGroupID', $approvalGroupIDs)
+            ->where('companySystemID', $selectedCompanyID)
+            ->where('documentSystemID', $documentSystemID)
+            ->where('isActive', 1)
+            ->where('removedYN', 0)
+            ->with(['employee' => function ($query)
+            {
+                $query->select('employeeSystemID', 'empName')
+                    ->where('discharegedYN', 0);
+            }])
+            ->get()
+            ->groupBy('employeeGroupID');
+    }
 }

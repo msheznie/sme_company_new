@@ -286,30 +286,39 @@ class ContractMasterRepository extends BaseRepository
         return ['status' => true , 'message' => trans('common.contract_form_data_retrieved'), 'data' => $response];
     }
 
-    public function updateContract($formData, $id, $selectedCompanyID): array {
+    public function updateContract($formData, $id, $selectedCompanyID)
+    {
 
         $contractOwner = $formData['contractOwner'] ?? '';
 
-        $checkContractTypeID = CMContractTypes::select('contract_typeId')->where('uuid', $formData['contractType'])->where('companySystemID', $selectedCompanyID)->first();
-        if(empty($checkContractTypeID)){
-            return ['status' => false, 'message' => trans('common.contract_type_not_found')];
+        $checkContractTypeID = CMContractTypes::select('contract_typeId')->where('uuid', $formData['contractType'])
+            ->where('companySystemID', $selectedCompanyID)->first();
+        if(empty($checkContractTypeID))
+        {
+            throw new CommonException(trans('common.contract_type_not_found'));
         }
-        $checkOwnerID = ($contractOwner != '') ? ContractUsers::where('uuid', $formData['contractOwner'])->where('companySystemId', $selectedCompanyID)->pluck('id')->first() : null;
-        if($contractOwner != '' && empty($checkOwnerID)){
-            return ['status' => false, 'message' => trans('common.contract_owner_not_found')];
+        $checkOwnerID = ($contractOwner != '') ? ContractUsers::where('uuid', $formData['contractOwner'])
+            ->where('companySystemId', $selectedCompanyID)->pluck('id')->first() : null;
+        if($contractOwner != '' && empty($checkOwnerID))
+        {
+            throw new CommonException(trans('common.contract_owner_not_found'));
         }
-        $checkContractPartyNameID = ContractUsers::where('uuid', $formData['counterPartyName'])->where('companySystemId', $selectedCompanyID)->pluck('id')->first();
-        if(empty($checkContractPartyNameID)){
-            return ['status' => false, 'message' => trans('common.counter_party_name_not_found')];
+        $checkContractPartyNameID = ContractUsers::where('uuid', $formData['counterPartyName'])
+            ->where('companySystemId', $selectedCompanyID)->pluck('id')->first();
+        if(empty($checkContractPartyNameID))
+        {
+            throw new CommonException(trans('common.counter_party_name_not_found'));
         }
 
-        $checkValidation = $this->checkValidation($formData, $id, $selectedCompanyID);
-        if(!$checkValidation['status']) {
-            return ['status' => false, 'message' => $checkValidation['message']];
-        }
+        $this->checkValidation($formData, $id, $selectedCompanyID);
 
-        DB::beginTransaction();
-        try{
+        return DB::transaction(function () use (
+            $formData,
+            $checkContractTypeID,
+            $checkContractPartyNameID,
+            $checkOwnerID,
+            $id)
+        {
             $updateData = [
                 'title' => $formData['title'] ?? null,
                 'description' => $formData['description'] ?? null,
@@ -319,9 +328,13 @@ class ContractMasterRepository extends BaseRepository
                 'referenceCode' => $formData['referenceCode'] ?? null,
                 'contractOwner' => $checkOwnerID,
                 'contractAmount' => $formData['contractAmount'] ?? 0,
-                'startDate' => $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
-                'endDate' => $formData['formatEndDate'] ? Carbon::parse($formData['formatEndDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
-                'agreementSignDate' => $formData['formatAgreementSignDate'] ? Carbon::parse($formData['formatAgreementSignDate'])->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'startDate' => $formData['formatStartDate'] ? Carbon::parse($formData['formatStartDate'])
+                    ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'endDate' => $formData['formatEndDate'] ? Carbon::parse($formData['formatEndDate'])
+                    ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
+                'agreementSignDate' => $formData['formatAgreementSignDate'] ?
+                    Carbon::parse($formData['formatAgreementSignDate'])
+                        ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
                 'contractTermPeriod' => $formData['contractTermPeriod'] ?? null,
                 'notifyDays' => $formData['notifyDays'] ?? null,
                 'primaryCounterParty' => $formData['primaryCounterParty'] ?? null,
@@ -334,40 +347,39 @@ class ContractMasterRepository extends BaseRepository
                 'updated_at' => Carbon::now()
             ];
 
-            $updateResponse = ContractMaster::where('id', $id)->update($updateData);
-            if($updateResponse) {
-                DB::commit();
-                return ['status' => true, 'message' => trans('common.contract_updated_successfully')];
-            }
-
-        } catch (\Exception $ex){
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage()];
-        }
+            return ContractMaster::where('id', $id)->update($updateData);
+        });
     }
 
-    public function checkValidation($formData, $id, $selectedCompanyID){
+    public function checkValidation($formData, $id, $selectedCompanyID)
+    {
         $primaryEmail = $formData['primaryEmail'] ?? null;
         $secondaryEmail = $formData['secondaryEmail'] ?? null;
 
-        if($primaryEmail != null) {
-            if(ContractMaster::where('id', '!=' ,$id)->where('primaryEmail', $primaryEmail)->orWhere('secondaryEmail', $primaryEmail)->where('companySystemID', $selectedCompanyID)->exists()) {
-                return ['status' => false, 'message' => trans('common.primary_email_already_exists')];
+        if($primaryEmail != null)
+        {
+            if(ContractMaster::emailValidation($id, $selectedCompanyID, $primaryEmail, 'primary'))
+            {
+                throw new CommonException(trans('common.primary_email_already_exists'));
             }
-            if(Employees::where('empEmail', $primaryEmail)->where('empCompanySystemID', $selectedCompanyID)->exists()){
-                return ['status' => false, 'message' => trans('common.primary_email_already_exists_in_employees')];
+            if(Employees::employeeEmailValidation($primaryEmail, $selectedCompanyID))
+            {
+                throw new CommonException(trans('common.primary_email_already_exists_in_employees'));
             }
         }
-        if($secondaryEmail != null) {
-            if(ContractMaster::where('id', '!=' ,$id)->where('primaryEmail', $secondaryEmail)->orWhere('secondaryEmail', $secondaryEmail)->where('companySystemID', $selectedCompanyID)->exists()) {
-                return ['status' => false, 'message' => trans('common.secondary_email_already_exists')];
+        if($secondaryEmail != null)
+        {
+            if(ContractMaster::emailValidation($id, $selectedCompanyID, $primaryEmail, 'secondary'))
+            {
+                throw new CommonException(trans('common.secondary_email_already_exists'));
             }
-            if(Employees::where('empEmail', $secondaryEmail)->where('empCompanySystemID', $selectedCompanyID)->exists()){
-                return ['status' => false, 'message' => trans('common.secondary_email_already_exists_in_employees')];
+            if(Employees::employeeEmailValidation($secondaryEmail, $selectedCompanyID))
+            {
+                throw new CommonException(trans('common.secondary_email_already_exists_in_employees'));
             }
         }
 
-        return ['status' => true, 'message' => 'Validation checked successfully'];
+        return true;
     }
 
     public function unsetValues($contract) {

@@ -2,17 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\ContractMaster;
 use App\Models\ContractDocument;
+use App\Utilities\ContractManagementUtils;
+
 class AttachmentService
 {
-    public function getDocumentSystemID($uuid, $documentMasterID)
+    public function getDocumentSystemID($uuid, $documentMasterID, $companySystemID)
     {
         $ids = [];
         switch($documentMasterID)
         {
             case 121:
-                $ids = self::getContractDocumentID($uuid);
+                $ids = self::getContractDocumentID($uuid, $companySystemID);
+                break;
+            case 123:
+                $contract = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
+                $ids[] = $contract['id'] ?? [];
                 break;
             default:
                 break;
@@ -20,10 +25,10 @@ class AttachmentService
         return $ids;
     }
 
-    private function getContractDocumentID($uuid)
+    private function getContractDocumentID($uuid, $companySystemID)
     {
-        $contractMaster = ContractMaster::select('id')->where('uuid', $uuid)->first();
+        $contractMaster = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
         $contractID = $contractMaster['id'] ?? 0;
-        return  ContractDocument::where('contractID', $contractID)->pluck('id');
+        return  ContractDocument::pluckContractDocumentID($contractID);
     }
 }
