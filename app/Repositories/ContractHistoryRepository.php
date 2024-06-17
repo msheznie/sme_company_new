@@ -584,11 +584,7 @@ class ContractHistoryRepository extends BaseRepository
 
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
 
-       $languages = ContractHistory::contractHistory($contract->id, $categoryId, $companySystemID);
-        return DataTables::eloquent($languages)
-            ->addColumn('Actions', 'Actions', "Actions")
-            ->addIndexColumn()
-            ->make(true);
+        return ContractHistory::contractHistory($contract->id, $categoryId, $companySystemID);
     }
 
     public function getCategoryWiseData($params)

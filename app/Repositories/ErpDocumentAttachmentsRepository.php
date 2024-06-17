@@ -170,7 +170,6 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
 
         $input = $request->all();
 
-        // Validate file type and size
         $validationResult = $this->validateFile($input);
         if (!$validationResult['status'])
         {

@@ -149,7 +149,8 @@ class ContractHistory extends Model
         ])->where($contractColumnName, $contractId)
             ->where('company_id', $companySystemID)
             ->where('category', $categoryId)
-            ->orderBy('id', 'asc');
+            ->orderBy('id', 'asc')
+            ->get();
     }
 
     public function getExtendContractApprovals($isPending, $selectedCompanyID, $search, $employeeID, $documentSystemID)
