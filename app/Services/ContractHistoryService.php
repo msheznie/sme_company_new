@@ -480,7 +480,6 @@ class ContractHistoryService
 
         return 0;
     }
-
     public function contractHistoryDelete($input)
     {
         try
@@ -488,7 +487,7 @@ class ContractHistoryService
             return DB::transaction(function () use ($input)
             {
                 $contractHistoryUuid = $input['contractHistoryUuid'];
-                $historyId = ContractHistory::select('id')->where('uuid',$contractHistoryUuid)->first();
+                $historyId = ContractHistory::select('id')->where('uuid', $contractHistoryUuid)->first();
 
                 if (!empty($historyId))
                 {

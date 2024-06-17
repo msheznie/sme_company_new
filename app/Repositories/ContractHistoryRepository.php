@@ -554,25 +554,19 @@ class ContractHistoryRepository extends BaseRepository
 
     public function getContractColumn($columns)
     {
+        $possibleColumns = ['contractId', 'contractID', 'contract_id'];
         $contractColumn = null;
-        if (in_array('contractId', $columns))
+
+        foreach ($possibleColumns as $possibleColumn)
         {
-            $contractColumn = 'contractId';
-        } elseif (in_array('contractID', $columns))
-        {
-            $contractColumn = 'contractID';
-        }
-        elseif (in_array('contract_id', $columns))
-        {
-            return 'contract_id';
-        }
-        else
-        {
-            $contractColumn = 'null';
+            if (in_array($possibleColumn, $columns, true))
+            {
+                $contractColumn = $possibleColumn;
+                break;
+            }
         }
 
         return $contractColumn;
-
     }
 
     public function getContractHistory(Request $request)
@@ -592,6 +586,6 @@ class ContractHistoryRepository extends BaseRepository
         $contractId = $params['contractId'];
         $category = $params['category'];
         $companyId = $params['companyId'];
-        return ContractHistory::contractHistory($contractId,$category,$companyId,'cloning_contract_id')->get();
+        return ContractHistory::contractHistory($contractId,$category,$companyId,'cloning_contract_id');
     }
 }
