@@ -556,10 +556,11 @@ class ContractHistoryRepository extends BaseRepository
     {
         $possibleColumns = ['contractId', 'contractID', 'contract_id'];
         $contractColumn = null;
+        $columns = array_map('strtolower', $columns);
 
         foreach ($possibleColumns as $possibleColumn)
         {
-            if (in_array($possibleColumn, $columns, true))
+            if (in_array(strtolower($possibleColumn), $columns, true))
             {
                 $contractColumn = $possibleColumn;
                 break;
