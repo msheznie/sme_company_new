@@ -337,7 +337,8 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
                 'status' => true,
                 'data' => [
                     'isUploaded' => 1,
-                    'path' => $path
+                    'path' => $path,
+                    'myFileName' => $myFileName
                 ]
             ];
         } catch (\Exception $exception)
