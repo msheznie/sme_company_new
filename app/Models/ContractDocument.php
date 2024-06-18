@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @version May 8, 2024, 5:23 pm +04
  *
  * @property string $uuid
+ * @property integer $contractID
  * @property integer $documentType
  * @property string $documentName
  * @property string $documentDescription
