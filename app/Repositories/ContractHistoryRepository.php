@@ -554,20 +554,19 @@ class ContractHistoryRepository extends BaseRepository
 
     public function getContractColumn($columns)
     {
-        $possibleColumns = ['contractId', 'contractID', 'contract_id'];
-        $contractColumn = null;
+        $originalColumns = $columns;
         $columns = array_map('strtolower', $columns);
+        $possibleColumns = ['contractid', 'contractid', 'contract_id'];
 
         foreach ($possibleColumns as $possibleColumn)
         {
-            if (in_array(strtolower($possibleColumn), $columns, true))
+            if (in_array($possibleColumn, $columns, true))
             {
-                $contractColumn = $possibleColumn;
-                break;
+                $index = array_search($possibleColumn, $columns);
+                return $originalColumns[$index];
             }
         }
-
-        return $contractColumn;
+        return null;
     }
 
     public function getContractHistory(Request $request)
