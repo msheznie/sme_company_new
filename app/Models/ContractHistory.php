@@ -104,7 +104,7 @@ class ContractHistory extends Model
             } , 'contractMaster' => function ($query)
             {
                 $query->select('id', 'contractCode','startDate','endDate','parent_id','uuid','confirmed_yn',
-                'approved_yn','refferedBackYN','timesReferred','status'
+                'approved_yn','refferedBackYN','timesReferred','status', 'is_renewal', 'updated_at'
                 );
             }])
             ->where('company_id', $companyId)

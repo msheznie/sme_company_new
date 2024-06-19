@@ -180,6 +180,7 @@
      "failed_to_update_contract" => "Failed to update ContractMaster",
      "contract_does_not_exist" => "Contract does not exist",
      "failed_to_update_status" => "Failed to update status",
+     "failed_to_update_contract_status" => "Failed to update status",
      "successfully_status_updated" => "Successfully Status Updated",
      'document_approved_not_found' => 'Document Approved not found',
      'document_attachment_not_found' => 'Document Attachments not found',

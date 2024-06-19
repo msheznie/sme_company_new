@@ -14,11 +14,12 @@ use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\ContractHistoryRepository;
 use App\Utilities\ContractManagementUtils;
-use AWS\CRT\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
+use Illuminate\Support\Facades\Log;
+
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -172,6 +173,11 @@ class ContractHistoryService
             $input['endDate'] =  ContractManagementUtils::convertDate($input['endDate'],true);
         }
 
+        if (isset($input['agreementSignDate']))
+        {
+            $input['agreementSignDate'] =  ContractManagementUtils::convertDate($input['agreementSignDate'],true);
+        }
+
         return $input;
     }
 
@@ -210,7 +216,7 @@ class ContractHistoryService
             });
         }catch (\Exception $e)
         {
-            throw new ContractCreationException(trans('common.failed_to_update_status: ' . $e->getMessage()));
+            throw new ContractCreationException(trans('common.failed_to_update_contract_status: ' . $e->getMessage()));
         }
     }
 
