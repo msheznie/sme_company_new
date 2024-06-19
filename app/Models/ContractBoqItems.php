@@ -6,6 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractBoqItems
  * @package App\Models
@@ -24,6 +25,7 @@ use App\Traits\HasContractIdColumn;
 class ContractBoqItems extends Model
 {
     use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     use HasFactory;
 
@@ -85,5 +87,10 @@ class ContractBoqItems extends Model
     public static function getContractIdColumn()
     {
         return 'contractId';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companyId';
     }
 }

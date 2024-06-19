@@ -53,31 +53,31 @@ class ContractHistoryService
 
     private function deleteRelatedModels($contractId, $companyId, $categoryId)
     {
-        $modelsToDelete =
-            [
-            'App\\Models\\ContractMaster' => ['companySystemID', 'id'],
-            'App\\Models\\ContractHistory' => ['company_id', 'contract_id'],
-            'App\\Models\\ContractUserAssign' => ['', 'contractId'],
-            'App\\Models\\ContractSettingMaster' => ['', 'contractId'],
-            'App\\Models\\ContractSettingDetail' => ['', 'contractId'],
-            'App\\Models\\ContractDocument' => ['companySystemID', 'contractID'],
-            'App\\Models\\ContractAdditionalDocuments' => ['companySystemID', 'contractID'],
-            'App\\Models\\ContractBoqItems' => ['companyId', 'contractId'],
-            'App\\Models\\ContractMilestone' => ['companySystemID', 'contractID'],
-            'App\\Models\\ContractDeliverables' => ['companySystemID', 'contractID'],
-            'App\\Models\\ContractOverallRetention' => ['companySystemId', 'contractId'],
-            'App\\Models\\ContractMilestoneRetention' => ['companySystemId', 'contractId'],
+        $modelsToDelete = [
+            'App\\Models\\ContractMaster',
+            'App\\Models\\ContractHistory',
+            'App\\Models\\ContractUserAssign',
+            'App\\Models\\ContractSettingMaster',
+            'App\\Models\\ContractSettingDetail',
+            'App\\Models\\ContractDocument',
+            'App\\Models\\ContractAdditionalDocuments',
+            'App\\Models\\ContractBoqItems',
+            'App\\Models\\ContractMilestone',
+            'App\\Models\\ContractDeliverables',
+            'App\\Models\\ContractOverallRetention',
+            'App\\Models\\ContractMilestoneRetention',
         ];
 
-        foreach ($modelsToDelete as $modelName => $columns)
+        foreach ($modelsToDelete as $modelName)
         {
-            list($companyColumn, $contractColumn) = $columns;
-
             $model = new $modelName();
-            $table = $model->getTable();
-            $availableColumns = \Schema::getColumnListing($table);
+            $contractIdCol = $modelName::getContractIdColumn();
+            $companyColumn = $modelName::getCompanyIdColumn();
+            $contractColumn = (
+            $modelName === 'App\\Models\\ContractMaster' ? 'id' :
+                $contractIdCol);
 
-            if (in_array($contractColumn, $availableColumns))
+            if ($contractColumn)
             {
                 $query = $model::where($contractColumn, $contractId);
 
@@ -86,7 +86,7 @@ class ContractHistoryService
                     $query->where('category', $categoryId);
                 }
 
-                if ($companyColumn !== '' && in_array($companyColumn, $availableColumns))
+                if ($companyColumn !== null)
                 {
                     $query->where($companyColumn, $companyId);
                 }

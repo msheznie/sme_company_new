@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Awobaz\Compoships\Compoships;
 use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 
 /**
  * Class ContractAdditionalDocuments
@@ -29,6 +30,7 @@ class ContractAdditionalDocuments extends Model
     use Compoships;
     use HasFactory;
     use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_additional_document';
 
@@ -112,5 +114,10 @@ class ContractAdditionalDocuments extends Model
     public static function getContractIdColumn()
     {
         return 'contractID';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
     }
 }

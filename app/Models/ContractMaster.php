@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\General;
+use App\Traits\HasCompanyIdColumn;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +33,7 @@ class ContractMaster extends Model
     use HasFactory;
     use Compoships;
     use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_master';
 
@@ -405,5 +407,10 @@ class ContractMaster extends Model
     public static function getContractIdColumn()
     {
         return 'id';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
     }
 }

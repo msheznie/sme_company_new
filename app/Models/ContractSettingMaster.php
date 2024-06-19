@@ -6,7 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasContractIdColumn;
-
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractSettingMaster
  * @package App\Models
@@ -21,6 +21,7 @@ class ContractSettingMaster extends Model
 
     use HasFactory;
     use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_setting_master';
 
@@ -104,5 +105,9 @@ class ContractSettingMaster extends Model
         return 'contractId';
     }
 
+    public static function getCompanyIdColumn()
+    {
+        return null;
+    }
 
 }

@@ -6,6 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 
 /**
  * Class ContractMilestone
@@ -27,6 +28,7 @@ class ContractMilestone extends Model
 
     use HasFactory;
     use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_milestone';
 
@@ -102,6 +104,11 @@ class ContractMilestone extends Model
     public static function getContractIdColumn()
     {
         return 'contractID';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
     }
 
 
