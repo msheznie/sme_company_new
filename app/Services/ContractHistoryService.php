@@ -53,32 +53,31 @@ class ContractHistoryService
 
     private function deleteRelatedModels($contractId, $companyId, $categoryId)
     {
-        $modelsToDelete = [
-            'App\\Models\\ContractMaster' => 'companySystemID',
-            'App\\Models\\ContractHistory' => 'company_id',
-            'App\\Models\\ContractUserAssign' => '',
-            'App\\Models\\ContractSettingMaster' => '',
-            'App\\Models\\ContractSettingDetail' => '',
-            'App\\Models\\ContractDocument' => 'companySystemID',
-            'App\\Models\\ContractAdditionalDocuments' => 'companySystemID',
-            'App\\Models\\ContractBoqItems' => 'companyId',
-            'App\\Models\\ContractMilestone' => 'companySystemID',
-            'App\\Models\\ContractDeliverables' => 'companySystemID',
-            'App\\Models\\ContractOverallRetention' => 'companySystemId',
-            'App\\Models\\ContractMilestoneRetention' => 'companySystemId',
+        $modelsToDelete =
+            [
+            'App\\Models\\ContractMaster' => ['companySystemID', 'id'],
+            'App\\Models\\ContractHistory' => ['company_id', 'contract_id'],
+            'App\\Models\\ContractUserAssign' => ['', 'contractId'],
+            'App\\Models\\ContractSettingMaster' => ['', 'contractId'],
+            'App\\Models\\ContractSettingDetail' => ['', 'contractId'],
+            'App\\Models\\ContractDocument' => ['companySystemID', 'contractID'],
+            'App\\Models\\ContractAdditionalDocuments' => ['companySystemID', 'contractID'],
+            'App\\Models\\ContractBoqItems' => ['companyId', 'contractId'],
+            'App\\Models\\ContractMilestone' => ['companySystemID', 'contractID'],
+            'App\\Models\\ContractDeliverables' => ['companySystemID', 'contractID'],
+            'App\\Models\\ContractOverallRetention' => ['companySystemId', 'contractId'],
+            'App\\Models\\ContractMilestoneRetention' => ['companySystemId', 'contractId'],
         ];
 
-        foreach ($modelsToDelete as $modelName => $companyColumn)
+        foreach ($modelsToDelete as $modelName => $columns)
         {
+            list($companyColumn, $contractColumn) = $columns;
+
             $model = new $modelName();
             $table = $model->getTable();
-            $columns = \Schema::getColumnListing($table);
+            $availableColumns = \Schema::getColumnListing($table);
 
-            $contractColumn = (
-            $modelName === 'App\\Models\\ContractMaster' ? 'id' :
-                $this->contractHistoryRepository->getContractColumn($columns));
-
-            if ($contractColumn)
+            if (in_array($contractColumn, $availableColumns))
             {
                 $query = $model::where($contractColumn, $contractId);
 
@@ -87,7 +86,7 @@ class ContractHistoryService
                     $query->where('category', $categoryId);
                 }
 
-                if ($companyColumn !== '')
+                if ($companyColumn !== '' && in_array($companyColumn, $availableColumns))
                 {
                     $query->where($companyColumn, $companyId);
                 }

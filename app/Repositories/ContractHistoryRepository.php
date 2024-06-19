@@ -323,24 +323,17 @@ class ContractHistoryRepository extends BaseRepository
     private function createSectionData($modelName, $cloningContractId, $contractId,  $additionalData = false)
     {
         $createdIds = [];
-
         try
         {
             $model = new $modelName();
-            $table = $model->getTable();
-            $columns = \Schema::getColumnListing($table);
-
-            $contractColumn = self::getContractColumn($columns);
-
-            $records = $model::where($contractColumn, $cloningContractId)->get();
-
-
-
+            $contractColumn = $modelName::getContractIdColumn();
+            $query = $model->where($contractColumn, $cloningContractId);
+            $records = $query->get();
             foreach ($records as $record)
             {
                 $oldId = $record->id;
                 $uuid = ContractManagementUtils::generateUuid();
-                $recordData = $record->only($columns);
+                $recordData = $record->toArray();
                 unset
                 (
                     $recordData['id'], $recordData['created_by'], $recordData['updated_by'],
@@ -349,14 +342,16 @@ class ContractHistoryRepository extends BaseRepository
 
                 if (isset($additionalData['milestoneRetention']) && $additionalData['milestoneRetention'])
                 {
-                    $getMileStoneIdCloning = ContractMilestone::getMilestoneData
-                    ($cloningContractId, $record->milestoneId);
-
-                    $getMileStoneId = ContractMilestone::getMilestoneDataByTitle
-                    ($contractId, $getMileStoneIdCloning->title);
-
-                    $recordData['milestoneId'] = $getMileStoneId['id'];
+                    $milestoneId = $this->getMilestoneId($cloningContractId, $record->milestoneId, $contractId);
+                    $recordData['milestoneId'] = $milestoneId;
                 }
+
+                if (isset($additionalData['contractDeliverable']) && $additionalData['contractDeliverable'])
+                {
+                    $milestoneID = $this->getMilestoneId($cloningContractId, $record->milestoneID, $contractId);
+                    $recordData['milestoneID'] = $milestoneID;
+                }
+
                 $recordData['uuid'] = $uuid;
                 $recordData[$contractColumn] = $contractId;
                 $recordData['created_by'] = General::currentEmployeeId();
@@ -422,7 +417,7 @@ class ContractHistoryRepository extends BaseRepository
 
             if ($modelName === 'App\\Models\\ContractMilestoneRetention')
             {
-                $additionalData['milestoneRetention'] = true;
+                $additionalData =  ['milestoneRetention' => true];
 
             }
 
@@ -532,9 +527,13 @@ class ContractHistoryRepository extends BaseRepository
 
     private function cloneSectionMilestoneAndDeliverables($cloningContractId, $contractId)
     {
+        $additionalData =  ['contractDeliverable' => true];
         return array_merge(
             $this->createSectionData('App\\Models\\ContractMilestone', $cloningContractId, $contractId),
-            $this->createSectionData('App\\Models\\ContractDeliverables', $cloningContractId, $contractId)
+            $this->createSectionData
+            (
+                'App\\Models\\ContractDeliverables', $cloningContractId, $contractId,$additionalData
+            )
         );
     }
 
@@ -552,24 +551,6 @@ class ContractHistoryRepository extends BaseRepository
 
         return $createdIds;
     }
-
-    public function getContractColumn($columns)
-    {
-        $originalColumns = $columns;
-        $columns = array_map('strtolower', $columns);
-        $possibleColumns = ['contractid', 'contractid', 'contract_id'];
-
-        foreach ($possibleColumns as $possibleColumn)
-        {
-            if (in_array($possibleColumn, $columns, true))
-            {
-                $index = array_search($possibleColumn, $columns);
-                return $originalColumns[$index];
-            }
-        }
-        return null;
-    }
-
     public function getContractHistory(Request $request)
     {
         $input = $request->all();
@@ -588,5 +569,13 @@ class ContractHistoryRepository extends BaseRepository
         $category = $params['category'];
         $companyId = $params['companyId'];
         return ContractHistory::contractHistory($contractId,$category,$companyId,'cloning_contract_id');
+    }
+
+    private function getMilestoneId($cloningContractId, $milestoneId, $contractId)
+    {
+        $getMileStoneIdCloning = ContractMilestone::getMilestoneData($cloningContractId, $milestoneId);
+        $getMileStoneId = ContractMilestone::getMilestoneDataByTitle($contractId, $getMileStoneIdCloning->title);
+
+        return $getMileStoneId['id'];
     }
 }

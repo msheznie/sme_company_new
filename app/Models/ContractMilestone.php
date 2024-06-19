@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
 
 /**
  * Class ContractMilestone
@@ -25,6 +26,7 @@ class ContractMilestone extends Model
 {
 
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_milestone';
 
@@ -95,6 +97,11 @@ class ContractMilestone extends Model
         return self::where('contractID', $contractId)
             ->where('id', $id)
             ->first();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
     }
 
 

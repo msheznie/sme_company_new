@@ -6,7 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Awobaz\Compoships\Compoships;
-
+use App\Traits\HasContractIdColumn;
 
 /**
  * Class ContractAdditionalDocuments
@@ -28,13 +28,14 @@ class ContractAdditionalDocuments extends Model
 {
     use Compoships;
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_additional_document';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $hidden = ['id', 'documentType'];
+    protected $hidden = ['id'];
 
     public $fillable = [
         'uuid',
@@ -106,5 +107,10 @@ class ContractAdditionalDocuments extends Model
         return self::where('companySystemID',$selectedCompanyID)
             ->where('contractID',$contractId)
             ->get();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
     }
 }

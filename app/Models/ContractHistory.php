@@ -6,7 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractHistory
  * @package App\Models
@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 class ContractHistory extends Model
 {
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_history';
 
@@ -250,5 +251,10 @@ class ContractHistory extends Model
             });
         }
         return $approvals;
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contract_id';
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Awobaz\Compoships\Compoships;
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractMaster
  * @package App\Models
@@ -30,6 +31,7 @@ class ContractMaster extends Model
 {
     use HasFactory;
     use Compoships;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_master';
 
@@ -398,5 +400,10 @@ class ContractMaster extends Model
             })
             ->where('companySystemID', $companySystemID)
             ->exists();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'id';
     }
 }

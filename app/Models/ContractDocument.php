@@ -5,7 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractDocument
  * @package App\Models
@@ -35,13 +35,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ContractDocument extends Model
 {
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_document';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $hidden = ['id', 'documentType'];
+    protected $hidden = ['id'];
 
     public $fillable = [
         'uuid',
@@ -137,5 +138,10 @@ class ContractDocument extends Model
     public function pluckContractDocumentID($contractID)
     {
         return ContractDocument::where('contractID', $contractID)->pluck('id');
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
     }
 }

@@ -6,7 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractUserAssign
  * @package App\Models
@@ -25,6 +25,7 @@ class ContractUserAssign extends Model
     //use SoftDeletes;
 
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_user_assign';
 
@@ -121,5 +122,10 @@ class ContractUserAssign extends Model
     {
             return self::where('contractId', $contractId)
                 ->get();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
     }
 }

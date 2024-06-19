@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
 
 /**
  * Class ContractOverallRetention
@@ -28,6 +29,7 @@ class ContractOverallRetention extends Model
 
 
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_overall_retention';
 
@@ -82,5 +84,9 @@ class ContractOverallRetention extends Model
         return $this->belongsTo(ContractMaster::class, 'contractId', 'id');
     }
 
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
+    }
 
 }

@@ -5,7 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractDeliverables
  * @package App\Models
@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ContractDeliverables extends Model
 {
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_deliverables';
 
@@ -86,5 +87,10 @@ class ContractDeliverables extends Model
 
     public function milestone() {
         return $this->belongsTo(ContractMilestone::class, 'milestoneID', 'id');
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
     }
 }

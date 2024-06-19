@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
 
 /**
  * Class ContractSettingDetail
@@ -19,6 +20,7 @@ class ContractSettingDetail extends Model
 {
 
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_contract_setting_detail';
 
@@ -73,6 +75,11 @@ class ContractSettingDetail extends Model
         return self::where('contractId', $contractId)
             ->where('settingMasterId', $id)
             ->get();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
     }
 
 }

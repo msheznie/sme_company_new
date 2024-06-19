@@ -7,6 +7,7 @@ use App\Helpers\General;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
 
 /**
  * Class ContractMilestoneRetention
@@ -29,13 +30,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ContractMilestoneRetention extends Model
 {
     use HasFactory;
+    use HasContractIdColumn;
 
     public $table = 'cm_milestone_retention';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $hidden = ['id', 'contractId'];
+    protected $hidden = ['id'];
 
 
 
@@ -105,5 +107,10 @@ class ContractMilestoneRetention extends Model
     public function setStartDateAttribute($value)
     {
         $this->attributes['startDate'] = General::convertDateTime($value);
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
     }
 }

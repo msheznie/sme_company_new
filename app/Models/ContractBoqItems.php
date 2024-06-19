@@ -5,7 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
 /**
  * Class ContractBoqItems
  * @package App\Models
@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractBoqItems extends Model
 {
-   // use SoftDeletes;
+    use HasContractIdColumn;
 
     use HasFactory;
 
@@ -34,7 +34,7 @@ class ContractBoqItems extends Model
 
 
     protected $dates = ['deleted_at'];
-    protected $hidden = ['id', 'itemId'];
+    protected $hidden = ['id'];
 
 
 
@@ -78,7 +78,12 @@ class ContractBoqItems extends Model
      */
     public static $rules = [];
 
-    public function itemMaster(){
+    public function itemMaster()
+    {
         return $this->belongsTo(ItemMaster::class, 'itemId', 'itemCodeSystem');
+    }
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
     }
 }
