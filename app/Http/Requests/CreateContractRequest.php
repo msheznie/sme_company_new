@@ -37,7 +37,6 @@ class CreateContractRequest extends FormRequest
                  'counterParty' => 'required',
                  'title' => 'required',
                  'contractType' => 'required',
-                 'description' => 'required',
                  'contractOwner' => 'required',
                  'contractAmount' => 'required'
              ];
