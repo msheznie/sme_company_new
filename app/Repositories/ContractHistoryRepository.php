@@ -91,7 +91,7 @@ class ContractHistoryRepository extends BaseRepository
             switch ($categoryId)
             {
                 case 2:
-                case 3:
+                case 5:
                     return $this->createAddendumContract($input,$currentContractDetails,$companyId);
                 case 4:
                 case 6:
@@ -374,8 +374,6 @@ class ContractHistoryRepository extends BaseRepository
         try
         {
             $erpAttachmentModel = new ErpDocumentAttachments();
-            $attachmentTable = $erpAttachmentModel->getTable();
-            $attachmentColumns = \Schema::getColumnListing($attachmentTable);
 
             foreach ($documentIdMapping as $oldDocumentId => $newDocumentId)
             {
@@ -392,7 +390,7 @@ class ContractHistoryRepository extends BaseRepository
 
                 foreach ($attachments as $attachment)
                 {
-                    $attachmentData = $attachment->only($attachmentColumns);
+                    $attachmentData = $attachment->toArray();
                     unset($attachmentData['attachmentID']);
                     $attachmentData['documentSystemCode'] = $newDocumentId;
                     $erpAttachmentModel::create($attachmentData);
