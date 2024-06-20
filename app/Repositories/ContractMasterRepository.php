@@ -369,7 +369,7 @@ class ContractMasterRepository extends BaseRepository
         }
         if($secondaryEmail != null)
         {
-            if(ContractMaster::emailValidation($id, $selectedCompanyID, $primaryEmail, 'secondary'))
+            if(ContractMaster::emailValidation($id, $selectedCompanyID, $secondaryEmail, 'secondary'))
             {
                 throw new CommonException(trans('common.secondary_email_already_exists'));
             }
