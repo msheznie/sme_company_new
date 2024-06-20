@@ -79,3 +79,9 @@ Route::group(['middleware' => ['tenant']], function ()
         Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
 });
+
+Route::get('/activate-contract', function ()
+{
+    \Artisan::call('activateContract');
+    return 'Contracts Activate Successfully!';
+});

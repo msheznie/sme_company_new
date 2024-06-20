@@ -413,4 +413,11 @@ class ContractMaster extends Model
     {
         return 'companySystemID';
     }
+    public static function getCurrentInactiveContract($todayDate)
+    {
+        return ContractMaster::select('id')
+            ->whereDate('startDate', $todayDate)
+            ->where('status', 0)
+            ->get();
+    }
 }

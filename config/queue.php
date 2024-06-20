@@ -41,6 +41,21 @@ return [
             'retry_after' => 90,
         ],
 
+        'database_cm' => [
+            'driver' => 'database',
+            'table' => 'cm_jobs',
+            'queue' => 'default',
+            'retry_after' => 90,
+        ],
+
+        'database_main_cm' => [
+            'driver' => 'database',
+            'connection' => 'main_db',
+            'table' => 'cm_jobs',
+            'queue' => 'default',
+            'retry_after' => 60,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
@@ -83,7 +98,7 @@ return [
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
         'database' => env('DB_CONNECTION', 'mysql'),
-        'table' => 'failed_jobs',
+        'table' => 'cm_failed_jobs',
     ],
 
 ];
