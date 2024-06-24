@@ -412,7 +412,7 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod)
+    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
     {
         try
         {
