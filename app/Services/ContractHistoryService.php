@@ -388,6 +388,7 @@ class ContractHistoryService
             return DB::transaction(function () use ($input)
             {
                 $contractId = $input['contractId'];
+                $contractHistoryUuid = $input['contractHistoryId'];
                 $contractEndDate = $input['contractEndDate'];
                 $companyId = $input['selectedCompanyID'];
                 $categoryId = $input['category'];
@@ -401,7 +402,7 @@ class ContractHistoryService
 
                 $contractId = $getContractId->id;
                 self::updateContractMasterEndDate
-                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod);
+                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid);
             });
         }catch (\Exception $e)
         {
@@ -435,7 +436,8 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod)
+    public function updateContractMasterEndDate(
+        $contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
 
     {
         try
@@ -443,12 +445,20 @@ class ContractHistoryService
             $data = [
                 'endDate'  => ContractManagementUtils::convertDate($contractEndDate),
                 'status'  => $status,
+                'is_extension'  => 1,
                 'contractTermPeriod'  => $newContractTermPeriod,
             ];
 
             ContractMaster::where('companySystemID', $companyId)
                 ->where('id', $contractId)
                 ->update($data);
+
+            $status = [
+                'status'  => 4,
+            ];
+
+            ContractHistory::where('uuid', $contractHistoryUuid)
+                ->update($status);
         }
 
         catch (\Exception $e)
