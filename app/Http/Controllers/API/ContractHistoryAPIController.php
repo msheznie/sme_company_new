@@ -303,22 +303,6 @@ class ContractHistoryAPIController extends AppBaseController
 
     }
 
-    public function updateTerminateStatus(Request $request)
-    {
-        try
-        {
-            $this->contractHistoryService->updateTerminateStatus($request->all());
-            return $this->sendSuccess('Successfully Status Updated');
-        } catch (ContractCreationException $e)
-        {
-            return $this->sendError($e->getMessage(), 500);
-        } catch (\Exception $e)
-        {
-            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
-        }
-
-    }
-
     public function contractHistoryAttachments(CreateContractHistoryAttachmentRequest $request)
     {
         try
@@ -333,8 +317,9 @@ class ContractHistoryAPIController extends AppBaseController
                     ->updateDocumentAttachments($request, $request->input('attachmentID'));
             } else
             {
+                $documentSystemCode = $formData['contractHistoryId'] ?? $currentContractDetails->id;
                 $attachment = $this->erpDocumentAttachmentsRepository
-                    ->saveDocumentAttachments($request, $currentContractDetails->id);
+                    ->saveDocumentAttachments($request, $documentSystemCode);
             }
 
             if (!$attachment['status'])

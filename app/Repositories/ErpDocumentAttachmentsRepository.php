@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Models\ContractHistory;
 use App\Models\DocumentAttachments;
 use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
@@ -13,7 +14,6 @@ use App\Services\AttachmentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 
@@ -122,14 +122,23 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
         {
             $formData = $request->all();
             $companySystemID = $formData['selectedCompanyID'] ?? 0;
-            $contractDetails = ContractManagementUtils::checkContractExist($formData['uuid'], $companySystemID);
-
-            if (!$contractDetails)
+            if(isset($formData['newContractHistoryId']) && $formData['newContractHistoryId'] != -1)
             {
-                throw new CommonException(trans('common.contract_not_found'));
+                $documentSystemCode = $formData['newContractHistoryId'];
+            } else
+            {
+                $contractHistoryDetails = ContractHistory::getContractHistory(
+                    $formData['historyUuid'],
+                    $companySystemID);
+
+                if (!$contractHistoryDetails)
+                {
+                    throw new CommonException(trans('common.contract_history_not_found'));
+                }
+
+                $documentSystemCode = $contractHistoryDetails->id;
             }
 
-            $documentSystemCode = $contractDetails->id;
             return $this->model->getAttachmentDocumentWise($formData['documentMaster'],
                 $documentSystemCode,
                 $companySystemID);

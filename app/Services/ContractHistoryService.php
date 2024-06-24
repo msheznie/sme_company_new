@@ -208,7 +208,10 @@ class ContractHistoryService
                 $cloningContractId = $cloneContractId->id;
 
                 self::updateContractMaster($contractId, $companyId,$categoryId);
-                self::updateContractMaster($cloningContractId, $companyId,-1);
+                if($categoryId !== 6)
+                {
+                    self::updateContractMaster($cloningContractId, $companyId,-1);
+                }
                 self::updateContractHistory($cloningContractId, $companyId, $categoryId);
             });
         }catch (\Exception $e)
@@ -409,35 +412,7 @@ class ContractHistoryService
         }
     }
 
-    public function updateTerminateStatus($input)
-    {
-        try
-        {
-            return DB::transaction(function () use ($input)
-            {
-                $contractId = $input['contractId'];
-                $companyId = $input['selectedCompanyID'];
-                $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
-
-                if (!$getContractId)
-                {
-                    throw new ContractCreationException(trans('common.contract_does_not_exist'));
-                }
-
-                $contractId = $getContractId->id;
-                ContractMaster::where('companySystemID', $companyId)
-                    ->where('id', $contractId)
-                    ->update(['is_termination'  => 1]);
-            });
-        }catch (\Exception $e)
-        {
-            throw new ContractCreationException(trans('common.failed_to_update_status: ' . $e->getMessage()));
-        }
-    }
-
-    public function updateContractMasterEndDate(
-        $contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
-
+    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod)
     {
         try
         {

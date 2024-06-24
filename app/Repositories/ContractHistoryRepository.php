@@ -95,8 +95,7 @@ class ContractHistoryRepository extends BaseRepository
                     return $this->createAddendumContract($input,$currentContractDetails,$companyId);
                 case 4:
                 case 6:
-                     $this->createHistory($input, null, $currentContractDetails->id);
-                     break;
+                     return $this->createHistory($input, null, $currentContractDetails->id);
                 default:
                     return $this->createContract($input,$currentContractDetails,$companyId);
             }
@@ -489,7 +488,7 @@ class ContractHistoryRepository extends BaseRepository
                 ContractHistoryService::
                 confirmHistoryDocument($insertResponse->id,$contractId,$companySystemId,$contractCategoryId);
             }
-
+            return $insertResponse->id;
         } catch (Exception $e)
         {
             throw new ContractCreationException('Failed to create contract history '.$e->getMessage());

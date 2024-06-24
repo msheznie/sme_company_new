@@ -28,8 +28,6 @@ class CreateContractHistoryAttachmentRequest extends FormRequest
             'contractCategory' => 'required|integer',
             'uuid' => 'required',
             'file' => 'required',
-            'attachmentName' => 'required',
-            'description' => 'required',
         ];
     }
 
@@ -39,9 +37,7 @@ class CreateContractHistoryAttachmentRequest extends FormRequest
             'selectedCompanyID.required' =>  'Company id is required',
             'contractCategory.required' => 'Category id is different',
             'uuid.required' => 'contract uuid is required',
-            'file.required' => 'File is required',
-            'attachmentName.required' => 'Attachment Name is required',
-            'description.required' => 'Attachment Name is required',
+            'file.required' => 'File is required'
         ];
     }
 }

@@ -144,7 +144,7 @@ class ContractHistory extends Model
         return ContractHistory::with([
             'contractOldMaster' => function ($q)
             {
-                $q->select('title', 'id', 'status' );
+                $q->select('title', 'id', 'status', 'uuid');
             }, 'createdUser' => function ($q1)
             {
                 $q1->select('employeeSystemID', 'empName');
@@ -263,5 +263,12 @@ class ContractHistory extends Model
     public static function getCompanyIdColumn()
     {
         return 'company_id';
+    }
+
+    public static function getContractHistory($contractUuid, $companySystemID)
+    {
+        return ContractHistory::where('uuid', $contractUuid)
+            ->where('company_id', $companySystemID)
+            ->first();
     }
 }
