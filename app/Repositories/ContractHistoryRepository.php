@@ -91,6 +91,7 @@ class ContractHistoryRepository extends BaseRepository
             switch ($categoryId)
             {
                 case 2:
+                case 3:
                 case 5:
                     return $this->createAddendumContract($input,$currentContractDetails,$companyId);
                 case 4:
