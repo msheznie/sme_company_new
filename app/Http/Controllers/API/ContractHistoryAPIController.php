@@ -220,10 +220,21 @@ class ContractHistoryAPIController extends AppBaseController
 
     public function updateContractStatus(Request $request)
     {
+        $contractCategories = [
+            1 => 'common.successfully_amendment_status_updated',
+            2 => 'common.successfully_addendum_status_updated',
+            3 => 'common.successfully_renewal_status_updated',
+            4 => 'common.successfully_extension_status_updated',
+            5 => 'common.successfully_revision_status_updated',
+            6 => 'common.successfully_termination_status_updated',
+        ];
+
         try
         {
+            $input = $request->all();
+            $categoryId = $input['category'];
             $this->contractHistoryService->updateContractStatus($request->all());
-            return $this->sendSuccess(trans('common.successfully_status_updated'));
+            return $this->sendSuccess(trans($contractCategories[$categoryId]));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);

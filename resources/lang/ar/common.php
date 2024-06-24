@@ -181,5 +181,11 @@ return [
     "successfully_status_updated" => "Successfully Status Updated AR",
     'document_approved_not_found' => 'Document approved not found AR',
     'document_attachment_not_found' => 'Document Attachments not found AR',
-    'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully AR'
+    'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully AR',
+    "successfully_amendment_status_updated" => "Contract Amended Successfully AR",
+    "successfully_addendum_status_updated" => "Contract Addended Successfully AR",
+    "successfully_renewal_status_updated" => "Contract Renewed Successfully AR",
+    "successfully_extension_status_updated" => "Contract Extended Successfully AR",
+    "successfully_revision_status_updated" => "Contract Revised Successfully AR",
+    "successfully_termination_status_updated" => "Contract Terminated Successfully AR",
 ];

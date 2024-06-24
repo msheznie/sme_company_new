@@ -18,7 +18,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
-use Illuminate\Support\Facades\Log;
 
 class ContractHistoryService
 {
@@ -210,8 +209,7 @@ class ContractHistoryService
 
                 self::updateContractMaster($contractId, $companyId,$categoryId);
                 self::updateContractMaster($cloningContractId, $companyId,-1);
-                self::updateContractHistory($cloningContractId, $companyId);
-
+                self::updateContractHistory($cloningContractId, $companyId, $categoryId);
             });
         }catch (\Exception $e)
         {
@@ -238,12 +236,13 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractHistory($contractId, $companyId)
+    public function updateContractHistory($contractId, $companyId, $categoryId = null)
     {
         try
         {
             $data = [
                 'date'  => carbon::now()->format('Y-m-d'),
+                'status'  => $categoryId,
             ];
 
             ContractHistory::where('company_id', $companyId)

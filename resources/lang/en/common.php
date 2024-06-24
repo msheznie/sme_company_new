@@ -184,5 +184,11 @@
      "successfully_status_updated" => "Successfully Status Updated",
      'document_approved_not_found' => 'Document Approved not found',
      'document_attachment_not_found' => 'Document Attachments not found',
-     'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully'
+     'approval_status_record_retrieved_successfully' => 'Approval status record retrieved successfully',
+     "successfully_amendment_status_updated" => "Contract Amended Successfully",
+     "successfully_addendum_status_updated" => "Contract Addended Successfully",
+     "successfully_renewal_status_updated" => "Contract Renewed Successfully",
+     "successfully_extension_status_updated" => "Contract Extended Successfully",
+     "successfully_revision_status_updated" => "Contract Revised Successfully",
+     "successfully_termination_status_updated" => "Contract Terminated Successfully",
  ];
