@@ -346,7 +346,8 @@ class ContractHistoryRepository extends BaseRepository
                     $recordData['milestoneId'] = $milestoneId;
                 }
 
-                if (isset($additionalData['contractDeliverable']) && $additionalData['contractDeliverable'])
+                if ($record->milestoneID > 0 && isset($additionalData['contractDeliverable'])
+                    && $additionalData['contractDeliverable'])
                 {
                     $milestoneID = $this->getMilestoneId($cloningContractId, $record->milestoneID, $contractId);
                     $recordData['milestoneID'] = $milestoneID;
