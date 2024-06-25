@@ -109,7 +109,7 @@ class ContractMasterAPIController extends AppBaseController
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
                 'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
-                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn'
+                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
