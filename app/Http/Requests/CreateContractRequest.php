@@ -61,7 +61,7 @@ class CreateContractRequest extends FormRequest
             'companySystemId.required' =>  'Company id is required',
             'contractCategoryId.required' => 'Category id is different',
             'contractUuid.required' => 'contract uuid is required',
-            'revisedEndDate.required' => 'Revised End Date is required',
+            'revisedEndDate.required' => 'Revised end date is required',
             'reason.required' => 'Reason is required',
         ];
     }

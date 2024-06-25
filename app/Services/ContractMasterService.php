@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\ContractHistory;
 use App\Repositories\ContractMasterRepository;
 use App\Models\ContractMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Company;
+use App\Utilities\ContractManagementUtils;
 
 class ContractMasterService
 {
@@ -16,7 +18,7 @@ class ContractMasterService
         $this->contractMasterRepository = $contractMasterRepository;
     }
 
-    public function getContractViewData($contractUUid, $selectedCompanyID)
+    public function getContractViewData($contractUUid, $selectedCompanyID, $historyUuid)
     {
         $contractMaster = ContractMaster::select('id', 'uuid', 'contractCode', 'title', 'description', 'contractType',
                 'counterParty', 'counterPartyName', 'referenceCode', 'contractOwner', 'contractAmount', 'startDate',
@@ -45,11 +47,13 @@ class ContractMasterService
         $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         $currencyCode = CurrencyMaster::getCurrencyCode($currencyId);
+        $history = ContractHistory::getContractHistory($historyUuid, $selectedCompanyID);
 
         return [
             'viewData' => $contractMaster,
             'currencyCode' => $currencyCode,
-            'decimalPlace' => $decimalPlaces
+            'decimalPlace' => $decimalPlaces,
+            'history' => $history
         ];
     }
 }

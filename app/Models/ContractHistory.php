@@ -168,6 +168,8 @@ class ContractHistory extends Model
                 'cm_contract_master.contractCode',
                 'cm_contract_master.uuid As contract_uuid',
                 'cm_contract_history.uuid',
+                'cm_contract_history.date',
+                'cm_contract_history.comment',
                 'cm_contract_master.title',
                 'cm_contract_master.contractAmount',
                 'cm_contract_types.cm_type_name',

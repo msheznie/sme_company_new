@@ -184,4 +184,12 @@ class ErpDocumentAttachments extends Model
     {
         return $this->belongsTo(ErpDocumentMaster::class, 'documentSystemID', 'documentSystemID');
     }
+
+    public function getAttachmentData($documentSystemID,$historyId)
+    {
+        return ErpDocumentAttachments::select('attachmentID')
+            ->where('documentSystemID', $documentSystemID)
+            ->where('documentSystemCode', $historyId)
+            ->get();
+    }
 }

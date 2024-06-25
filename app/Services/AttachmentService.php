@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ContractDocument;
+use App\Models\ContractHistory;
 use App\Utilities\ContractManagementUtils;
 
 class AttachmentService
@@ -18,6 +19,9 @@ class AttachmentService
             case 123:
                 $contract = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
                 $ids[] = $contract['id'] ?? [];
+                break;
+            case 125:
+                $ids = ContractHistory::getContractHistory($uuid, $companySystemID);
                 break;
             default:
                 break;

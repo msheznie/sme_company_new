@@ -368,7 +368,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $this->contractHistoryService->contractHistoryDelete($request->all());
-            return $this->sendSuccess('Successfully deleted');
+            return $this->sendSuccess('Contract extension record successfully deleted');
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);

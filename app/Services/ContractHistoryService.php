@@ -412,7 +412,8 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractMasterEndDate($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
+    public function updateContractMasterEndDate
+    ($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
     {
         try
         {
@@ -476,11 +477,29 @@ class ContractHistoryService
             return DB::transaction(function () use ($input)
             {
                 $contractHistoryUuid = $input['contractHistoryUuid'];
-                $historyId = ContractHistory::select('id')->where('uuid', $contractHistoryUuid)->first();
+                $companyId = $input['selectedCompanyID'];
+                $historyId = ContractHistory::getContractHistory($contractHistoryUuid, $companyId);
 
                 if (!empty($historyId))
                 {
                     ContractHistory::where('id', $historyId->id)->delete();
+                }
+
+                if($historyId->category == 4)
+                {
+                    $documentSystemID = 125;
+                }
+                if($historyId->category == 6)
+                {
+                    $documentSystemID = 124;
+                }
+
+                $deleteFiles = ErpDocumentAttachments::getAttachmentData($documentSystemID, $historyId->id);
+
+                if($deleteFiles->isNotEmpty())
+                {
+                    $attachmentIDs = $deleteFiles->pluck('attachmentID')->toArray();
+                    ErpDocumentAttachments::whereIn('attachmentID', $attachmentIDs)->delete();
                 }
             });
         } catch (\Exception $e)

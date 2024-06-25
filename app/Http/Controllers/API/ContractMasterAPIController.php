@@ -477,10 +477,12 @@ class ContractMasterAPIController extends AppBaseController
     public function getContractViewData(Request $request)
     {
         $contractUuid = $request->input('contractUuid') ?? null;
+        $historyUuid = $request->input('historyUuid') ?? null;
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
         try
         {
-            $response = $this->contractMasterService->getContractViewData($contractUuid, $selectedCompanyID);
+            $response = $this->contractMasterService->getContractViewData
+            ($contractUuid, $selectedCompanyID, $historyUuid);
             return $this->sendResponse($response, trans('common.retrieved_successfully'));
         } catch (CommonException $ex)
         {
