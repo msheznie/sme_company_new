@@ -261,12 +261,19 @@ class ContractMasterRepository extends BaseRepository
 
     public function getEditFormData($counterPartyType, $userUuid): array
     {
+        if (isset($userUuid) && $userUuid->contractUserId !== 0)
+        {
+            $tenderList = TenderFinalBids::getTenderListBySupplier($userUuid->contractUserId);
+        } else
+        {
+            $tenderList = [];
+        }
         return [
             'contractType' => ContractManagementUtils::getContractTypes(),
             'contractOwners' => ContractManagementUtils::counterPartyNames($counterPartyType),
             'counterPartyType' => ContractManagementUtils::getCounterParty(),
             'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType),
-            'tenderList' => TenderFinalBids::getTenderListBySupplier($userUuid->contractUserId),
+            'tenderList' => $tenderList
         ];
     }
 
