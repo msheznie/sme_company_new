@@ -188,4 +188,5 @@ return [
     "successfully_extension_status_updated" => "Contract Extended Successfully AR",
     "successfully_revision_status_updated" => "Contract Revised Successfully AR",
     "successfully_termination_status_updated" => "Contract Terminated Successfully AR",
+    "tender_list_retrieved" => "Tender List Retrieved Successfully"
 ];

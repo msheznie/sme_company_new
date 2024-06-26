@@ -27,6 +27,7 @@ use App\Models\ContractUsers;
 use App\Models\CurrencyMaster;
 use App\Models\DocumentMaster;
 use App\Models\Employees;
+use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
@@ -258,12 +259,14 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
-    public function getEditFormData($counterPartyType): array {
+    public function getEditFormData($counterPartyType, $userUuid): array
+    {
         return [
             'contractType' => ContractManagementUtils::getContractTypes(),
             'contractOwners' => ContractManagementUtils::counterPartyNames($counterPartyType),
             'counterPartyType' => ContractManagementUtils::getCounterParty(),
-            'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType)
+            'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType),
+            'tenderList' => TenderFinalBids::getTenderListBySupplier($userUuid->contractUserId),
         ];
     }
 
@@ -284,6 +287,25 @@ class ContractMasterRepository extends BaseRepository
         ];
 
         return ['status' => true , 'message' => trans('common.contract_form_data_retrieved'), 'data' => $response];
+    }
+
+    public function getTenderList($counterparty)
+    {
+        $user = ContractUsers::getContractUserIdByUuid($counterparty);
+
+        if (!$user)
+        {
+            return ['status' => false, 'message' => trans('common.user_not_found'), 'code' => 404];
+        }
+
+        $tenderList = TenderFinalBids::getTenderListBySupplier($user->contractUserId);
+
+        $response = [
+            'tenderList' => $tenderList
+        ];
+
+        return ['status' => true, 'message' => trans('common.tender_list_retrieved'), 'data' => $response];
+
     }
 
     public function updateContract($formData, $id, $selectedCompanyID)
@@ -344,7 +366,8 @@ class ContractMasterRepository extends BaseRepository
                 'secondaryEmail' => $formData['secondaryEmail'] ?? null,
                 'secondaryPhoneNumber' => $formData['secondaryPhoneNumber'] ?? null,
                 'updated_by' => General::currentEmployeeId(),
-                'updated_at' => Carbon::now()
+                'updated_at' => Carbon::now(),
+                'tender_id' => $formData['tenderId'] ?? null
             ];
 
             return ContractMaster::where('id', $id)->update($updateData);

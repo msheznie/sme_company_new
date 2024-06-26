@@ -15,6 +15,7 @@ use App\Http\Requests\API\ContractConfirmRequest;
 use App\Jobs\DeleteFileFromS3Job;
 use App\Models\Company;
 use App\Models\ContractMaster;
+use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
@@ -109,7 +110,7 @@ class ContractMasterAPIController extends AppBaseController
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
                 'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
-                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN'
+                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
@@ -131,8 +132,9 @@ class ContractMasterAPIController extends AppBaseController
 
 
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
+        $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
-        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty']);
+        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid);
         $contactMaster = new ContractMaster();
         $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
@@ -273,6 +275,22 @@ class ContractMasterAPIController extends AppBaseController
             return $this->sendError($fromData['message'], $statusCode);
         }
 
+    }
+
+    public function getSupplierTenderList(Request $request)
+    {
+        $counterparty = $request->input('counterParty');
+
+        $fromData = $this->contractMasterRepository->getTenderList($counterparty);
+
+        if($fromData['status'])
+        {
+            return $this->sendResponse($fromData['data'], $fromData['message']);
+        } else
+        {
+            $statusCode = $fromData['code'] ?? 404;
+            return $this->sendError($fromData['message'], $statusCode);
+        }
     }
 
     public function getContractTypeSectionData(Request $request)

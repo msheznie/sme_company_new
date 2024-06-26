@@ -180,4 +180,11 @@ class ContractUsers extends Model
         return self::where('uuid', $uuid)->first();
     }
 
+    public static function getContractUserIdByUuid($uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->select('contractUserId')
+            ->first();
+    }
+
 }

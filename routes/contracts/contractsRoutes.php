@@ -28,6 +28,9 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/user-form-data',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getUserFormDataContractEdit'])
         ->name('Contract edit form data');
+    Route::post('/load-tender-data',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSupplierTenderList'])
+        ->name('Load tender data');
     Route::post('/get-contract-type-sections-data',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractTypeSectionData'])
         ->name('Contract type section data');
