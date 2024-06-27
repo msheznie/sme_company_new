@@ -96,7 +96,7 @@ class ContractHistoryRepository extends BaseRepository
                     return $this->createAddendumContract($input,$currentContractDetails,$companyId);
                 case 4:
                 case 6:
-                     return $this->createHistory($input, null, $currentContractDetails->id);
+                     return $this->createHistory($input, $currentContractDetails->id, $currentContractDetails->id);
                 default:
                     return $this->createContract($input,$currentContractDetails,$companyId);
             }
@@ -120,7 +120,8 @@ class ContractHistoryRepository extends BaseRepository
         $this->createContractSetting($contractId, $currentContractDetails);
         $this->createUserAssign($currentContractDetails['id'],$contractId);
         $this->addSectionWiseRecords($currentContractDetails['id'],$contractId,$companyId);
-        $this->createHistory($input,$currentContractDetails['id'],$contractId);
+        $historyId = $this->createHistory($input,$currentContractDetails['id'],$contractId);
+        ContractHistoryService::insertHistoryStatus($contractId,$contract['status'],$companyId,$historyId);
         return $contract['uuid'];
     }
 
@@ -168,7 +169,10 @@ class ContractHistoryRepository extends BaseRepository
             'secondaryEmail' => $currentContractDetails["secondaryEmail"],
             'secondaryPhoneNumber' => $currentContractDetails["secondaryPhoneNumber"],
             'documentMasterId' => $currentContractDetails["documentMasterId"],
-            'status' => 0,
+            'status' => ContractHistoryService::checkContractDateBetween
+            (
+                $currentContractDetails["startDate"], $currentContractDetails["endDate"]
+            ),
             'uuid' => $uuid,
             'companySystemID' => $companyId,
             'created_by' => General::currentEmployeeId(),
@@ -176,14 +180,7 @@ class ContractHistoryRepository extends BaseRepository
             'parent_id' => $currentContractDetails['id']
         ];
 
-        $categoryFields = [
-            1 => 'is_amendment',
-            2 => 'is_addendum',
-            3 => 'is_renewal',
-            4 => 'is_extension',
-            5 => 'is_revision',
-            6 => 'is_termination',
-        ];
+        $categoryFields = ContractHistoryService::getCategories();
 
         if (isset($categoryFields[$categoryId]))
         {
@@ -193,14 +190,21 @@ class ContractHistoryRepository extends BaseRepository
         try
         {
             $insertResponse = ContractMaster::create($insert);
+
+
             if (!$insertResponse)
             {
                 throw new ContractCreationException('Something went wrong while creating the contract.');
             }
+
+
+
+
             return
                 [
                     'id' => $insertResponse->id,
-                    'uuid' => $insertResponse->uuid
+                    'uuid' => $insertResponse->uuid,
+                    'status' => $insertResponse->status
                 ];
         } catch (Exception $e)
         {

@@ -12,6 +12,7 @@ use App\Models\CMIntentsMaster;
 use App\Models\CMPartiesMaster;
 use App\Models\Company;
 use App\Models\ContractDocument;
+use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractUserGroup;
@@ -208,9 +209,16 @@ class ContractManagementUtils
 
         return $formattedDate;
     }
+
     public static function getBillingFrequencies()
     {
         return BillingFrequencies::select('id', 'description')
             ->get();
+    }
+
+    public static function getContractHistoryData($uuid)
+    {
+        return ContractHistory::Where('uuid',$uuid)
+            ->first();
     }
 }

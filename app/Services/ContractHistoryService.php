@@ -10,6 +10,7 @@ use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
+use App\Models\contractStatusHistory;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\ContractHistoryRepository;
@@ -18,7 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
-
+use Illuminate\Support\Facades\Log;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -36,12 +37,15 @@ class ContractHistoryService
                 $uuid = $input['contractUuid'];
                 $companyId = $input['selectedCompanyID'];
                 $categoryId = $input['category'];
+                $historyUuid = $input['contractHistoryId'];
                 $getContractId = ContractManagementUtils::checkContractExist($uuid, $companyId);
                 $contractDocuments = ContractDocument::getContractDocuments($getContractId['id'], $companyId);
                 $contractAdditionalDocuments = ContractAdditionalDocuments::getContractAdditionalDocuments(
                     $getContractId['id'], $companyId
                 );
+                $getContractHistory = ContractManagementUtils::getContractHistoryData($historyUuid);
                 $this->deleteRelatedModels($getContractId['id'], $companyId, $categoryId);
+                $this->deleteContractStatus($getContractHistory['id']);
                 $this->deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments);
             });
         } catch (\Exception $e)
@@ -193,11 +197,13 @@ class ContractHistoryService
             return DB::transaction(function () use ($input)
             {
                 $contractId = $input['contractId'];
-                $cloneContractId = $input['cloneContractId'];
                 $companyId = $input['selectedCompanyID'];
                 $categoryId = $input['category'];
+                $contractHistoryUuid = $input['contractHistoryId'];
+                $contractCloneUuid = $input['cloneContractId'];
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
-                $cloneContractId = ContractManagementUtils::checkContractExist($cloneContractId, $companyId);
+                $getContractCloneData = ContractManagementUtils::checkContractExist($contractCloneUuid, $companyId);
+                $getContractHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
 
                 if (!$getContractId)
                 {
@@ -205,14 +211,19 @@ class ContractHistoryService
                 }
 
                 $contractId = $getContractId->id;
-                $cloningContractId = $cloneContractId->id;
+                $contractHistoryId  = $getContractHistoryData->id;
+
+                $cloneStatus = self::checkContractDateBetween
+                (
+                    $getContractCloneData['startDate'],$getContractCloneData['endDate']
+                );
 
                 self::updateContractMaster($contractId, $companyId,$categoryId);
-                if($categoryId !== 6)
-                {
-                    self::updateContractMaster($cloningContractId, $companyId,-1);
-                }
-                self::updateContractHistory($cloningContractId, $companyId, $categoryId);
+                self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
+                self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
+                self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
+                self::insertHistoryStatus($contractId,$categoryId,$companyId);
+
             });
         }catch (\Exception $e)
         {
@@ -239,7 +250,7 @@ class ContractHistoryService
         }
     }
 
-    public function updateContractHistory($contractId, $companyId, $categoryId = null)
+    public function updateContractHistory($historyID, $companyId, $categoryId = null)
     {
         try
         {
@@ -249,7 +260,7 @@ class ContractHistoryService
             ];
 
             ContractHistory::where('company_id', $companyId)
-                ->where('contract_id', $contractId)
+                ->where('id', $historyID)
                 ->update($data);
         }
 
@@ -507,4 +518,96 @@ class ContractHistoryService
             throw new ContractCreationException("Failed to delete contract history: " . $e->getMessage());
         }
     }
+
+    public static function getCategories()
+    {
+        return  [
+            1 => 'is_amendment',
+            2 => 'is_addendum',
+            3 => 'is_renewal',
+            4 => 'is_extension',
+            5 => 'is_revision',
+            6 => 'is_termination',
+        ];
+
+    }
+
+    public static function insertHistoryStatus($contractId, $status, $companySystemID, $contractHistoryId = null)
+    {
+        try
+        {
+            return DB::transaction(function () use ($contractId,$status, $companySystemID, $contractHistoryId)
+            {
+                $insert = [
+                    'contract_id' => $contractId,
+                    'status' => $status,
+                    'company_id' => $companySystemID,
+                    'created_by' => General::currentEmployeeId(),
+                    'created_at' => Carbon::now()
+                ];
+
+                if ($contractHistoryId!=null)
+                {
+                    $insert['contract_history_id'] = $contractHistoryId;
+                }
+
+                contractStatusHistory::create($insert);
+            });
+        } catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to insert contract status: " . $e->getMessage());
+        }
+    }
+   public static function checkContractDateBetween($startDate, $endDate)
+    {
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+        $currentDate = Carbon::now();
+
+        if ($currentDate->lt($startDate))
+        {
+            return 0;
+        } elseif ($currentDate->between($startDate, $endDate))
+        {
+            return -1;
+        } else
+        {
+            return 7;
+        }
+    }
+
+    public static function deleteContractStatus($id)
+    {
+        try
+        {
+            contractStatusHistory::where('contract_history_id',$id)
+                ->delete();
+        }
+        catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to delete contract status history: " . $e->getMessage());
+        }
+
+    }
+
+    public static function updateContractHistoryStatus($contractId,$contractHistoryId, $cloneStatus)
+    {
+        try
+        {
+            $data = [
+                'status'  => $cloneStatus,
+            ];
+
+            contractStatusHistory::where('contract_id',$contractId)
+            ->where('contract_history_id',$contractHistoryId)
+            ->update($data);
+        }
+        catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to delete contract status history: " . $e->getMessage());
+        }
+
+    }
+
+
 }

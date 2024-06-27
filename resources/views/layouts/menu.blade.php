@@ -308,3 +308,9 @@
         </a>
     </li>
 </ul>
+<li class="nav-item {{ Request::is('contractStatusHistories*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractStatusHistories.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Status Histories</span>
+    </a>
+</li>

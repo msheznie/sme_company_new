@@ -268,4 +268,9 @@ Route::
         \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
         'update'
     ])->name('update periodic billing');
+
+    Route::post('get-contract-list-status', [
+        \App\Http\Controllers\API\contractStatusHistoryAPIController::class,
+        'getContractListStatus'
+    ])->name('Contract History Status');
 });

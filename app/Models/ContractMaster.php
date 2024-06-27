@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\General;
+use App\Services\ContractHistoryService;
 use App\Traits\HasCompanyIdColumn;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -237,7 +238,15 @@ class ContractMaster extends Model
             $q4->select('contractId', 'userId')
                 ->where('userId', $contractUserId->id)
                 ->where('status', 1);
-        }, 'contractAssignedUsers.contractUserGroupAssignedUser'])->where('companySystemID', $companyId)
+        },'contractHistoryStatus' => function ($q5) use ($companyId)
+            {
+                $q5->select(DB::raw('MIN(id) as id'), 'contract_id', 'status')
+                    ->where('company_id', $companyId)
+                    ->groupBy('contract_id', 'status')
+                    ->orderBy('id', 'asc');
+
+            },'contractAssignedUsers.contractUserGroupAssignedUser'
+        ])->where('companySystemID', $companyId)
             ->orderBy('id', 'desc');
         if ($filter)
         {
@@ -422,4 +431,9 @@ class ContractMaster extends Model
             ->where('status', 0)
             ->get();
     }
+    public function contractHistoryStatus()
+    {
+        return $this->hasMany(contractStatusHistory::class, 'contract_id', 'id');
+    }
+
 }

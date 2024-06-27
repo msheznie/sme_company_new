@@ -29,6 +29,7 @@ use App\Models\DocumentMaster;
 use App\Models\Employees;
 use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
+use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -192,7 +193,7 @@ class ContractMasterRepository extends BaseRepository
 
             $insertResponse = ContractMaster::create($insertArray);
             $contractMasterId = $insertResponse->id;
-
+            ContractHistoryService::insertHistoryStatus($contractMasterId, 0,$companySystemID);
             if($insertResponse) {
 
                 $contractTypeSections = CMContractTypeSections::where('contract_typeId', $contractType["contract_typeId"])
@@ -422,8 +423,6 @@ class ContractMasterRepository extends BaseRepository
         unset($contract['contractOwner']);
         unset($contract['contractType']);
         unset($contract['counterPartyName']);
-        $contract['parent_id'] = $contract['parent_id'] ?? null;
-        unset($contract['parent_id']);
 
         return $contract;
     }
