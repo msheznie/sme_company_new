@@ -42,12 +42,11 @@ class ContractMilestone extends Model
         'uuid',
         'contractID',
         'title',
-        'percentage',
-        'amount',
         'status',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'description'
     ];
 
     /**
@@ -60,12 +59,11 @@ class ContractMilestone extends Model
         'uuid' => 'string',
         'contractID' => 'integer',
         'title' => 'string',
-        'percentage' => 'float',
-        'amount' => 'float',
         'status' => 'integer',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'description' => 'string'
     ];
 
     /**
@@ -77,15 +75,14 @@ class ContractMilestone extends Model
         'uuid' => 'required|string|max:200',
         'contractID' => 'required|integer',
         'title' => 'required|string|max:255',
-        'percentage' => 'required|numeric',
-        'amount' => 'required|numeric',
         'status' => 'required|boolean',
         'companySystemID' => 'required|integer',
         'created_by' => 'required|integer',
         'updated_by' => 'required|integer',
         'deleted_at' => 'required',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'description' => 'required|string',
     ];
 
     public static function getMilestoneDataByTitle($contractId,$title)
@@ -109,6 +106,15 @@ class ContractMilestone extends Model
     public static function getCompanyIdColumn()
     {
         return 'companySystemID';
+    }
+
+    public static function getContractMilestone($contractID, $companySystemID)
+    {
+        return ContractMilestone::select('uuid', 'title', 'description', 'status')
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->get();
+
     }
 
 

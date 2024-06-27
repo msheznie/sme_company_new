@@ -30,11 +30,10 @@ class ContractDeliverablesRepository extends BaseRepository
         'contractID',
         'milestoneID',
         'description',
-        'startDate',
-        'endDate',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'dueDate'
     ];
 
     /**
@@ -55,44 +54,40 @@ class ContractDeliverablesRepository extends BaseRepository
         return ContractDeliverables::class;
     }
 
-    protected function getModel(){
+    protected function getModel()
+    {
         return new ContractDeliverables();
     }
 
-    public function getDeliverables($contractID, $companySystemID): array {
-        $deliverables = ContractDeliverables::select('uuid', 'milestoneID', 'description', 'startDate', 'endDate')
-            ->with([
-                'milestone' => function ($q) {
-                    $q->select('id', 'uuid');
-                }
-            ])
-            ->where('contractID', $contractID)
-            ->where('companySystemID', $companySystemID)
-            ->get();
+    public function getDeliverables($contractID, $companySystemID): array
+    {
+        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
         $deliverablesArray = [];
-        if ($deliverables) {
-            foreach($deliverables as $key => $value) {
+        if ($deliverables)
+        {
+            foreach($deliverables as $key => $value)
+            {
                 $deliverablesArray[$key]['uuid'] = $value['uuid'];
                 $deliverablesArray[$key]['description'] = $value['description'];
-                $deliverablesArray[$key]['startDate'] = $value['startDate'];
-                $deliverablesArray[$key]['endDate'] = $value['endDate'];
+                $deliverablesArray[$key]['dueDate'] = $value['dueDate'];
                 $deliverablesArray[$key]['milestoneUuid'] = $value['milestone']['uuid'] ?? null;
             }
         }
         return $deliverablesArray;
     }
 
-    public function createDeliverables(Request $request): array {
+    public function createDeliverables(Request $request): array
+    {
         $companySystemID = $request->input('companySystemID');
         $contractUuid = $request->input('contractUuid');
         $description = $request->input('description');
         $milestone = $request->input('milestone') ?? null;
-        $formattedStartDate = $request->input('formattedStartDate') ?? null;
-        $formattedEndDate = $request->input('formattedEndDate') ?? null;
+        $formattedDueDate = $request->input('formattedDueDate') ?? null;
         $uuid = bin2hex(random_bytes(16));
         $milestoneID = 0;
 
-        if(ContractDeliverables::where('uuid', $uuid)->exists()) {
+        if(ContractDeliverables::where('uuid', $uuid)->exists())
+        {
             return [
                 'status' => false,
                 'message' => trans('common.deliverable_uuid_already_exists')
@@ -102,13 +97,15 @@ class ContractDeliverablesRepository extends BaseRepository
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
-        if(empty($contractMaster)) {
+        if(empty($contractMaster))
+        {
             return [
                 'status' => false,
                 'message' => trans('common.contract_id_not_found')
             ];
         }
-        if($milestone != null) {
+        if($milestone != null)
+        {
             $milestoneExists = ContractMilestone::select('id')
                 ->where('uuid', $milestone)
                 ->where('companySystemID',$companySystemID)
@@ -118,18 +115,19 @@ class ContractDeliverablesRepository extends BaseRepository
         }
         $contractId = $contractMaster['id'];
         $validationInsert = self::checkDeliverableValidation($description, 0, $companySystemID, $contractId);
-        if(!$validationInsert['status']) {
+        if(!$validationInsert['status'])
+        {
             return $validationInsert;
         }
-        try{
+        try
+        {
             DB::beginTransaction();
             $insertDeliverables = [
                 'uuid' => $uuid,
                 'contractID' => $contractId,
                 'description' => $description,
                 'milestoneID' => $milestoneID,
-                'startDate' => $formattedStartDate ? Carbon::parse($formattedStartDate) : null,
-                'endDate' => $formattedEndDate ? Carbon::parse($formattedEndDate) : null,
+                'dueDate' => $formattedDueDate ? Carbon::parse($formattedDueDate) : null,
                 'companySystemID' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
@@ -138,35 +136,40 @@ class ContractDeliverablesRepository extends BaseRepository
 
             DB::commit();
             return ['status' => true, 'message' => trans('common.deliverable_created_successfully')];
-        } catch (\Exception $ex){
+        } catch (\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
     }
-    public function updateDeliverable(Request $request, $id): array {
+    public function updateDeliverable(Request $request, $id): array
+    {
         $companySystemID = $request->input('companySystemID');
         $contractUuid = $request->input('contractUuid');
         $description = $request->input('description');
         $milestone = $request->input('milestone') ?? null;
-        $formattedStartDate = $request->input('formattedStartDate') ?? null;
-        $formattedEndDate = $request->input('formattedEndDate') ?? null;
+        $formattedDueDate = $request->input('formattedDueDate') ?? null;
         $milestoneID = 0;
 
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
 
-        if(empty($contractMaster)) {
+        if(empty($contractMaster))
+        {
             return [
                 'status' => false,
                 'message' => trans('common.contract_id_not_found')
             ];
         }
-        $validationUpdate = self::checkDeliverableValidation($description, $id, $companySystemID, $contractMaster['id']);
-        if(!$validationUpdate['status']) {
+        $validationUpdate =
+            self::checkDeliverableValidation($description, $id, $companySystemID, $contractMaster['id']);
+        if(!$validationUpdate['status'])
+        {
             return $validationUpdate;
         }
-        if($milestone != null) {
+        if($milestone != null)
+        {
             $milestoneExists = ContractMilestone::select('id')
                 ->where('uuid', $milestone)
                 ->where('companySystemID',$companySystemID)
@@ -174,13 +177,13 @@ class ContractDeliverablesRepository extends BaseRepository
 
             $milestoneID = $milestoneExists['id'] ?? 0;
         }
-        try{
+        try
+        {
             DB::beginTransaction();
             $insertDeliverables = [
                 'description' => $description,
                 'milestoneID' => $milestoneID,
-                'startDate' => $formattedStartDate ? Carbon::parse($formattedStartDate) : null,
-                'endDate' => $formattedEndDate ? Carbon::parse($formattedEndDate) : null,
+                'dueDate' => $formattedDueDate ? Carbon::parse($formattedDueDate) : null,
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];
@@ -188,20 +191,24 @@ class ContractDeliverablesRepository extends BaseRepository
 
             DB::commit();
             return ['status' => true, 'message' => trans('common.deliverable_updated_successfully')];
-        } catch (\Exception $ex){
+        } catch (\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
     }
-    public function checkDeliverableValidation($description, $id, $companySystemID, $contractID): array{
+    public function checkDeliverableValidation($description, $id, $companySystemID, $contractID): array
+    {
         $milestoneExists = ContractDeliverables::where('description', $description)
             ->where('contractID', $contractID)
             ->where('companySystemID', $companySystemID)
-            ->when($id > 0, function ($q) use ($id) {
+            ->when($id > 0, function ($q) use ($id)
+            {
                 $q->where('id', '!=', $id);
             })
             ->exists();
-        if($milestoneExists) {
+        if($milestoneExists)
+        {
             return [
                 'status' => false,
                 'message' => trans('common.deliverable_already_exists')
@@ -213,45 +220,37 @@ class ContractDeliverablesRepository extends BaseRepository
         ];
     }
 
-    public function getDeliverablesExcelData(Request $request): array {
+    public function getDeliverablesExcelData(Request $request): array
+    {
         $contractUuid = $request->input('contractUUid') ?? null;
         $companySystemID = $request->input('selectedCompanyID') ?? 0;
-        $startDateText = 'Start Date';
-        $endDateText = 'End Date';
+        $dueDateText = 'Due Date';
 
         $contractMaster = ContractMaster::select('id')
             ->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
-        if(empty($contractMaster)) {
+        if(empty($contractMaster))
+        {
             return [
                 'status' => false,
                 'message' => trans('common.contract_id_not_found')
             ];
         }
         $contractID = $contractMaster['id'];
-        $deliverables = ContractDeliverables::select('milestoneID', 'description', 'startDate', 'endDate')
-            ->with([
-                'milestone' => function ($q) {
-                    $q->select('id', 'title');
-                }
-            ])
-            ->where('contractID', $contractID)
-            ->where('companySystemID', $companySystemID)
-            ->get();
+        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
 
-        $data[0]['Description'] = "Description";
         $data[0]['Milestone'] = "Milestone";
-        $data[0][$startDateText] = $startDateText;
-        $data[0][$endDateText] = $endDateText;
-        if($deliverables) {
-            foreach ($deliverables as $key => $deliverable){
-                $data[$key+1]['Description'] = $deliverable['description'];
+        $data[0]['Description'] = "Description";
+        $data[0][$dueDateText] = $dueDateText;
+        if($deliverables)
+        {
+            foreach ($deliverables as $key => $deliverable)
+            {
                 $data[$key+1]['Milestone'] = $deliverable['milestone']['title'] ?? '-';
-                $data[$key+1][$startDateText] = $deliverable['startDate'] ?
-                    Carbon::parse($deliverable['startDate'])->format('Y-m-d') : '-';
-                $data[$key+1][$endDateText] = $deliverable['endDate'] ?
-                    Carbon::parse($deliverable['endDate'])->format('Y-m-d') : '-';
+                $data[$key+1]['Description'] = $deliverable['description'];
+                $data[$key+1][$dueDateText] = $deliverable['dueDate'] ?
+                    Carbon::parse($deliverable['dueDate'])->format('Y-m-d') : '-';
             }
         }
         return [

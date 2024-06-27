@@ -42,11 +42,10 @@ class ContractDeliverables extends Model
         'contractID',
         'milestoneID',
         'description',
-        'startDate',
-        'endDate',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'dueDate'
     ];
 
     /**
@@ -60,8 +59,7 @@ class ContractDeliverables extends Model
         'contractID' => 'integer',
         'milestoneID' => 'integer',
         'description' => 'string',
-        'startDate' => 'string',
-        'endDate' => 'string',
+        'dueDate' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
@@ -77,17 +75,17 @@ class ContractDeliverables extends Model
         'contractID' => 'required|integer',
         'milestoneID' => 'required|integer',
         'description' => 'required|string|max:255',
-        'startDate' => 'required',
-        'endDate' => 'required',
         'companySystemID' => 'required|integer',
         'created_by' => 'required|integer',
         'updated_by' => 'required|integer',
         'deleted_at' => 'required',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'dueDate' => 'string'
     ];
 
-    public function milestone() {
+    public function milestone()
+    {
         return $this->belongsTo(ContractMilestone::class, 'milestoneID', 'id');
     }
 
@@ -99,5 +97,19 @@ class ContractDeliverables extends Model
     public static function getCompanyIdColumn()
     {
         return 'companySystemID';
+    }
+
+    public static function getDeliverables($contractID, $companySystemID)
+    {
+        return ContractDeliverables::select('uuid', 'milestoneID', 'description', 'dueDate')
+            ->with([
+                'milestone' => function ($q)
+                {
+                    $q->select('id', 'uuid', 'title');
+                }
+            ])
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->get();
     }
 }
