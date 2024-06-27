@@ -256,4 +256,16 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'contractHistoryDelete'
     ])->name('Contract History Delete');
+    Route::post('periodic-billing-form-data', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'periodicBillingFormData'
+    ])->name('Payment schedule form data');
+    Route::post('periodic-billing', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'store'
+    ])->name('store periodic billing');
+    Route::put('periodic-billing/{id}', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'update'
+    ])->name('update periodic billing');
 });

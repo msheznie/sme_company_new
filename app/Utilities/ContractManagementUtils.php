@@ -3,6 +3,7 @@
 namespace App\Utilities;
 
 use App\Helper\General;
+use App\Models\BillingFrequencies;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractsMaster;
 use App\Models\CMContractTypes;
@@ -206,5 +207,10 @@ class ContractManagementUtils
         }
 
         return $formattedDate;
+    }
+    public static function getBillingFrequencies()
+    {
+        return BillingFrequencies::select('id', 'description')
+            ->get();
     }
 }

@@ -289,5 +289,22 @@
             <span>Erp Employees Departments</span>
         </a>
     </li>
-
+    <li class="nav-item {{ Request::is('billingFrequencies*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('billingFrequencies.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Billing Frequencies</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('periodicBillings*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('periodicBillings.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Periodic Billings</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('milestonePaymentSchedules*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('milestonePaymentSchedules.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Milestone Payment Schedules</span>
+        </a>
+    </li>
 </ul>
