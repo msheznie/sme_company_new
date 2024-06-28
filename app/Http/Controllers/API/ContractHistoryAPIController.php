@@ -17,7 +17,6 @@ use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractHistoryResource;
-use Illuminate\Support\Facades\Log;
 use Response;
 
 /**

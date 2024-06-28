@@ -20,6 +20,7 @@ class AttachmentService
                 $contract = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
                 $ids[] = $contract['id'] ?? [];
                 break;
+            case 124:
             case 125:
                 $ids = ContractHistory::getContractHistory($uuid, $companySystemID);
                 break;

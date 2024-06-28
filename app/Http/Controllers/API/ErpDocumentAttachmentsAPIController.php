@@ -166,6 +166,7 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
             $documentSystemID,
             $selectedCompanyID
         );
+
         return $this->erpDocumentAttachmentsRepository->getDocumentAttachments(
             $documentSystemID,
             $search,

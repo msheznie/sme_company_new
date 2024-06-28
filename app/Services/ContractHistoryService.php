@@ -19,7 +19,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
-use Illuminate\Support\Facades\Log;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -204,7 +203,6 @@ class ContractHistoryService
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
                 $getContractCloneData = ContractManagementUtils::checkContractExist($contractCloneUuid, $companyId);
                 $getContractHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
-
                 if (!$getContractId)
                 {
                     throw new ContractCreationException(trans('common.contract_does_not_exist'));
