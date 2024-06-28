@@ -164,6 +164,16 @@ class ContractManagementUtils
             ->where('companySystemID', $companySystemID)
             ->get();
     }
+
+    public static function getMilestonesWithAmount($contractId, $companySystemID)
+    {
+        return ContractMilestone::with('milestonePaymentSchedules')
+            ->where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->has('milestonePaymentSchedules')
+            ->get();
+    }
+
     public static function getDocumentTypeMasters($companySystemID)
     {
         return DocumentMaster::select('uuid', 'documentType')

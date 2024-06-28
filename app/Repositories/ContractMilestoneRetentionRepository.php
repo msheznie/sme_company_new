@@ -10,6 +10,7 @@ use App\Models\ContractMilestoneRetention;
 use App\Models\ContractOverallRetention;
 use App\Models\CurrencyMaster;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,13 +61,14 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         return ContractMilestoneRetention::class;
     }
 
-    public function getContractMilestoneRetentionData(Request $request){
+    public function getContractMilestoneRetentionData(Request $request)
+    {
 
         $input = $request->all();
         $contractUuid = $input['contractId'];
         $companySystemID = $input['selectedCompanyID'];
 
-        $contract = ContractMaster::select('id', 'contractAmount')->where('uuid', $contractUuid)->first();
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
         $contractId = $contract['id'];
 
         $languages =  $this->model->ContractMilestoneRetention($companySystemID, $contractId);
@@ -93,8 +95,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             ];
         }
 
-        $totalRecords = ContractMilestone::where('contractID', $contract['id'])
-            ->where('companySystemID', $companySystemID)->count();
+        $totalRecords = ContractManagementUtils::getMilestonesWithAmount($contract['id'], $companySystemID)->count();
 
         if($totalRecords == 0){
             return [
@@ -148,7 +149,8 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         }
     }
 
-    public function updateMilestoneRetention(Request $request){
+    public function updateMilestoneRetention(Request $request)
+    {
         $input = $request->all();
         $companySystemID = $input['selectedCompanyID'];
         $milestoneUuid = $input['data']['milestoneId'] ?? null;
@@ -156,59 +158,69 @@ class ContractMilestoneRetentionRepository extends BaseRepository
 
         $milestoneRetentionData = ContractMilestoneRetention::where('uuid', $milestoneRetentionUuid)->first();
         $retentionPercentage = $milestoneRetentionData['retentionPercentage'];
-        $milestone = ContractMilestone::where('uuid', $milestoneUuid)->first();
+        $milestone = ContractMilestone::getContractMilestoneWithAmount($milestoneUuid);
 
-        if($input['value'] == 0){
+        if($input['value'] == 0)
+        {
             $duplicateMilestone = ContractMilestoneRetention::where('milestoneId', $milestone['id'])
                 ->where('contractId', $milestoneRetentionData['contractId'])
                 ->where('companySystemId', $companySystemID)
                 ->first();
 
-            if ($duplicateMilestone) {
+            if ($duplicateMilestone)
+            {
                 return ['status' => false, 'message' => trans('common.milestone_titles_cannot_be_duplicated')];
             }
         }
 
-        if($milestoneUuid){
+        if($milestoneUuid)
+        {
             $milestoneId = $milestone['id'];
-            $retentionAmount = $milestone['amount'] * ($retentionPercentage / 100);
-        }else{
+            $retentionAmount = $milestone['milestonePaymentSchedules']['amount'] * ($retentionPercentage / 100);
+        }else
+        {
             $milestoneId = null;
             $retentionAmount = 0;
         }
 
-        if($input['data']['startDate'] == null && $input['data']['dueDate'] == null){
+        if($input['data']['startDate'] == null && $input['data']['dueDate'] == null)
+        {
             $startDate = $input['startDate'];
             $dueDate = $input['dueDate'];
             $withholdPeriod = 0;
         }
 
-        if($input['startDate'] && $input['data']['dueDate'] == null){
+        if($input['startDate'] && $input['data']['dueDate'] == null)
+        {
             $startDate = (new Carbon($input['startDate']))->format('Y-m-d');
             $dueDate = $input['dueDate'];
             $withholdPeriod = 0;
         }
 
-        if($input['dueDate'] && $input['data']['startDate'] == null){
+        if($input['dueDate'] && $input['data']['startDate'] == null)
+        {
             $startDate = $input['startDate'];
             $dueDate = (new Carbon($input['dueDate']))->format('Y-m-d');
             $withholdPeriod = 0;
         }
 
-        if ($input['startDate'] && $input['dueDate']) {
+        if ($input['startDate'] && $input['dueDate'])
+        {
             $startDate = (new Carbon($input['startDate']))->format('Y-m-d');
             $dueDate = (new Carbon($input['dueDate']))->format('Y-m-d');
             $newStartDate = new Carbon($startDate);
             $newDueDate = new Carbon($dueDate);
             $withholdPeriod = $newStartDate->diffInDays($newDueDate) . " Days";
 
-            if ($newDueDate->lessThanOrEqualTo($newStartDate)) {
+            if ($newDueDate->lessThanOrEqualTo($newStartDate))
+            {
                 return ['status' => false, 'message' => trans('common.due_date_must_be_greater_than_start_date')];
             }
         }
 
         DB::beginTransaction();
-        try{
+        try
+        {
 
             $data = [
                 'milestoneId' => $milestoneId,
@@ -227,7 +239,8 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             DB::commit();
             return ['status' => true, 'message' => trans('common.milestone_retention_updated_successfully')];
 
-        } catch (\Exception $ex){
+        } catch (\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage()];
         }

@@ -97,9 +97,16 @@ class ContractMilestoneRetention extends Model
     public function ContractMilestoneRetention($companySystemID, $contractId)
     {
         return ContractMilestoneRetention::with([
-            'milestone' => function ($q) {
-                $q->select('title', 'id', 'amount', 'uuid');
-            }
+            'milestone' => function ($q)
+            {
+                $q->select('title', 'id', 'uuid')
+                  ->with([
+                      'milestonePaymentSchedules' => function ($q1)
+                      {
+                          $q1->select('amount', 'id', 'uuid','milestone_id');
+                      }
+                      ]);
+            },
         ])->where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)
             ->orderBy('id', 'asc');

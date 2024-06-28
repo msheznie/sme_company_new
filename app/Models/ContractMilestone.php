@@ -85,6 +85,11 @@ class ContractMilestone extends Model
         'description' => 'required|string',
     ];
 
+    public function milestonePaymentSchedules()
+    {
+        return $this->hasOne('App\Models\MilestonePaymentSchedules', 'milestone_id', 'id');
+    }
+
     public static function getMilestoneDataByTitle($contractId,$title)
     {
             return self::where('title', $title)
@@ -116,6 +121,20 @@ class ContractMilestone extends Model
             ->get();
 
     }
+
+    public static function getContractMilestoneWithAmount($milestoneUuid)
+    {
+        return ContractMilestone::with([
+            'milestonePaymentSchedules' => function ($q)
+            {
+                $q->select('amount', 'id', 'uuid','milestone_id');
+            }
+        ])->where('uuid', $milestoneUuid)
+          ->first();
+    }
+
+
+
 
 
 }

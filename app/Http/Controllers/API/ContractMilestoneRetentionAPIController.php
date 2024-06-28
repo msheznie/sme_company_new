@@ -136,15 +136,19 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
         return $this->sendSuccess(trans('common.milestone_retention_deleted_successfully'));
     }
 
-    public function getContractMilestoneRetentionData(Request $request){
+    public function getContractMilestoneRetentionData(Request $request)
+    {
         return $this->contractMilestoneRetentionRepository->getContractMilestoneRetentionData($request);
     }
 
-    public function updateMilestoneRetention(Request $request){
+    public function updateMilestoneRetention(Request $request)
+    {
         $milestoneRetention = $this->contractMilestoneRetentionRepository->updateMilestoneRetention($request);
-        if($milestoneRetention['status']){
+        if($milestoneRetention['status'])
+        {
             return $this->sendResponse([], $milestoneRetention['message']);
-        } else{
+        } else
+        {
             $statusCode = $milestoneRetention['code'] ?? 404;
             return $this->sendError($milestoneRetention['message'], $statusCode);
         }

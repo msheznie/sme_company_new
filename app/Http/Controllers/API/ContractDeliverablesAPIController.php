@@ -165,6 +165,8 @@ class ContractDeliverablesAPIController extends AppBaseController
             ->getDeliverables($contractMaster['id'], $companySystemID);
         $response['contract_milestones'] = ContractManagementUtils::getContractMilestones($contractMaster['id'],
             $companySystemID);
+        $response['contract_milestones_with_amount'] =
+            ContractManagementUtils::getMilestonesWithAmount($contractMaster['id'], $companySystemID);
         $response['contract_master'] = $contractMaster;
         return $this->sendResponse($response, trans('common.deliverable_form_data_retrieved_successfully'));
     }
