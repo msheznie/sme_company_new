@@ -15,6 +15,8 @@ use App\Http\Requests\API\ContractConfirmRequest;
 use App\Jobs\DeleteFileFromS3Job;
 use App\Models\Company;
 use App\Models\ContractMaster;
+use App\Models\ContractSettingDetail;
+use App\Models\ContractSettingMaster;
 use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
@@ -105,8 +107,8 @@ class ContractMasterAPIController extends AppBaseController
         $input = $request->all();
         $comapnyId = $input['selectedCompanyID'];
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
-            [   'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode',
-                'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
+            [   'id', 'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName',
+                'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
                 'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
@@ -138,8 +140,11 @@ class ContractMasterAPIController extends AppBaseController
         $contactMaster = new ContractMaster();
         $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+        $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
         $response['editData'] = $editData;
         $response['newContractCode'] = $contractCode;
+        $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
+        $response['boqActive'] = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'boq');
 
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }

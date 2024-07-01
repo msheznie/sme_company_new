@@ -19,6 +19,7 @@ use App\Models\ContractUserGroup;
 use App\Models\ContractUsers;
 use App\Models\DocumentMaster;
 use App\Models\DocumentReceivedFormat;
+use App\Models\Unit;
 use Carbon\Carbon;
 
 class ContractManagementUtils
@@ -228,7 +229,36 @@ class ContractManagementUtils
 
     public static function getContractHistoryData($uuid)
     {
-        return ContractHistory::Where('uuid',$uuid)
+        return ContractHistory::Where('uuid', $uuid)
             ->first();
+    }
+    public static function getPaymentScheduleMilestone($contractID, $companySystemID, $editMilestoneID = null)
+    {
+        return ContractMilestone::select('uuid', 'title')
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->where(function ($query) use ($contractID, $editMilestoneID)
+            {
+                $query->whereDoesntHave('checkMilestoneInPayment', function ($q) use ($contractID)
+                {
+                    $q->where('contract_id', $contractID);
+                });
+                if ($editMilestoneID)
+                {
+                    $query->orWhereHas('checkMilestoneInPayment', function ($q) use ($contractID, $editMilestoneID)
+                    {
+                        $q->where('contract_id', $contractID);
+                        $q->where('uuid', $editMilestoneID);
+                    });
+                }
+            })
+            ->get();
+    }
+    public static function getUomList()
+    {
+        return Unit::select('UnitID', 'UnitShortCode', 'UnitDes')
+            ->where('is_active', 1)
+            ->where('createdFrom', 0)
+            ->get();
     }
 }

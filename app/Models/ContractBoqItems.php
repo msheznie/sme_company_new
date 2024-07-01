@@ -93,4 +93,23 @@ class ContractBoqItems extends Model
     {
         return 'companyId';
     }
+
+    public function getBoqItemDetails($uuid)
+    {
+        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty')
+            ->with([
+                'itemMaster' => function ($q)
+                {
+                    $q->select('itemCodeSystem', 'primaryCode', 'unit');
+                    $q->with([
+                        'itemAssigned' => function ($q)
+                        {
+                            $q->select('idItemAssigned', 'itemCodeSystem', 'wacValueLocal');
+                        }
+                    ]);
+                }
+            ])
+            ->where('uuid', $uuid)
+            ->first();
+    }
 }

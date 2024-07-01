@@ -109,5 +109,14 @@ class ContractSettingMaster extends Model
     {
         return null;
     }
-
+    public static function checkActiveContractSettings($contractID, $type = '')
+    {
+        return ContractSettingMaster::where('contractId', $contractID)
+            ->when($type == 'boq', function($q)
+            {
+                $q->where('contractTypeSectionId', 1)
+                    ->where('isActive', 1);
+            })
+            ->exists();
+    }
 }

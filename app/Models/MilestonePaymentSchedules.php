@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utilities\ContractManagementUtils;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -54,7 +55,8 @@ class MilestonePaymentSchedules extends Model
         'currency_id',
         'company_id',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'milestone_status'
     ];
 
     /**
@@ -70,13 +72,14 @@ class MilestonePaymentSchedules extends Model
         'description' => 'string',
         'percentage' => 'float',
         'amount' => 'float',
-        'payment_due_date' => 'date',
-        'actual_payment_date' => 'date',
-        'milestone_due_date' => 'date',
-        'currency_id' => 'boolean',
+        'payment_due_date' => 'string',
+        'actual_payment_date' => 'string',
+        'milestone_due_date' => 'string',
+        'currency_id' => 'integer',
         'company_id' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'milestone_status' => 'integer'
     ];
 
     /**
@@ -87,6 +90,46 @@ class MilestonePaymentSchedules extends Model
     public static $rules = [
 
     ];
-
+    public function milestoneDetail()
+    {
+        return $this->belongsTo(ContractMilestone::class, 'milestone_id', 'id');
+    }
+    public function currency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'currency_id', 'currencyID');
+    }
+    public function milestonePaymentSchedules($searchKeyword, $companyId, $contractUuid)
+    {
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
+        $contractID = $contract['id'] ?? 0;
+        $paymentSchedules = MilestonePaymentSchedules::select('uuid', 'contract_id', 'milestone_id', 'description',
+            'percentage', 'amount', 'payment_due_date', 'actual_payment_date', 'milestone_due_date', 'currency_id',
+            'milestone_status')
+            ->where('contract_id', $contractID)
+            ->where('company_id', $companyId)
+            ->with([
+                'milestoneDetail' => function ($q)
+                {
+                    $q->select('id', 'uuid', 'title');
+                },
+                'currency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                }
+            ]);
+        if ($searchKeyword)
+        {
+            $searchKeyword = str_replace("\\", "\\\\", $searchKeyword);
+            $paymentSchedules = $paymentSchedules->where(function ($query) use ($searchKeyword)
+            {
+                $query->orWhere('description', 'LIKE', "%{$searchKeyword}%");
+                $query->orWhereHas('milestoneDetail', function ($query2) use ($searchKeyword)
+                {
+                    $query2->where('title', 'LIKE', "%{$searchKeyword}%");
+                });
+            });
+        }
+        return $paymentSchedules;
+    }
 
 }

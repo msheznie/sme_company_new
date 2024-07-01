@@ -307,10 +307,16 @@
             <span>Milestone Payment Schedules</span>
         </a>
     </li>
-</ul>
+
 <li class="nav-item {{ Request::is('contractStatusHistories*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractStatusHistories.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Contract Status Histories</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('timeMaterialConsumptions*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('timeMaterialConsumptions.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Time Material Consumptions</span>
     </a>
 </li>

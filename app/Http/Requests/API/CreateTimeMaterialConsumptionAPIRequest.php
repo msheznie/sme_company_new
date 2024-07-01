@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\MilestonePaymentSchedules;
+use App\Models\TimeMaterialConsumption;
 use InfyOm\Generator\Request\APIRequest;
 
-class CreateMilestonePaymentSchedulesAPIRequest extends APIRequest
+class CreateTimeMaterialConsumptionAPIRequest extends APIRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,22 +27,13 @@ class CreateMilestonePaymentSchedulesAPIRequest extends APIRequest
         return [
             'selectedCompanyID' => 'required',
             'contract_id' => 'required',
-            'milestone_id' => 'required',
-            'description' => 'required',
-            'percentage' => 'required',
-            'amount' => 'required',
         ];
     }
-
     public function messages()
     {
         return [
             'selectedCompanyID.required' => 'Company ID is required.',
-            'contract_id.required' => 'Contract ID is required.',
-            'milestone_id.required' => 'Milestone title is required.',
-            'description.title' => 'Description is required.',
-            'percentage.required' => 'Percentage is required.',
-            'amount.required' => 'Amount is required.',
+            'contract_id.required' => 'Contract ID is required.'
         ];
     }
 }

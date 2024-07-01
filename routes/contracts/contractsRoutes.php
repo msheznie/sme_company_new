@@ -273,4 +273,57 @@ Route::
         \App\Http\Controllers\API\contractStatusHistoryAPIController::class,
         'getContractListStatus'
     ])->name('Contract History Status');
+
+    Route::post('payment-schedule-form-data', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'getPaymentScheduleFormData'
+    ])->name('get payment schedule form data');
+    Route::post('milestone-payment-schedule', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'store'
+    ])->name('store milestone payment schedule');
+    Route::post('milestone-payment-schedule-list', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'getMilestonePaymentSchedules'
+    ])->name('get milestone payment schedule list');
+
+    Route::put('milestone-payment-schedule/{id}', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'update'
+    ])->name('update milestone payment schedule');
+
+    Route::post('get-time-consumption-form-data', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'getTimeConsumptionFormData'
+    ])->name('time and material consumption from data');
+
+    Route::post('time-material-consumption', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'store'
+    ])->name('store time and material consumption');
+
+    Route::post('all-time-material-consumption', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'getAllTimeMaterialConsumption'
+    ])->name('get all time and material consumption');
+
+    Route::put('time-material-consumption/{id}', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'update'
+    ])->name('update time and material consumption');
+
+    Route::delete('time-material-consumption/{id}', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'destroy'
+    ])->name('delete time and material consumption');
+
+    Route::post('pull-items-from-boq', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'pullItemsFromBOQ'
+    ])->name('pull items from boq');
+
+    Route::delete('milestone-payment-schedule/{id}', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'destroy'
+    ])->name('delete milestone payment schedule');
 });

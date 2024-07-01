@@ -193,5 +193,6 @@
      "successfully_termination_status_updated" => "Contract Terminated Successfully",
      "tender_list_retrieved" => "Tender List Retrieved Successfully",
      "billing_frequencies_not_found" => "Billing Frequencies not found",
-     "milestone_payment_schedule_not_found" => "Milestone payment schedules not found"
+     "milestone_payment_schedule_not_found" => "Milestone payment schedules not found",
+     "time_material_consumption_not_found" => "Time material consumption not found"
  ];

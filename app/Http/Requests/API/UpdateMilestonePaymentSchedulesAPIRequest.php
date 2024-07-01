@@ -24,8 +24,22 @@ class UpdateMilestonePaymentSchedulesAPIRequest extends APIRequest
      */
     public function rules()
     {
-        $rules = MilestonePaymentSchedules::$rules;
-        
-        return $rules;
+        return [
+            'selectedCompanyID' => 'required',
+            'milestone_id' => 'required',
+            'description' => 'required',
+            'percentage' => 'required',
+            'amount' => 'required',
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'selectedCompanyID.required' => 'Company ID is required.',
+            'milestone_id.required' => 'Milestone title is required.',
+            'description.title' => 'Description is required.',
+            'percentage.required' => 'Percentage is required.',
+            'amount.required' => 'Amount is required.',
+        ];
     }
 }

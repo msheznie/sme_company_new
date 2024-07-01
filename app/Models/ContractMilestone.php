@@ -72,17 +72,7 @@ class ContractMilestone extends Model
      * @var array
      */
     public static $rules = [
-        'uuid' => 'required|string|max:200',
-        'contractID' => 'required|integer',
-        'title' => 'required|string|max:255',
-        'status' => 'required|boolean',
-        'companySystemID' => 'required|integer',
-        'created_by' => 'required|integer',
-        'updated_by' => 'required|integer',
-        'deleted_at' => 'required',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable',
-        'description' => 'required|string',
+
     ];
 
     public function milestonePaymentSchedules()
@@ -133,8 +123,18 @@ class ContractMilestone extends Model
           ->first();
     }
 
+    public function checkMilestoneInPayment()
+    {
+        return $this->belongsTo(MilestonePaymentSchedules::class, 'id', 'milestone_id');
+    }
 
-
-
+    public function checkContractMilestoneExists($milestoneUuid)
+    {
+        return ContractMilestone::select('id')->where('uuid', $milestoneUuid)->first();
+    }
+    public static function checkContractHasMilestone($contractID)
+    {
+        return ContractMilestone::select('id')->where('contractID', $contractID)->exists();
+    }
 
 }

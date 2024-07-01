@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Http\Requests\API\CreateMilestonePaymentSchedulesAPIRequest;
 use App\Http\Requests\API\UpdateMilestonePaymentSchedulesAPIRequest;
 use App\Models\MilestonePaymentSchedules;
@@ -56,11 +57,23 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function store(CreateMilestonePaymentSchedulesAPIRequest $request)
     {
         $input = $request->all();
-
-        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->create($input);
-
-        return $this->sendResponse(new MilestonePaymentSchedulesResource($milestonePaymentSchedules),
-            'Milestone Payment Schedules saved successfully');
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $contractUuid = $input['contract_id'] ?? null;
+        try
+        {
+            $this->milestonePaymentSchedulesRepository->createPaymentSchedule(
+                $input,
+                $contractUuid,
+                $selectedCompanyID
+            );
+            return $this->sendResponse([], 'Milestone payment schedule created successfully');
+        } catch(CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), '404');
+        } catch(\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), '404');
+        }
     }
 
     /**
@@ -97,19 +110,23 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function update($id, UpdateMilestonePaymentSchedulesAPIRequest $request)
     {
         $input = $request->all();
-
-        /** @var MilestonePaymentSchedules $milestonePaymentSchedules */
-        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->find($id);
-
-        if (empty($milestonePaymentSchedules))
+        try
         {
-            return $this->sendError('Milestone Payment Schedules not found');
+            $paymentSchedule = $this->milestonePaymentSchedulesRepository->findByUuid($id, ['id']);
+
+            if (empty($paymentSchedule))
+            {
+                throw new CommonException('Milestone payment schedule not found.');
+            }
+            $this->milestonePaymentSchedulesRepository->updateMilestonePaymentSchedule($input, $paymentSchedule['id']);
+            return $this->sendResponse([], trans('Milestone payment schedule updated successfully.'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
         }
-
-        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->update($input, $id);
-
-        return $this->sendResponse(new MilestonePaymentSchedulesResource($milestonePaymentSchedules),
-            'MilestonePaymentSchedules updated successfully');
     }
 
     /**
@@ -125,7 +142,7 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var MilestonePaymentSchedules $milestonePaymentSchedules */
-        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->find($id);
+        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->findByUuid($id);
 
         if (empty($milestonePaymentSchedules))
         {
@@ -135,5 +152,28 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
         $milestonePaymentSchedules->delete();
 
         return $this->sendSuccess('Milestone Payment Schedules deleted successfully');
+    }
+
+    public function getPaymentScheduleFormData(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid') ?? null;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $uuid = $request->input('uuid') ?? null;
+        try
+        {
+            $response = $this->milestonePaymentSchedulesRepository->getPaymentScheduleFormData(
+                $contractUuid, $companySystemID, $uuid);
+            return $this->sendResponse($response, trans('common.retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+    public function getMilestonePaymentSchedules(Request $request)
+    {
+        return $this->milestonePaymentSchedulesRepository->getMilestonePaymentSchedules($request);
     }
 }

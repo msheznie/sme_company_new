@@ -88,4 +88,12 @@ class ContractSettingDetail extends Model
         return null;
     }
 
+    public function getActiveContractPaymentSchedule($contractID)
+    {
+        return ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractID)
+            ->whereIn('sectionDetailId', [1,2,3])
+            ->where('isActive', 1)
+            ->first();
+    }
 }
