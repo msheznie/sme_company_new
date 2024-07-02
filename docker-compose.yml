@@ -8,6 +8,8 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        image: contract-mgmt-be
+        container_name: cms-backend
         ports:
             - '9049:80'
 #        environment:
