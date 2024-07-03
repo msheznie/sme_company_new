@@ -194,5 +194,7 @@
      "tender_list_retrieved" => "Tender List Retrieved Successfully",
      "billing_frequencies_not_found" => "Billing Frequencies not found",
      "milestone_payment_schedule_not_found" => "Milestone payment schedules not found",
-     "time_material_consumption_not_found" => "Time material consumption not found"
+     "time_material_consumption_not_found" => "Time material consumption not found",
+     "contract_payment_term_not_found" => "Contract payment term not found",
+     "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully"
  ];

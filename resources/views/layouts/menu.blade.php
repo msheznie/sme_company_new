@@ -320,3 +320,10 @@
         <span>Time Material Consumptions</span>
     </a>
 </li>
+    <li class="nav-item {{ Request::is('contractPaymentTerms*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractPaymentTerms.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Payment Terms</span>
+        </a>
+    </li>
+</ul>

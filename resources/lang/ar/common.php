@@ -188,5 +188,7 @@ return [
     "successfully_extension_status_updated" => "Contract Extended Successfully AR",
     "successfully_revision_status_updated" => "Contract Revised Successfully AR",
     "successfully_termination_status_updated" => "Contract Terminated Successfully AR",
-    "tender_list_retrieved" => "Tender List Retrieved Successfully"
+    "tender_list_retrieved" => "Tender List Retrieved Successfully",
+    "contract_payment_term_not_found" => "Contract payment term not found AR",
+    "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully AR"
 ];

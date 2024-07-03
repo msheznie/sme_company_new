@@ -326,4 +326,20 @@ Route::
         \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
         'destroy'
     ])->name('delete milestone payment schedule');
+
+    Route::get('/get-contract-payment-terms/{id}',
+        [\App\Http\Controllers\API\ContractPaymentTermsAPIController::class, 'getContractPaymentTerms'])
+        ->name('get contract payment terms');
+    Route::post('payment-term',
+        [\App\Http\Controllers\API\ContractPaymentTermsAPIController::class, 'store'])
+        ->name('create payment term');
+    Route::put('update-payment-term', [
+        \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
+        'update'
+    ])->name('update payment term');
+    Route::delete('delete-payment-term/{id}', [
+        \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
+        'destroy'
+    ])->name('delete payment term');
+
 });
