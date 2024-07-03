@@ -218,4 +218,13 @@ class ErpDocumentApproved extends Model
             ->with(['approved_by'])
             ->get();
     }
+    public static function levelWiseDocumentApproveUsers($documentSystemID, $documentSystemCode, $rollLevelOrder)
+    {
+        return ErpDocumentApproved::select('documentApprovedID', 'companySystemID', 'documentSystemID', 'approvedYN',
+            'documentSystemCode', 'approvalGroupID', 'rollLevelOrder')
+            ->where("documentSystemID", $documentSystemID)
+            ->where("documentSystemCode", $documentSystemCode)
+            ->where("rollLevelOrder", $rollLevelOrder)
+            ->first();
+    }
 }

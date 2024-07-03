@@ -145,7 +145,9 @@ class ContractMasterAPIController extends AppBaseController
         $response['newContractCode'] = $contractCode;
         $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
         $response['boqActive'] = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'boq');
-
+        $milestoneActive = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'milestone');
+        $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
+        $response['milestoneActive'] = $milestoneActive && $milestoneHasRec;
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }
 

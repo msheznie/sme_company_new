@@ -117,6 +117,11 @@ class ContractSettingMaster extends Model
                 $q->where('contractTypeSectionId', 1)
                     ->where('isActive', 1);
             })
+            ->when($type == 'milestone', function($q)
+            {
+                $q->where('contractTypeSectionId', 2)
+                    ->where('isActive', 1);
+            })
             ->exists();
     }
 }

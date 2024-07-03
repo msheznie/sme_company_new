@@ -18,26 +18,47 @@ class TenantEnforce
      */
     public function handle($request, Closure $next)
     {
-        if (env('IS_MULTI_TENANCY', false)) {
+        $dbRoutes = [
+            'api/v1/contract/confirm-contract',
+            'api/v1/approvals/contract-approvals'
+        ];
+        if (env('IS_MULTI_TENANCY', false))
+        {
             $url = $request->fullUrl();
             $host = explode('/', $url);
             $subDomain = count($host) > 3 ? $host[3] : '';
 
-            if ($subDomain == 'www') {
+            if ($subDomain == 'www')
+            {
                 $subDomain = $host[1];
             }
 
-            if ($subDomain != 'localhost:8000') {
-                if (!$subDomain) {
+            if ($subDomain != 'localhost:8000')
+            {
+                if (!$subDomain)
+                {
                     return response(['message' => $subDomain . "Not found"], 404);
                 }
                 $tenant = Tenant::where('sub_domain', 'like', $subDomain)->first();
-                if (!empty($tenant)) {
+                if (!empty($tenant))
+                {
+                    if (in_array($request->route()->uri, $dbRoutes))
+                    {
+                        $request->request->add(['db' => $tenant->database]);
+                    }
                     Config::set("database.connections.mysql.database", $tenant->database);
                     DB::reconnect('mysql');
-                } else {
+                } else
+                {
                     return response(['message' => "Sub domain " . $subDomain . " not found"], 404);
                 }
+            }
+        }
+        else
+        {
+            if (in_array($request->route()->uri, $dbRoutes))
+            {
+                $request->request->add(['db' => ""]);
             }
         }
         return $next($request);

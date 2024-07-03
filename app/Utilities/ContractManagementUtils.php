@@ -188,6 +188,26 @@ class ContractManagementUtils
     {
         return ContractMaster::where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
+            ->with([
+                "contractTypes" => function ($q)
+                {
+                    $q->select('contract_typeId', 'uuid', 'cm_type_name', 'cmPartyA_id', 'cmPartyB_id');
+                    $q->with([
+                        'partyA' => function ($q)
+                        {
+                            $q->select('cmParty_id', 'cmParty_name');
+                        },
+                        'partyB' => function ($q)
+                        {
+                            $q->select('cmParty_id', 'cmParty_name');
+                        }
+                    ]);
+                },
+                "createdUser" => function ($q)
+                {
+                    $q->select('employeeSystemID', 'empName');
+                },
+            ])
             ->first();
     }
     public static function getDocumentReceivedFormat()
@@ -260,5 +280,9 @@ class ContractManagementUtils
             ->where('is_active', 1)
             ->where('createdFrom', 0)
             ->get();
+    }
+    public static function checkContractMilestoneExists($contractID)
+    {
+        return ContractMilestone::where('contractID', $contractID)->exists();
     }
 }

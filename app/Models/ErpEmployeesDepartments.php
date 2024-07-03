@@ -182,4 +182,19 @@ class ErpEmployeesDepartments extends Model
             ->get()
             ->groupBy('employeeGroupID');
     }
+    public static function getApprovalListToEmail($approvalGroupID, $companySystemID, $documentSystemID)
+    {
+        return ErpEmployeesDepartments::select('employeesDepartmentsID', 'employeeSystemID', 'employeeGroupID')
+            ->where('employeeGroupID', $approvalGroupID)
+            ->with(['employee' => function ($query)
+            {
+                $query->select('employeeSystemID', 'empName')
+                    ->where('discharegedYN', 0);
+            }])
+            ->where('companySystemID', $companySystemID)
+            ->where('documentSystemID', $documentSystemID)
+            ->where('isActive', 1)
+            ->where('removedYN', 0)
+            ->get();
+    }
 }

@@ -698,8 +698,7 @@ class ContractMasterRepository extends BaseRepository
             $contractUuid = $input['contractUuid'];
             $companySystemID = $input['selectedCompanyID'];
             $documentSystemID = $input['documentSystemID'];
-            $contractMaster = self::findByUuid($contractUuid);
-
+            $contractMaster = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
             if($contractMaster['contractAmount'] == 0)
             {
                 throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
@@ -725,6 +724,7 @@ class ContractMasterRepository extends BaseRepository
             } else
             {
                 $insertData = [
+                    'db' => $input['db'] ?? "",
                     'autoID' => $contractMaster['id'],
                     'company' => $companySystemID,
                     'document' => $documentSystemID,
@@ -922,7 +922,7 @@ class ContractMasterRepository extends BaseRepository
         return DB::transaction(function () use ( $input )
         {
             $contractUuid = $input['contractUuid'] ?? null;
-            $contractMaster = $this->findByUuid($contractUuid);
+            $contractMaster = ContractManagementUtils::checkContractExist($contractUuid, $input['selectedCompanyID']);
             if(empty($contractMaster))
             {
                 throw new CommonException(trans('common.contract_not_found'));

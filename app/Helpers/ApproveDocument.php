@@ -7,8 +7,10 @@ use App\Models\CompanyDocumentAttachment;
 use App\Models\ErpApprovalLevel;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpEmployeesDepartments;
+use App\Utilities\EmailUtils;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\CommonException;
+use Illuminate\Support\Facades\Log;
 
 class ApproveDocument
 {
@@ -47,7 +49,8 @@ class ApproveDocument
             $docApproved['approvalGroupID'],
             $docApproved['companySystemID'],
             $formData["documentSystemID"],
-            $employeeSystemID
+            $employeeSystemID,
+            'get'
         );
         if(!$checkEmployeeAccess)
         {
@@ -65,6 +68,7 @@ class ApproveDocument
         {
             throw new CommonException(trans('common.approval_level_not_found'));
         }
+        Log::info($checkEmployeeAccess);
 
         self::updateApproveDocument(
             $formData,
@@ -112,6 +116,46 @@ class ApproveDocument
         {
             throw new CommonException(trans('common.failed_to_approve_document'));
         }
+        self::sendEmail($formData, $masterRecord);
+        return true;
+    }
+    public static function sendEmail($params, $masterRecords)
+    {
+        $documentApproved = ErpDocumentApproved::levelWiseDocumentApproveUsers(
+            $params["documentSystemID"],
+            $masterRecords->id,
+            $masterRecords->rollLevelOrder
+        );
+        $emails = [];
+        if($documentApproved && $documentApproved['approvedYN'] == 0)
+        {
+            $approvalList = ErpEmployeesDepartments::getApprovalListToEmail(
+                $documentApproved['approvalGroupID'],
+                $documentApproved['companySystemID'],
+                $documentApproved['documentSystemID'],
+            );
+            $subject = EmailUtils::getEmailSubject($documentApproved->documentSystemID);
+            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords);
+            foreach($approvalList as $dt)
+            {
+                if ($dt['employee'])
+                {
+                    $emails[] = [
+                        'empSystemID' => $dt['employee']['employeeSystemID'],
+                        'companySystemID' => $documentApproved['companySystemID'],
+                        'docSystemID' => $documentApproved['documentSystemID'],
+                        'alertMessage' => $subject,
+                        'emailAlertMessage' => $body,
+                        'docSystemCode' => $documentApproved['documentSystemCode'],
+                        'error_tag' => $subject,
+                        'error_msg' => '<b>The Employee:'. $dt['employee']['empName'] .
+                            '</b>- Mail ID is invalid!',
+                        'db' => $params['db'] ?? ""
+                    ];
+                }
+            }
+        }
+        Email::sendBulkEmail($emails);
         return true;
     }
 }
