@@ -31,10 +31,10 @@ class EmailForQueuing extends Mailable implements ShouldQueue
         $this->mailAttachment = $attachment;
         if(env('IS_MULTI_TENANCY',false))
         {
-            self::onConnection('database_main_cm');
+            self::onConnection('database_main');
         }else
         {
-            self::onConnection('database_cm');
+            self::onConnection('database');
         }
     }
 
@@ -56,8 +56,6 @@ class EmailForQueuing extends Mailable implements ShouldQueue
                     ],
                 ],
             ]);
-        Log::info('mailAttachment path');
-        Log::info($this->mailAttachment);
         if($this->mailAttachment)
         {
             $mail->attach($this->mailAttachment);

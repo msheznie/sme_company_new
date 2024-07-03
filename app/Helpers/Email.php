@@ -37,9 +37,6 @@ class Email
                     $dataMail['attachmentFileName'] = $dataMail['attachmentFileName'] ?? '';
                     Mail::to($dataMail['empEmail'])->send(new EmailForQueuing($dataMail['alertMessage'],
                         $body, $dataMail['attachmentFileName']));
-                    Log::channel('email_log')->info('Email sent success fully to :' .
-                        $dataMail['empEmail']);
-                    Log::channel('email_log')->info('QUEUE_DRIVER : ' . env('QUEUE_DRIVER'));
                 }
             } else
             {

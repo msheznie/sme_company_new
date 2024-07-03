@@ -125,6 +125,6 @@ class General
                     break;
             }
         }
-        return $number . $suffix;
+        return $number . '<sup>' .$suffix. '</sup>';
     }
 }

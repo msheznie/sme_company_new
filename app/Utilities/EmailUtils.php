@@ -22,7 +22,6 @@ class EmailUtils
     }
     public static function getEmailBody($documentID, $masterData)
     {
-        Log::info('gg: '.$masterData);
         $emailBody = '';
         $footer = self::getEmailFooter();
         if($documentID === 123)
@@ -36,13 +35,13 @@ class EmailUtils
                     contract details provided below and approve.
                    </p> <p><span style="text-decoration: underline;">Contract Details</span></p>
                    <p>
-                    <span><b>Contract Title: </b></span>'. $masterData->title .' <br>
-                    <span><b>Contract ID: </b></span>'. $masterData->contractCode .' <br>
-                    <span><b>Contract Type: </b></span>'. $contractType .' <br>
-                    <span><b>Created By: </b></span>'. $contractUser .' <br>
-                    <span><b>Parties Invlolved: </b></span> <br>
-                    <span><b>Party A: </b></span>'. $partyA .' <br>
-                    <span><b>Party B: </b></span>'. $partyB .' <br>
+                    <span style="margin-bottom: 10px;"><b>Contract Title: </b>'. $masterData->title .'</span><br>
+                    <span style="margin-bottom: 10px;"><b>Contract ID: </b>'. $masterData->contractCode .' </span><br>
+                    <span style="margin-bottom: 10px;"><b>Contract Type: </b>'. $contractType .' </span><br>
+                    <span style="margin-bottom: 10px;"><b>Created By: </b>'. $contractUser .' </span><br>
+                    <span style="margin-bottom: 10px;"><b>Parties Invlolved: </b></span> <br>
+                    <span style="margin-bottom: 10px;"><b>Party A: </b>'. $partyA .' </span><br>
+                    <span style="margin-bottom: 10px;"><b>Party B: </b>'. $partyB .' </span>
                    </p>
                    <p> Please click the link below to review the full contract document and submit your approval or
                      comments. <br> <a href="' . self::getRedirectUrl() . '">Click here to approve</a> </p>
