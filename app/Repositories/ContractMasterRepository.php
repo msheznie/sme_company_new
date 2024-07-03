@@ -17,6 +17,7 @@ use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
 use App\Models\ContractOverallRetention;
+use App\Models\ContractPaymentTerms;
 use App\Models\ContractSectionDetail;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
@@ -338,6 +339,14 @@ class ContractMasterRepository extends BaseRepository
         if(empty($checkContractPartyNameID))
         {
             throw new CommonException(trans('common.counter_party_name_not_found'));
+        }
+        if(empty($formData['formatStartDate']))
+        {
+            throw new CommonException(trans('common.start_date_not_found'));
+        }
+        if(empty($formData['formatEndDate']))
+        {
+            throw new CommonException(trans('common.end_date_not_found'));
         }
 
         $this->checkValidation($formData, $id, $selectedCompanyID);
@@ -716,7 +725,7 @@ class ContractMasterRepository extends BaseRepository
                 throw new CommonException($message);
             }
 
-            $message = $this->checkMandatoryDetails($contractMaster['id'], $companySystemID);
+            $message = $this->checkMandatoryDetails($contractMaster['id'], $companySystemID, $contractUuid);
 
             if($message)
             {
@@ -778,6 +787,14 @@ class ContractMasterRepository extends BaseRepository
                     $existRetention == null)){
                 return trans('common.at_least_one_retention_should_be_available');
             }
+            if($activeMaster['contractTypeSection']['cmSection_id'] == 6)
+            {
+                $existPaymentTerm = ContractPaymentTerms::paymentTermExist($contractId, $companySystemID);
+                if(empty($existPaymentTerm))
+                {
+                    return trans('common.at_least_one_payment_term_should_be_available');
+                }
+            }
         }
 
         return null;
@@ -811,7 +828,7 @@ class ContractMasterRepository extends BaseRepository
         return null;
     }
 
-    private function checkMandatoryDetails($contractId, $companySystemID)
+    private function checkMandatoryDetails($contractId, $companySystemID, $contractUuid)
     {
         $totalRecords = ContractMilestoneRetention::where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)->count();
@@ -832,7 +849,7 @@ class ContractMasterRepository extends BaseRepository
             ->where('companySystemId', $companySystemID)
             ->count();
 
-        $contract = ContractMaster::select('contractAmount')->where('id', $contractId)->first();
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
 
         if($totalRecords != $recordsWithMilestoneId){
             return trans('common.milestone_title_is_a_mandatory_field');
@@ -846,7 +863,8 @@ class ContractMasterRepository extends BaseRepository
         if($totalRecords != $recordsWithDueDate){
             return trans('common.due_date_is_a_mandatory_field');
         }
-        if($contract['contractAmount'] == 0){
+        if($contract['contractAmount'] == 0 || $contract['startDate'] == null || $contract['endDate'] == null)
+        {
             return trans('common.contract_amount_is_a_mandatory_field');
         }
 

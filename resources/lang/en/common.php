@@ -196,5 +196,9 @@
      "milestone_payment_schedule_not_found" => "Milestone payment schedules not found",
      "time_material_consumption_not_found" => "Time material consumption not found",
      "contract_payment_term_not_found" => "Contract payment term not found",
-     "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully"
+     "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully",
+     "start_date_not_found" => "Start Date not found",
+     "end_date_not_found" => "End Date not found",
+     "at_least_one_payment_term_should_be_available" =>
+         "At least one payment term should be available to send the contract for approval",
  ];

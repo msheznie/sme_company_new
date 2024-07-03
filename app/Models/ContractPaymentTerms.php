@@ -88,5 +88,12 @@ class ContractPaymentTerms extends Model
 
     }
 
+    public static function paymentTermExist($contractId, $companySystemID)
+    {
+        return ContractPaymentTerms::where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->first();
+    }
+
 
 }

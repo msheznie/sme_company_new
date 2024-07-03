@@ -190,5 +190,9 @@ return [
     "successfully_termination_status_updated" => "Contract Terminated Successfully AR",
     "tender_list_retrieved" => "Tender List Retrieved Successfully",
     "contract_payment_term_not_found" => "Contract payment term not found AR",
-    "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully AR"
+    "payment_term_retrieved_successfully" => "Contract payment term retrieved successfully AR",
+    "start_date_not_found" => "Start Date not found AR",
+    "end_date_not_found" => "End Date not found AR",
+    "at_least_one_payment_term_should_be_available" =>
+        "At least one payment term should be available to send the contract for approval AR",
 ];
