@@ -317,7 +317,7 @@ class ContractMasterRepository extends BaseRepository
 
     }
 
-    public function updateContract($formData, $id, $selectedCompanyID)
+    public function updateContract($formData, $id, $selectedCompanyID, $checkStatus)
     {
 
         $contractOwner = $formData['contractOwner'] ?? '';
@@ -356,7 +356,9 @@ class ContractMasterRepository extends BaseRepository
             $checkContractTypeID,
             $checkContractPartyNameID,
             $checkOwnerID,
-            $id)
+            $id,
+            $selectedCompanyID,
+            $checkStatus)
         {
             $updateData = [
                 'title' => $formData['title'] ?? null,
@@ -386,8 +388,20 @@ class ContractMasterRepository extends BaseRepository
                 'updated_at' => Carbon::now(),
                 'tender_id' => $formData['tenderId'] ?? null
             ];
+            $status = 0;
+            if($checkStatus == 0)
+            {
+                $status = ContractHistoryService::checkContractDateBetween($formData['formatStartDate'],
+                    $formData['formatEndDate']);
+                $updateData['status'] = $status;
+            }
 
-            return ContractMaster::where('id', $id)->update($updateData);
+            ContractMaster::where('id', $id)->update($updateData);
+            if($status != 0)
+            {
+                ContractHistoryService::insertHistoryStatus($id, $status, $selectedCompanyID);
+            }
+
         });
     }
 

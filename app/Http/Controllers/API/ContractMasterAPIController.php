@@ -169,7 +169,7 @@ class ContractMasterAPIController extends AppBaseController
 
         try
         {
-            $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id']);
+            $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id', 'status']);
 
             if (empty($contractMaster))
             {
@@ -178,7 +178,8 @@ class ContractMasterAPIController extends AppBaseController
             $this->contractMasterRepository->updateContract(
                 $input,
                 $contractMaster['id'],
-                $selectedCompanyID
+                $selectedCompanyID,
+                $contractMaster['status']
             );
             return $this->sendResponse(['id' => $id], trans('common.contract_updated_successfully'));
         } catch (CommonException $ex)

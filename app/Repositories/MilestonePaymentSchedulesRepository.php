@@ -112,7 +112,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     Carbon::parse($input['actual_payment_date']) : null,
                 'milestone_due_date' => $input['milestone_due_date'] ?
                     Carbon::parse($input['milestone_due_date']) : null,
-                'milestone_status' => $input['milestone_status'],
+                'milestone_status' => $input['milestone_status'] ?? 0,
                 'currency_id' => $currencyId,
                 'company_id' => $selectedCompanyID,
                 'created_by' => General::currentEmployeeId(),
@@ -153,7 +153,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     Carbon::parse($input['actual_payment_date']) : null,
                 'milestone_due_date' => $input['milestone_due_date'] ?
                     Carbon::parse($input['milestone_due_date']) : null,
-                'milestone_status' => $input['milestone_status'],
+                'milestone_status' => $input['milestone_status'] ?? 0,
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];

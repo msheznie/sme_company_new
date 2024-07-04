@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ContractMaster;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Services\ContractHistoryService;
 
 class ActivateContractService
 {
@@ -16,6 +17,17 @@ class ActivateContractService
         {
             $contractIds = $contractList->pluck('id')->toArray();
             ContractMaster::whereIn('id', $contractIds)->update(['status' => -1]);
+
+            foreach ($contractList as $contract)
+            {
+                $contractId = $contract->id;
+                $currentStatus = -1;
+                $companyId = $contract->companySystemID;
+
+                ContractMaster::where('id', $contractId)->update(['status' => $currentStatus]);
+                ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null);
+            }
+
         }
     }
 }

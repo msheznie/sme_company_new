@@ -405,7 +405,11 @@ class ContractHistoryService
                 $categoryId = $input['category'];
                 $newContractTermPeriod = $input['newContractTermPeriod'];
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
-
+                $checkHistoryExists = ContractHistory::getContractHistory($contractHistoryUuid, $companyId);
+                if(empty($checkHistoryExists))
+                {
+                    throw new ContractCreationException('Contract history not found');
+                }
                 if (!$getContractId)
                 {
                     throw new ContractCreationException(trans('common.contract_does_not_exist'));
@@ -413,7 +417,8 @@ class ContractHistoryService
 
                 $contractId = $getContractId->id;
                 self::updateContractMasterEndDate
-                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid);
+                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid,
+                    $checkHistoryExists['id']);
             });
         }catch (\Exception $e)
         {
@@ -422,7 +427,7 @@ class ContractHistoryService
     }
 
     public function updateContractMasterEndDate
-    ($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid)
+    ($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid, $id)
     {
         try
         {
@@ -443,6 +448,7 @@ class ContractHistoryService
 
             ContractHistory::where('uuid', $contractHistoryUuid)
                 ->update($status);
+            ContractHistoryService::insertHistoryStatus($contractId,4,$companyId, $id);
         }
 
         catch (\Exception $e)
