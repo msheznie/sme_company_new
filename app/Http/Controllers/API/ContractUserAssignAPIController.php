@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserAssignAPIRequest;
 use App\Http\Requests\API\UpdateContractUserAssignAPIRequest;
@@ -157,16 +158,34 @@ class ContractUserAssignAPIController extends AppBaseController
                 ->where('uuid', $input['userGroupId'])
                 ->first();
 
+            $companyId = $input['selectedCompanyID'];
+            $activeDefaultUserGroups = ContractUserGroup::getActiveDefaultUserGroups($companyId);
+            $assignUserGroups = ContractUserAssign::getAssignUserGroups($input['contractId']);
+            $activeDefaultUserGroupsIds = $activeDefaultUserGroups->pluck('id');
+            $assignUserGroupsIds = $assignUserGroups->pluck('userGroupId');
+            $commonIds = $activeDefaultUserGroupsIds->intersect($assignUserGroupsIds);
+            $commonCount = $commonIds->count();
+
+            $defaultUserGroupIds = $activeDefaultUserGroups->pluck('id')->toArray();
+            $isInActiveDefaultUserGroups = in_array($getUserGroupId->id, $defaultUserGroupIds);
+
             $contractUserAssigns = ContractUserAssign::where('contractId', $input['contractId'])
                 ->where('userGroupId', $getUserGroupId->id)
                 ->select('id as i')
                 ->get();
 
-            foreach ($contractUserAssigns as $contractUserAssign) {
-                $this->contractUserAssignRepository->update([
-                    'status' => 0,
-                    'updatedBy' => General::currentEmployeeId()
-                ], $contractUserAssign->i);
+
+            if($commonCount == 1 && $isInActiveDefaultUserGroups==1)
+            {
+                throw new CommonException('At least one default user group must be present in a contract');
+            } else
+            {
+                foreach ($contractUserAssigns as $contractUserAssign) {
+                    $this->contractUserAssignRepository->update([
+                        'status' => 0,
+                        'updatedBy' => General::currentEmployeeId()
+                    ], $contractUserAssign->i);
+                }
             }
         }
 

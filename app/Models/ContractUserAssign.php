@@ -135,4 +135,13 @@ class ContractUserAssign extends Model
     {
         return null;
     }
+
+    public static function getAssignUserGroups($contractId)
+    {
+        return ContractUserAssign::select('userGroupId')
+            ->where('contractId', $contractId)
+            ->where('status', 1)
+            ->distinct()
+            ->get();
+    }
 }

@@ -889,6 +889,7 @@ class ContractMasterRepository extends BaseRepository
     {
         $defaultUserIds = ContractUserGroup::where('companySystemID', $companySystemID)
             ->where('isDefault', 1)
+            ->where('status', 1)
             ->pluck('id')
             ->toArray();
 
