@@ -64,6 +64,7 @@ class ContractManagementUtils
     {
         $input = $request->all();
         return ContractUserGroup::where('isDefault', 1)
+            ->where('status',1)
             ->where('companySystemID', $input['selectedCompanyID'])
             ->count();
     }

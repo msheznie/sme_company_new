@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserGroupAPIRequest;
 use App\Http\Requests\API\UpdateContractUserGroupAPIRequest;
@@ -127,9 +128,14 @@ class ContractUserGroupAPIController extends AppBaseController
     public function updateStatus($id, UpdateContractUserGroupAPIRequest $request)
     {
         $input = $request->all();
+        $companyId = $input['selectedCompanyID'];
         $result = ContractUserGroup::select('id')
             ->where('uuid', $input['uuid'])
             ->first();
+
+        $activeDefaultUserGroupsCount = ContractUserGroup::getActiveDefaultUserGroups($companyId)->count();
+        $defaultUserGroupIds = ContractUserGroup::getActiveDefaultUserGroups($companyId)->pluck('id')->toArray();
+        $isInActiveDefaultUserGroups = in_array($result->id, $defaultUserGroupIds);
 
         if (empty($result)) {
             return $this->sendError(trans('common.contract_user_group_not_found'));
@@ -141,14 +147,20 @@ class ContractUserGroupAPIController extends AppBaseController
             return $this->sendError(trans('common.contract_user_group_not_found'));
         }
 
-        $status = $input['status'];
-        $contractUserGroup->status = $status;
-        $contractUserGroup->save();
+        if ($activeDefaultUserGroupsCount == 1 && $isInActiveDefaultUserGroups==1)
+        {
+            throw new CommonException('At least one default user group must be enabled');
+        } else
+        {
+            $status = $input['status'];
+            $contractUserGroup->status = $status;
+            $contractUserGroup->save();
 
-        return $this->sendResponse(
-            new ContractUserGroupResource($contractUserGroup),
-            trans('common.user_group_status_updated_successfully')
-        );
+            return $this->sendResponse(
+                new ContractUserGroupResource($contractUserGroup),
+                trans('common.user_group_status_updated_successfully')
+            );
+        }
 
     }
 

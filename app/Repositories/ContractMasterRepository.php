@@ -354,7 +354,7 @@ class ContractMasterRepository extends BaseRepository
 
         if ($agreementSignDate > $contractStartDate)
         {
-            throw new CommonException('Agreement Sign Date cannot be greater than Contract Start Date');
+            throw new CommonException('Agreement Sign Date cannot be greater than the Contract Start Date');
         }
 
         $this->checkValidation($formData, $id, $selectedCompanyID);
