@@ -349,6 +349,14 @@ class ContractMasterRepository extends BaseRepository
             throw new CommonException(trans('common.end_date_not_found'));
         }
 
+        $agreementSignDate = \DateTime::createFromFormat('d-m-Y', $formData['formatAgreementSignDate']);
+        $contractStartDate = \DateTime::createFromFormat('d-m-Y', $formData['formatStartDate']);
+
+        if ($agreementSignDate > $contractStartDate)
+        {
+            throw new CommonException('Agreement Sign Date cannot be greater than Contract Start Date');
+        }
+
         $this->checkValidation($formData, $id, $selectedCompanyID);
 
         return DB::transaction(function () use (
