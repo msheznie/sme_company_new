@@ -100,4 +100,11 @@ class PeriodicBillings extends Model
             ])
             ->where('contract_id', $contractID)->first();
     }
+
+    public static function existPeriodicBilling($contractId, $companySystemID)
+    {
+        return PeriodicBillings::where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->first();
+    }
 }

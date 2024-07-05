@@ -132,4 +132,11 @@ class MilestonePaymentSchedules extends Model
         return $paymentSchedules;
     }
 
+    public static function existMilestonePayment($contractId, $companySystemID)
+    {
+        return MilestonePaymentSchedules::where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->first();
+    }
+
 }

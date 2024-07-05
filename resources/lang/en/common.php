@@ -201,4 +201,11 @@
      "end_date_not_found" => "End Date not found",
      "at_least_one_payment_term_should_be_available" =>
          "At least one payment term should be available to send the contract for approval",
+     "at_least_one_milestone_and_payment_schedule_should_be_available" =>
+         "Please enable milestone payment or time & material consumption or periodic billing
+          to send the contract for approval",
+     "at_least_one_milestone_payment_should_be_available" =>
+         "At least one milestone payment schedule should be available to send the contract for approval",
+     "at_least_one_periodic_billing_should_be_available" =>
+         "At least one periodic billing should be available to send the contract for approval",
  ];

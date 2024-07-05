@@ -28,6 +28,8 @@ use App\Models\ContractUsers;
 use App\Models\CurrencyMaster;
 use App\Models\DocumentMaster;
 use App\Models\Employees;
+use App\Models\MilestonePaymentSchedules;
+use App\Models\PeriodicBillings;
 use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
 use App\Services\ContractHistoryService;
@@ -809,6 +811,12 @@ class ContractMasterRepository extends BaseRepository
                     $existRetention == null)){
                 return trans('common.at_least_one_retention_should_be_available');
             }
+            if(($activeMaster['contractTypeSection']['cmSection_id'] == 3 && !in_array(1, $existRetention) &&
+                    !in_array(2, $existRetention) && !in_array(3, $existRetention)) ||
+                ($activeMaster['contractTypeSection']['cmSection_id'] == 3 && $existRetention == null))
+            {
+                return trans('common.at_least_one_milestone_and_payment_schedule_should_be_available');
+            }
             if($activeMaster['contractTypeSection']['cmSection_id'] == 6)
             {
                 $existPaymentTerm = ContractPaymentTerms::paymentTermExist($contractId, $companySystemID);
@@ -843,6 +851,23 @@ class ContractMasterRepository extends BaseRepository
                     ->first();
                 if(empty($existMilestoneRetention)) {
                     return trans('common.at_least_one_milestone_retention_should_be_available');
+                }
+            }
+            if($activeSection['sectionDetailId'] == 1)
+            {
+                $existMilestonePayment =
+                    MilestonePaymentSchedules::existMilestonePayment($contractId, $companySystemID);
+                if(empty($existMilestonePayment))
+                {
+                    return trans('common.at_least_one_milestone_payment_should_be_available');
+                }
+            }
+            if($activeSection['sectionDetailId'] == 3)
+            {
+                $existPeriodicBilling = PeriodicBillings::existPeriodicBilling($contractId, $companySystemID);
+                if(empty($existPeriodicBilling))
+                {
+                    return trans('common.at_least_one_periodic_billing_should_be_available');
                 }
             }
         }
