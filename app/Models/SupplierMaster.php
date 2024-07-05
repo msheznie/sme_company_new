@@ -381,4 +381,11 @@ class SupplierMaster extends Model
         return $this->belongsTo(ContractUsers::class, 'supplierCodeSystem', 'contractUserId');
     }
 
+    public static function getSupplierBySupplierCodeSystem($id)
+    {
+        return self::select('supplierCodeSystem', 'supplierName', 'supEmail')
+            ->where('supplierCodeSystem', $id)
+            ->first();
+    }
+
 }

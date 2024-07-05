@@ -85,3 +85,9 @@ Route::get('/activate-contract', function ()
     \Artisan::call('activateContract');
     return 'Contracts Activate Successfully!';
 });
+
+Route::get('/contract-expiry-reminder', function ()
+{
+    \Artisan::call('reminderContractExpiry');
+    return 'Contracts Reminder Expiry Send Successfully!';
+});

@@ -436,4 +436,14 @@ class ContractMaster extends Model
         return $this->hasMany(contractStatusHistory::class, 'contract_id', 'id');
     }
 
+    public function contractScenarioAssigns()
+    {
+        return $this->hasMany(CMContractScenarioAssign::class, 'contract_id', 'id');
+    }
+
+    public function contractUserAssigns()
+    {
+        return $this->hasMany(ContractUserAssign::class, 'contractId', 'id');
+    }
+
 }

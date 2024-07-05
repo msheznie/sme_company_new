@@ -314,10 +314,16 @@
         <span>Contract Status Histories</span>
     </a>
 </li>
+
 <li class="nav-item {{ Request::is('timeMaterialConsumptions*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('timeMaterialConsumptions.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>Time Material Consumptions</span>
+
+<li class="nav-item {{ Request::is('cMContractReminderScenarios*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('cMContractReminderScenarios.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>C M Contract Reminder Scenarios</span>
     </a>
 </li>
     <li class="nav-item {{ Request::is('contractPaymentTerms*') ? 'active' : '' }}">

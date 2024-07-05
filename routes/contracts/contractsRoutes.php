@@ -273,7 +273,6 @@ Route::
         \App\Http\Controllers\API\contractStatusHistoryAPIController::class,
         'getContractListStatus'
     ])->name('Contract History Status');
-
     Route::post('payment-schedule-form-data', [
         \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
         'getPaymentScheduleFormData'
@@ -326,7 +325,6 @@ Route::
         \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
         'destroy'
     ])->name('delete milestone payment schedule');
-
     Route::get('/get-contract-payment-terms/{id}',
         [\App\Http\Controllers\API\ContractPaymentTermsAPIController::class, 'getContractPaymentTerms'])
         ->name('get contract payment terms');
@@ -341,5 +339,16 @@ Route::
         \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
         'destroy'
     ])->name('delete payment term');
-
+    Route::post('get-reminder-configuration', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'showReminders'
+    ])->name('Contract Reminder Configuration');
+    Route::post('get-reminder-drop-val', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'showRemindersDropValues'
+    ])->name('Contract Reminder Dropdown Values');
+    Route::post('crate-reminder-configuration', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'createReminderConfiguration'
+    ])->name('Create Contract Reminder Configuration');
 });
