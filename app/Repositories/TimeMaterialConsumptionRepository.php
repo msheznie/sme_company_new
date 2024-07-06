@@ -149,7 +149,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
                     throw new CommonException('BOQ not found.');
                 }
                 $qty = $boq['qty'] ?? 0;
-                $price = $boq['itemMaster']['itemAssigned']['wacValueLocal'] ?? 0;
+                $price = $boq['price'] ?? 0;
                 $amount = $qty * $price;
                 $postData[] = [
                     'uuid' => ContractManagementUtils::generateUuid(),

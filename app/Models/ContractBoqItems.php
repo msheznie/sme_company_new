@@ -49,6 +49,7 @@ class ContractBoqItems extends Model
         'minQty',
         'maxQty',
         'qty',
+        'price',
         'companyId',
         'created_by',
         'updated_by'
@@ -68,6 +69,7 @@ class ContractBoqItems extends Model
         'minQty' => 'integer',
         'maxQty' => 'integer',
         'qty' => 'integer',
+        'price' => 'float',
         'companyId' => 'integer',
         'created_by' => 'string',
         'updated_by' => 'string'
@@ -96,7 +98,7 @@ class ContractBoqItems extends Model
 
     public function getBoqItemDetails($uuid)
     {
-        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty')
+        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price')
             ->with([
                 'itemMaster' => function ($q)
                 {

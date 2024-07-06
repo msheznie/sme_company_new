@@ -58,7 +58,7 @@ class ContractBoqItemsRepository extends BaseRepository
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
-        $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId')
+        $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId', 'price')
             ->with(['itemMaster.unit' => function ($query) {
                 $query->select('UnitShortCode');
             }, 'itemMaster.itemAssigned.local_currency'])

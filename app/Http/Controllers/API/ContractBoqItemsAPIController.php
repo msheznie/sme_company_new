@@ -49,7 +49,8 @@ class ContractBoqItemsAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems), 'BOQ Items retrieved successfully');
+        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems),
+            'BOQ Items retrieved successfully');
     }
 
     /**
@@ -82,7 +83,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         /** @var ContractBoqItems $contractBoqItems */
         $contractBoqItems = $this->contractBoqItemsRepository->find($id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Contract Boq Items not found');
         }
 
@@ -105,7 +107,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         /** @var ContractBoqItems $contractBoqItems */
         $contractBoqItems = $this->contractBoqItemsRepository->find($id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Contract Boq Items not found');
         }
 
@@ -129,7 +132,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         $contractResult = ContractBoqItems::select('id')->where('uuid', $id)->first();
         $contractBoqItems = $this->contractBoqItemsRepository->find($contractResult->id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Boq Item not found');
         }
 
@@ -148,15 +152,22 @@ class ContractBoqItemsAPIController extends AppBaseController
         $input = $request->all();
         $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('BOQ Item not found');
         }
 
-        if($input['type'] == 'minQty') {
+        if($input['type'] == 'minQty')
+        {
             $inputArr = ['minQty' => $input['qty']];
-        } elseif($input['type'] == 'maxQty') {
+        } elseif($input['type'] == 'maxQty')
+        {
             $inputArr = ['maxQty' => $input['qty']];
-        } else {
+        } elseif($input['type'] == 'price')
+        {
+            $inputArr = ['price' => $input['qty']];
+        } else
+        {
             $inputArr = ['qty' => $input['qty']];
         }
         $inputArr['updated_by'] = General::currentEmployeeId();
@@ -171,17 +182,21 @@ class ContractBoqItemsAPIController extends AppBaseController
         $input = $request->all();
         $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('BOQ Items not found');
         }
 
         $getValidRangeOfIdsToUpdate = $this->contractBoqItemsRepository->copyIdsRange($contractBoqItems);
 
-        if($input['type'] == 'minQty') {
+        if($input['type'] == 'minQty')
+        {
             $inputArr = ['minQty' => $input['qty']];
-        } elseif($input['type'] == 'maxQty') {
+        } elseif($input['type'] == 'maxQty')
+        {
             $inputArr = ['maxQty' => $input['qty']];
-        } else {
+        } else
+        {
             $inputArr = ['qty' => $input['qty']];
         }
         $inputArr['updated_by'] = General::currentEmployeeId();
@@ -204,11 +219,13 @@ class ContractBoqItemsAPIController extends AppBaseController
             'companyId' => $input['companyId']
         ];
         DB::beginTransaction();
-        try {
+        try
+        {
             $this->contractBoqItemsRepository->create($insertArray);
             DB::commit();
             return ['status' => true, 'message' => 'BOQ Item added successfully'];
-        } catch (\Exception $ex) {
+        } catch (\Exception $ex)
+        {
                 DB::rollBack();
                 return ['status' => false, 'message' => $ex->getMessage()];
             }
@@ -229,9 +246,11 @@ class ContractBoqItemsAPIController extends AppBaseController
         $export = new ContractManagmentExport($contractBoqItems);
         $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
 
-        if ($basePath == '') {
+        if ($basePath == '')
+        {
             return $this->sendError('unable_to_export_excel');
-        } else {
+        } else
+        {
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }

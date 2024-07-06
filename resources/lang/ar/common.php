@@ -202,4 +202,5 @@ return [
         "At least one milestone payment schedule should be available to send the contract for approval AR",
     "at_least_one_periodic_billing_should_be_available" =>
         "At least one periodic billing should be available to send the contract for approval AR",
+    "price_is_a_mandatory_field" => "Price is a mandatory field for added BOQ Items AR",
 ];

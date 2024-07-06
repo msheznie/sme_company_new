@@ -788,7 +788,7 @@ class ContractMasterRepository extends BaseRepository
 
         foreach ($activeMasters as $activeMaster){
             if($activeMaster['contractTypeSection']['cmSection_id'] == 1){
-                $existBoq = ContractBoqItems::select('qty')->where('contractId', $contractId)
+                $existBoq = ContractBoqItems::select('qty', 'price')->where('contractId', $contractId)
                     ->where('companyId', $companySystemID)
                     ->first();
                 if(empty($existBoq)) {
@@ -796,6 +796,9 @@ class ContractMasterRepository extends BaseRepository
                 }
                 if(empty($existBoq['qty'])){
                     return  trans('common.qty_is_a_mandatory_field');
+                }
+                if(empty($existBoq['price'])){
+                    return  trans('common.price_is_a_mandatory_field');
                 }
             }
             if($activeMaster['contractTypeSection']['cmSection_id'] == 2){
