@@ -142,16 +142,32 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var MilestonePaymentSchedules $milestonePaymentSchedules */
-        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->findByUuid($id);
-
-        if (empty($milestonePaymentSchedules))
+        $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->findByUuid($id,
+            ['id', 'milestone_id']);
+        try
         {
-            return $this->sendError('Milestone Payment Schedules not found');
+            if (empty($milestonePaymentSchedules))
+            {
+                throw new CommonException('Milestone Payment Schedules not found');
+            }
+            $checkMilestonePRUsed = MilestonePaymentSchedules::checkMilestoneUsedInRetention(
+                $milestonePaymentSchedules['milestone_id']
+            );
+            if($checkMilestonePRUsed)
+            {
+                throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
+                 milestone retention');
+            }
+            $milestonePaymentSchedules->delete();
+
+            return $this->sendSuccess('Milestone Payment Schedules deleted successfully');
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
         }
-
-        $milestonePaymentSchedules->delete();
-
-        return $this->sendSuccess('Milestone Payment Schedules deleted successfully');
     }
 
     public function getPaymentScheduleFormData(Request $request)

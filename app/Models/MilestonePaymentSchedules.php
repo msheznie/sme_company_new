@@ -139,4 +139,16 @@ class MilestonePaymentSchedules extends Model
             ->first();
     }
 
+    public static function getTotalAmount($contractID)
+    {
+        return MilestonePaymentSchedules::where('contract_id', $contractID)->sum('amount');
+    }
+    public static function getTotalPercentage($contractID)
+    {
+        return MilestonePaymentSchedules::where('contract_id', $contractID)->sum('percentage');
+    }
+    public static function checkMilestoneUsedInRetention($milestoneID)
+    {
+        return ContractMilestoneRetention::where('milestoneId', $milestoneID)->exists();
+    }
 }

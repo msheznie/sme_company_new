@@ -97,11 +97,14 @@ class TimeMaterialConsumption extends Model
     public static function checkExistRecordEmpty($contractID)
     {
         return TimeMaterialConsumption::where('contract_id', $contractID)
-            ->whereNull('item')
-            ->orWhereNull('description')
-            ->orWhereNull('uom_id')
-            ->orWhere('quantity', '=', 0)
-            ->orWhere('price', '=', 0)
+            ->where( function ($q)
+            {
+                $q->whereNull('item')
+                ->orWhereNull('description')
+                ->orWhereNull('uom_id')
+                ->orWhere('quantity', '=', 0)
+                ->orWhere('price', '=', 0);
+            })
             ->exists();
     }
 }

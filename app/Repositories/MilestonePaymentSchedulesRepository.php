@@ -76,11 +76,16 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         $currencyCode = CurrencyMaster::getCurrencyCode($currencyId);
         $milestoneExists = ContractMilestone::checkContractHasMilestone($contract['id']);
+        $totalPSAmount = MilestonePaymentSchedules::getTotalAmount($contract['id']);
+        $totalPSPercentage = MilestonePaymentSchedules::getTotalPercentage($contract['id']);
         return [
             'milestones' => $milestones,
             'currencyCode' => $currencyCode,
             'decimalPlace' => $decimalPlaces,
-            'milestoneExists' => $milestoneExists
+            'milestoneExists' => $milestoneExists,
+            'contractAmount' => $contract['contractAmount'] ?? 0,
+            'totalPSAmount' => $totalPSAmount ?? 0,
+            'totalPSPercentage' => $totalPSPercentage ?? 0
         ];
     }
 

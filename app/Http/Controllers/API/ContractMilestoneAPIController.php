@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
 use App\Helpers\General;
@@ -10,6 +11,8 @@ use App\Http\Requests\API\UpdateContractMilestoneAPIRequest;
 use App\Models\Company;
 use App\Models\ContractDeliverables;
 use App\Models\ContractMilestone;
+use App\Models\MilestonePaymentSchedules;
+use App\Models\ContractMilestoneRetention;
 use App\Repositories\ContractMilestoneRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -138,20 +141,39 @@ class ContractMilestoneAPIController extends AppBaseController
     {
         /** @var ContractMilestone $contractMilestone */
         $contractMilestone = $this->contractMilestoneRepository->findByUuid($id, ['id']);
-
-        if (empty($contractMilestone))
+        try
         {
-            return $this->sendError(trans('common.milestone_not_found'));
-        }
+            if (empty($contractMilestone))
+            {
+                throw new CommonException(trans('common.milestone_not_found'));
+            }
 
-        if(ContractDeliverables::where('milestoneID', $contractMilestone['id'])->exists())
+            if(ContractDeliverables::where('milestoneID', $contractMilestone['id'])->exists())
+            {
+                throw new CommonException(trans('common.linked_milestone_delete_error_message'));
+            }
+            if(MilestonePaymentSchedules::where('milestone_id', $contractMilestone['id'])->exists())
+            {
+                throw new CommonException('Cannot delete milestone. Milestone already assigned to milestone
+                 payment schedule');
+            }
+            if(ContractMilestoneRetention::where('milestoneId', $contractMilestone['id'])->exists())
+            {
+                throw new CommonException('Cannot delete milestone. Milestone already assigned to milestone
+                 retention');
+            }
+
+            $contractMilestone->delete();
+
+            return $this->sendSuccess(trans('common.mile_stone_deleted_successfully'));
+        } catch (CommonException $ex)
         {
-            return $this->sendError(trans('common.linked_milestone_delete_error_message'));
+            return $this->sendError($ex->getMessage());
         }
-
-        $contractMilestone->delete();
-
-        return $this->sendSuccess(trans('common.mile_stone_deleted_successfully'));
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
     }
 
     public function getContractMilestones($id, Request $request)

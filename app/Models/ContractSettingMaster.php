@@ -112,15 +112,20 @@ class ContractSettingMaster extends Model
     public static function checkActiveContractSettings($contractID, $type = '')
     {
         return ContractSettingMaster::where('contractId', $contractID)
-            ->when($type == 'boq', function($q)
+            ->where('isActive', 1)
+            ->where(function ($q) use ($type)
             {
-                $q->where('contractTypeSectionId', 1)
-                    ->where('isActive', 1);
-            })
-            ->when($type == 'milestone', function($q)
-            {
-                $q->where('contractTypeSectionId', 2)
-                    ->where('isActive', 1);
+                $q->whereHas('contractTypeSection', function ($q) use($type)
+                {
+                    $q->when($type == 'boq', function ($q)
+                    {
+                        $q->where('cmSection_id', 1);
+                    });
+                    $q->when($type == 'milestone', function ($q)
+                    {
+                        $q->where('cmSection_id', 2);
+                    });
+                });
             })
             ->exists();
     }

@@ -67,24 +67,18 @@ class EmailUtils
     }
     public static function getRedirectUrl()
     {
-        $redirectUrl = env("APP_URL");
-        if($_SERVER["REMOTE_ADDR"]=="127.0.0.1")
+        $redirectUrl =  env("DOMAIN_URL");
+
+        if (env('IS_MULTI_TENANCY') && isset($_SERVER['HTTP_HOST']))
         {
-            $redirectUrl = $redirectUrl.':4200';
-        }else
-        {
-            if (env('IS_MULTI_TENANCY'))
-            {
+            $url = $_SERVER['HTTP_HOST'];
+            $urlArray = explode('.', $url);
+            $subDomain = $urlArray[0];
 
-                $url = $_SERVER['HTTP_HOST'];
-                $urlArray = explode('.', $url);
-                $subDomain = $urlArray[0];
+            $tenantDomain = (isset(explode('-', $subDomain)[0])) ? explode('-', $subDomain)[0] : "";
 
-                $tenantDomain = (isset(explode('-', $subDomain)[0])) ? explode('-', $subDomain)[0] : "";
-
-                $search = '*';
-                $redirectUrl = str_replace($search, $tenantDomain, $redirectUrl);
-            }
+            $search = '*';
+            $redirectUrl = str_replace($search, $tenantDomain, $redirectUrl);
         }
 
         return $redirectUrl.'/approval/contracts';
