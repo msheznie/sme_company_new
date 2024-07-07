@@ -68,6 +68,7 @@ class ContractDeliverablesRepository extends BaseRepository
             foreach($deliverables as $key => $value)
             {
                 $deliverablesArray[$key]['uuid'] = $value['uuid'];
+                $deliverablesArray[$key]['title'] = $value['title'];
                 $deliverablesArray[$key]['description'] = $value['description'];
                 $deliverablesArray[$key]['dueDate'] = $value['dueDate'];
                 $deliverablesArray[$key]['milestoneUuid'] = $value['milestone']['uuid'] ?? null;
@@ -81,6 +82,7 @@ class ContractDeliverablesRepository extends BaseRepository
         $companySystemID = $request->input('companySystemID');
         $contractUuid = $request->input('contractUuid');
         $description = $request->input('description');
+        $title = $request->input('title');
         $milestone = $request->input('milestone') ?? null;
         $formattedDueDate = $request->input('formattedDueDate') ?? null;
         $uuid = bin2hex(random_bytes(16));
@@ -114,7 +116,7 @@ class ContractDeliverablesRepository extends BaseRepository
             $milestoneID = $milestoneExists['id'] ?? 0;
         }
         $contractId = $contractMaster['id'];
-        $validationInsert = self::checkDeliverableValidation($description, 0, $companySystemID, $contractId);
+        $validationInsert = self::checkDeliverableValidation($title, $description, 0, $companySystemID, $contractId);
         if(!$validationInsert['status'])
         {
             return $validationInsert;
@@ -125,6 +127,7 @@ class ContractDeliverablesRepository extends BaseRepository
             $insertDeliverables = [
                 'uuid' => $uuid,
                 'contractID' => $contractId,
+                'title' => $title,
                 'description' => $description,
                 'milestoneID' => $milestoneID,
                 'dueDate' => $formattedDueDate ? Carbon::parse($formattedDueDate) : null,
@@ -147,6 +150,7 @@ class ContractDeliverablesRepository extends BaseRepository
         $companySystemID = $request->input('companySystemID');
         $contractUuid = $request->input('contractUuid');
         $description = $request->input('description');
+        $title = $request->input('title');
         $milestone = $request->input('milestone') ?? null;
         $formattedDueDate = $request->input('formattedDueDate') ?? null;
         $milestoneID = 0;
@@ -163,7 +167,7 @@ class ContractDeliverablesRepository extends BaseRepository
             ];
         }
         $validationUpdate =
-            self::checkDeliverableValidation($description, $id, $companySystemID, $contractMaster['id']);
+            self::checkDeliverableValidation($title, $description, $id, $companySystemID, $contractMaster['id']);
         if(!$validationUpdate['status'])
         {
             return $validationUpdate;
@@ -181,6 +185,7 @@ class ContractDeliverablesRepository extends BaseRepository
         {
             DB::beginTransaction();
             $insertDeliverables = [
+                'title' => $title,
                 'description' => $description,
                 'milestoneID' => $milestoneID,
                 'dueDate' => $formattedDueDate ? Carbon::parse($formattedDueDate) : null,
@@ -197,17 +202,11 @@ class ContractDeliverablesRepository extends BaseRepository
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
     }
-    public function checkDeliverableValidation($description, $id, $companySystemID, $contractID): array
+    public function checkDeliverableValidation($title, $description, $id, $companySystemID, $contractID): array
     {
-        $milestoneExists = ContractDeliverables::where('description', $description)
-            ->where('contractID', $contractID)
-            ->where('companySystemID', $companySystemID)
-            ->when($id > 0, function ($q) use ($id)
-            {
-                $q->where('id', '!=', $id);
-            })
-            ->exists();
-        if($milestoneExists)
+        $exists = ContractDeliverables::checkDeliverableExist($title, $description, $id, $companySystemID, $contractID);
+
+        if($exists)
         {
             return [
                 'status' => false,
@@ -241,6 +240,7 @@ class ContractDeliverablesRepository extends BaseRepository
         $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
 
         $data[0]['Milestone'] = "Milestone";
+        $data[0]['Title'] = "Title";
         $data[0]['Description'] = "Description";
         $data[0][$dueDateText] = $dueDateText;
         if($deliverables)
@@ -248,6 +248,7 @@ class ContractDeliverablesRepository extends BaseRepository
             foreach ($deliverables as $key => $deliverable)
             {
                 $data[$key+1]['Milestone'] = $deliverable['milestone']['title'] ?? '-';
+                $data[$key+1]['Title'] = $deliverable['title'];
                 $data[$key+1]['Description'] = $deliverable['description'];
                 $data[$key+1][$dueDateText] = $deliverable['dueDate'] ?
                     Carbon::parse($deliverable['dueDate'])->format('Y-m-d') : '-';

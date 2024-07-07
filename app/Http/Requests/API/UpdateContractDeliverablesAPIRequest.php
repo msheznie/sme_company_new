@@ -29,6 +29,7 @@ class UpdateContractDeliverablesAPIRequest extends APIRequest
             'contractUuid' => 'required',
             'uuid' => 'required',
             'description' => 'required',
+            'title' => 'required',
         ];
     }
 
@@ -39,6 +40,7 @@ class UpdateContractDeliverablesAPIRequest extends APIRequest
             'contractUuid.required' => 'Contract ID is required',
             'uuid.required' => 'Deliverable ID is required',
             'description.required' => 'Description is required',
+            'title.required' => 'Deliverable Title is required',
         ];
     }
 }

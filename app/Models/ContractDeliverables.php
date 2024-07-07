@@ -41,6 +41,7 @@ class ContractDeliverables extends Model
         'uuid',
         'contractID',
         'milestoneID',
+        'title',
         'description',
         'companySystemID',
         'created_by',
@@ -58,6 +59,7 @@ class ContractDeliverables extends Model
         'uuid' => 'string',
         'contractID' => 'integer',
         'milestoneID' => 'integer',
+        'title' => 'string',
         'description' => 'string',
         'dueDate' => 'string',
         'companySystemID' => 'integer',
@@ -74,6 +76,7 @@ class ContractDeliverables extends Model
         'uuid' => 'required|string|max:200',
         'contractID' => 'required|integer',
         'milestoneID' => 'required|integer',
+        'title' => 'required|string|max:255',
         'description' => 'required|string|max:255',
         'companySystemID' => 'required|integer',
         'created_by' => 'required|integer',
@@ -101,7 +104,7 @@ class ContractDeliverables extends Model
 
     public static function getDeliverables($contractID, $companySystemID)
     {
-        return ContractDeliverables::select('uuid', 'milestoneID', 'description', 'dueDate')
+        return ContractDeliverables::select('uuid', 'milestoneID', 'title', 'description', 'dueDate')
             ->with([
                 'milestone' => function ($q)
                 {
@@ -111,5 +114,24 @@ class ContractDeliverables extends Model
             ->where('contractID', $contractID)
             ->where('companySystemID', $companySystemID)
             ->get();
+    }
+
+    public static function checkDeliverableExist($title, $description, $id, $companySystemID, $contractID)
+    {
+        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID)
+        {
+            $query->where('contractID', $contractID)
+                ->where('companySystemID', $companySystemID)
+                ->where(function ($q) use ($title, $description)
+                {
+                    $q->where('description', $description)
+                        ->orWhere('title', $title);
+                });
+        })
+            ->when($id > 0, function ($q) use ($id)
+            {
+                $q->where('id', '!=', $id);
+            })
+            ->exists();
     }
 }
