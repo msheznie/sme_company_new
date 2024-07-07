@@ -28,7 +28,6 @@ class ActivateContractService
                 $currentStatus = -1;
                 $companyId = $contract->companySystemID;
 
-                ContractMaster::where('id', $contractId)->update(['status' => $currentStatus]);
                 ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null);
             }
 

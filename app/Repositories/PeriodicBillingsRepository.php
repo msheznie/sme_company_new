@@ -123,7 +123,7 @@ class PeriodicBillingsRepository extends BaseRepository
                 'start_date' => Carbon::parse($input['start_date']),
                 'end_date' => Carbon::parse($input['end_date']),
                 'occurrence_type' => $input['occurrence_type'],
-                'due_in' => $input['due_in'] ?? 0,
+                'due_in' => ($input['occurrence_type'] == 7) ? ($input['due_in'] ?? null) : null,
                 'no_of_installment' => $input['no_of_installment'] ?? 0,
                 'inst_payment_amount' => $input['inst_payment_amount'] ? (float) $input['inst_payment_amount'] : 0,
                 'updated_by' => General::currentEmployeeId(),

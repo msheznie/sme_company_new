@@ -331,7 +331,16 @@ class ContractHistoryService
 
     public function getApprovalData($isPending, $selectedCompanyID, $search, $categoryId)
     {
-        if($categoryId ==  4)
+        if($categoryId ==  1)
+        {
+            $historyMaster = ContractHistory::getExtendContractApprovals(
+                $isPending,
+                $selectedCompanyID,
+                $search,
+                General::currentEmployeeId(),
+                126
+            );
+        } elseif($categoryId ==  4)
         {
             $historyMaster = ContractHistory::getExtendContractApprovals(
                 $isPending,

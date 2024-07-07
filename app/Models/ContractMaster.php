@@ -426,7 +426,7 @@ class ContractMaster extends Model
     }
     public static function getCurrentInactiveContract($todayDate)
     {
-        return ContractMaster::select('id')
+        return ContractMaster::select('id', 'companySystemID')
             ->whereDate('startDate', $todayDate)
             ->where('status', 0)
             ->get();
@@ -445,5 +445,12 @@ class ContractMaster extends Model
     {
         return $this->hasMany(ContractUserAssign::class, 'contractId', 'id');
     }
-
+    public function contractMilestonePaymentSchedule()
+    {
+        return $this->hasMany(MilestonePaymentSchedules::class, 'contract_id', 'id');
+    }
+    public function contractRetention()
+    {
+        return $this->hasMany(ContractMilestoneRetention::class, 'contractId', 'id');
+    }
 }

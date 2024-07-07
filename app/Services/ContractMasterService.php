@@ -57,4 +57,14 @@ class ContractMasterService
             'history' => $history
         ];
     }
+    public function disableAmountField($contractID)
+    {
+        return ContractMaster::where('id', $contractID)
+            ->where(function ($q)
+            {
+                $q->whereHas('contractMilestonePaymentSchedule')
+                    ->orWhereHas('contractRetention');
+            })
+            ->exists();
+    }
 }

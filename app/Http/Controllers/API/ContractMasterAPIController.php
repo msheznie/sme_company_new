@@ -148,6 +148,7 @@ class ContractMasterAPIController extends AppBaseController
         $milestoneActive = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'milestone');
         $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
         $response['milestoneActive'] = $milestoneActive && $milestoneHasRec;
+        $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }
 
