@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ContractHistoryService;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,5 +76,20 @@ class contractStatusHistory extends Model
     public function employees()
     {
         return $this->hasOne(Employees::class, 'employeeSystemID', 'created_by');
+    }
+
+    public static function updateTerminatedAddendum($contractId, $companyId, $status)
+    {
+        $data = [
+            'status'  => $status
+        ];
+
+        ContractMaster::updatedAddendumRecords($companyId, $contractId, $data);
+        $updatedIdList = ContractMaster::getAddendumRecordsId($companyId, $contractId);
+
+        foreach ($updatedIdList as $i)
+        {
+            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId, $contractId);
+        }
     }
 }

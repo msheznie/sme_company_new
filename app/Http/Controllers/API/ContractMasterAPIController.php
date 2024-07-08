@@ -19,6 +19,7 @@ use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
+use App\Models\contractStatusHistory;
 use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
@@ -154,6 +155,7 @@ class ContractMasterAPIController extends AppBaseController
         $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
         $response['milestoneActive'] = $milestoneActive && $milestoneHasRec;
         $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
+
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }
 

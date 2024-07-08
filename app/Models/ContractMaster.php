@@ -447,6 +447,7 @@ class ContractMaster extends Model
     {
         return $this->hasMany(ContractUserAssign::class, 'contractId', 'id');
     }
+
     public function contractMilestonePaymentSchedule()
     {
         return $this->hasMany(MilestonePaymentSchedules::class, 'contract_id', 'id');
@@ -454,5 +455,22 @@ class ContractMaster extends Model
     public function contractRetention()
     {
         return $this->hasMany(ContractMilestoneRetention::class, 'contractId', 'id');
+    }
+
+    public static function updatedAddendumRecords($companyId, $contractId, $data)
+    {
+        return ContractMaster::where('companySystemID', $companyId)
+            ->where('parent_id', $contractId)
+            ->where('is_addendum', 1)
+            ->update($data);
+    }
+
+    public static function getAddendumRecordsId($companyId, $contractId)
+    {
+        return ContractMaster::select('id')
+            ->where('companySystemID', $companyId)
+            ->where('parent_id', $contractId)
+            ->where('is_addendum', 1)
+            ->get();
     }
 }

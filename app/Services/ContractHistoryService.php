@@ -21,6 +21,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
+use Illuminate\Support\Facades\Log;
+
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -243,12 +245,17 @@ class ContractHistoryService
                 (
                     $getContractCloneData['startDate'],$getContractCloneData['endDate']
                 );
-
+                $cloneStatus = ($categoryId == 6) ? $categoryId : $cloneStatus;
                 self::updateContractMaster($contractId, $companyId,$categoryId);
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
                 self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
                 self::insertHistoryStatus($contractId,$categoryId,$companyId);
+                if($categoryId === 6)
+                {
+                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
+                }
+
 
             });
         }catch (\Exception $e)
@@ -665,6 +672,7 @@ class ContractHistoryService
 
     }
 
+    
     public function getModelsToDelete($categoryId)
     {
         $defaultModels = [
@@ -699,6 +707,5 @@ class ContractHistoryService
 
         return $defaultModels;
     }
-
 
 }
