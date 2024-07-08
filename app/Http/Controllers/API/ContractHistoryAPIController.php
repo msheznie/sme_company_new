@@ -10,8 +10,10 @@ use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
 use App\Http\Requests\CreateContractRequest;
 use App\Http\Requests\CreateContractHistoryAttachmentRequest;
+use App\Models\ContractHistory;
 use App\Repositories\ContractHistoryRepository;
 use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
@@ -29,17 +31,20 @@ class ContractHistoryAPIController extends AppBaseController
     /** @var  ContractHistoryRepository */
     private $contractHistoryRepository;
     protected $contractHistoryService;
+    protected $contractAmendmentService;
     protected $erpDocumentAttachmentsRepository ;
 
     const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
 
     public function __construct(ContractHistoryRepository $contractHistoryRepo,
                                 ContractHistoryService $contractHistoryService,
-                                ErpDocumentAttachmentsRepository  $erpDocumentAttachmentsRepository)
+                                ErpDocumentAttachmentsRepository  $erpDocumentAttachmentsRepository,
+                                ContractAmendmentService $contractAmendmentService)
     {
         $this->contractHistoryRepository = $contractHistoryRepo;
         $this->contractHistoryService = $contractHistoryService;
         $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepository;
+        $this->contractAmendmentService = $contractAmendmentService;
     }
 
     /**
@@ -372,6 +377,134 @@ class ContractHistoryAPIController extends AppBaseController
         {
             return $this->sendError($e->getMessage(), 500);
         } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function updateContractStatusAmendment(Request $request)
+    {
+        try
+        {
+            $this->contractAmendmentService->updateContractStatusAmendment($request->all());
+            return $this->sendSuccess('Contract amendment active successfully');
+        } catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+
+        }
+    }
+
+    public function deleteContractBoqAmend(Request $request)
+    {
+        try
+        {
+            $this->contractAmendmentService->deleteContractBoqAmendment($request->all());
+            return $this->sendSuccess('BOQ Item deleted successfully');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteMilestoneAmd(Request $request)
+    {
+        try
+        {
+            $this->contractAmendmentService->deleteMilestoneAmd($request->all());
+            return $this->sendSuccess('Milestone deleted successfully');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteContractDeliverablesAmd(Request $request)
+    {
+        try
+        {
+            $this->contractAmendmentService->deleteContractDeliverablesAmd($request->all());
+            return $this->sendSuccess('Milestone deleted successfully');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function contractDocumentAmd(Request $request)
+    {
+        try
+        {
+           return $this->contractAmendmentService->getContractData($request->all());
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+    public function getContractAmdHistory(Request $request)
+    {
+        try
+        {
+             $data = $this->contractAmendmentService->getHistoryData($request->all());
+            $responseData = ['data' => $data];
+            return response()->json($responseData);
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function confirmContractAmendment(Request $request)
+    {
+        try
+        {
+           $input = $request->all();
+           $companyId = $input['selectedCompanyID'];
+           $historyUuid = $input['historyUuid'];
+           $contractUuid = $input['contractUuid'];
+           $getContractHistory = ContractManagementUtils::getContractHistoryData($historyUuid);
+           $getContractData = ContractManagementUtils::checkContractExist($contractUuid,$companyId);
+
+            $this->contractHistoryService->confirmHistoryDocument
+            (
+                $getContractHistory->id,$getContractData->id,$companyId,1
+            );
+
+            return $this->sendSuccess('Contract amendment document confirmed successfully');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
         }

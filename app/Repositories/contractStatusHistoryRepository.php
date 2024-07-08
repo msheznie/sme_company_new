@@ -6,7 +6,7 @@ use App\Models\contractStatusHistory;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 /**
  * Class contractStatusHistoryRepository
  * @package App\Repositories
@@ -50,6 +50,8 @@ class contractStatusHistoryRepository extends BaseRepository
         $input = $request->all();
         $getContractData = ContractManagementUtils::checkContractExist
         ($input['contractUuid'],$input['selectedCompanyID']);
+
+
         return $this->model->getContractListStatus($getContractData->id);
     }
 }

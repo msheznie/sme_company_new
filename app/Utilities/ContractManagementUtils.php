@@ -4,6 +4,8 @@ namespace App\Utilities;
 
 use App\Helper\General;
 use App\Models\BillingFrequencies;
+use App\Models\CMContractDeliverableAmd;
+use App\Models\CMContractMileStoneAmd;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractsMaster;
 use App\Models\CMContractTypes;
@@ -57,7 +59,9 @@ class ContractManagementUtils
 
     public static function getAllContractSetions()
     {
-        return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')->get();
+        return CMContractSectionsMaster::select('cmSection_id', 'cmSection_detail', 'csm_active')
+            ->whereIn('csm_active', [0,1])
+            ->get();
     }
 
     public static function getContractDefaultUserGroup($request)
@@ -285,5 +289,39 @@ class ContractManagementUtils
     public static function checkContractMilestoneExists($contractID)
     {
         return ContractMilestone::where('contractID', $contractID)->exists();
+    }
+
+    public static function getId($amendment,$uuid, $companyId)
+    {
+        $id = 0;
+        if($amendment)
+        {
+            $data = self::getContractHistoryData($uuid);
+            $id = $data;
+        }else
+        {
+            $data = self::checkContractExist($uuid,$companyId);
+            $id = $data->id;
+        }
+        return  $id;
+    }
+
+    public static function getMilestonesAmd($uuid,$milestoneUuid)
+    {
+        $historyData = self::getContractHistoryData($uuid);
+        return CMContractMileStoneAmd::select('status','amd_id', 'uuid','id')
+            ->where('contract_history_id', $historyData->id)
+            ->where('uuid', $milestoneUuid)
+            ->first();
+
+    }
+
+    public static function getDeliverableAmd($uuid,$deliverableUuid)
+    {
+        $historyData = self::getContractHistoryData($uuid);
+        return CMContractDeliverableAmd::select('amd_id', 'uuid','id')
+            ->where('contract_history_id', $historyData->id)
+            ->where('uuid', $deliverableUuid)
+            ->first();
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\API\UpdateContractDocumentAPIRequest;
 use App\Models\ContractDocument;
 use App\Repositories\ContractDocumentRepository;
 use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\ContractAmendmentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -114,7 +115,14 @@ class ContractDocumentAPIController extends AppBaseController
     public function update($id, UpdateContractDocumentAPIRequest $request)
     {
         $input = $request->all();
-        $contractDocumentExist = $this->contractDocumentRepository->findByUuid($id, ['id']);
+        $amendment = $input['amendment'];
+
+        $contractDocumentExist = $amendment
+            ?
+            ContractAmendmentService::getContractDocumentAmend($id)
+            :
+            $this->contractDocumentRepository->findByUuid($id, ['id']);
+
 
         if (empty($contractDocumentExist)) {
             return $this->sendError(trans('common.contract_document_id_not_found'));
@@ -170,17 +178,39 @@ class ContractDocumentAPIController extends AppBaseController
             return $this->sendError($documentReceived['message'], $errorCode);
         } else {
             if($request->input('file')){
-                $contractDocument = $this->contractDocumentRepository->findByUuid(
-                    $request->input('uuid'),
-                    ['id', 'documentName']
-                );
-                if(empty($contractDocument)) {
+
+                $amendment = $request->input('amendment');
+                $historyId = 0;
+                if($amendment)
+                {
+                    $histroyData = ContractManagementUtils::getContractHistoryData
+                    (
+                        $request->input('contractHistoryUuid')
+                    );
+
+                    $historyId = $histroyData['id'];
+
+                    $contractDocument = ContractAmendmentService::getcontractDocumentDataAmd
+                    (
+                        $historyId, $request->input('uuid')
+                    );
+                }else
+                {
+                    $contractDocument = $this->contractDocumentRepository->findByUuid(
+                        $request->input('uuid'),
+                        ['id', 'documentName']
+                    );
+                }
+
+                if(empty($contractDocument))
+                {
                     return $this->sendError(trans('common.contract_document_id_not_found'));
                 }
 
                 $attachment = $this->erpDocumentAttachmentsRepository
-                    ->saveDocumentAttachments($request, $contractDocument['id']);
-                if(!$attachment['status']) {
+                    ->saveDocumentAttachments($request, $contractDocument['id'], $historyId);
+                if(!$attachment['status'])
+                {
                     $errorCode = $attachment['code'] ?? 404;
                     return $this->sendError($attachment['message'], $errorCode);
                 }

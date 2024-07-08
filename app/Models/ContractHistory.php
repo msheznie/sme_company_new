@@ -100,7 +100,11 @@ class ContractHistory extends Model
 
     public static function addendumData($contractId, $companyId,$contractCategory)
     {
-        return self::select('uuid', 'contract_id', 'company_id', 'created_at', 'created_by','date','status')
+        return self::select
+        (
+            'uuid', 'contract_id', 'company_id', 'created_at', 'created_by',
+            'date','status','confirmed_yn','approved_yn','refferedBackYN'
+        )
             ->with(['employees' => function ($query)
             {
                 $query->select('employeeSystemID', 'empName');

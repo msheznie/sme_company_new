@@ -3,10 +3,13 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\CMContractDeliverableAmd;
+use App\Models\CMContractMileStoneAmd;
 use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -154,6 +157,10 @@ class ContractDeliverablesRepository extends BaseRepository
         $milestone = $request->input('milestone') ?? null;
         $formattedDueDate = $request->input('formattedDueDate') ?? null;
         $milestoneID = 0;
+        $amendment = $request->input('amendment');
+        $historyId = 0;
+        $modelMilestone = $amendment ? CMContractMileStoneAmd::class : ContractMilestone::class;
+        $model = $amendment ? CMContractDeliverableAmd::class : ContractDeliverables::class;
 
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
@@ -166,21 +173,31 @@ class ContractDeliverablesRepository extends BaseRepository
                 'message' => trans('common.contract_id_not_found')
             ];
         }
+
+
+        if($amendment)
+        {
+            $contractHistory =ContractManagementUtils::getContractHistoryData($request->input('historyUuid'));
+            $historyId = $contractHistory['id'];
+        }
+
         $validationUpdate =
             self::checkDeliverableValidation($title, $description, $id, $companySystemID, $contractMaster['id']);
         if(!$validationUpdate['status'])
         {
             return $validationUpdate;
         }
+
         if($milestone != null)
         {
-            $milestoneExists = ContractMilestone::select('id')
+            $milestoneExists = $modelMilestone::select('id')
                 ->where('uuid', $milestone)
                 ->where('companySystemID',$companySystemID)
                 ->first();
 
             $milestoneID = $milestoneExists['id'] ?? 0;
         }
+
         try
         {
             DB::beginTransaction();
@@ -192,7 +209,16 @@ class ContractDeliverablesRepository extends BaseRepository
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];
-            ContractDeliverables::where('id', $id)->update($insertDeliverables);
+
+            if($amendment)
+            {
+                CMContractDeliverableAmd::where('uuid',$request->input('uuid'))
+                ->where('contract_history_id', $historyId)->update($insertDeliverables);
+            }else
+            {
+                ContractDeliverables::where('id', $id)->update($insertDeliverables);
+            }
+
 
             DB::commit();
             return ['status' => true, 'message' => trans('common.deliverable_updated_successfully')];
@@ -259,5 +285,10 @@ class ContractDeliverablesRepository extends BaseRepository
             'message' => trans('common.successfully_data_loaded'),
             'deliverable' => $data
         ];
+    }
+
+    public function getContractDeliverableRepo($contractId)
+    {
+        return $this->model->getContractDeliverable($contractId);
     }
 }

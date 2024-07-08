@@ -44,7 +44,7 @@ class ErpDocumentAttachments extends Model
     const CREATED_AT = 'timeStamp';
     const UPDATED_AT = 'timeStamp';
 
-    protected $hidden = ['documentSystemCode'];
+
 
     public $fillable = [
         'companySystemID',
@@ -190,6 +190,13 @@ class ErpDocumentAttachments extends Model
         return ErpDocumentAttachments::select('attachmentID')
             ->where('documentSystemID', $documentSystemID)
             ->where('documentSystemCode', $historyId)
+            ->get();
+    }
+
+    public function getErpAttachedData($documentCode,$id)
+    {
+        return self::where('documentID',$documentCode)
+            ->where('documentSystemCode',$id)
             ->get();
     }
 }

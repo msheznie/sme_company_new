@@ -3,17 +3,21 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\CMContractMileStoneAmd;
+use App\Models\CMContractStatusHistoryAmd;
 use App\Models\Company;
+use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\CurrencyMaster;
 use App\Models\MilestoneStatusHistory;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Traits\CrudOperations;
-
+use Illuminate\Support\Facades\Log;
 /**
  * Class ContractMilestoneRepository
  * @package App\Repositories
@@ -70,8 +74,7 @@ class ContractMilestoneRepository extends BaseRepository
             ->select('*')
             ->first();
 
-        if(empty($contractMaster))
-        {
+        if (empty($contractMaster)) {
             return ['status' => false, 'message' => 'Contract Master not found'];
         }
 
@@ -99,8 +102,12 @@ class ContractMilestoneRepository extends BaseRepository
         $description = $formData['description'];
         $status = $formData['status'];
         $uuid = bin2hex(random_bytes(16));
+        $amendment = $request->input('amendment');
+        $model = $amendment ? CMContractMileStoneAmd::class : ContractMilestone::class;
+        $contractHistoryId = 0;
 
-        if(ContractMilestone::where('uuid', $uuid)->exists())
+
+        if ($model::where('uuid', $uuid)->exists())
         {
             return [
                 'status' => false,
@@ -111,16 +118,33 @@ class ContractMilestoneRepository extends BaseRepository
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
-        if(empty($contractMaster))
+
+        if (empty($contractMaster))
         {
             return [
                 'status' => false,
                 'message' => trans('common.contract_id_not_found')
             ];
         }
+
+        if($amendment)
+        {
+            $contractHistory = ContractManagementUtils::getContractHistoryData($request->input('historyUuid'));
+            if (empty($contractHistory))
+            {
+                return [
+                    'status' => false,
+                    'message' => 'Contract history not found'
+                ];
+            }
+            $contractHistoryId = $contractHistory['id'];
+        }
+
+
+
         $contractId = $contractMaster['id'];
-        $validationInsert = self::checkMilestoneValidation($title, 0, $companySystemID, $contractId);
-        if(!$validationInsert['status'])
+        $validationInsert = self::checkMilestoneValidation($title, 0, $companySystemID, $contractId, $amendment, $contractHistoryId);
+        if (!$validationInsert['status'])
         {
             return $validationInsert;
         }
@@ -137,12 +161,18 @@ class ContractMilestoneRepository extends BaseRepository
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
             ];
-            ContractMilestone::insert($insertMilestone);
+
+            if($amendment)
+            {
+                $insertMilestone['contract_history_id'] = $contractHistory->id;
+            }
+
+
+            $model::insert($insertMilestone);
 
             DB::commit();
             return ['status' => true, 'message' => trans('common.milestone_created_successfully')];
-        } catch (\Exception $ex)
-        {
+        } catch (\Exception $ex) {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
@@ -151,18 +181,23 @@ class ContractMilestoneRepository extends BaseRepository
     public function updateMilestone($input, $contractMilestone): array
     {
         $companySystemID = $input['companySystemID'];
+        $amendment = $input['amendment'];
         $formData = $input['formData'];
         $contractUuid = $input['contractUuid'] ?? null;
         $title = $formData['title'];
         $description = $formData['description'];
         $status = $formData['status'];
         $statusYN = $input['statusYN'];
-        $id = $contractMilestone['id'];
+        $id = $amendment ? $contractMilestone['amd_id'] :$contractMilestone['id'];
         $previousStatus = $statusYN && $contractMilestone['status'] ? $contractMilestone['status'] : 0;
 
+        $contractHistoryId = 0;
         $contractMaster = ContractMaster::select('id')->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
+        $modelName = $amendment ? CMContractMileStoneAmd::class : ContractMilestone::class;
+        $colName = $amendment ? 'amd_id' : 'id';
+        $modelNameStatus = $amendment ? CMContractStatusHistoryAmd::class : MilestoneStatusHistory::class;
         if(empty($contractMaster))
         {
             return [
@@ -170,7 +205,26 @@ class ContractMilestoneRepository extends BaseRepository
                 'message' => trans('common.contract_id_not_found')
             ];
         }
-        $validationUpdate = self::checkMilestoneValidation($title, $id, $companySystemID, $contractMaster['id']);
+
+        if($amendment)
+        {
+            $contractHistory = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+            if (empty($contractHistory))
+            {
+                return [
+                    'status' => false,
+                    'message' => 'Contract history not found'
+                ];
+            }
+
+            $contractHistoryId = $contractHistory['id'];
+        }
+
+        $validationUpdate = self::checkMilestoneValidation
+        (
+            $title, $id, $companySystemID, $contractMaster['id'] ,$amendment,$contractHistoryId
+        );
+
         if(!$validationUpdate['status'])
         {
             return $validationUpdate;
@@ -185,7 +239,9 @@ class ContractMilestoneRepository extends BaseRepository
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];
-            ContractMilestone::where('id', $id)->update($insertMilestone);
+
+            $modelName::where($colName, $id)->update($insertMilestone);
+
             if($statusYN)
             {
                 $historyInsert = [
@@ -198,7 +254,13 @@ class ContractMilestoneRepository extends BaseRepository
                     'created_by' => General::currentEmployeeId(),
                     'created_at' => Carbon::now()
                 ];
-                MilestoneStatusHistory::insert($historyInsert);
+
+                if($amendment)
+                {
+                    $historyInsert['contract_history_id'] = $contractHistoryId;
+                }
+
+                $modelNameStatus::insert($historyInsert);
             }
 
             DB::commit();
@@ -210,24 +272,48 @@ class ContractMilestoneRepository extends BaseRepository
         }
 
     }
-
-    public function checkMilestoneValidation($title, $id, $companySystemID, $contractID): array
+    public function checkMilestoneValidation
+    (
+        $title, $id, $companySystemID, $contractID ,$amendment,$contractHistoryId
+    ): array
     {
-        $milestoneExists = ContractMilestone::where('title', $title)
-            ->where('contractID', $contractID)
-            ->where('companySystemID', $companySystemID)
-            ->when($id > 0, function ($q) use ($id)
-            {
-                $q->where('id', '!=', $id);
-            })
-            ->exists();
-        if($milestoneExists)
+
+        if($amendment)
         {
-            return [
-                'status' => false,
-                'message' => trans('common.milestone_already_exists')
-            ];
+            $milestoneExistsAmd = CMContractMileStoneAmd::where('title', $title)
+                ->where('contractID', $contractID)
+                ->where('companySystemID', $companySystemID)
+                ->where('contract_history_id', $contractHistoryId)
+                ->when($id > 0, function ($q) use ($id)
+                {
+                    $q->where('amd_id', '!=', $id);
+                })
+                ->exists();
+            if ($milestoneExistsAmd)
+            {
+                return [
+                    'status' => false,
+                    'message' => trans('common.milestone_already_exists')
+                ];
+            }
         }
+        else
+        {
+            $milestoneExists = ContractMilestone::where('title', $title)
+                ->where('contractID', $contractID)
+                ->where('companySystemID', $companySystemID)
+                ->when($id > 0, function ($q) use ($id) {
+                    $q->where('id', '!=', $id);
+                })
+                ->exists();
+            if ($milestoneExists) {
+                return [
+                    'status' => false,
+                    'message' => trans('common.milestone_already_exists')
+                ];
+            }
+        }
+
         return [
             'status' => true,
             'message' => trans('common.validation_checked_successfully')
@@ -243,8 +329,7 @@ class ContractMilestoneRepository extends BaseRepository
             ->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->first();
-        if(empty($contractMaster))
-        {
+        if (empty($contractMaster)) {
             return [
                 'status' => false,
                 'message' => trans('common.contract_id_not_found')
@@ -257,21 +342,17 @@ class ContractMilestoneRepository extends BaseRepository
         $data[0]['Description'] = "Description";
         $data[0]['Status'] = "Status";
 
-        if($deliverables)
-        {
-            foreach ($deliverables as $key => $deliverable)
-            {
+        if ($deliverables) {
+            foreach ($deliverables as $key => $deliverable) {
                 $status = 'Pending';
-                if($deliverable['status'] == 1)
-                {
+                if ($deliverable['status'] == 1) {
                     $status = 'In Progress';
-                } elseif ($deliverable['status'] == 2)
-                {
+                } elseif ($deliverable['status'] == 2) {
                     $status = 'Completed';
                 }
-                $data[$key+1]['Title'] = $deliverable['title'] ?? '-';
-                $data[$key+1]['Description'] = $deliverable['description'] ?? '-';
-                $data[$key+1]['Status'] = $status;
+                $data[$key + 1]['Title'] = $deliverable['title'] ?? '-';
+                $data[$key + 1]['Description'] = $deliverable['description'] ?? '-';
+                $data[$key + 1]['Status'] = $status;
             }
         }
         return [
@@ -279,5 +360,10 @@ class ContractMilestoneRepository extends BaseRepository
             'message' => trans('common.successfully_data_loaded'),
             'milestones' => $data
         ];
+    }
+
+    public function getMileStone($contractId)
+    {
+        return $this->model->getMileStone($contractId);
     }
 }

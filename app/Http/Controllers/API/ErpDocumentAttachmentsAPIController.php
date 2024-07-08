@@ -174,4 +174,18 @@ class ErpDocumentAttachmentsAPIController extends AppBaseController
             $ids
         );
     }
+
+    public function downloadAttachmentAmd(Request $request)
+    {
+        $id = $request->input('id') ?? 0;
+
+        $documentAttachments = $this->erpDocumentAttachmentsRepository->downloadFileAmd($id);
+        if ($documentAttachments['status'])
+        {
+            return $documentAttachments['data'];
+        } else
+        {
+            return $this->sendError($documentAttachments['message'], $documentAttachments['code']);
+        }
+    }
 }

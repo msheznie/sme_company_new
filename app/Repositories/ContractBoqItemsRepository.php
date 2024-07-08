@@ -3,8 +3,11 @@
 namespace App\Repositories;
 
 use App\Helpers\inventory;
+use App\Models\CMContractBoqItemsAmd;
+use App\Models\CMContractMasterAmd;
 use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
@@ -58,13 +61,19 @@ class ContractBoqItemsRepository extends BaseRepository
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
-        $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId', 'price')
+        $amedment = $input['amendment'];
+        $model = $amedment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $colName = $amedment ? 'contract_history_id' : 'contractId';
+        $col =  $amedment ? 'amd_id' : 'id';
+        $id = $amedment ? self::getHistoryId($uuid) : $contractId->id;
+
+        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price')
             ->with(['itemMaster.unit' => function ($query) {
                 $query->select('UnitShortCode');
             }, 'itemMaster.itemAssigned.local_currency'])
             ->where('companyId', $companyId)
-            ->where('contractId', $contractId->id)
-            ->orderBy('id', 'desc');
+            ->where($colName, $id)
+            ->orderBy($col, 'desc');
 
         return DataTables::eloquent($query)
             ->addColumn('itemDescription', function ($row) {
@@ -117,10 +126,13 @@ class ContractBoqItemsRepository extends BaseRepository
             ->toArray();
     }
 
-    public function copySameQty($id, $arr): array
+    public function copySameQty($id, $arr, $amentmend): array
     {
+        $model = $amentmend ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $col =  $amentmend ? 'amd_id' : 'id';
+
         try {
-            ContractBoqItems::whereIn('id', $id)
+            $model::whereIn($col, $id)
                 ->update($arr);
 
             return ['status' => true, 'message' => trans('BoqItems updated successfully')];
@@ -226,6 +238,17 @@ class ContractBoqItemsRepository extends BaseRepository
             }
         }
         return $data;
+    }
+
+    public function getBoqData($id)
+    {
+        return $this->model->getBoqData($id);
+    }
+
+    public function getHistoryId($id)
+    {
+        $data = ContractManagementUtils::getContractHistoryData($id);
+        return $data->id;
     }
 
 }

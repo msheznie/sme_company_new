@@ -114,4 +114,10 @@ class ContractBoqItems extends Model
             ->where('uuid', $uuid)
             ->first();
     }
+
+    public function getBoqData($id)
+    {
+        return self::where('contractId',$id)
+            ->get();
+    }
 }

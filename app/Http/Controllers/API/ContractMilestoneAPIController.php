@@ -14,10 +14,12 @@ use App\Models\ContractMilestone;
 use App\Models\MilestonePaymentSchedules;
 use App\Models\ContractMilestoneRetention;
 use App\Repositories\ContractMilestoneRepository;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMilestoneResource;
 use Response;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ContractMilestoneController
@@ -109,8 +111,12 @@ class ContractMilestoneAPIController extends AppBaseController
     {
         $input = $request->all();
         $uuid = $input['formData']['uuid'] ?? null;
+        $amendment = $input['amendment'];
 
-        $contractMilestone = $this->contractMilestoneRepository->findByUuid($uuid, ['id', 'status']);
+        $contractMilestone = $amendment ? ContractManagementUtils::getMilestonesAmd
+        (
+            $input['historyUuid'],$uuid
+        ) : $this->contractMilestoneRepository->findByUuid($uuid, ['id', 'status']);
 
         if (empty($contractMilestone))
         {

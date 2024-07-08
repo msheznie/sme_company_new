@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
 use App\Repositories\ContractDeliverablesRepository;
+use App\Services\ContractAmendmentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -104,9 +105,15 @@ class ContractDeliverablesAPIController extends AppBaseController
      */
     public function update($id, UpdateContractDeliverablesAPIRequest $request)
     {
+        $input = $request->all();
         $uuid = $request->input('uuid') ?? null;
+        $amendment = $input['amendment'];
 
-        $contractDeliverables = $this->contractDeliverablesRepository->findByUuid($uuid, ['id']);
+        $contractDeliverables  = $amendment ? ContractManagementUtils::getDeliverableAmd
+        (
+            $input['historyUuid'],$uuid
+        ) : $this->contractDeliverablesRepository->findByUuid($uuid, ['id']);
+
 
         if (empty($contractDeliverables))
         {
@@ -155,16 +162,33 @@ class ContractDeliverablesAPIController extends AppBaseController
     {
         $contractUuid = $request->input('contractUuid');
         $companySystemID = $request->input('companySystemID');
+        $amendment = $request->input('amendment');
 
         $contractMaster = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
         if(empty($contractMaster))
         {
             return $this->sendError(trans('common.contract_not_found'));
         }
-        $response['contract_deliverables'] = $this->contractDeliverablesRepository
+
+        if($amendment)
+        {
+            $contractHistory = ContractManagementUtils::getContractHistoryData($request->input('historyUuid'));
+        }
+
+        $response['contract_deliverables'] = $amendment
+            ?
+            ContractAmendmentService::getAmendmentDeliverables($contractHistory->id)
+            :
+            $this->contractDeliverablesRepository
             ->getDeliverables($contractMaster['id'], $companySystemID);
-        $response['contract_milestones'] = ContractManagementUtils::getContractMilestones($contractMaster['id'],
+
+        $response['contract_milestones'] =  $amendment
+            ?
+            ContractAmendmentService::getAmendmentMilestones($contractHistory->id)
+            :
+            ContractManagementUtils::getContractMilestones($contractMaster['id'],
             $companySystemID);
+
         $response['contract_milestones_with_amount'] =
             ContractManagementUtils::getMilestonesWithAmount($contractMaster['id'], $companySystemID);
         $response['contract_master'] = $contractMaster;

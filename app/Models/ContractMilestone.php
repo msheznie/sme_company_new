@@ -128,6 +128,12 @@ class ContractMilestone extends Model
         return $this->belongsTo(MilestonePaymentSchedules::class, 'id', 'milestone_id');
     }
 
+    public function getMileStone($contractId)
+    {
+        return self::where('contractID',$contractId)->get();
+    }
+
+
     public function checkContractMilestoneExists($milestoneUuid)
     {
         return ContractMilestone::select('id')->where('uuid', $milestoneUuid)->first();

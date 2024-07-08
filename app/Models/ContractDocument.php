@@ -151,4 +151,10 @@ class ContractDocument extends Model
     {
         return 'companySystemID';
     }
+
+    public function getcontractDocumentData($contractId)
+    {
+        return self::where('contractID',$contractId)
+            ->get();
+    }
 }

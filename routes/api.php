@@ -91,3 +91,4 @@ Route::get('/contract-expiry-reminder', function ()
     \Artisan::call('reminderContractExpiry');
     return 'Contracts Reminder Expiry Send Successfully!';
 });
+

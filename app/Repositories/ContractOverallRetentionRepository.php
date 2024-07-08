@@ -47,4 +47,9 @@ class ContractOverallRetentionRepository extends BaseRepository
     {
         return ContractOverallRetention::class;
     }
+
+    public function getContractOverall($contractId,$companyId)
+    {
+            return  $this->model->getContractOverall($contractId,$companyId);
+    }
 }

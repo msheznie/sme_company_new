@@ -339,6 +339,7 @@ Route::
         \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
         'destroy'
     ])->name('delete payment term');
+
     Route::post('get-reminder-configuration', [
         \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
         'showReminders'
@@ -351,4 +352,64 @@ Route::
         \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
         'createReminderConfiguration'
     ])->name('Create Contract Reminder Configuration');
+
+    Route::post('get-contract-master-data', [
+        \App\Http\Controllers\API\CMContractMasterAmdAPIController::class,
+        'getContractMasterData'
+    ])->name('Contract History Status');
+
+    Route::post('update-contract-status-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateContractStatusAmendment'
+    ])->name('Update Contract Status Amendment');
+
+    Route::post('delete-contract-amend-boq', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteContractBoqAmend'
+    ])->name('Delete Contract Boq Amend');
+
+    Route::post('get-milestone-amend', [
+        \App\Http\Controllers\API\CMContractMileStoneAmdAPIController::class,
+        'getMilestoneAmend'
+    ])->name('get Milestone Amend');
+
+
+    Route::post('delete-milestone-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteMilestoneAmd'
+    ])->name('Delete Contract Boq Amend');
+
+    Route::post('delete-deliverables-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteContractDeliverablesAmd'
+    ])->name('Delete Contract Deliverables Amend');
+
+    Route::post('contract-document-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractDocumentAmd'
+    ])->name('Get Amend Contract Documents');
+
+    Route::get('download-attachment-amd', [
+        \App\Http\Controllers\API\ErpDocumentAttachmentsAPIController::class,
+        'downloadAttachmentAmd'
+    ])->name('Download Contract Attachment');
+
+    Route::post('get-active-amd-sections', [
+        \App\Http\Controllers\API\ContractAmendmentAreaAPIController::class,
+        'getActiveAmdSections'
+    ])->name('get Milestone Amend');
+
+    Route::post('get-contract-amd-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractAmdHistory'
+    ])->name('get Amendment history');
+
+    Route::post('confirm-contract-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'confirmContractAmendment'
+    ])->name('Confirm Amendment');
+
 });
+
+
+

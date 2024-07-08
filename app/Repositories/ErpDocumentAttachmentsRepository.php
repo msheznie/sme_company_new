@@ -8,6 +8,7 @@ use App\Models\ContractHistory;
 use App\Models\DocumentAttachments;
 use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
+use App\Models\ErpDocumentAttachmentsAmd;
 use App\Models\ErpDocumentMaster;
 use App\Repositories\BaseRepository;
 use App\Services\AttachmentService;
@@ -234,9 +235,10 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
         return $response;
     }
 
-    public function saveDocumentAttachments(Request $request, $documentSystemCode)
+    public function saveDocumentAttachments(Request $request, $documentSystemCode,$historyId = 0)
     {
         $input = $request->all();
+        $amendment = $input['amendment'];
         $response = [
             'status' => true,
             'message' => trans('common.document_uploaded_successfully'),
@@ -265,7 +267,14 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
                 'attachmentDescription' => $input['attachmentName'] ?? 'Document'
             ];
 
-            $documentAttachments = ErpDocumentAttachments::create($postData);
+            $model = $amendment ? ErpDocumentAttachmentsAmd::class : ErpDocumentAttachments::class;
+
+            if($amendment)
+            {
+                $postData['contract_history_id'] = $historyId;
+            }
+
+            $documentAttachments = $model::create($postData);
 
             $fileUploadResult = $this->uploadFile($request->input('file'), $input['fileType'], $documentAttachments);
             if (!$fileUploadResult['status'])
@@ -278,7 +287,14 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
                     'originalFileName' => $input['originalFileName']
                 ]);
 
-                ErpDocumentAttachments::where('attachmentID', $documentAttachments->attachmentID)->update($postData);
+                if($amendment)
+                {
+                    ErpDocumentAttachmentsAmd::where('id', $documentAttachments->id)->update($postData);
+                }else
+                {
+                    ErpDocumentAttachments::where('attachmentID', $documentAttachments->attachmentID)->update($postData);
+                }
+
 
                 DB::commit();
             }
@@ -375,6 +391,43 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
         }
 
         return '';
+    }
+    public function getErpAttachedData($documentCode,$getContractDocument)
+    {
+        return $this->model->getErpAttachedData($documentCode,$getContractDocument);
+    }
+
+    public function downloadFileAmd($attachmentID)
+    {
+        $documentAttachment = ErpDocumentAttachmentsAmd::where('id', $attachmentID)->first();
+        if (!$documentAttachment)
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.attachment_is_not_attached'),
+                'code' => 404
+            ];
+        }
+        $disk = 's3';
+        if (Storage::disk($disk)->exists($documentAttachment->path))
+        {
+            $attachmentResp =  Storage::disk($disk)
+                ->download($documentAttachment->path, $documentAttachment->myFileName);
+            return [
+                'status' => true,
+                'message' => trans('common.attachment_downloaded_successfully'),
+                'data' => $attachmentResp
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.attachment_not_found'),
+                'code' => 500
+            ];
+        }
+
     }
 
 }

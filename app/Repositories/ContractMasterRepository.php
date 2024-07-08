@@ -7,6 +7,8 @@ use App\Helpers\ApproveDocument;
 use App\Helpers\RejectDocument;
 use App\Helpers\General;
 use App\Helpers\ConfirmDocument;
+use App\Models\CMContractMasterAmd;
+use App\Models\CMContractOverallRetentionAmd;
 use App\Models\CMContractSectionsMaster;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
@@ -32,6 +34,7 @@ use App\Models\MilestonePaymentSchedules;
 use App\Models\PeriodicBillings;
 use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
+use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
@@ -321,9 +324,8 @@ class ContractMasterRepository extends BaseRepository
 
     public function updateContract($formData, $id, $selectedCompanyID, $checkStatus)
     {
-
         $contractOwner = $formData['contractOwner'] ?? '';
-
+        $fromAmendment = $formData['amendment'];
         $checkContractTypeID = CMContractTypes::select('contract_typeId')->where('uuid', $formData['contractType'])
             ->where('companySystemID', $selectedCompanyID)->first();
         if(empty($checkContractTypeID))
@@ -368,7 +370,8 @@ class ContractMasterRepository extends BaseRepository
             $checkOwnerID,
             $id,
             $selectedCompanyID,
-            $checkStatus)
+            $checkStatus,
+            $fromAmendment)
         {
             $updateData = [
                 'title' => $formData['title'] ?? null,
@@ -399,6 +402,7 @@ class ContractMasterRepository extends BaseRepository
                 'tender_id' => $formData['tenderId'] ?? null
             ];
             $status = 0;
+
             if($checkStatus == 0)
             {
                 $status = ContractHistoryService::checkContractDateBetween($formData['formatStartDate'],
@@ -406,11 +410,14 @@ class ContractMasterRepository extends BaseRepository
                 $updateData['status'] = $status;
             }
 
-            ContractMaster::where('id', $id)->update($updateData);
             if($status != 0)
             {
                 ContractHistoryService::insertHistoryStatus($id, $status, $selectedCompanyID);
             }
+
+            $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
+            $colName = $fromAmendment ? 'contract_history_id' : 'id';
+            return $model::where($colName, $id)->update($updateData);
 
         });
     }
@@ -419,6 +426,8 @@ class ContractMasterRepository extends BaseRepository
     {
         $primaryEmail = $formData['primaryEmail'] ?? null;
         $secondaryEmail = $formData['secondaryEmail'] ?? null;
+
+        $id = $this->getContractMasterId($formData,$id,$selectedCompanyID);
 
         if($primaryEmail != null)
         {
@@ -572,6 +581,7 @@ class ContractMasterRepository extends BaseRepository
     {
         $input = $request->all();
         $contractUuid = $input['contractId'];
+        $isDrop = $input['isDrop'] ?? null;
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
 
@@ -579,14 +589,35 @@ class ContractMasterRepository extends BaseRepository
             ->where('isActive', 1)
             ->with([
                 'contractTypeSection' => function ($q) {
-                    $q->select('ct_sectionId', 'cmSection_id');
+                    $q->select('ct_sectionId', 'cmSection_id')
+                        ->with(['contractSectionWithTypes']);
                 }
             ])
             ->get();
         $pluckedData = [];
         foreach ($activeSetting as $setting) {
-            $pluckedData[] = $setting['contractTypeSection']['cmSection_id'];
+            if ($isDrop) {
+                $pluckedData[] = [
+                    'id' => $setting->contractTypeSection->cmSection_id,
+                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
+                ];
+            } else {
+                $pluckedData[] = $setting->contractTypeSection->cmSection_id;
+            }
         }
+
+        if ($isDrop) {
+            $pluckedData[] = [
+                'id' => 12,
+                'description' => 'Contract Info',
+            ];
+            $pluckedData[] = [
+                'id' => 13,
+                'description' => 'User & User Group',
+            ];
+        }
+
+
 
         return [
             'status' => true ,
@@ -598,8 +629,21 @@ class ContractMasterRepository extends BaseRepository
         $input = $request->all();
         $contractUuid = $input['contractId'];
         $companySystemID = $input['selectedCompanyID'];
+        $amendment = $input['amendment'];
+        $contractOverallModel = $amendment ? CMContractOverallRetentionAmd::class : ContractOverallRetention::class;
+        $contractCol = $amendment ? 'contract_history_id' : 'contractId';
+        $historyId = 0;
+        if($amendment)
+        {
+            $getContractHistoryData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+            $historyId = $getContractHistoryData->id;
+        }
 
-        $contract = ContractMaster::select('id', 'contractAmount')->where('uuid', $contractUuid)->first();
+        $contract = $amendment
+            ?
+            ContractAmendmentService::getContractAmendment($contractUuid,$historyId)
+            :
+            ContractManagementUtils::checkContractExist($contractUuid,$companySystemID);
 
         $activeSections = ContractSettingDetail::select('sectionDetailId')
             ->where('contractId', $contract['id'])
@@ -611,14 +655,23 @@ class ContractMasterRepository extends BaseRepository
             $pluckedData[] = $activeSection['sectionDetailId'];
         }
 
-        $overallRetention = ContractOverallRetention::where('contractId', $contract['id'])
+
+
+        $overallRetention = $contractOverallModel::where('contractId', $contract['id'])
             ->where('companySystemId', $companySystemID)
             ->with([
-                'contract' => function ($q) {
+                'contract' => function ($q)  use ($amendment, $historyId)
+                {
                     $q->select('contractAmount', 'id');
+                    if ($amendment)
+                    {
+                        $q->where('contract_history_id', $historyId);
+                    }
                 }
             ])
             ->first();
+
+
 
         $currencyId = Company::getLocalCurrencyID($companySystemID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
@@ -640,10 +693,24 @@ class ContractMasterRepository extends BaseRepository
         $contractUuid = $input['contractId'];
         $companySystemID = $input['selectedCompanyID'];
         $formData = $input['formValue'];
+        $amendment = $formData['amendment'];
+        $contractOverallModel = $amendment ? CMContractOverallRetentionAmd::class : ContractOverallRetention::class;
+        $contractCol = $amendment ? 'contract_history_id' : 'contractId';
+        $historyId = 0;
 
-        $contract = ContractMaster::select('id', 'contractAmount')->where('uuid', $contractUuid)->first();
+        if($amendment)
+        {
+            $getContractHistoryData = ContractManagementUtils::getContractHistoryData($formData['contractHistoryUuid']);
+            $historyId = $getContractHistoryData->id;
+        }
 
-        $overallRetention = ContractOverallRetention::where('contractId', $contract['id'])
+        $contract = $amendment
+            ?
+            ContractAmendmentService::getContractAmendment($contractUuid, $historyId)
+            :
+            ContractManagementUtils::checkContractExist($contractUuid,$companySystemID);
+
+        $overallRetention = $contractOverallModel::where($contractCol, $contract['id'])
             ->where('companySystemId', $companySystemID)
             ->first();
 
@@ -682,8 +749,6 @@ class ContractMasterRepository extends BaseRepository
                         'created_at' => Carbon::now(),
                     ];
 
-                    $data = array_merge($data, $additionalData);
-
                 } else
                 {
                     $additionalData = [
@@ -691,11 +756,16 @@ class ContractMasterRepository extends BaseRepository
                         'updated_at' => Carbon::now(),
                     ];
 
-                    $data = array_merge($data, $additionalData);
                 }
 
+                if($amendment)
+                {
+                    $additionalData['contract_history_id'] = $contract['contract_history_id'];
+                }
 
-                ContractOverallRetention::updateOrCreate(
+                $data = array_merge($data, $additionalData);
+
+                $contractOverallModel::updateOrCreate(
                     ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
 
                 DB::commit();
@@ -1014,6 +1084,17 @@ class ContractMasterRepository extends BaseRepository
 
             return RejectDocument::rejectDocument($input, $contractMaster);
         });
+    }
+
+    public function getContractMasterId($formData,$id,$selectedCompanyID)
+    {
+        if($formData['amendment'])
+        {
+            $data = ContractManagementUtils::checkContractExist($formData['contractUuid'],$selectedCompanyID);
+            return $data->id;
+        }
+
+        return $id;
     }
 }
 

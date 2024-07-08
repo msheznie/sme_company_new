@@ -181,4 +181,9 @@ class ItemAssigned extends Model
     public function contractBoqItems(){
         return $this->hasMany(ContractBoqItems::class, 'itemId', 'itemCodeSystem');
     }
+
+    public function contractBoqItemsAmd()
+    {
+        return $this->hasMany(CMContractBoqItemsAmd::class, 'itemId', 'itemCodeSystem');
+    }
 }

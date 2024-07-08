@@ -115,23 +115,24 @@ class ContractDeliverables extends Model
             ->where('companySystemID', $companySystemID)
             ->get();
     }
-
     public static function checkDeliverableExist($title, $description, $id, $companySystemID, $contractID)
     {
-        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID)
-        {
+        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID) {
             $query->where('contractID', $contractID)
                 ->where('companySystemID', $companySystemID)
-                ->where(function ($q) use ($title, $description)
-                {
+                ->where(function ($q) use ($title, $description) {
                     $q->where('description', $description)
                         ->orWhere('title', $title);
                 });
         })
-            ->when($id > 0, function ($q) use ($id)
-            {
+            ->when($id > 0, function ($q) use ($id) {
                 $q->where('id', '!=', $id);
             })
             ->exists();
+    }
+    public static function getContractDeliverable($contractID)
+    {
+        return self::where('contractID', $contractID)
+            ->get();
     }
 }

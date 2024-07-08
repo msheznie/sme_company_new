@@ -95,7 +95,8 @@ class ContractMaster extends Model
         'is_revision',
         'is_termination',
         'parent_id',
-        'tender_id'
+        'tender_id',
+        'contract_history_id'
     ];
 
     /**
@@ -153,6 +154,7 @@ class ContractMaster extends Model
         'is_termination' => 'integer',
         'parent_id' => 'integer',
         'tender_id' => 'integer',
+        'contract_history_id' => 'integer',
     ];
 
     /**

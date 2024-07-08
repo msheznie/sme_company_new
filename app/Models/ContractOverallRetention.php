@@ -95,4 +95,10 @@ class ContractOverallRetention extends Model
         return 'companySystemId';
     }
 
+    public function getContractOverall($contractId,$companyId)
+    {
+      return self::where('companySystemId',$companyId)
+            ->where('contractId',$contractId)
+            ->first();
+    }
 }

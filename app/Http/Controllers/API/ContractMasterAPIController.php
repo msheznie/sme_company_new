@@ -13,7 +13,9 @@ use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\ApproveDocumentRequest;
 use App\Http\Requests\API\ContractConfirmRequest;
 use App\Jobs\DeleteFileFromS3Job;
+use App\Models\CMContractBoqItemsAmd;
 use App\Models\Company;
+use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
 use App\Models\ContractSettingDetail;
 use App\Models\ContractSettingMaster;
@@ -47,16 +49,19 @@ class ContractMasterAPIController extends AppBaseController
      * @var CompanyRepository
      */
     private $companyRepository;
+    private $contractHistoryRepository;
 
     public function __construct(
         ContractMasterRepository $contractMasterRepo,
         CompanyRepository $companyRepository,
-        ContractMasterService $contractMasterService
+        ContractMasterService $contractMasterService,
+        ContractHistoryRepository $contractHistoryRepository
     )
     {
         $this->contractMasterRepository = $contractMasterRepo;
         $this->companyRepository = $companyRepository;
         $this->contractMasterService = $contractMasterService;
+        $this->contractHistoryRepository = $contractHistoryRepository;
     }
 
     /**
@@ -161,28 +166,33 @@ class ContractMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function update($id, UpdateContractMasterAPIRequest $request)
+    public function update($uuid, UpdateContractMasterAPIRequest $request)
     {
         $input = $request->all();
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $fromAmendment = $request->input('amendment');
 
         /** @var ContractMaster $contractMaster */
 
         try
         {
-            $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id', 'status']);
 
-            if (empty($contractMaster))
+            if ($fromAmendment)
             {
-                throw new CommonException(trans('common.contract_not_found'));
+                $contractMaster = $this->getContractHistoryId($uuid);
+            } else
+            {
+                $contractMaster = $this->getContractMasterId($uuid);
             }
+
             $this->contractMasterRepository->updateContract(
                 $input,
                 $contractMaster['id'],
                 $selectedCompanyID,
-                $contractMaster['status']
+                $contractMaster['status'],
             );
-            return $this->sendResponse(['id' => $id], trans('common.contract_updated_successfully'));
+
+           return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -384,8 +394,18 @@ class ContractMasterAPIController extends AppBaseController
     public function getAssignedItemsByCompanyQry($request)
     {
         $input = $request;
+
+        $amedment = $input['amendment'];
         $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
-        $contractId = $contractResult->id;
+
+
+        $colName = $amedment ? 'contract_history_id' : 'contractId';
+        $id = $amedment ? self::getHistoryId($input['uuid']) :  $contractResult->id;
+        $relationShip = $amedment ? 'contractBoqItemsAmd' : 'contractBoqItems';
+
+
+
+
         $companyId = $input['companyId'];
 
         $isGroup = $this->companyRepository->checkIsCompanyGroup($companyId);
@@ -401,9 +421,9 @@ class ContractMasterAPIController extends AppBaseController
         $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
             ->whereIn('companySystemID', $childCompanies)
             ->where('financeCategoryMaster', 1)
-            ->whereDoesntHave('contractBoqItems', function ($query) use ($contractId)
+            ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
             {
-                $query->where('contractId', $contractId);
+                $query->where($colName, $id);
             })
             ->orderBy('idItemAssigned', 'desc');
 
@@ -519,6 +539,32 @@ class ContractMasterAPIController extends AppBaseController
         {
             return $this->sendError($ex->getMessage(), 500);
         }
+    }
+
+    protected function getContractHistoryId($uuid)
+    {
+        $contractHistory = $this->contractHistoryRepository->findByUuid($uuid, ['id']);
+        if (empty($contractHistory))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+        return $contractHistory;
+    }
+
+    protected function getContractMasterId($uuid)
+    {
+        $contractMaster = $this->contractMasterRepository->findByUuid($uuid, ['id']);
+        if (empty($contractMaster))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+        return $contractMaster;
+    }
+
+    public function getHistoryId($id)
+    {
+        $data = ContractManagementUtils::getContractHistoryData($id);
+        return $data;
     }
 
 }

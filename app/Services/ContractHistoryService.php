@@ -6,6 +6,7 @@ use App\Helpers\ApproveDocument;
 use App\Helpers\ConfirmDocument;
 use App\Helpers\General;
 use App\Helpers\RejectDocument;
+use App\Models\CMContractMasterAmd;
 use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
@@ -13,6 +14,7 @@ use App\Models\ContractMaster;
 use App\Models\contractStatusHistory;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
+use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\ContractHistoryRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
@@ -37,15 +39,32 @@ class ContractHistoryService
                 $companyId = $input['selectedCompanyID'];
                 $categoryId = $input['category'];
                 $historyUuid = $input['contractHistoryId'];
+                $amendment = $input['amendment'] ?? false;
                 $getContractId = ContractManagementUtils::checkContractExist($uuid, $companyId);
-                $contractDocuments = ContractDocument::getContractDocuments($getContractId['id'], $companyId);
-                $contractAdditionalDocuments = ContractAdditionalDocuments::getContractAdditionalDocuments(
-                    $getContractId['id'], $companyId
-                );
                 $getContractHistory = ContractManagementUtils::getContractHistoryData($historyUuid);
-                $this->deleteRelatedModels($getContractId['id'], $companyId, $categoryId);
+                if($amendment)
+                {
+                    $contractDocuments = ContractAmendmentService::getcontractDocumentDataAmd
+                    (
+                        $getContractHistory->id,null,true
+                    );
+                    $contractAdditionalDocuments =  null;
+
+                }else
+                {
+                    $contractDocuments = ContractDocument::getContractDocuments($getContractId['id'], $companyId);
+                    $contractAdditionalDocuments = ContractAdditionalDocuments::getContractAdditionalDocuments(
+                        $getContractId['id'], $companyId
+                    );
+
+                }
+
+
+
+
+                $this->deleteRelatedModels($getContractId['id'], $companyId, $categoryId , $amendment,$getContractHistory->id);
                 $this->deleteContractStatus($getContractHistory['id']);
-                $this->deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments);
+                $this->deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments, $amendment);
             });
         } catch (\Exception $e)
         {
@@ -53,42 +72,38 @@ class ContractHistoryService
         }
     }
 
-    private function deleteRelatedModels($contractId, $companyId, $categoryId)
+    private function deleteRelatedModels($contractId, $companyId, $categoryId, $amendment, $historyId)
     {
-        $modelsToDelete = [
-            'App\\Models\\ContractMaster',
-            'App\\Models\\ContractHistory',
-            'App\\Models\\ContractUserAssign',
-            'App\\Models\\ContractSettingMaster',
-            'App\\Models\\ContractSettingDetail',
-            'App\\Models\\ContractDocument',
-            'App\\Models\\ContractAdditionalDocuments',
-            'App\\Models\\ContractBoqItems',
-            'App\\Models\\ContractMilestone',
-            'App\\Models\\ContractDeliverables',
-            'App\\Models\\ContractOverallRetention',
-            'App\\Models\\ContractMilestoneRetention',
-        ];
+        $modelsToDelete = self::getModelsToDelete($categoryId);
 
         foreach ($modelsToDelete as $modelName)
         {
             $model = new $modelName();
-            $contractIdCol = $modelName::getContractIdColumn();
-            $companyColumn = $modelName::getCompanyIdColumn();
-            $contractColumn = (
-            $modelName === 'App\\Models\\ContractMaster' ? 'id' :
-                $contractIdCol);
+
+            if($amendment)
+            {
+
+                $contractColumn = ($modelName === 'App\\Models\\ContractHistory') ? 'id' : 'contract_history_id';
+                $colValue = $historyId;
+            }else
+            {
+                $contractIdCol = $modelName::getContractIdColumn();
+                $companyColumn = $modelName::getCompanyIdColumn();
+
+                $contractColumn = ($modelName === 'App\\Models\\ContractMaster' ? 'id' : $contractIdCol);
+                $colValue = $contractId;
+            }
+
 
             if ($contractColumn)
             {
-                $query = $model::where($contractColumn, $contractId);
-
+                $query = $model::where($contractColumn, $colValue);
                 if ($modelName === 'App\\Models\\ContractHistory')
                 {
                     $query->where('category', $categoryId);
                 }
 
-                if ($companyColumn !== null)
+                if (!$amendment && $companyColumn !== null)
                 {
                     $query->where($companyColumn, $companyId);
                 }
@@ -98,14 +113,27 @@ class ContractHistoryService
         }
     }
 
-    private function deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments)
+    private function deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments, $amendment)
     {
-        $attachmentIds = $contractDocuments->pluck('id')->merge($contractAdditionalDocuments->pluck('id'))->all();
+        $attachmentIds = collect();
 
-        if (!empty($attachmentIds))
+        if ($contractDocuments)
         {
-            ErpDocumentAttachments::whereIn('documentSystemID', [121, 122])
-                ->whereIn('documentSystemCode', $attachmentIds)
+            $attachmentIds = $contractDocuments->pluck('id');
+        }
+
+        if ($contractAdditionalDocuments)
+        {
+            $attachmentIds = $attachmentIds->merge($contractAdditionalDocuments->pluck('id'));
+        }
+
+        $attachmentIdsArray = $attachmentIds->all();
+        $model = $amendment ? ErpDocumentAttachmentsAmd::class : ErpDocumentAttachments::class;
+
+        if (!empty($attachmentIdsArray))
+        {
+            $model::whereIn('documentSystemID', [121, 122])
+                ->whereIn('documentSystemCode', $attachmentIdsArray)
                 ->delete();
         }
     }
@@ -281,10 +309,25 @@ class ContractHistoryService
             {
                 $documentSystemID = 124;
             }
+            if($contractCategoryId == 1)
+            {
+                $documentSystemID = 126;
+            }
 
-            $contractMaster = ContractMaster::where('id', $contractId)
-                ->where('companySystemID', $companySystemId)
-                ->first();
+
+            if ($contractCategoryId == 1)
+            {
+                $contractMaster = CMContractMasterAmd::where('contract_history_id', $historyId)
+                    ->where('id', $contractId)
+                    ->where('companySystemID', $companySystemId)
+                    ->first();
+            } else
+            {
+                $contractMaster = ContractMaster::where('id', $contractId)
+                    ->where('companySystemID', $companySystemId)
+                    ->first();
+            }
+
             $historyMaster = ContractHistory::where('id', $historyId)
                 ->where('company_id', $companySystemId)
                 ->first();
@@ -568,7 +611,7 @@ class ContractHistoryService
             });
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to insert contract status: " . $e->getMessage());
+            throw new ContractCreationException("Failed to insert contract statuss: " . $e->getMessage());
         }
     }
    public static function checkContractDateBetween($startDate, $endDate)
@@ -620,6 +663,41 @@ class ContractHistoryService
             throw new ContractCreationException("Failed to delete contract status history: " . $e->getMessage());
         }
 
+    }
+
+    public function getModelsToDelete($categoryId)
+    {
+        $defaultModels = [
+            'App\\Models\\ContractMaster',
+            'App\\Models\\ContractHistory',
+            'App\\Models\\ContractUserAssign',
+            'App\\Models\\ContractSettingMaster',
+            'App\\Models\\ContractSettingDetail',
+            'App\\Models\\ContractDocument',
+            'App\\Models\\ContractAdditionalDocuments',
+            'App\\Models\\ContractBoqItems',
+            'App\\Models\\ContractMilestone',
+            'App\\Models\\ContractDeliverables',
+            'App\\Models\\ContractOverallRetention',
+            'App\\Models\\ContractMilestoneRetention',
+        ];
+
+        if ($categoryId == 1)
+        {
+            return [
+                'App\\Models\\CMContractMasterAmd',
+                'App\\Models\\ContractHistory',
+                'App\\Models\\CMContractUserAssignAmd',
+                'App\\Models\\CMContractDocumentAmd',
+                'App\\Models\\CMContractBoqItemsAmd',
+                'App\\Models\\CMContractMileStoneAmd',
+                'App\\Models\\CMContractDeliverableAmd',
+                'App\\Models\\CMContractOverallRetentionAmd',
+                'App\\Models\\ContractAmendmentArea',
+            ];
+        }
+
+        return $defaultModels;
     }
 
 
