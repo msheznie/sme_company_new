@@ -63,15 +63,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class CMContractMasterAmd extends Model
 {
-
     use HasFactory;
 
     public $table = 'cm_contract_master_amd';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
-
-
     public $fillable = [
         'id',
         'contract_history_id',
@@ -123,7 +120,8 @@ class CMContractMasterAmd extends Model
         'is_revision',
         'is_termination',
         'parent_id',
-        'tender_id'
+        'tender_id',
+        'level_no'
     ];
 
     /**
@@ -224,7 +222,6 @@ class CMContractMasterAmd extends Model
     {
         return $this->belongsTo(ContractUsers::class, 'contractOwner', 'id');
     }
-
     public function getLevelNo($contractId)
     {
        $levelNo = self::where('id',$contractId)

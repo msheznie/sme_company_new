@@ -644,7 +644,6 @@ class ContractHistoryRepository extends BaseRepository
         }
         $historyData = $this->createHistory($input,$contractId,$contractId);
         $historyId = $historyData['historyId'];
-
         $this->cmContractMasterAmdRepository->save($historyId,$currentContractDetails);
         $this->cmContractUserAmdRepository->save($historyId,$contractId);
         $this->cmContractBoqItemsAmdRepository->save($historyId,$contractId);
@@ -658,8 +657,6 @@ class ContractHistoryRepository extends BaseRepository
         {
             throw new ContractCreationException("Failed to create contract amendment: " . $e->getMessage());
         }
-
-
 
         return $historyData['uuid'];
 

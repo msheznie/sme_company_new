@@ -43,7 +43,8 @@ class CMContractDeliverableAmd extends Model
         'companySystemID',
         'created_by',
         'updated_by',
-        'dueDate'
+        'dueDate',
+        'title'
     ];
 
     /**
@@ -62,7 +63,8 @@ class CMContractDeliverableAmd extends Model
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer',
-        'dueDate' => 'string'
+        'dueDate' => 'string',
+        'title' => 'string',
     ];
 
     /**

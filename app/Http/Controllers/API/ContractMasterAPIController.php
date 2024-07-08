@@ -187,6 +187,7 @@ class ContractMasterAPIController extends AppBaseController
                 $contractMaster = $this->getContractMasterId($uuid);
             }
 
+
             $this->contractMasterRepository->updateContract(
                 $input,
                 $contractMaster['id'],
@@ -194,7 +195,8 @@ class ContractMasterAPIController extends AppBaseController
                 $contractMaster['status'],
             );
 
-           return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
+            return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
+
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());

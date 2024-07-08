@@ -108,6 +108,7 @@ class CMContractMasterAmdRepository extends BaseRepository
     {
         try
         {
+
             $recordData = $this->prepareRecordData($currentContractDetails);
             $recordData['contract_history_id'] = $historyId;
             return CMContractMasterAmd::create($recordData);

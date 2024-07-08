@@ -171,29 +171,29 @@ class ContractBoqItemsAPIController extends AppBaseController
         } else
         {
             $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
-
             if (empty($contractBoqItems)) {
                 return $this->sendError('BOQ Item not found');
             }
             $updateId = $contractBoqItems->id;
         }
 
-        if ($input['type'] == 'minQty') {
-            $inputArr = ['minQty' => $input['qty']];
-        } elseif ($input['type'] == 'maxQty') {
-            $inputArr = ['maxQty' => $input['qty']];
-        } elseif ($input['type'] == 'price') {
-            $inputArr = ['price' => $input['qty']];
-        } else {
-            $inputArr = ['qty' => $input['qty']];
-        }
-        $inputArr['updated_by'] = General::currentEmployeeId();
-        $inputArr['updated_at'] = Carbon::now();
+            if ($input['type'] == 'minQty') {
+                $inputArr = ['minQty' => $input['qty']];
+            } elseif ($input['type'] == 'maxQty') {
+                $inputArr = ['maxQty' => $input['qty']];
+            } elseif ($input['type'] == 'price') {
+                $inputArr = ['price' => $input['qty']];
+            } else {
+                $inputArr = ['qty' => $input['qty']];
+            }
+            $inputArr['updated_by'] = General::currentEmployeeId();
+            $inputArr['updated_at'] = Carbon::now();
 
-        $contractBoqItems = $model::where($colname, $updateId)
-            ->update($inputArr);
+            $contractBoqItems = $model::where($colname, $updateId)
+                ->update($inputArr);
 
-        return $this->sendResponse($contractBoqItems, 'BOQ Item updated successfully');
+            return $this->sendResponse($contractBoqItems, 'BOQ Item updated successfully');
+
     }
 
     public function copyBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)

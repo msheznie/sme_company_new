@@ -49,8 +49,6 @@ class ContractAmendmentService
                 self::updateContractOverallRetention($contractHistoryId);
                 self::updateContractDocument($contractHistoryId);
                 self::updateContractHistory($contractHistoryId);
-
-
             });
 
         } catch (\Exception $e)
@@ -107,8 +105,8 @@ class ContractAmendmentService
                 });
 
             $newRecords = CMContractUserAssignAmd::where('contract_history_id', $contractHistoryId)
-            ->whereNull('id')
-            ->get();
+                ->whereNull('id')
+                ->get();
 
             $newRecords->each(function ($record)
             {
@@ -136,8 +134,8 @@ class ContractAmendmentService
         {
             $getContractHistoryData = ContractManagementUtils::getContractHistoryData($data['contractHistoryId']);
             CMContractBoqItemsAmd::where('uuid',$data['uuid'])
-            ->where('contract_history_id',$getContractHistoryData->id)
-            ->delete();
+                ->where('contract_history_id',$getContractHistoryData->id)
+                ->delete();
         }
         catch (\Exception $e)
         {
@@ -208,9 +206,9 @@ class ContractAmendmentService
 
             }
 
-          $getMilestoneData = ContractManagementUtils::getMilestonesAmd($input['contractHistoryUuid'],$input['uuid']);
+            $getMilestoneData = ContractManagementUtils::getMilestonesAmd($input['contractHistoryUuid'],$input['uuid']);
             CMContractMileStoneAmd::where('amd_id',$getMilestoneData->amd_id)
-            ->delete();
+                ->delete();
         }
         catch (\Exception $e)
         {
@@ -233,6 +231,7 @@ class ContractAmendmentService
                 $deliverablesArray[$key]['description'] = $value['description'];
                 $deliverablesArray[$key]['dueDate'] = $value['dueDate'];
                 $deliverablesArray[$key]['milestoneUuid'] = $value['milestone']['uuid'] ?? null;
+                $deliverablesArray[$key]['title'] = $value['title'];
             }
         }
         return $deliverablesArray;
@@ -325,13 +324,14 @@ class ContractAmendmentService
     public static function getContractAmendment($uuid, $historyId, $contractExist = false)
     {
         $query = CMContractMasterAmd::where('uuid',$uuid);
-            if($contractExist)
-            {
-                $query->whereNull('contract_history_id');
-            }else
-            {
-                $query->where('contract_history_id', $historyId);
-            }
+        if($contractExist)
+        {
+            $query->whereNull('contract_history_id');
+        }else
+        {
+            $query->where('contract_history_id', $historyId);
+        }
+
         return $query->first();
     }
 
@@ -465,6 +465,7 @@ class ContractAmendmentService
         $getHistoryData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
         $contractId = $getContractData->id;
         $historyId = $getHistoryData->id;
+
         $allChanges = [];
         $getSectionConfigs = self::sectionConfig();
 
@@ -652,6 +653,7 @@ class ContractAmendmentService
 
         return $data;
     }
+
     public function updateContractHistory($historyId)
     {
         try

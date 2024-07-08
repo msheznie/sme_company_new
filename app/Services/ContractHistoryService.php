@@ -21,8 +21,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
-use Illuminate\Support\Facades\Log;
-
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -245,17 +243,12 @@ class ContractHistoryService
                 (
                     $getContractCloneData['startDate'],$getContractCloneData['endDate']
                 );
-                $cloneStatus = ($categoryId == 6) ? $categoryId : $cloneStatus;
+
                 self::updateContractMaster($contractId, $companyId,$categoryId);
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
                 self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
                 self::insertHistoryStatus($contractId,$categoryId,$companyId);
-                if($categoryId === 6)
-                {
-                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
-                }
-
 
             });
         }catch (\Exception $e)
@@ -526,11 +519,11 @@ class ContractHistoryService
         }
 
         $data =
-        [
-            'contractId' => $contractMasterData->parent_id,
-            'category' => $category,
-            'companyId'=>$comapnyId
-        ];
+            [
+                'contractId' => $contractMasterData->parent_id,
+                'category' => $category,
+                'companyId'=>$comapnyId
+            ];
 
         return $this->contractHistoryRepository->getCategoryWiseData($data);
     }
@@ -621,7 +614,7 @@ class ContractHistoryService
             throw new ContractCreationException("Failed to insert contract statuss: " . $e->getMessage());
         }
     }
-   public static function checkContractDateBetween($startDate, $endDate)
+    public static function checkContractDateBetween($startDate, $endDate)
     {
         $startDate = Carbon::parse($startDate);
         $endDate = Carbon::parse($endDate);
@@ -662,8 +655,8 @@ class ContractHistoryService
             ];
 
             contractStatusHistory::where('contract_id',$contractId)
-            ->where('contract_history_id',$contractHistoryId)
-            ->update($data);
+                ->where('contract_history_id',$contractHistoryId)
+                ->update($data);
         }
         catch (\Exception $e)
         {
@@ -672,7 +665,6 @@ class ContractHistoryService
 
     }
 
-    
     public function getModelsToDelete($categoryId)
     {
         $defaultModels = [
@@ -707,5 +699,6 @@ class ContractHistoryService
 
         return $defaultModels;
     }
+
 
 }
