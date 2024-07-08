@@ -238,7 +238,7 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
     public function saveDocumentAttachments(Request $request, $documentSystemCode,$historyId = 0)
     {
         $input = $request->all();
-        $amendment = $input['amendment'];
+        $amendment = $input['amendment'] ?? false;
         $response = [
             'status' => true,
             'message' => trans('common.document_uploaded_successfully'),

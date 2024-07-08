@@ -73,12 +73,13 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
         try
         {
            $getOverall = $this->contractOverallRepo()->getContractOverall($contractId, $input['selectedCompanyID']);
-
-            $recordData = $getOverall->toArray();
-            $recordData['contract_history_id'] = $historyId;
-            $recordData['retention_id'] = $getOverall['id'];
-            $this->model->create($recordData);
-
+            if($getOverall)
+            {
+                $recordData = $getOverall->toArray();
+                $recordData['contract_history_id'] = $historyId;
+                $recordData['retention_id'] = $getOverall['id'];
+                $this->model->create($recordData);
+            }
         } catch
         (Exception $e)
         {
