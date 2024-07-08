@@ -30,7 +30,8 @@ class ApproveDocumentRequest extends APIRequest
             'rollLevelOrder' => 'required',
         ];
 
-        if (isset($this->input()['categoryId']) && ($this->input('categoryId') == 4 || $this->input('categoryId') == 6))
+        if (isset($this->input()['categoryId']) && ($this->input('categoryId') == 1) ||
+                ($this->input('categoryId') == 4 || $this->input('categoryId') == 6))
         {
             $rules ['contractHistoryUuid'] = 'required';
         } else
