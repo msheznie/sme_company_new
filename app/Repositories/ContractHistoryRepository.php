@@ -63,7 +63,7 @@ class ContractHistoryRepository extends BaseRepository
         ContractMaster $contractMaster,
         CMContractMasterAmdRepository $cmContractMasterAmdRepository,
         CMContractUserAssignAmdRepository $cmContractUserAmdRepository,
-        CMContractBOQItemsAmdRepository $cmContractBoqItemsAmdRepository,
+        CMContractBoqItemsAmdRepository $cmContractBoqItemsAmdRepository,
         CMContractMileStoneAmdRepository $cmContractMileStoneAmdRepository,
         CMContractDeliverableAmdRepository $cmContractDeliverableAmdRepository,
         CMContractOverallRetentionAmdRepository $cmContractOverallRetentionAmdRepository,
