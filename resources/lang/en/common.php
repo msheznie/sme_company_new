@@ -138,8 +138,8 @@
      'deliverable_already_exists' => "Deliverable already exists",
      'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated',
      'existing_milestones_are_already_used_for_retentions' =>
-         'Existing milestones are already used for retentions, If you want to add more retentions,
-         please add new milestones',
+         'Existing milestone payment schedules are already used for retentions, If you want to add more retentions,
+         please add new milestone payment schedules',
      'active_user_should_jn_default_user_group' => 'At least one active user should be there in a default user group',
      'document_not_found' => 'Document not found',
      'company_not_found' => 'Company not found',
@@ -155,7 +155,8 @@
      'please_set_the_approval_group' => 'Please set the approval group',
      'document_confirmed_successfully' => 'Document confirmed successfully',
      'failed_to_confirm_document' => 'Failed to confirm document',
-     'add_new_milestones' => 'If you want to add milestone retentions, please add new milestones first',
+     'add_new_milestones' =>
+         'If you want to add milestone retentions, please add new milestone payment schedules first',
      'add_contract_amount_before_adding_overall_retention' => 'Add contract amount before adding overall retention',
      'no_approval_record_found' => 'No approval record found.',
      'document_is_not_confirmed' => 'Document is not confirmed.',

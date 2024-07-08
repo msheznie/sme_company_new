@@ -338,8 +338,8 @@ class ContractMilestoneRepository extends BaseRepository
         $contractID = $contractMaster['id'];
         $deliverables = ContractMilestone::getContractMilestone($contractID, $companySystemID);
 
-        $data[0]['Title'] = "Title";
-        $data[0]['Description'] = "Description";
+        $data[0]['Milestone Title'] = "Milestone Title";
+        $data[0]['Milestone Description'] = "Milestone Description";
         $data[0]['Status'] = "Status";
 
         if ($deliverables) {
@@ -350,8 +350,8 @@ class ContractMilestoneRepository extends BaseRepository
                 } elseif ($deliverable['status'] == 2) {
                     $status = 'Completed';
                 }
-                $data[$key + 1]['Title'] = $deliverable['title'] ?? '-';
-                $data[$key + 1]['Description'] = $deliverable['description'] ?? '-';
+                $data[$key + 1]['Milestone Title'] = $deliverable['title'] ?? '-';
+                $data[$key + 1]['Milestone Description'] = $deliverable['description'] ?? '-';
                 $data[$key + 1]['Status'] = $status;
             }
         }

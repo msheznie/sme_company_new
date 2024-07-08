@@ -265,17 +265,17 @@ class ContractDeliverablesRepository extends BaseRepository
         $contractID = $contractMaster['id'];
         $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
 
+        $data[0]['Deliverable Title'] = "Deliverable Title";
+        $data[0]['Deliverable Description'] = "Deliverable Description";
         $data[0]['Milestone'] = "Milestone";
-        $data[0]['Title'] = "Title";
-        $data[0]['Description'] = "Description";
         $data[0][$dueDateText] = $dueDateText;
         if($deliverables)
         {
             foreach ($deliverables as $key => $deliverable)
             {
+                $data[$key+1]['Deliverable Title'] = $deliverable['title'];
+                $data[$key+1]['Deliverable Description'] = $deliverable['description'];
                 $data[$key+1]['Milestone'] = $deliverable['milestone']['title'] ?? '-';
-                $data[$key+1]['Title'] = $deliverable['title'];
-                $data[$key+1]['Description'] = $deliverable['description'];
                 $data[$key+1][$dueDateText] = $deliverable['dueDate'] ?
                     Carbon::parse($deliverable['dueDate'])->format('Y-m-d') : '-';
             }

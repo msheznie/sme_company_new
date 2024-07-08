@@ -136,8 +136,8 @@ return [
     'deliverable_already_exists' => "Deliverable already exists",
     'milestone_titles_cannot_be_duplicated' => 'Milestone titles cannot be duplicated AR',
     'existing_milestones_are_already_used_for_retentions' =>
-        'Existing milestones are already used for retentions, If you want to add more retentions,
-         please add new milestones AR',
+        'Existing milestone payment schedules are already used for retentions, If you want to add more retentions,
+         please add new milestone payment schedules AR',
     'user_status_updated_successfully' => 'User status updated successfully AR',
     'active_user_should_jn_default_user_group' => 'At least one active user should be there in a default user group',
     'document_not_found' => 'Document not found AR',
@@ -203,4 +203,6 @@ return [
     "at_least_one_periodic_billing_should_be_available" =>
         "At least one periodic billing should be available to send the contract for approval AR",
     "price_is_a_mandatory_field" => "Price is a mandatory field for added BOQ Items AR",
+    'add_new_milestones' =>
+        'If you want to add milestone retentions, please add new milestone payment schedules first AR',
 ];
