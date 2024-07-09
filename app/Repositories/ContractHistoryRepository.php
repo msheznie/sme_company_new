@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
+use App\Models\ContractAdditionalDocumentAmd;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
@@ -57,6 +58,7 @@ class ContractHistoryRepository extends BaseRepository
     private $cmContractOverallRetentionAmdRepository;
     private $cmContractDocumentAmdRepository;
     private $contractAmendmentAreaRepository;
+    private $contractAdditionalDocumentAmd;
 
     public function __construct
     (
@@ -69,6 +71,7 @@ class ContractHistoryRepository extends BaseRepository
         CMContractOverallRetentionAmdRepository $cmContractOverallRetentionAmdRepository,
         CMContractDocumentAmdRepository $cmContractDocumentAmdRepository,
         ContractAmendmentAreaRepository $contractAmendmentAreaRepository,
+        ContractAdditionalDocumentAmdRepository $contractAdditionalDocumentAmd,
         Application $app
     )
     {
@@ -82,6 +85,7 @@ class ContractHistoryRepository extends BaseRepository
         $this->cmContractOverallRetentionAmdRepository = $cmContractOverallRetentionAmdRepository;
         $this->cmContractDocumentAmdRepository = $cmContractDocumentAmdRepository;
         $this->contractAmendmentAreaRepository = $contractAmendmentAreaRepository;
+        $this->contractAdditionalDocumentAmd = $contractAdditionalDocumentAmd;
     }
 
     /**
@@ -652,6 +656,7 @@ class ContractHistoryRepository extends BaseRepository
         $this->cmContractOverallRetentionAmdRepository->save($historyId,$contractId,$input);
         $this->cmContractDocumentAmdRepository->save($historyId,$contractId,$input);
         $this->contractAmendmentAreaRepository->save($input,$contractId,$historyId);
+        $this->contractAdditionalDocumentAmd->save($input,$contractId,$historyId);
         }
         catch (Exception $e)
         {

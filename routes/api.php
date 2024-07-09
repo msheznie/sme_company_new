@@ -92,3 +92,6 @@ Route::get('/contract-expiry-reminder', function ()
     return 'Contracts Reminder Expiry Send Successfully!';
 });
 
+
+
+Route::resource('contract_additional_document_amds', App\Http\Controllers\API\ContractAdditionalDocumentAmdAPIController::class);

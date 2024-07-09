@@ -11,6 +11,8 @@ use App\Models\CMContractMasterAmd;
 use App\Models\CMContractMileStoneAmd;
 use App\Models\CMContractOverallRetentionAmd;
 use App\Models\CMContractUserAssignAmd;
+use App\Models\ContractAdditionalDocumentAmd;
+use App\Models\ContractAdditionalDocuments;
 use App\Models\ContractBoqItems;
 use App\Models\ContractDeliverables;
 use App\Models\ContractDocument;
@@ -48,7 +50,8 @@ class ContractAmendmentService
                 self::updateContractMileStonesAndDeliverables($contractHistoryId);
                 self::updateContractOverallRetention($contractHistoryId);
                 self::updateContractDocument($contractHistoryId);
-                self::updateContractHistory($contractHistoryId);
+                ContractHistoryService::updateContractHistory($contractHistoryId,$companyId,1);
+                self::updateAdditionalDocument($contractHistoryId);
             });
 
         } catch (\Exception $e)
@@ -431,23 +434,23 @@ class ContractAmendmentService
 
                 try
                 {
-                    $this->insertErpDocumentAmd($newRecord->id, $record['id'], $historyId);
+                    $this->insertErpDocumentAmd($newRecord->id, $record['id'], $historyId, 'COD');
                 }
                 catch (\Exception $e)
                 {
-                    $this->insertErpDocumentAmd($newRecord->id, $record['id'],$historyId);
+                    throw new ContractCreationException("Contract document failed: " . $e->getMessage());
                 }
 
             }
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Contract Retention failed: " . $e->getMessage());
+            throw new ContractCreationException("Contract document failed: " . $e->getMessage());
         }
     }
 
-    private function insertErpDocumentAmd($newContractId, $oldContractId, $historyId)
+    private function insertErpDocumentAmd($newContractId, $oldContractId, $historyId, $documentCode)
     {
-        $erpDocuments = ErpDocumentAttachmentsAmd::getErpAttachedData('COD', [$oldContractId]);
+        $erpDocuments = ErpDocumentAttachmentsAmd::getErpAttachedData($documentCode, [$oldContractId]);
 
         foreach ($erpDocuments as $erpDocument)
         {
@@ -654,21 +657,81 @@ class ContractAmendmentService
         return $data;
     }
 
-    public function updateContractHistory($historyId)
+    public function additionalDocumentList($companyId,$contractUuid,$historyUuid)
+    {
+         $contractMaster = ContractManagementUtils::checkContractExist($contractUuid,$companyId);
+         $contractHistory = ContractManagementUtils::getContractHistoryData($historyUuid);
+
+        return ContractAdditionalDocumentAmd::select('id', 'documentMasterID', 'uuid', 'documentType', 'documentName',
+            'documentDescription', 'expiryDate', 'additional_doc_id')
+            ->with([
+                'documentMaster' => function ($query)
+                {
+                    $query->select('id', 'uuid', 'documentType');
+                },
+                'attachment' => function ($query)
+                {
+                    $query->select(
+                        DB::raw('id as attachmentID'), 'documentSystemID',
+                        'documentSystemCode', 'myFileName'
+                    );
+                }
+            ])
+            ->where([
+                'contractID' => $contractMaster->id,
+                'contract_history_id' => $contractHistory->id
+            ])
+            ->orderBy('id', 'desc');
+    }
+
+    public static function getContractAdditionalDocument($uuid,$historyUuid, $allRecords = false)
+    {
+        if ($allRecords)
+        {
+            return ContractAdditionalDocumentAmd::where('contract_history_id', $historyUuid)->get();
+        }
+
+        $getHistoryData = ContractManagementUtils::getContractHistoryData($historyUuid);
+        return ContractAdditionalDocumentAmd::where([
+            ['uuid', $uuid],
+            ['contract_history_id', $getHistoryData->id]
+        ])->first();
+
+    }
+
+    public static function getAdditionalDocument($input)
+    {
+        $additionalDocumentUuid = $input['additionalDocumentUuid'];
+        $contractHistoryUuid = $input['contractHistoryUuid'];
+        $contractHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
+
+        return ContractAdditionalDocumentAmd::getAdditionalDocument($additionalDocumentUuid, $contractHistoryData->id);
+    }
+
+    public static function updateAdditionalDocument($historyId)
     {
         try
         {
-            $status = [
-                'status'  => 1,
-            ];
+            $getContractDocument = ContractAdditionalDocumentAmd::getAdditionalDocumentDataAmd($historyId);
 
-            ContractHistory::where('id', $historyId)
-                ->update($status);
-        }
+            foreach ($getContractDocument as $record)
+            {
+                $recordData = $record->toArray();
+                $newRecord = ContractAdditionalDocuments::create($recordData);
 
-        catch (\Exception $e)
+                try
+                {
+                    self::insertErpDocumentAmd($newRecord->id, $record['id'], $historyId, 'COAD');
+                }
+                catch (\Exception $e)
+                {
+                    throw new ContractCreationException("Contract additional document failed: " . $e->getMessage());
+                }
+
+            }
+        } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+            throw new ContractCreationException("Contract additional document failed: " . $e->getMessage());
         }
     }
 }

@@ -509,4 +509,22 @@ class ContractHistoryAPIController extends AppBaseController
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
         }
     }
+
+    public function additionalDocumentAmendment(Request $request)
+    {
+        try
+        {
+            $data = $this->contractAmendmentService->getAdditionalDocument($request->all());
+            $responseData = ['data' => $data];
+            return response()->json($responseData);
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
+        }
+    }
 }

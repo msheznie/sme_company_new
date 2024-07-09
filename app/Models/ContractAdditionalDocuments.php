@@ -120,4 +120,9 @@ class ContractAdditionalDocuments extends Model
     {
         return 'companySystemID';
     }
+
+        public function additionalDocumentData($contractId)
+        {
+            return self::where('contractID',$contractId)->get();
+        }
 }

@@ -121,13 +121,12 @@ class CMContractDocumentAmdRepository extends BaseRepository
             }
         } catch (Exception $e)
         {
-            throw new ContractCreationException("Contract Retention failed: " . $e->getMessage());
+            throw new ContractCreationException("Contract Document failed: " . $e->getMessage());
         }
     }
 
     private function insertErpDocumentAmd($newContractId, $oldContractId, $historyId)
     {
-        // Retrieve the corresponding records in erp_document
         $erpDocuments = ErpDocumentAttachments::getErpAttachedData('COD', [$oldContractId]);
 
         foreach ($erpDocuments as $erpDocument)

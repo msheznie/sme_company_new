@@ -394,6 +394,7 @@
         <span>Contract Amendment Areas</span>
     </a>
 </li>
+<<<<<<< HEAD
 <li class="nav-item {{ Request::is('appearanceSettings*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('appearanceSettings.index') }}">
         <i class="nav-icon icon-cursor"></i>
@@ -416,5 +417,11 @@
     <a class="nav-link" href="{{ route('systemConfigurationDetails.index') }}">
         <i class="nav-icon icon-cursor"></i>
         <span>System Configuration Details</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('contractAdditionalDocumentAmds*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('contractAdditionalDocumentAmds.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Contract Additional Document Amds</span>
     </a>
 </li>

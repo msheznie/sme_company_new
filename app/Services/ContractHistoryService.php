@@ -48,7 +48,10 @@ class ContractHistoryService
                     (
                         $getContractHistory->id,null,true
                     );
-                    $contractAdditionalDocuments =  null;
+                    $contractAdditionalDocuments =  ContractAmendmentService::getContractAdditionalDocument
+                    (
+                        null,$getContractHistory->id,true
+                    );
 
                 }else
                 {
@@ -58,11 +61,10 @@ class ContractHistoryService
                     );
 
                 }
-
-
-
-
-                $this->deleteRelatedModels($getContractId['id'], $companyId, $categoryId , $amendment,$getContractHistory->id);
+                $this->deleteRelatedModels
+                (
+                    $getContractId['id'], $companyId, $categoryId , $amendment,$getContractHistory->id
+                );
                 $this->deleteContractStatus($getContractHistory['id']);
                 $this->deleteDocumentAttachments($contractDocuments, $contractAdditionalDocuments, $amendment);
             });
@@ -698,6 +700,7 @@ class ContractHistoryService
                 'App\\Models\\CMContractDeliverableAmd',
                 'App\\Models\\CMContractOverallRetentionAmd',
                 'App\\Models\\ContractAmendmentArea',
+                'App\\Models\\ContractAdditionalDocumentAmd',
             ];
         }
 

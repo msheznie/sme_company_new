@@ -409,6 +409,13 @@ Route::
         'confirmContractAmendment'
     ])->name('Confirm Amendment');
 
+    Route::post('additional-document-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'additionalDocumentAmendment'
+    ])->name('Additional Document Amendment');
+
+
+
 });
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Awobaz\Compoships\Compoships;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,7 +40,7 @@ class ErpDocumentAttachmentsAmd extends Model
 
 
     use HasFactory;
-
+    use Compoships;
     public $table = 'erp_documentattachments_amd';
 
     const CREATED_AT = 'timeStamp';
@@ -133,14 +134,14 @@ class ErpDocumentAttachmentsAmd extends Model
 
     public static function deleteAttachment($documentSystemID, $documentSystemCode, $historyId): array
     {
-        $deleteFile = self::select('attachmentID')
+        $deleteFile = self::select('id')
             ->where('documentSystemID', $documentSystemID)
             ->where('documentSystemCode', $documentSystemCode)
             ->where('contract_history_id', $historyId )
             ->first();
         if(!empty($deleteFile))
         {
-            $delete = self::where('attachmentID', $deleteFile['attachmentID'])->delete();
+            $delete = self::where('id', $deleteFile['id'])->delete();
             if(!$delete)
             {
                 return [
