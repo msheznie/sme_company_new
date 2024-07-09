@@ -114,7 +114,7 @@ class CMContractScenarioAssign extends Model
                 },
                 'contractMaster' => function ($query)
                 {
-                    $query->select('id', 'title', 'endDate', 'contractOwner', 'counterPartyName');
+                    $query->select('id', 'title', 'endDate', 'contractOwner', 'counterPartyName', 'companySystemID');
                 }
             ])
             ->get();

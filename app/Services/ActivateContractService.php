@@ -57,7 +57,7 @@ class ActivateContractService
                     'title' => $result->contractMaster->title,
                     'contractOwner' => $result->contractMaster->contractOwner,
                     'counterPartyName' => $result->contractMaster->counterPartyName,
-                    'companySystemID' => $result->company_system_id,
+                    'companySystemID' => $result->contractMaster->companySystemID,
                     'endDate' => $result->contractMaster->endDate,
                 ]);
             }
@@ -71,12 +71,12 @@ class ActivateContractService
                     'title' => $result->contractMaster->title,
                     'contractOwner' => $result->contractMaster->contractOwner,
                     'counterPartyName' => $result->contractMaster->counterPartyName,
-                    'companySystemID' => $result->company_system_id,
+                    'companySystemID' => $result->contractMaster->companySystemID,
                     'endDate' => $result->contractMaster->endDate,
                 ]);
             }
         }
-
+        
         self::sendEmail($userDetails, 1);
     }
 
