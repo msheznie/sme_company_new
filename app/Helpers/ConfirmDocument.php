@@ -62,10 +62,10 @@ class ConfirmDocument
         {
             throw new CommonException(trans('common.failed_to_confirm_document'));
         }
-        if ($params["document"] === 123)
+        /*if ($params["document"] === 123)
         {
             self::sendEmail($params, $masterRecord);
-        }
+        }*/
         return true;
     }
 
