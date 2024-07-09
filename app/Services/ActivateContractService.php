@@ -6,10 +6,10 @@ use App\Helpers\Email;
 use App\Models\CMContractScenarioAssign;
 use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
+use App\Services\ContractHistoryService;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Log;
-use App\Services\ContractHistoryService;
 
 class ActivateContractService
 {
@@ -27,8 +27,7 @@ class ActivateContractService
                 $contractId = $contract->id;
                 $currentStatus = -1;
                 $companyId = $contract->companySystemID;
-
-                ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null);
+                ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null, true);
             }
 
         }
@@ -76,7 +75,7 @@ class ActivateContractService
                 ]);
             }
         }
-        
+
         self::sendEmail($userDetails, 1);
     }
 

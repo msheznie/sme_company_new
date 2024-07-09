@@ -410,10 +410,8 @@ class ContractMasterRepository extends BaseRepository
                 $updateData['status'] = $status;
             }
 
-            if($status != 0)
-            {
-                ContractHistoryService::insertHistoryStatus($id, $status, $selectedCompanyID);
-            }
+
+            ContractHistoryService::updateOrInsertStatus($id, $status, $selectedCompanyID);
 
             $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
             $colName = $fromAmendment ? 'contract_history_id' : 'id';

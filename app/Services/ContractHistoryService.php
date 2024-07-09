@@ -594,19 +594,26 @@ class ContractHistoryService
 
     }
 
-    public static function insertHistoryStatus($contractId, $status, $companySystemID, $contractHistoryId = null)
+    public static function insertHistoryStatus($contractId, $status, $companySystemID, $contractHistoryId = null,
+                                               $systemUser=false)
     {
         try
         {
-            return DB::transaction(function () use ($contractId,$status, $companySystemID, $contractHistoryId)
+            return DB::transaction(function () use ($contractId,$status, $companySystemID, $contractHistoryId,
+                $systemUser)
             {
                 $insert = [
                     'contract_id' => $contractId,
                     'status' => $status,
                     'company_id' => $companySystemID,
-                    'created_by' => General::currentEmployeeId(),
                     'created_at' => Carbon::now()
                 ];
+
+                if($systemUser)
+                {
+                    $insert['system_user'] = 1;
+                }else
+                    $insert['created_by'] = General::currentEmployeeId();
 
                 if ($contractHistoryId!=null)
                 {
@@ -705,6 +712,51 @@ class ContractHistoryService
         }
 
         return $defaultModels;
+    }
+
+    public static function getLatestRecordHistory($id)
+    {
+        return contractStatusHistory::select('status','id')
+            ->where('contract_id',$id)
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
+
+    public static function updateHistoryStatus($id)
+    {
+        try
+        {
+            return DB::transaction(function () use ($id)
+            {
+                $data = ['updated_at' => Carbon::now()];
+                contractStatusHistory::where('id', $id)
+                ->update($data);
+            });
+        } catch (\Exception $e)
+        {
+            throw new ContractCreationException("Failed to insert contract statuss: " . $e->getMessage());
+        }
+    }
+
+    public static function updateOrInsertStatus($id, $status, $selectedCompanyID)
+    {
+        $latestRecordStatus = ContractHistoryService::getLatestRecordHistory($id);
+        if ($latestRecordStatus)
+        {
+            if ($latestRecordStatus->status == $status)
+            {
+                self::updateHistoryStatus($latestRecordStatus->id);
+            }
+            else
+            {
+                self::insertHistoryStatus($id, $status, $selectedCompanyID);
+            }
+        }
+        else
+        {
+            self::insertHistoryStatus($id, $status, $selectedCompanyID);
+        }
     }
 
 
