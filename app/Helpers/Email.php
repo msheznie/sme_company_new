@@ -23,6 +23,7 @@ class Email
         foreach ($data as $dataMail)
         {
             $employee = Employees::getEmployee($dataMail['empSystemID']);
+            $dataMail['attachmentList'] = $dataMail['attachmentList'] ?? [];
             if(!empty($employee))
             {
                 $dataMail['empID'] = $employee['empID'];
@@ -41,7 +42,7 @@ class Email
                 {
                     $dataMail['attachmentFileName'] = $dataMail['attachmentFileName'] ?? '';
                     Mail::to($dataMail['empEmail'])->send(new EmailForQueuing($dataMail['alertMessage'],
-                        $body, $dataMail['attachmentFileName']), $dataMail['attachmentList'], $color, $text, $fromName);
+                        $body, $dataMail['attachmentFileName'], $dataMail['attachmentList'], $color, $text, $fromName));
                 }
             } else
             {
