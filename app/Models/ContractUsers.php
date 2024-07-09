@@ -189,7 +189,7 @@ class ContractUsers extends Model
     public static function getContractUserIdById($id)
     {
         return self::where('id', $id)
-            ->select('contractUserId')
+            ->select('contractUserId', 'contractUserType')
             ->first();
     }
 

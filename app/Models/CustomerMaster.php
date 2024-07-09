@@ -305,4 +305,11 @@ class CustomerMaster extends Model
     public function pulledContractUser(){
         return $this->belongsTo(ContractUsers::class, 'customerCodeSystem', 'contractUserId');
     }
+
+    public static function getSupplierBySupplierCodeSystem($id)
+    {
+        return self::select('customerCodeSystem', 'CustomerName', 'CutomerCode')
+            ->where('supplierCodeSystem', $id)
+            ->first();
+    }
 }

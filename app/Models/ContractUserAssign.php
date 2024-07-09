@@ -151,7 +151,7 @@ class ContractUserAssign extends Model
         return $this->belongsTo(ContractMaster::class, 'contractId', 'id');
     }
 
-    public static function getReminderContractExpiryUsers($contractIds)
+    public static function  getReminderContractExpiryUsers($contractIds)
     {
         return self::with(['contractMaster' => function ($query)
         {

@@ -91,7 +91,7 @@ class CMContractScenarioAssign extends Model
         return false;
     }
 
-    public static function getReminderContractExpiryBefore()
+    public static function  getReminderContractExpiryBefore()
     {
         return self::where('is_active', 1)
             ->whereHas('contractScenarioSettings', function ($query)
@@ -100,7 +100,8 @@ class CMContractScenarioAssign extends Model
             })
             ->whereHas('contractMaster', function ($query)
             {
-                $query->whereRaw('DATEDIFF(endDate, CURDATE()) < (
+                $query->whereRaw('DATEDIFF(endDate, CURDATE()) > 0')
+                ->whereRaw('DATEDIFF(endDate, CURDATE()) < (
             SELECT value FROM cm_contract_scenario_setting
             WHERE scenario_assign_id = cm_contract_scenario_assign.id
             AND scenario_type = 1 LIMIT 1
@@ -113,7 +114,7 @@ class CMContractScenarioAssign extends Model
                 },
                 'contractMaster' => function ($query)
                 {
-                    $query->select('id', 'title', 'endDate');
+                    $query->select('id', 'title', 'endDate', 'contractOwner', 'counterPartyName');
                 }
             ])
             ->get();

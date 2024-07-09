@@ -40,6 +40,43 @@ class ActivateContractService
 
         $contractIds = $results->pluck('contract_id')->toArray();
         $userDetails = ContractUserAssign::getReminderContractExpiryUsers($contractIds);
+
+        $existingUserIds = $userDetails->pluck('userId')->toArray();
+
+        foreach ($results as $result)
+        {
+            $contractOwnerId = $result->contractMaster->contractOwner;
+            $counterPartyNameId = $result->contractMaster->counterPartyName;
+
+            if ($contractOwnerId && !in_array($contractOwnerId, $existingUserIds))
+            {
+                $userDetails->push([
+                    'userId' => $contractOwnerId,
+                    'contractId' => $result->contract_id,
+                    'contractCode' => $result->contract_code,
+                    'title' => $result->contractMaster->title,
+                    'contractOwner' => $result->contractMaster->contractOwner,
+                    'counterPartyName' => $result->contractMaster->counterPartyName,
+                    'companySystemID' => $result->company_system_id,
+                    'endDate' => $result->contractMaster->endDate,
+                ]);
+            }
+
+            if ($counterPartyNameId && !in_array($counterPartyNameId, $existingUserIds))
+            {
+                $userDetails->push([
+                    'userId' => $counterPartyNameId,
+                    'contractId' => $result->contract_id,
+                    'contractCode' => $result->contract_code,
+                    'title' => $result->contractMaster->title,
+                    'contractOwner' => $result->contractMaster->contractOwner,
+                    'counterPartyName' => $result->contractMaster->counterPartyName,
+                    'companySystemID' => $result->company_system_id,
+                    'endDate' => $result->contractMaster->endDate,
+                ]);
+            }
+        }
+
         self::sendEmail($userDetails, 1);
     }
 
