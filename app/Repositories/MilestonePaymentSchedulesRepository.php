@@ -64,7 +64,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
     {
         return new MilestonePaymentSchedules();
     }
-    public function getPaymentScheduleFormData($contractUuid, $companyID, $uuid)
+    public function getPaymentScheduleFormData($contractUuid, $companyID, $uuid, $isEdit)
     {
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyID);
         if(empty($contract))
@@ -76,8 +76,8 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         $currencyCode = CurrencyMaster::getCurrencyCode($currencyId);
         $milestoneExists = ContractMilestone::checkContractHasMilestone($contract['id']);
-        $totalPSAmount = MilestonePaymentSchedules::getTotalAmount($contract['id']);
-        $totalPSPercentage = MilestonePaymentSchedules::getTotalPercentage($contract['id']);
+        $totalPSAmount = MilestonePaymentSchedules::getTotalAmount($contract['id'], $isEdit, $uuid);
+        $totalPSPercentage = MilestonePaymentSchedules::getTotalPercentage($contract['id'],$isEdit, $uuid);
         return [
             'milestones' => $milestones,
             'currencyCode' => $currencyCode,

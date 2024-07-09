@@ -4,19 +4,22 @@ namespace App\Helpers;
 
 use App\Exceptions\CommonException;
 use App\Models\Alert;
+use App\Models\AppearanceSettings;
 use App\Models\CompanyPolicyMaster;
 use App\Models\ContractUsers;
 use App\Models\Employees;
 use App\Mail\EmailForQueuing;
 use App\Models\SupplierMaster;
 use App\Utilities\EmailUtils;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class Email
 {
     public static function sendBulkEmail($data)
     {
+        $color = AppearanceSettings::getAppearanceSettings(1);
+        $text = AppearanceSettings::getAppearanceSettings(7);
+        $fromName = EmailUtils::getEmailConfiguration('mail_name','GEARS');
         foreach ($data as $dataMail)
         {
             $employee = Employees::getEmployee($dataMail['empSystemID']);
@@ -38,7 +41,7 @@ class Email
                 {
                     $dataMail['attachmentFileName'] = $dataMail['attachmentFileName'] ?? '';
                     Mail::to($dataMail['empEmail'])->send(new EmailForQueuing($dataMail['alertMessage'],
-                        $body, $dataMail['attachmentFileName']));
+                        $body, $dataMail['attachmentFileName']), $dataMail['attachmentList'], $color, $text, $fromName);
                 }
             } else
             {

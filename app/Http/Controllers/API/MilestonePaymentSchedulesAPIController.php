@@ -175,10 +175,11 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
         $contractUuid = $request->input('contractUuid') ?? null;
         $companySystemID = $request->input('selectedCompanyID') ?? 0;
         $uuid = $request->input('uuid') ?? null;
+        $isEdit = $request->input('isEdit') ?? 0;
         try
         {
             $response = $this->milestonePaymentSchedulesRepository->getPaymentScheduleFormData(
-                $contractUuid, $companySystemID, $uuid);
+                $contractUuid, $companySystemID, $uuid, $isEdit);
             return $this->sendResponse($response, trans('common.retrieved_successfully'));
         } catch (CommonException $ex)
         {

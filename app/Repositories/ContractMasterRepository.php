@@ -796,7 +796,7 @@ class ContractMasterRepository extends BaseRepository
     public function confirmContract($request)
     {
         $input = $request->all();
-        return DB::transaction( function() use ($input)
+        return DB::transaction( function() use ($input, $request)
         {
             $contractUuid = $input['contractUuid'];
             $companySystemID = $input['selectedCompanyID'];
@@ -832,7 +832,8 @@ class ContractMasterRepository extends BaseRepository
                     'company' => $companySystemID,
                     'document' => $documentSystemID,
                     'documentCode' => $contractMaster['contractCode'] ?? null,
-                    'amount' => $contractMaster['contractAmount'] ?? 0
+                    'amount' => $contractMaster['contractAmount'] ?? 0,
+                    'url' => $request->fullUrl()
                 ];
                 return ConfirmDocument::confirmDocument($insertData, $contractMaster);
             }
@@ -1057,8 +1058,9 @@ class ContractMasterRepository extends BaseRepository
     public function approveContract($request)
     {
         $input = $request->all();
+        $url = $request->fullUrl();
 
-        return DB::transaction(function () use ( $input )
+        return DB::transaction(function () use ( $input, $url )
         {
             $contractUuid = $input['contractUuid'] ?? null;
             $contractMaster = ContractManagementUtils::checkContractExist($contractUuid, $input['selectedCompanyID']);
@@ -1066,6 +1068,7 @@ class ContractMasterRepository extends BaseRepository
             {
                 throw new CommonException(trans('common.contract_not_found'));
             }
+            $input['url'] = $url;
             return ApproveDocument::approveDocument($input, $contractMaster);
         });
     }

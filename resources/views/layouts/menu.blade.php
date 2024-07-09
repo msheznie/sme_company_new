@@ -394,3 +394,27 @@
         <span>Contract Amendment Areas</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('appearanceSettings*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('appearanceSettings.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Appearance Settings</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('appearanceElements*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('appearanceElements.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Appearance Elements</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('systemConfigurationAttributes*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('systemConfigurationAttributes.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>System Configuration Attributes</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('systemConfigurationDetails*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('systemConfigurationDetails.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>System Configuration Details</span>
+    </a>
+</li>

@@ -137,8 +137,9 @@ class ApproveDocument
                 $documentApproved['companySystemID'],
                 $documentApproved['documentSystemID'],
             );
+            $url = $params['url'] ?? null;
             $subject = EmailUtils::getEmailSubject($documentApproved->documentSystemID);
-            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords);
+            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords, $url);
             foreach($approvalList as $dt)
             {
                 if ($dt['employee'])

@@ -18,17 +18,26 @@ class EmailForQueuing extends Mailable implements ShouldQueue
     public $subject;
     public $to;
     public $mailAttachment;
+    public $mailAttachmentList;
+    public $color;
+    public $text;
+    public $fromName;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($subject, $content, $attachment = '')
+    public function __construct($subject, $content, $attachment = '', $attachmentList = [], $color = '#C23C32',
+                                $text = 'GEARS', $fromName = 'GEARS')
     {
         $this->subject = $subject;
         $this->content = $content;
         $this->mailAttachment = $attachment;
+        $this->mailAttachmentList = $attachmentList;
+        $this->color = $color;
+        $this->text = $text;
+        $this->fromName = $fromName;
         if(env('IS_MULTI_TENANCY',false))
         {
             self::onConnection('database_main');
@@ -45,7 +54,8 @@ class EmailForQueuing extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        $mail = $this->view('email.default_email')
+        $mail = $this->from(env('MAIL_FROM_ADDRESS'), $this->fromName)
+            ->view('email.default_email', ['color' => $this->color,'text' => $this->text])
             ->subject($this->subject)
             ->sendgrid([
                 'personalizations' => [
@@ -56,6 +66,13 @@ class EmailForQueuing extends Mailable implements ShouldQueue
                     ],
                 ],
             ]);
+        if($this->mailAttachmentList && is_array($this->mailAttachmentList))
+        {
+            foreach ($this->mailAttachmentList as  $key => $attachment)
+            {
+                $mail->attach($attachment, array('as' => $key));
+            }
+        }
         if($this->mailAttachment)
         {
             $mail->attach($this->mailAttachment);

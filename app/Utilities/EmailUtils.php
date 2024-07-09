@@ -2,7 +2,9 @@
 
 namespace App\Utilities;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Models\SystemConfigurationAttributes;
 use Illuminate\Support\Facades\Log;
 
 class EmailUtils
@@ -20,7 +22,7 @@ class EmailUtils
         }
         return $emailSubject;
     }
-    public static function getEmailBody($documentID, $masterData)
+    public static function getEmailBody($documentID, $masterData, $url=null)
     {
         $emailBody = '';
         $footer = self::getEmailFooter();
@@ -44,7 +46,7 @@ class EmailUtils
                     <span style="margin-bottom: 10px;"><b>Party B: </b>'. $partyB .' </span>
                    </p>
                    <p> Please click the link below to review the full contract document and submit your approval or
-                     comments. <br> <a href="' . self::getRedirectUrl() . '">Click here to approve</a> </p>
+                     comments. <br> <a href="' . self::getRedirectUrl($url) . '">Click here to approve</a> </p>
                      <p>Thank you for your prompt attention to this matter.</p>';
         }
 
@@ -65,22 +67,23 @@ class EmailUtils
         }
         return $email;
     }
-    public static function getRedirectUrl()
+    public static function getRedirectUrl($url)
     {
         $redirectUrl =  env("DOMAIN_URL");
 
-        if (env('IS_MULTI_TENANCY') && isset($_SERVER['HTTP_HOST']))
+        if (env('IS_MULTI_TENANCY'))
         {
-            $url = $_SERVER['HTTP_HOST'];
-            $urlArray = explode('.', $url);
-            $subDomain = $urlArray[0];
+            $path = parse_url($url, PHP_URL_PATH);
+            $host = explode('/', trim($path, '/'));
 
-            $tenantDomain = (isset(explode('-', $subDomain)[0])) ? explode('-', $subDomain)[0] : "";
+            $subDomain = $host[0] ?? null;
 
-            $search = '*';
-            $redirectUrl = str_replace($search, $tenantDomain, $redirectUrl);
+            if (!$subDomain)
+            {
+                throw new CommonException($subDomain . "Not found");
+            }
+            $redirectUrl = str_replace('*', $subDomain, $redirectUrl);
         }
-
         return $redirectUrl.'/approval/contracts';
     }
     public static function getEmailFooter()
@@ -88,5 +91,22 @@ class EmailUtils
         return "<font size='1.5'><i><p><br><br><br>SAVE PAPER - THINK BEFORE YOU PRINT!
         <br>This is an auto generated email. Please do not reply to this email because we are not
          monitoring this inbox.</font>";
+    }
+    public static function getEmailConfiguration($slug='', $defaultValue = 'GEARS')
+    {
+        $emailConfiguration = SystemConfigurationAttributes::select('id', 'systemConfigurationId', 'name', 'slug')
+            ->where('slug', $slug)
+            ->whereHas('systemConfigurationDetail')
+            ->with([
+                'systemConfigurationDetail' => function ($q)
+                {
+                    $q->select('id', 'attributeId', 'value');
+                }
+            ])->first();
+        if(!$emailConfiguration)
+        {
+            return $defaultValue;
+        }
+        return $emailConfiguration['systemConfigurationDetail']['value'];
     }
 }
