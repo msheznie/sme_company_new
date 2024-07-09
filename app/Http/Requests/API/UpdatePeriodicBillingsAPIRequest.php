@@ -30,6 +30,14 @@ class UpdatePeriodicBillingsAPIRequest extends APIRequest
             'start_date' => 'required',
             'end_date' => 'required',
             'occurrence_type' => 'required',
+            'due_in' => [
+                'required_if:occurrence_type,7',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('occurrence_type') == 7 && $value <= 0) {
+                        $fail('The due in field must be greater than 0.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -41,6 +49,7 @@ class UpdatePeriodicBillingsAPIRequest extends APIRequest
             'start_date.title' => 'Start date is required.',
             'end_date.required' => 'End date is required.',
             'occurrence_type.required' => 'Occurrence is required.',
+            'due_in.required_if' => 'Due in field is required.',
         ];
     }
 }

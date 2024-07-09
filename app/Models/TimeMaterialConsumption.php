@@ -91,7 +91,6 @@ class TimeMaterialConsumption extends Model
         return TimeMaterialConsumption::select('uuid', 'item', 'description', 'min_quantity', 'max_quantity', 'price',
                 'amount', 'quantity', 'uom_id')
             ->where('contract_id', $contractID)
-            ->orderBy('updated_at', 'desc')
             ->get();
     }
     public static function checkExistRecordEmpty($contractID)
