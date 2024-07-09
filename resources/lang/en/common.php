@@ -210,4 +210,6 @@
      "at_least_one_periodic_billing_should_be_available" =>
          "At least one periodic billing should be available to send the contract for approval",
      "price_is_a_mandatory_field" => "Price is a mandatory field for added BOQ Items",
+     "empty_quantity_or_price_values" => "There are BOQ records with empty quantity or price values",
+     "quantity_or_price_values_equal_to_zero" => "There are BOQ items with quantity or price values equal to 0",
  ];

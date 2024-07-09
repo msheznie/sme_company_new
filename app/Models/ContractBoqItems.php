@@ -120,4 +120,27 @@ class ContractBoqItems extends Model
         return self::where('contractId',$id)
             ->get();
     }
+
+    public static function checkValues($contractId, $companySystemID, $checkType)
+    {
+        return ContractBoqItems::select('qty', 'price')
+            ->where('contractId', $contractId)
+            ->where('companyId', $companySystemID)
+            ->where(function($query) use ($checkType)
+            {
+                if ($checkType == 'zero')
+                {
+                    $query->where('qty', 0)
+                        ->orWhere('price', 0);
+                }
+                if ($checkType == 'empty')
+                {
+                    $query->whereNull('qty')
+                        ->orWhereNull('price')
+                        ->orWhere('qty', '')
+                        ->orWhere('price', '');
+                }
+            })
+            ->get();
+    }
 }

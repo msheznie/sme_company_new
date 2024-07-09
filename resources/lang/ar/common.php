@@ -205,4 +205,6 @@ return [
     "price_is_a_mandatory_field" => "Price is a mandatory field for added BOQ Items AR",
     'add_new_milestones' =>
         'If you want to add milestone retentions, please add new milestone payment schedules first AR',
+    "empty_quantity_or_price_values" => "There are BOQ records with empty quantity or price values AR",
+    "quantity_or_price_values_equal_to_zero" => "There are BOQ items with quantity or price values equal to 0 AR",
 ];

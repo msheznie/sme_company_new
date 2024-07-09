@@ -862,14 +862,20 @@ class ContractMasterRepository extends BaseRepository
                 $existBoq = ContractBoqItems::select('qty', 'price')->where('contractId', $contractId)
                     ->where('companyId', $companySystemID)
                     ->first();
+
+                $checkZeroValues = ContractBoqItems::checkValues($contractId, $companySystemID, 'zero');
+                $checkEmptyValues = ContractBoqItems::checkValues($contractId, $companySystemID, 'empty');
+
                 if(empty($existBoq)) {
                     return  trans('common.at_least_one_boq_item_should_be_available');
                 }
-                if(empty($existBoq['qty'])){
-                    return  trans('common.qty_is_a_mandatory_field');
+                if($checkZeroValues->isNotEmpty())
+                {
+                    return  trans('common.quantity_or_price_values_equal_to_zero');
                 }
-                if(empty($existBoq['price'])){
-                    return  trans('common.price_is_a_mandatory_field');
+                if($checkEmptyValues->isNotEmpty())
+                {
+                    return  trans('common.empty_quantity_or_price_values');
                 }
             }
             if($activeMaster['contractTypeSection']['cmSection_id'] == 2){
