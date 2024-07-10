@@ -150,11 +150,15 @@ class ContractUserAssignAPIController extends AppBaseController
         $colname = $amendment ? 'amd_id' : 'id';
         $historyId = 0;
         /** @var ContractUserAssign $contractUserAssign */
-        if ($input['userGroupId'] == null) {
 
-            if ($amendment) {
+        if ($input['userGroupId'] == null)
+        {
+
+            if ($amendment)
+            {
                 $id = $input['id'];
-            } else {
+            } else
+            {
 
                 $contractUserAssignedId = ContractUserAssign::select('id')->where('uuid', $input['id'])->first();
                 $contractUserAssign = $this->contractUserAssignRepository->find($contractUserAssignedId->id);
@@ -170,14 +174,18 @@ class ContractUserAssignAPIController extends AppBaseController
             $data['updatedBy'] = General::currentEmployeeId();
             $model::where($colname, $id)
                 ->update($data);
-        } else {
+        }
+        else
+        {
             $getUserGroupId = ContractUserGroup::select('id')
                 ->where('uuid', $input['userGroupId'])
                 ->first();
 
             $companyId = $input['selectedCompanyID'];
             $activeDefaultUserGroups = ContractUserGroup::getActiveDefaultUserGroups($companyId);
-            $assignUserGroups = ContractUserAssign::getAssignUserGroups($input['contractId']);
+
+            $assignUserGroups =  ContractUserAssign::getAssignUserGroups($input['contractId']);
+
             $activeDefaultUserGroupsIds = $activeDefaultUserGroups->pluck('id');
             $assignUserGroupsIds = $assignUserGroups->pluck('userGroupId');
             $commonIds = $activeDefaultUserGroupsIds->intersect($assignUserGroupsIds);
@@ -186,32 +194,29 @@ class ContractUserAssignAPIController extends AppBaseController
             $defaultUserGroupIds = $activeDefaultUserGroups->pluck('id')->toArray();
             $isInActiveDefaultUserGroups = in_array($getUserGroupId->id, $defaultUserGroupIds);
 
-            $contractUserAssigns = ContractUserAssign::where('contractId', $input['contractId'])
+
+
+            $contractUserAssigns = $model::where('contractId', $input['contractId'])
                 ->where('userGroupId', $getUserGroupId->id)
-                ->select('id as i')
-                ->get();
+                ->select($colname . ' as i');
 
+            if ($amendment)
+            {
+                $historyData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+                $historyId = $historyData->id;
+                $contractUserAssigns->where('contract_history_id', $historyId);
+            }
 
-            if ($commonCount == 1 && $isInActiveDefaultUserGroups == 1) {
+            $contractUserAssigns = $contractUserAssigns->get();
+
+            if ($commonCount == 1 && $isInActiveDefaultUserGroups == 1)
+            {
                 throw new CommonException('At least one default user group must be present in a contract');
-            } else {
-                foreach ($contractUserAssigns as $contractUserAssign) {
-                    $this->contractUserAssignRepository->update([
-                        'status' => 0,
-                        'updatedBy' => General::currentEmployeeId()
-                    ], $contractUserAssign->i);
-                }
+            } else
+            {
 
-                $contractUserAssigns = $model::where('contractId', $input['contractId'])
-                    ->where('userGroupId', $getUserGroupId->id)
-                    ->select($colname . ' as i');
-                if ($amendment) {
-                    $contractUserAssigns->where('contract_history_id', $historyId);
-                }
-
-                $contractUserAssigns = $contractUserAssigns->get();
-
-                foreach ($contractUserAssigns as $contractUserAssign) {
+                foreach ($contractUserAssigns as $contractUserAssign)
+                {
                     $model::where($colname, $contractUserAssign->i)
                         ->update([
                             'status' => 0,
