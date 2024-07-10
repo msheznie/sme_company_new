@@ -116,10 +116,11 @@ class ApproveDocument
         {
             throw new CommonException(trans('common.failed_to_approve_document'));
         }
-        /*if ($formData["documentSystemID"] === 123)
+        if ($formData["documentSystemID"] === 123)
         {
             self::sendEmail($formData, $masterRecord);
-        }*/
+        }
+        
         return true;
     }
     public static function sendEmail($params, $masterRecords)
