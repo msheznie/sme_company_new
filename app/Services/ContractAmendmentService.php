@@ -46,8 +46,8 @@ class ContractAmendmentService
                 ContractHistoryService::insertHistoryStatus($contractId,1,$companyId,$contractHistoryId);
                 self::updateContractMasterAmendmentData($contractId,$contractHistoryId);
                 self::updateContractUserAndUserGroup($contractHistoryId);
-                self::updateContractBoqItemsAmendmentData($contractHistoryId);
-                self::updateContractMileStonesAndDeliverables($contractHistoryId);
+                self::updateContractBoqItemsAmendmentData($contractHistoryId,$contractId);
+                self::updateContractMileStonesAndDeliverables($contractHistoryId,$contractId);
                 self::updateContractOverallRetention($contractHistoryId);
                 self::updateContractDocument($contractHistoryId);
                 ContractHistoryService::updateContractHistory($contractHistoryId,$companyId,1);
@@ -146,7 +146,7 @@ class ContractAmendmentService
         }
     }
 
-    public function updateContractBoqItemsAmendmentData($contractHistoryId)
+    public function updateContractBoqItemsAmendmentData($contractHistoryId,$contractId)
     {
         try
         {
@@ -169,6 +169,7 @@ class ContractAmendmentService
 
 
             ContractBoqItems::whereNotIn('id', $amdRecordIds)
+                ->where('contractId',$contractId)
                 ->delete();
 
             $newRecords = CMContractBoqItemsAmd::where('contract_history_id', $contractHistoryId)
@@ -262,7 +263,7 @@ class ContractAmendmentService
         }
     }
 
-    public function updateContractMileStonesAndDeliverables($historyId)
+    public function updateContractMileStonesAndDeliverables($historyId,$contractId)
     {
 
         try
@@ -286,6 +287,7 @@ class ContractAmendmentService
 
 
             ContractMilestone::whereNotIn('id', $amdRecordIds)
+                ->where('contractId',$contractId)
                 ->delete();
 
 
@@ -315,7 +317,9 @@ class ContractAmendmentService
             });
 
             ContractDeliverables::whereNotIn('id', $amdRecordIds)
+                ->where('contractId',$contractId)
                 ->delete();
+
         }
         catch (\Exception $e)
         {
