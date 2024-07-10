@@ -160,6 +160,7 @@ class ContractUserAssign extends Model
             );
         }])
             ->whereIn('contractId', $contractIds)
+            ->where('status',1)
             ->get(['userId', 'contractId'])
             ->map(function ($contractUserAssign)
             {

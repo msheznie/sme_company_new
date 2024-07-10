@@ -190,6 +190,7 @@ class ContractUsers extends Model
     {
         return self::where('id', $id)
             ->select('contractUserId', 'contractUserType')
+            ->whereIn('contractUserType',[1,2])
             ->first();
     }
 

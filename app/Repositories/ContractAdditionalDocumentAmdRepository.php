@@ -82,7 +82,6 @@ class ContractAdditionalDocumentAmdRepository extends BaseRepository
                 $recordData['contract_history_id'] = $historyId;
 
                 $newRecord = $this->model->create($recordData);
-                Log::info($record['id']);
 
                 $this->insertErpDocumentAmd($newRecord->id, $record['id'],$historyId);
             }

@@ -36,7 +36,6 @@ class ActivateContractService
     public static function reminderContractExpiry()
     {
         $results = CMContractScenarioAssign::getReminderContractExpiryBefore();
-
         $contractIds = $results->pluck('contract_id')->toArray();
         $userDetails = ContractUserAssign::getReminderContractExpiryUsers($contractIds);
 
@@ -75,7 +74,6 @@ class ActivateContractService
                 ]);
             }
         }
-
         self::sendEmail($userDetails, 1);
     }
 
@@ -147,14 +145,15 @@ class ActivateContractService
 
         foreach ($userDetails as $dt)
         {
-            $contractId = $dt['contractId'];
+            $contractCode = $dt['contractCode'];
             $title = $dt['title'] ?? 'N/A';
             $endDate = $dt['endDate'] ?? 'N/A';
             if ($endDate !== 'N/A')
             {
                 $date = new DateTime($endDate);
                 $endDateFormatted = $date->format('Y-m-d');
-            } else
+            }
+            else
             {
                 $endDateFormatted = 'N/A';
             }
@@ -164,13 +163,14 @@ class ActivateContractService
             if($type == 1)
             {
                 $body = "<p>
-            This is a reminder that Contract ID " . $contractId . ", titled " . $title .
+            This is a reminder that Contract Code " . $contractCode . ", titled " . $title .
                     ", will expire on " . $endDateFormatted .
                     ". Please review and renew as necessary to ensure continued service.</p>
         <p>Thank you</p>";
-            } else
+            }
+            else
             {
-                $body = "<p>Please be reminded that Contract ID " . $contractId . ", titled " . $title .",
+                $body = "<p>Please be reminded that Contract ID " . $contractCode . ", titled " . $title .",
                 has expired on " . $endDateFormatted .".
                 Kindly review and renew the contract at your earliest convenience to
                 ensure uninterrupted service.</p>
@@ -188,7 +188,6 @@ class ActivateContractService
                 'db' =>  ""
             ];
         }
-
         Email::sendBulkEmailSupplier($emails);
         return true;
     }

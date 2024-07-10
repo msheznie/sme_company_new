@@ -12,6 +12,7 @@ use App\Models\Employees;
 use App\Mail\EmailForQueuing;
 use App\Models\SupplierMaster;
 use App\Utilities\EmailUtils;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class Email
@@ -57,35 +58,46 @@ class Email
     {
         foreach ($data as $dataMail)
         {
+
             $contractUserResult = ContractUsers::getContractUserIdById($dataMail['empSystemID']);
-            if ($contractUserResult->contractUserType == 1)
+            if($contractUserResult)
             {
-                $supplier = SupplierMaster::getSupplierBySupplierCodeSystem($contractUserResult->contractUserId);
-                if (empty($supplier))
+                if ($contractUserResult->contractUserType == 1)
                 {
-                    throw new CommonException('Supplier Not Found');
+                    $supplier = SupplierMaster::getSupplierBySupplierCodeSystem($contractUserResult->contractUserId);
+                    if (empty($supplier))
+                    {
+                        throw new CommonException('Supplier Not Found');
+                    }
+                    $dataMail = array_merge($dataMail, [
+                        'empID' => $supplier['supplierCodeSystem'],
+                        'empName' => $supplier['supplierName'],
+                        'empEmail' => $supplier['supEmail'],
+                    ]);
                 }
-                $dataMail = array_merge($dataMail, [
-                    'empID' => $supplier['supplierCodeSystem'],
-                    'empName' => $supplier['supplierName'],
-                    'empEmail' => $supplier['supEmail'],
-                ]);
-            } elseif ($contractUserResult->contractUserType == 3)
-            {
-                $employee = Employees::getEmployee($contractUserResult->contractUserId);
-                if (empty($employee))
+                elseif ($contractUserResult->contractUserType == 3)
                 {
-                    throw new CommonException('Employee Not Found');
+                    $employee = Employees::getEmployee($contractUserResult->contractUserId);
+                    if (empty($employee))
+                    {
+                        throw new CommonException('Employee Not Found');
+                    }
+                    $dataMail = array_merge($dataMail, [
+                        'empID' => $employee['empID'],
+                        'empName' => $employee['empName'],
+                        'empEmail' => $employee['empEmail'],
+                    ]);
                 }
-                $dataMail = array_merge($dataMail, [
-                    'empID' => $employee['empID'],
-                    'empName' => $employee['empName'],
-                    'empEmail' => $employee['empEmail'],
-                ]);
-            } else
-            {
-                throw new CommonException('No Record Found');
+                else
+                {
+                    throw new CommonException('No Record Found');
+                }
             }
+            else
+            {
+                continue;
+            }
+
 
             $body = '<p>Dear ' . $dataMail['empName'] . ', </p>' . $dataMail['emailAlertMessage'];
             $hasPolicy = CompanyPolicyMaster::checkActiveCompanyPolicy($dataMail['companySystemID'], 37);
