@@ -324,4 +324,26 @@ class ContractManagementUtils
             ->where('uuid', $deliverableUuid)
             ->first();
     }
+
+    public static function getContractUsers($companySystemId)
+    {
+        $contractUsers = ContractUsers::select
+        ('uuid', 'contractUserId', 'contractUserCode', 'contractUserName', 'isActive')
+            ->where('companySystemId', $companySystemId)
+            ->where('isActive', 1)
+            ->get();
+
+        $supplier = array();
+
+        foreach ($contractUsers as $user)
+        {
+            $uuid = $user->uuid;
+            $name = $user->contractUserCode. ' | ' .$user->contractUserName;
+            $supplier[] = [
+                "uuid" => $uuid,
+                'name' => $name
+            ];
+        }
+        return $supplier;
+    }
 }

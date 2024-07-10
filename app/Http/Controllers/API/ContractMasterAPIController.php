@@ -142,7 +142,7 @@ class ContractMasterAPIController extends AppBaseController
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
-        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid);
+        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid, $comapnyId);
         $contactMaster = new ContractMaster();
         $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');

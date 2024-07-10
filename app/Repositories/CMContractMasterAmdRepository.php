@@ -149,6 +149,7 @@ class CMContractMasterAmdRepository extends BaseRepository
     public function getContractMasterData(Request $request)
     {
         $input = $request->input();
+        $companyId = $input['selectedCompanyID'];
         $historyUuid = $input['historyUuid'];
         $getContractHistoryData = ContractManagementUtils::getContractHistoryData($historyUuid);
         if (!$getContractHistoryData)
@@ -159,7 +160,8 @@ class CMContractMasterAmdRepository extends BaseRepository
         $contractMasterData = $this->model->getContractMasterData($getContractHistoryData->id);
         $contractMaster = $this->contractMasterRepo->unsetValues($contractMasterData);
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMasterData['counterPartyNameUuid']);
-        $response = $this->contractMasterRepo->getEditFormData($contractMasterData['counterParty'],$userUuid);
+        $response =
+            $this->contractMasterRepo->getEditFormData($contractMasterData['counterParty'],$userUuid,$companyId);
 
         $editData = $contractMaster;
         $response['editData'] = $editData;

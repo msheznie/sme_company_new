@@ -266,7 +266,7 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
-    public function getEditFormData($counterPartyType, $userUuid): array
+    public function getEditFormData($counterPartyType, $userUuid, $companyId): array
     {
         if (isset($userUuid) && $userUuid->contractUserId !== 0)
         {
@@ -277,7 +277,7 @@ class ContractMasterRepository extends BaseRepository
         }
         return [
             'contractType' => ContractManagementUtils::getContractTypes(),
-            'contractOwners' => ContractManagementUtils::counterPartyNames($counterPartyType),
+            'contractOwners' => ContractManagementUtils::getContractUsers($companyId),
             'counterPartyType' => ContractManagementUtils::getCounterParty(),
             'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType),
             'tenderList' => $tenderList
@@ -296,7 +296,6 @@ class ContractMasterRepository extends BaseRepository
 
         $response = [
             'counterParty' =>  $checkCounterParty,
-            'contractOwners' => ContractManagementUtils::counterPartyNames($checkCounterParty),
             'counterPartyNames' => ContractManagementUtils::counterPartyNames($checkCounterParty)
         ];
 
