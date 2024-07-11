@@ -22,7 +22,7 @@ class EmailUtils
         }
         return $emailSubject;
     }
-    public static function getEmailBody($documentID, $masterData, $url=null)
+    public static function getEmailBody($documentID, $masterData)
     {
         $emailBody = '';
         $footer = self::getEmailFooter();
@@ -32,6 +32,7 @@ class EmailUtils
             $contractUser = $masterData['createdUser']['empName'] ?? "-";
             $partyA = $masterData['contractTypes']['partyA']['cmParty_name'] ?? "-";
             $partyB = $masterData['contractTypes']['partyB']['cmParty_name'] ?? "-";
+            $path = '/approval/contracts';
             $emailBody = '<p>A new contract has been created in the contract management and requires your
                    '. General::ordinalSuffix($masterData->rollLevelOrder) . ' level of approval. Please review the
                     contract details provided below and approve.
@@ -45,10 +46,10 @@ class EmailUtils
                     <span style="margin-bottom: 10px;"><b>Party A: </b>'. $partyA .' </span><br>
                     <span style="margin-bottom: 10px;"><b>Party B: </b>'. $partyB .' </span>
                    </p>
-                     <p>Thank you for your prompt attention to this matter.</p>';
+                     <p>Thank you for your prompt attention to this matter.</p>
 
-            /*<p> Please click the link below to review the full contract document and submit your approval or
-        comments. <br> <a href="' . self::getRedirectUrl($url) . '">Click here to approve</a> </p>*/
+            <p> Please click the link below to review the full contract document and submit your approval or
+        comments. <br> <a href="' . self::getRedirectUrl($path) . '">Click here to approve</a> </p> ';
         }
 
         return $emailBody . $footer;
@@ -68,24 +69,31 @@ class EmailUtils
         }
         return $email;
     }
-    public static function getRedirectUrl($url)
+    public static function getRedirectUrl($path = '/approval/contract-approval')
     {
-        $redirectUrl =  env("DOMAIN_URL");
-
-        if (env('IS_MULTI_TENANCY'))
+        if(env('IS_MULTI_TENANCY'))
         {
-            $path = parse_url($url, PHP_URL_PATH);
-            $host = explode('/', trim($path, '/'));
+            $domainUrl = env("DOMAIN_URL");
+            $currentUrl = request()->fullUrl();
 
-            $subDomain = $host[0] ?? null;
+            $parsedUrl = parse_url($currentUrl);
+            $hostParts = explode('.', $parsedUrl['host']);
 
-            if (!$subDomain)
+            if (count($hostParts) > 2)
             {
-                throw new CommonException($subDomain . "Not found");
+                $subDomain = $hostParts[0];
+            } else
+            {
+                throw new CommonException('Host not found');
             }
-            $redirectUrl = str_replace('*', $subDomain, $redirectUrl);
+
+
+            $redirectUrl = str_replace('*', $subDomain, $domainUrl);
+            $redirectUrl .= $path;
+
+            return $redirectUrl;
         }
-        return $redirectUrl.'/approval/contracts';
+        return '';
     }
     public static function getEmailFooter()
     {

@@ -120,7 +120,7 @@ class ApproveDocument
         {
             self::sendEmail($formData, $masterRecord);
         }
-        
+
         return true;
     }
     public static function sendEmail($params, $masterRecords)
@@ -138,9 +138,9 @@ class ApproveDocument
                 $documentApproved['companySystemID'],
                 $documentApproved['documentSystemID'],
             );
-            $url = $params['url'] ?? null;
+
             $subject = EmailUtils::getEmailSubject($documentApproved->documentSystemID);
-            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords, $url);
+            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords);
             foreach($approvalList as $dt)
             {
                 if ($dt['employee'])
