@@ -43,7 +43,14 @@ class ConfirmDocument
 
         if (empty($output))
         {
-            throw new CommonException(trans('common.no_approval_level_for_this_document'));
+            if($policy->isAmountApproval)
+            {
+                throw new CommonException('Contract amount is not within the specified approval setup value
+                 range');
+            } else
+            {
+                throw new CommonException(trans('common.no_approval_level_for_this_document'));
+            }
         }
 
         $documentApproved = self::prepareDocumentApprovalData(
