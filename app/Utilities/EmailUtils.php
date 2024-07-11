@@ -46,10 +46,10 @@ class EmailUtils
                     <span style="margin-bottom: 10px;"><b>Party A: </b>'. $partyA .' </span><br>
                     <span style="margin-bottom: 10px;"><b>Party B: </b>'. $partyB .' </span>
                    </p>
-                     <p>Thank you for your prompt attention to this matter.</p>
-
-            <p> Please click the link below to review the full contract document and submit your approval or
-        comments. <br> <a href="' . self::getRedirectUrl($path) . '">Click here to approve</a> </p> ';
+                   <p> Please click the link below to review the full contract document and submit your approval or
+                        comments. <br> <a href="' . self::getRedirectUrl($path) . '">Click here to approve</a>
+                   </p>
+                   <p>Thank you for your prompt attention to this matter.</p>';
         }
 
         return $emailBody . $footer;
