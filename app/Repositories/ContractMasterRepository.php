@@ -1145,4 +1145,3 @@ class ContractMasterRepository extends BaseRepository
         return $id;
     }
 }
-
