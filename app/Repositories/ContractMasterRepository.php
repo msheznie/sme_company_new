@@ -414,6 +414,50 @@ class ContractMasterRepository extends BaseRepository
 
             $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
             $colName = $fromAmendment ? 'contract_history_id' : 'id';
+
+            $contractTypeSections = CMContractTypeSections::getContractTypeSections(
+                $checkContractTypeID['contract_typeId'],
+                $selectedCompanyID
+            );
+
+            ContractSettingMaster::where('contractId', $id)->delete();
+            ContractSettingDetail::where('contractId', $id)->delete();
+
+            foreach ($contractTypeSections as $contractTypeSection)
+            {
+                $contractSettingMasterArray = [
+                    'uuid' => bin2hex(random_bytes(16)),
+                    'contractId' => $id,
+                    'contractTypeSectionId' => $contractTypeSection['ct_sectionId'],
+                    'isActive' => 0
+                ];
+
+                ContractSettingMaster::create($contractSettingMasterArray);
+            }
+
+            $contractTypeSectionDetail = ContractSettingMaster::getContractTypeSectionDetail($id);
+            $detailArray = [];
+            $i = 0;
+            foreach ($contractTypeSectionDetail as $detail)
+            {
+                $sDetails = $detail['contractTypeSection']['contractSectionWithTypes']['sectionDetail'];
+                foreach ($sDetails as $s)
+                {
+                    $sectionDetailId = $s['id'];
+                    $detailArray[$i] = [
+                        'uuid' => bin2hex(random_bytes(16)),
+                        'settingMasterId' => $detail['id'],
+                        'sectionDetailId' => $sectionDetailId,
+                        'isActive' => 0,
+                        'contractId' => $id,
+                        'created_at' => Carbon::now(),
+                    ];
+                    $i++;
+                }
+            }
+
+            ContractSettingDetail::insert($detailArray);
+
             return $model::where($colName, $id)->update($updateData);
 
         });

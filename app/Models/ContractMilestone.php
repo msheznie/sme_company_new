@@ -143,4 +143,10 @@ class ContractMilestone extends Model
         return ContractMilestone::select('id')->where('contractID', $contractID)->exists();
     }
 
+    public static function checkMilestoneAddedForContract($contractId, $companySystemID)
+    {
+        return ContractMilestone::where('contractId', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
+    }
 }

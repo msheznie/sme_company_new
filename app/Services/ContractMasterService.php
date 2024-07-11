@@ -2,13 +2,21 @@
 
 namespace App\Services;
 
+use App\Models\CMContractTypes;
+use App\Models\CMContractTypeSections;
+use App\Models\ContractBoqItems;
+use App\Models\ContractDeliverables;
 use App\Models\ContractHistory;
 use App\Exceptions\CommonException;
+use App\Models\ContractMilestone;
+use App\Models\ContractMilestoneRetention;
+use App\Models\MilestonePaymentSchedules;
 use App\Repositories\ContractMasterRepository;
 use App\Models\ContractMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Company;
 use App\Utilities\ContractManagementUtils;
+use Illuminate\Support\Facades\Log;
 
 class ContractMasterService
 {
@@ -67,4 +75,51 @@ class ContractMasterService
             })
             ->exists();
     }
+
+    public function disableContractTypeField($contractTypeUUId, $companySystemID, $contractId)
+    {
+        $contractType = CMContractTypes::getContractType($contractTypeUUId);
+        $sections = CMContractTypeSections::getContractTypeSections($contractType->contract_typeId, $companySystemID);
+        $cmSectionIds = $sections->pluck('cmSection_id')->toArray();
+
+        foreach ($cmSectionIds as $sectionId)
+        {
+            if ($this->checkRecordExistence($sectionId, $contractId, $companySystemID))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function checkRecordExistence($sectionId, $contractId, $companySystemID)
+    {
+        switch ($sectionId)
+        {
+            case 1:
+                $result = ContractBoqItems::checkBoqAddedForContract($contractId, $companySystemID);
+                break;
+            case 2:
+                $hasMilestone = ContractMilestone::checkMilestoneAddedForContract($contractId, $companySystemID);
+                $hasDeliverables = ContractDeliverables::checkDeliverableAddedForContract(
+                    $contractId,
+                    $companySystemID
+                );
+                $result = $hasMilestone || $hasDeliverables;
+                break;
+            case 3:
+                $milestonePayment = MilestonePaymentSchedules::existMilestonePayment($contractId, $companySystemID);
+                $result = $milestonePayment !== null;
+                break;
+            case 4:
+                $result = ContractMilestoneRetention::checkRetentionAddedForContract($contractId, $companySystemID);
+                break;
+            default:
+                $result = false;
+        }
+
+        return $result;
+    }
+
 }

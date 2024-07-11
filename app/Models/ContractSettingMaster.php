@@ -129,4 +129,18 @@ class ContractSettingMaster extends Model
             })
             ->exists();
     }
+
+    public static function getContractTypeSectionDetail($contractMasterId)
+    {
+        return ContractSettingMaster::with([
+            'contractTypeSection' => function ($q) {
+                $q->select('ct_sectionId', 'cmSection_id', 'contract_typeId', 'companySystemID')
+                    ->with(['contractSectionWithTypes' => function ($q1) {
+                        $q1->select('cmSection_id','cmSection_detail')
+                            ->with(['sectionDetail']);
+                    }]);
+            }
+        ])->where('contractId', $contractMasterId)
+            ->get();
+    }
 }

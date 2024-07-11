@@ -33,6 +33,7 @@ use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMasterResource;
+use Illuminate\Support\Facades\Log;
 use Response;
 use Yajra\DataTables\DataTables;
 
@@ -155,6 +156,12 @@ class ContractMasterAPIController extends AppBaseController
         $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
         $response['milestoneActive'] = $milestoneActive && $milestoneHasRec;
         $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
+        $response['disableContractType'] = $this->contractMasterService->disableContractTypeField(
+            $editData['contractTypeUuid'],
+            $comapnyId,
+            $contractMaster['id']
+        );
+
 
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }

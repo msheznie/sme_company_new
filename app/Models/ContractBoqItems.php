@@ -143,4 +143,11 @@ class ContractBoqItems extends Model
             })
             ->get();
     }
+
+    public static function checkBoqAddedForContract($contractId, $companySystemID)
+    {
+        return ContractBoqItems::where('contractId', $contractId)
+            ->where('companyId', $companySystemID)
+            ->exists();
+    }
 }

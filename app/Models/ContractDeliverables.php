@@ -135,4 +135,11 @@ class ContractDeliverables extends Model
         return self::where('contractID', $contractID)
             ->get();
     }
+
+    public static function checkDeliverableAddedForContract($contractId, $companySystemID)
+    {
+        return ContractDeliverables::where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
+    }
 }

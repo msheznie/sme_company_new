@@ -127,4 +127,11 @@ class ContractMilestoneRetention extends Model
     {
         return 'companySystemId';
     }
+
+    public static function checkRetentionAddedForContract($contractId, $companySystemID)
+    {
+        return ContractMilestoneRetention::where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
+    }
 }
