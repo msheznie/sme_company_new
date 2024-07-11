@@ -43,13 +43,27 @@ class ConfirmDocument
 
         if (empty($output))
         {
-            if($policy->isAmountApproval)
+            throw new CommonException(trans('common.no_approval_level_for_this_document'));
+        }
+        if($output && $policy->isAmountApproval)
+        {
+            if(array_key_exists('amount', $params))
             {
-                throw new CommonException('Contract amount is not within the specified approval setup value
-                 range');
+                if ($params["amount"] >= 0)
+                {
+                    $amount = $params["amount"];
+                    if($output->valueWise == 1 && ($amount < $output->valueFrom || $amount > $output->valueTo))
+                    {
+                        throw new CommonException('Contract amount is not within the specified approval
+                        setup value range');
+                    }
+                } else
+                {
+                    throw new CommonException(trans('common.no_approval_level_for_this_document'));
+                }
             } else
             {
-                throw new CommonException(trans('common.no_approval_level_for_this_document'));
+                throw new CommonException(trans('common.amount_parameter_are_missing'));
             }
         }
 

@@ -101,7 +101,7 @@ class ErpApprovalLevel extends Model
     }
     public static function approvalLevelValidation($params, $document, $policy)
     {
-        $approvalLevel = ErpApprovalLevel::select('approvalLevelID')
+        return ErpApprovalLevel::select('approvalLevelID', 'valueFrom', 'valueTo', 'valueWise')
             ->with([
                 'approvalRole' => function ($q)
                 {
@@ -113,30 +113,7 @@ class ErpApprovalLevel extends Model
             ->where('companySystemID', $params['company'])
             ->where('documentSystemID', $params['document'])
             ->where('departmentSystemID', $document['departmentSystemID'])
-            ->where('isActive', -1);
-
-        if($policy->isAmountApproval)
-        {
-            if(array_key_exists('amount', $params))
-            {
-                if ($params["amount"] >= 0)
-                {
-                    $amount = $params["amount"];
-                    $approvalLevel->where(function ($query) use ($amount)
-                    {
-                        $query->where('valueFrom', '<=', $amount);
-                        $query->where('valueTo', '>=', $amount);
-                    });
-                    $approvalLevel->where('valueWise', 1);
-                } else
-                {
-                    throw new CommonException(trans('common.no_approval_level_for_this_document'));
-                }
-            } else
-            {
-                throw new CommonException(trans('common.amount_parameter_are_missing'));
-            }
-        }
-        return $approvalLevel->first();
+            ->where('isActive', -1)
+            ->first();
     }
 }
