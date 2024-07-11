@@ -88,7 +88,6 @@ class Employees extends Model
     const CREATED_AT = 'timestamp';
     const UPDATED_AT = 'timestamp';
 
-    protected $hidden = ['employeeSystemID', 'empID'];
 
     public $fillable = [
         'empID',
@@ -244,79 +243,22 @@ class Employees extends Model
      * @var array
      */
     public static $rules = [
-        'empID' => 'required|string|max:20',
-        'hrmsEmpID' => 'nullable|integer',
-        'serial' => 'nullable|integer',
-        'empLeadingText' => 'nullable|string|max:3',
-        'empUserName' => 'nullable|string|max:255',
-        'empTitle' => 'nullable|string|max:100',
-        'empInitial' => 'nullable|string|max:100',
-        'empName' => 'nullable|string|max:500',
-        'empName_O' => 'nullable|string|max:500',
-        'empFullName' => 'nullable|string|max:500',
-        'empSurname' => 'nullable|string|max:500',
-        'empSurname_O' => 'nullable|string|max:500',
-        'empFirstName' => 'nullable|string|max:500',
-        'empFirstName_O' => 'nullable|string|max:500',
-        'empFamilyName' => 'nullable|string|max:500',
-        'empFamilyName_O' => 'nullable|string|max:500',
-        'empFatherName' => 'nullable|string|max:500',
-        'empFatherName_O' => 'nullable|string|max:500',
-        'empManagerAttached' => 'nullable|string|max:100',
-        'empDateRegistered' => 'nullable',
-        'empTelOffice' => 'nullable|string|max:100',
-        'empTelMobile' => 'nullable|string|max:100',
-        'empLandLineNo' => 'nullable|string|max:100',
-        'extNo' => 'nullable|integer',
-        'empFax' => 'nullable|string|max:100',
-        'empEmail' => 'nullable|string|max:255',
-        'empLocation' => 'nullable|integer',
-        'empDateTerminated' => 'nullable',
-        'empLoginActive' => 'nullable|integer',
-        'empActive' => 'nullable|integer',
-        'userGroupID' => 'nullable|integer',
-        'empCompanySystemID' => 'nullable|integer',
-        'empCompanyID' => 'nullable|string|max:45',
-        'religion' => 'nullable|integer',
-        'isLoggedIn' => 'nullable|integer',
-        'isLoggedOutFailYN' => 'nullable|integer',
-        'logingFlag' => 'nullable|integer',
-        'isSuperAdmin' => 'nullable|integer',
-        'discharegedYN' => 'nullable|integer',
-        'isFinalSettlementDone' => 'nullable|integer',
-        'hrusergroupID' => 'nullable|string|max:45',
-        'employmentType' => 'nullable|integer',
-        'isConsultant' => 'nullable|integer',
-        'isTrainee' => 'nullable|integer',
-        'is3rdParty' => 'nullable|integer',
-        '3rdPartyCompanyName' => 'nullable|string|max:500',
-        'gender' => 'nullable|integer',
-        'designation' => 'nullable|integer',
-        'nationality' => 'nullable|string|max:20',
-        'isManager' => 'nullable|integer',
-        'isApproval' => 'nullable|integer',
-        'isDashBoard' => 'nullable|integer',
-        'isAdmin' => 'nullable|integer',
-        'isBasicUser' => 'nullable|integer',
-        'ActivationCode' => 'nullable|string|max:100',
-        'ActivationFlag' => 'nullable|integer',
-        'isHR_admin' => 'nullable|integer',
-        'isLock' => 'nullable|integer',
-        'basicDataIngCount' => 'nullable|boolean',
-        'opRptManagerAccess' => 'nullable|integer',
-        'isSupportAdmin' => 'nullable|integer',
-        'isHSEadmin' => 'required|integer',
-        'excludeObjectivesYN' => 'nullable|integer',
-        'machineID' => 'nullable|integer',
-        'timestamp' => 'nullable',
-        'createdFrom' => 'nullable|integer',
-        'isNewPortal' => 'nullable|integer',
-        'uuid' => 'nullable|string|max:255'
+
     ];
 
-    public function pulledContractUser(){
+    public function pulledContractUser()
+    {
         return $this->belongsTo(ContractUsers::class, 'employeeSystemID', 'contractUserId');
     }
-
-
+    public static function employeeEmailValidation($email, $selectedCompanyID)
+    {
+        return Employees::where('empEmail', $email)->where('empCompanySystemID', $selectedCompanyID)->exists();
+    }
+    public static function getEmployee($empSystemID)
+    {
+        return Employees::select('empID', 'empName', 'empEmail')
+            ->where('employeeSystemID', $empSystemID)
+            ->where('discharegedYN',0)
+            ->first();
+    }
 }

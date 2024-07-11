@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class CMContractTypeSections
@@ -77,5 +78,13 @@ class CMContractTypeSections extends Model
     public function sectionDetail()
     {
         return $this->belongsTo(ContractSectionDetail::class, 'cmSection_id', 'sectionMasterId');
+    }
+
+    public static function getContractTypeSections($contractTypeId, $companySystemID)
+    {
+        return CMContractTypeSections::where('contract_typeId', $contractTypeId)
+            ->where('companySystemID', $companySystemID)
+            ->where('is_enabled', 1)
+            ->get();
     }
 }

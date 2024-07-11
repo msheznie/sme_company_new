@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractUserAssignAPIRequest;
 use App\Http\Requests\API\UpdateContractUserAssignAPIRequest;
+use App\Models\CMContractMasterAmd;
+use App\Models\CMContractUserAssignAmd;
+use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
 use App\Models\ContractUserGroup;
 use App\Models\ContractUsers;
 use App\Repositories\ContractUserAssignRepository;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\Log;
@@ -140,37 +145,88 @@ class ContractUserAssignAPIController extends AppBaseController
     public function deleteAssignedUsers(CreateContractUserAssignAPIRequest $request)
     {
         $input = $request->all();
+        $amendment = $input['amendment'];
+        $model = $amendment ? CMContractUserAssignAmd::class : ContractUserAssign::class;
+        $colname = $amendment ? 'amd_id' : 'id';
+        $historyId = 0;
         /** @var ContractUserAssign $contractUserAssign */
-        if($input['userGroupId'] == null){
-            $contractUserAssignedId = ContractUserAssign::select('id')->where('uuid', $input['id'])->first();
-            $contractUserAssign = $this->contractUserAssignRepository->find($contractUserAssignedId->id);
 
-            if (empty($contractUserAssign)) {
-                return $this->sendError('',trans('common.contract_user_assign_not_found'));
+        if ($input['userGroupId'] == null)
+        {
+
+            if ($amendment)
+            {
+                $id = $input['id'];
+            } else
+            {
+
+                $contractUserAssignedId = ContractUserAssign::select('id')->where('uuid', $input['id'])->first();
+                $contractUserAssign = $this->contractUserAssignRepository->find($contractUserAssignedId->id);
+
+                if (empty($contractUserAssign)) {
+                    return $this->sendError('', trans('common.contract_user_assign_not_found'));
+                }
+                $id = $contractUserAssignedId->id;
             }
-            $input['userGroupId'] = 0;
-            $input['status'] = 0;
-            $input['updatedBy'] = General::currentEmployeeId();
-            $this->contractUserAssignRepository->update($input, $contractUserAssignedId->id);
-        } else {
+
+            $data['userGroupId'] = 0;
+            $data['status'] = 0;
+            $data['updatedBy'] = General::currentEmployeeId();
+            $model::where($colname, $id)
+                ->update($data);
+        }
+        else
+        {
             $getUserGroupId = ContractUserGroup::select('id')
                 ->where('uuid', $input['userGroupId'])
                 ->first();
 
-            $contractUserAssigns = ContractUserAssign::where('contractId', $input['contractId'])
+            $companyId = $input['selectedCompanyID'];
+            $activeDefaultUserGroups = ContractUserGroup::getActiveDefaultUserGroups($companyId);
+
+            $assignUserGroups =  ContractUserAssign::getAssignUserGroups($input['contractId']);
+
+            $activeDefaultUserGroupsIds = $activeDefaultUserGroups->pluck('id');
+            $assignUserGroupsIds = $assignUserGroups->pluck('userGroupId');
+            $commonIds = $activeDefaultUserGroupsIds->intersect($assignUserGroupsIds);
+            $commonCount = $commonIds->count();
+
+            $defaultUserGroupIds = $activeDefaultUserGroups->pluck('id')->toArray();
+            $isInActiveDefaultUserGroups = in_array($getUserGroupId->id, $defaultUserGroupIds);
+
+
+
+            $contractUserAssigns = $model::where('contractId', $input['contractId'])
                 ->where('userGroupId', $getUserGroupId->id)
-                ->select('id as i')
-                ->get();
+                ->select($colname . ' as i');
 
-            foreach ($contractUserAssigns as $contractUserAssign) {
-                $this->contractUserAssignRepository->update([
-                    'status' => 0,
-                    'updatedBy' => General::currentEmployeeId()
-                ], $contractUserAssign->i);
+            if ($amendment)
+            {
+                $historyData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+                $historyId = $historyData->id;
+                $contractUserAssigns->where('contract_history_id', $historyId);
             }
-        }
 
-        return $this->sendResponse('',trans('common.contract_user_assign_deleted_successfully'));
+            $contractUserAssigns = $contractUserAssigns->get();
+
+            if ($commonCount == 1 && $isInActiveDefaultUserGroups == 1)
+            {
+                throw new CommonException('At least one default user group must be present in a contract');
+            } else
+            {
+
+                foreach ($contractUserAssigns as $contractUserAssign)
+                {
+                    $model::where($colname, $contractUserAssign->i)
+                        ->update([
+                            'status' => 0,
+                            'updatedBy' => General::currentEmployeeId()
+                        ]);
+                }
+            }
+
+            return $this->sendResponse('', trans('common.contract_user_assign_deleted_successfully'));
+        }
     }
 
     public function getAssignedUsers(Request $request) {

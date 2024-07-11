@@ -39,11 +39,12 @@ class ErpDocumentAttachments extends Model
     use HasFactory;
 
     public $table = 'erp_documentattachments';
+    protected $primaryKey = 'attachmentID';
 
     const CREATED_AT = 'timeStamp';
     const UPDATED_AT = 'timeStamp';
 
-    protected $hidden = ['documentSystemCode'];
+
 
     public $fillable = [
         'companySystemID',
@@ -103,36 +104,20 @@ class ErpDocumentAttachments extends Model
      * @var array
      */
     public static $rules = [
-        'companySystemID' => 'nullable|integer',
-        'companyID' => 'nullable|string|max:45',
-        'documentSystemID' => 'nullable|integer',
-        'documentID' => 'nullable|string|max:45',
-        'documentSystemCode' => 'nullable|integer',
-        'approvalLevelOrder' => 'nullable|integer',
-        'attachmentDescription' => 'nullable|string',
-        'location' => 'nullable|string|max:500',
-        'path' => 'nullable|string|max:500',
-        'originalFileName' => 'nullable|string|max:500',
-        'myFileName' => 'nullable|string|max:500',
-        'docExpirtyDate' => 'nullable',
-        'attachmentType' => 'nullable|integer',
-        'sizeInKbs' => 'nullable|numeric',
-        'isUploaded' => 'nullable|integer',
-        'pullFromAnotherDocument' => 'nullable|integer',
-        'parent_id' => 'nullable|integer',
-        'timeStamp' => 'nullable',
-        'envelopType' => 'nullable|integer',
-        'order_number' => 'nullable|integer'
+
     ];
 
-    public static function deleteAttachment($documentSystemID, $documentSystemCode): array{
+    public static function deleteAttachment($documentSystemID, $documentSystemCode): array
+    {
         $deleteFile = ErpDocumentAttachments::select('attachmentID')
             ->where('documentSystemID', $documentSystemID)
             ->where('documentSystemCode', $documentSystemCode)
             ->first();
-        if(!empty($deleteFile)) {
+        if(!empty($deleteFile))
+        {
             $delete = ErpDocumentAttachments::where('attachmentID', $deleteFile['attachmentID'])->delete();
-            if(!$delete) {
+            if(!$delete)
+            {
                 return [
                     'status' => false,
                     'message' => trans('common.could_not_delete_attachment')
@@ -143,5 +128,75 @@ class ErpDocumentAttachments extends Model
             'status' => true,
             'message' => trans('common.attachment_document_deleted_successfully')
         ];
+    }
+
+    public static function deleteHistoryAttachment($attachmentID): array
+    {
+
+        $delete = ErpDocumentAttachments::where('attachmentID', $attachmentID)->delete();
+        if(!$delete)
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.could_not_delete_attachment')
+            ];
+        }
+
+        return [
+            'status' => true,
+            'message' => trans('common.attachment_document_deleted_successfully')
+        ];
+    }
+
+    public function getAttachmentDocumentWise($documentSystemID,$documentSystemCode,$companySystemID)
+    {
+        return self::where('companySystemID', $companySystemID)
+            ->where('documentSystemID',$documentSystemID)
+            ->where('documentSystemCode',$documentSystemCode)
+            ->get();
+
+    }
+    public function getDocumentAttachments($search, $documentSystemID, $selectedCompanyID, $ids)
+    {
+        $query = ErpDocumentAttachments::select('attachmentID', 'attachmentDescription', 'myFileName',
+                'documentSystemID'
+            )
+            ->with([
+                'documentMaster' => function ($q)
+                {
+                    $q->select('documentSystemID', 'documentDescription');
+                }
+            ])
+            ->where('documentSystemID', $documentSystemID)
+            ->whereIn('documentSystemCode', $ids)
+            ->orderBy('attachmentID', 'desc');
+        if($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $query = $query->where(function ($query) use ($search)
+            {
+                $query->orWhere('attachmentDescription', 'LIKE', "%{$search}%");
+            });
+        }
+        return $query;
+    }
+    public function documentMaster()
+    {
+        return $this->belongsTo(ErpDocumentMaster::class, 'documentSystemID', 'documentSystemID');
+    }
+
+    public function getAttachmentData($documentSystemID,$historyId)
+    {
+        return ErpDocumentAttachments::select('attachmentID')
+            ->where('documentSystemID', $documentSystemID)
+            ->where('documentSystemCode', $historyId)
+            ->get();
+    }
+
+    public function getErpAttachedData($documentCode,$id)
+    {
+        return self::where('documentID',$documentCode)
+            ->where('documentSystemCode',$id)
+            ->get();
     }
 }

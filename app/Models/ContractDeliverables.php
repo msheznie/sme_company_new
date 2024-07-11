@@ -5,7 +5,8 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractDeliverables
  * @package App\Models
@@ -23,8 +24,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractDeliverables extends Model
 {
-    use SoftDeletes;
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_deliverables';
 
@@ -32,7 +34,6 @@ class ContractDeliverables extends Model
     const UPDATED_AT = 'updated_at';
 
 
-    protected $dates = ['deleted_at'];
 
 
 
@@ -40,12 +41,12 @@ class ContractDeliverables extends Model
         'uuid',
         'contractID',
         'milestoneID',
+        'title',
         'description',
-        'startDate',
-        'endDate',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'dueDate'
     ];
 
     /**
@@ -58,9 +59,9 @@ class ContractDeliverables extends Model
         'uuid' => 'string',
         'contractID' => 'integer',
         'milestoneID' => 'integer',
+        'title' => 'string',
         'description' => 'string',
-        'startDate' => 'string',
-        'endDate' => 'string',
+        'dueDate' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
@@ -75,18 +76,70 @@ class ContractDeliverables extends Model
         'uuid' => 'required|string|max:200',
         'contractID' => 'required|integer',
         'milestoneID' => 'required|integer',
+        'title' => 'required|string|max:255',
         'description' => 'required|string|max:255',
-        'startDate' => 'required',
-        'endDate' => 'required',
         'companySystemID' => 'required|integer',
         'created_by' => 'required|integer',
         'updated_by' => 'required|integer',
         'deleted_at' => 'required',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'dueDate' => 'string'
     ];
 
-    public function milestone() {
+    public function milestone()
+    {
         return $this->belongsTo(ContractMilestone::class, 'milestoneID', 'id');
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
+    }
+
+    public static function getDeliverables($contractID, $companySystemID)
+    {
+        return ContractDeliverables::select('uuid', 'milestoneID', 'title', 'description', 'dueDate')
+            ->with([
+                'milestone' => function ($q)
+                {
+                    $q->select('id', 'uuid', 'title');
+                }
+            ])
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->get();
+    }
+    public static function checkDeliverableExist($title, $description, $id, $companySystemID, $contractID)
+    {
+        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID) {
+            $query->where('contractID', $contractID)
+                ->where('companySystemID', $companySystemID)
+                ->where(function ($q) use ($title, $description) {
+                    $q->where('description', $description)
+                        ->orWhere('title', $title);
+                });
+        })
+            ->when($id > 0, function ($q) use ($id) {
+                $q->where('id', '!=', $id);
+            })
+            ->exists();
+    }
+    public static function getContractDeliverable($contractID)
+    {
+        return self::where('contractID', $contractID)
+            ->get();
+    }
+
+    public static function checkDeliverableAddedForContract($contractId, $companySystemID)
+    {
+        return ContractDeliverables::where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
     }
 }

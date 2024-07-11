@@ -28,6 +28,9 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/user-form-data',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getUserFormDataContractEdit'])
         ->name('Contract edit form data');
+    Route::post('/load-tender-data',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSupplierTenderList'])
+        ->name('Load tender data');
     Route::post('/get-contract-type-sections-data',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractTypeSectionData'])
         ->name('Contract type section data');
@@ -207,4 +210,213 @@ Route::
         \App\Http\Controllers\API\MilestoneStatusHistoryAPIController::class,
         'getMilestoneStatusHistory'
     ])->name('Milestone status history');
+
+    Route::post('create-contract-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'createContractHistory'
+    ])->name('Create Contract History');
+
+    Route::post('get-category-wise-contract-data', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getCategoryWiseContractData'
+    ])->name('get Contract History Category Wise Data');
+    Route::post('delete-contract-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteContractHistory'
+    ])->name('Delete Contract History');
+    Route::post('get-contract-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractHistory'
+    ])->name('Get Contract History');
+    Route::post('update-contract-status', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateContractStatus'
+    ])->name('Update Contract Status');
+    Route::post('get-contract-view-data', [
+        \App\Http\Controllers\API\ContractMasterAPIController::class,
+        'getContractViewData'
+    ])->name('get contract view data');
+    Route::post('update-extend-contract-status', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateExtendStatus'
+    ])->name('Update Extend Contract Status');
+    Route::post('contract-history-attachments', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractHistoryAttachments'
+    ])->name('Contract History Attachments');
+    Route::post('get-contract-history-attachments', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractHistoryAttachments'
+    ])->name('Get Contract History Attachments');
+    Route::post('delete-contract-history-attachment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteHistoryAttachment'
+    ])->name('Delete Contract History Attachments');
+    Route::post('contract-history-delete', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractHistoryDelete'
+    ])->name('Contract History Delete');
+    Route::post('periodic-billing-form-data', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'periodicBillingFormData'
+    ])->name('Payment schedule form data');
+    Route::post('periodic-billing', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'store'
+    ])->name('store periodic billing');
+    Route::put('periodic-billing/{id}', [
+        \App\Http\Controllers\API\PeriodicBillingsAPIController::class,
+        'update'
+    ])->name('update periodic billing');
+
+    Route::post('get-contract-list-status', [
+        \App\Http\Controllers\API\contractStatusHistoryAPIController::class,
+        'getContractListStatus'
+    ])->name('Contract History Status');
+    Route::post('payment-schedule-form-data', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'getPaymentScheduleFormData'
+    ])->name('get payment schedule form data');
+    Route::post('milestone-payment-schedule', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'store'
+    ])->name('store milestone payment schedule');
+    Route::post('milestone-payment-schedule-list', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'getMilestonePaymentSchedules'
+    ])->name('get milestone payment schedule list');
+
+    Route::put('milestone-payment-schedule/{id}', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'update'
+    ])->name('update milestone payment schedule');
+
+    Route::post('get-time-consumption-form-data', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'getTimeConsumptionFormData'
+    ])->name('time and material consumption from data');
+
+    Route::post('time-material-consumption', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'store'
+    ])->name('store time and material consumption');
+
+    Route::post('all-time-material-consumption', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'getAllTimeMaterialConsumption'
+    ])->name('get all time and material consumption');
+
+    Route::put('time-material-consumption/{id}', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'update'
+    ])->name('update time and material consumption');
+
+    Route::delete('time-material-consumption/{id}', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'destroy'
+    ])->name('delete time and material consumption');
+
+    Route::post('pull-items-from-boq', [
+        \App\Http\Controllers\API\TimeMaterialConsumptionAPIController::class,
+        'pullItemsFromBOQ'
+    ])->name('pull items from boq');
+
+    Route::delete('milestone-payment-schedule/{id}', [
+        \App\Http\Controllers\API\MilestonePaymentSchedulesAPIController::class,
+        'destroy'
+    ])->name('delete milestone payment schedule');
+    Route::get('/get-contract-payment-terms/{id}',
+        [\App\Http\Controllers\API\ContractPaymentTermsAPIController::class, 'getContractPaymentTerms'])
+        ->name('get contract payment terms');
+    Route::post('payment-term',
+        [\App\Http\Controllers\API\ContractPaymentTermsAPIController::class, 'store'])
+        ->name('create payment term');
+    Route::put('update-payment-term', [
+        \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
+        'update'
+    ])->name('update payment term');
+    Route::delete('delete-payment-term/{id}', [
+        \App\Http\Controllers\API\ContractPaymentTermsAPIController::class,
+        'destroy'
+    ])->name('delete payment term');
+
+    Route::post('get-reminder-configuration', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'showReminders'
+    ])->name('Contract Reminder Configuration');
+    Route::post('get-reminder-drop-val', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'showRemindersDropValues'
+    ])->name('Contract Reminder Dropdown Values');
+    Route::post('crate-reminder-configuration', [
+        \App\Http\Controllers\API\CMContractReminderScenarioAPIController::class,
+        'createReminderConfiguration'
+    ])->name('Create Contract Reminder Configuration');
+
+    Route::post('get-contract-master-data', [
+        \App\Http\Controllers\API\CMContractMasterAmdAPIController::class,
+        'getContractMasterData'
+    ])->name('Contract History Status');
+
+    Route::post('update-contract-status-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'updateContractStatusAmendment'
+    ])->name('Update Contract Status Amendment');
+
+    Route::post('delete-contract-amend-boq', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteContractBoqAmend'
+    ])->name('Delete Contract Boq Amend');
+
+    Route::post('get-milestone-amend', [
+        \App\Http\Controllers\API\CMContractMileStoneAmdAPIController::class,
+        'getMilestoneAmend'
+    ])->name('get Milestone Amend');
+
+
+    Route::post('delete-milestone-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteMilestoneAmd'
+    ])->name('Delete Contract Boq Amend');
+
+    Route::post('delete-deliverables-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'deleteContractDeliverablesAmd'
+    ])->name('Delete Contract Deliverables Amend');
+
+    Route::post('contract-document-amd', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'contractDocumentAmd'
+    ])->name('Get Amend Contract Documents');
+
+    Route::get('download-attachment-amd', [
+        \App\Http\Controllers\API\ErpDocumentAttachmentsAPIController::class,
+        'downloadAttachmentAmd'
+    ])->name('Download Contract Attachment');
+
+    Route::post('get-active-amd-sections', [
+        \App\Http\Controllers\API\ContractAmendmentAreaAPIController::class,
+        'getActiveAmdSections'
+    ])->name('get Milestone Amend');
+
+    Route::post('get-contract-amd-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractAmdHistory'
+    ])->name('get Amendment history');
+
+    Route::post('confirm-contract-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'confirmContractAmendment'
+    ])->name('Confirm Amendment');
+
+    Route::post('additional-document-amendment', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'additionalDocumentAmendment'
+    ])->name('Additional Document Amendment');
+
+
+
 });
+
+
+

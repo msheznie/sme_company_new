@@ -3,16 +3,18 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\CMContractUserAssignAmd;
 use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
 use App\Models\ContractUserGroup;
 use App\Models\ContractUserGroupAssignedUser;
 use App\Models\ContractUsers;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
-
 /**
  * Class ContractUserAssignRepository
  * @package App\Repositories
@@ -21,6 +23,24 @@ use Yajra\DataTables\DataTables;
 
 class ContractUserAssignRepository extends BaseRepository
 {
+
+    protected $userAssignedAmd;
+
+    public function __construct(Application $app)
+    {
+        parent::__construct($app);
+        $this->app = $app;
+    }
+
+    public function getContractUserAmdAssign()
+    {
+        if (!$this->userAssignedAmd)
+        {
+            $this->userAssignedAmd = $this->app->make(CMContractUserAssignAmdRepository::class);
+        }
+        return $this->userAssignedAmd;
+    }
+
     /**
      * @var array
      */
@@ -56,7 +76,17 @@ class ContractUserAssignRepository extends BaseRepository
         $input  = $request->all();
         $companyId =  $input['selectedCompanyID'];
         $uuid =  $input['uuid'];
-        $contractUserGroupList =  $this->model->getAssignedUsers($companyId, $uuid);
+        $amendment = $input['amendment'];
+
+     if($amendment)
+        {
+            $contractUserGroupList =  $this->getContractUserAmdAssign()->userAssignedData($companyId, $uuid);
+        }else
+        {
+            $contractUserGroupList =  $this->model->getAssignedUsers($companyId, $uuid);
+        }
+
+
         return DataTables::eloquent($contractUserGroupList)
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
@@ -69,6 +99,20 @@ class ContractUserAssignRepository extends BaseRepository
         if (!$contractResult) {
             return false;
         }
+
+        $amendment = $input['amendment'];
+
+        if($amendment)
+        {
+            $historyUuid = $input['historyUuid'];
+            $historyData = ContractManagementUtils::getContractHistoryData($historyUuid);
+            if (!$historyData)
+            {
+                return false;
+            }
+        }
+        $modelClass = $amendment ? 'App\Models\CMContractUserAssignAmd' : 'App\Models\ContractUserAssign';
+
 
         $selectedUserGroupsUuid = array_column($input['selectedUserGroups'], 'id');
 
@@ -88,21 +132,31 @@ class ContractUserAssignRepository extends BaseRepository
             $contractId = $contractResult->id;
             $userGroupId = $user['userGroupId'];
             $userId = $user['contractUserId'];
-            $existingRecord = ContractUserAssign::where('contractId', $contractId)
+            $existingRecord = $modelClass::where('contractId', $contractId)
                 ->where('userGroupId', $userGroupId)
                 ->where('userId', $userId)
-                ->where('status', 1)
-                ->first();
+                ->where('status', 1);
 
-            if (!$existingRecord) {
+                if ($amendment)
+                {
+                    $existingRecord->where('contract_history_id', $historyData->id);
+                }
+                $existingRecord = $existingRecord->first();
+
+            if (!$existingRecord)
+            {
                 $input['uuid'] = bin2hex(random_bytes(16));
                 $input['contractId'] = $contractId;
                 $input['userGroupId'] = $userGroupId;
                 $input['userId'] = $user['contractUserId'];
                 $input['createdBy'] = General::currentEmployeeId();
                 $input['updated_at'] = null;
+                if($amendment)
+                {
+                    $input['contract_history_id'] = $historyData->id;
+                }
 
-                $this->create($input);
+                $modelClass::create($input);
             }
         }
 
@@ -115,11 +169,15 @@ class ContractUserAssignRepository extends BaseRepository
 
             if ($user) {
                 $userId = $user->id;
-                $existingRecord = ContractUserAssign::where('contractId', $contractId)
+                $existingRecord = $modelClass::where('contractId', $contractId)
                     ->where('userGroupId', $userGroupId)
                     ->where('userId', $userId)
-                    ->where('status', 1)
-                    ->first();
+                    ->where('status', 1);
+                    if ($amendment)
+                    {
+                        $existingRecord->where('contract_history_id', $historyData->id);
+                    }
+                $existingRecord = $existingRecord->first();
 
                 if (!$existingRecord) {
                     $newRecord = [
@@ -132,11 +190,22 @@ class ContractUserAssignRepository extends BaseRepository
                         'updated_at' => null
                     ];
 
-                    $this->create($newRecord);
+                    if($amendment)
+                    {
+                        $newRecord['contract_history_id'] = $historyData->id;
+                    }
+
+                    $modelClass::create($newRecord);
                 }
             }
         }
 
         return true;
+    }
+
+    public function getUserAssignData($id)
+    {
+        return ContractUserAssign::where('contractId',$id)
+            ->get();
     }
 }

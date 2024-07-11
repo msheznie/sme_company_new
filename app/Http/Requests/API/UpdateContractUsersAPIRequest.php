@@ -28,7 +28,6 @@ class UpdateContractUsersAPIRequest extends APIRequest
         return [
             'selectedCompanyID' => 'required',
             'contractUserType' => 'required',
-            'contractUserId' => 'required',
             'contractUserCode' => 'required',
             'contractUserName' => 'required'
         ];
@@ -39,7 +38,6 @@ class UpdateContractUsersAPIRequest extends APIRequest
         return [
             'selectedCompanyID.required' => trans('common.company_id_is_required'),
             'contractUserType.required' => trans('common.contract_user_type_is_required'),
-            'contractUserId.required' => trans('common.contract_user_id_is_required'),
             'contractUserCode.required' => trans('common.contract_user_code_is_required'),
             'contractUserName.required' => trans('common.contract_user_name_is_required'),
         ];

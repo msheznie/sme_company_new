@@ -59,7 +59,9 @@
         "files": [
             "./app/Helpers/permission.php",
             "./app/Helpers/General.php",
-            "./app/Helpers/ConfirmDocument.php"
+            "./app/Helpers/ConfirmDocument.php",
+            "./app/Helpers/ApproveDocument.php",
+            "./app/Helpers/RejectDocument.php"
         ]
     },
     "autoload-dev": {

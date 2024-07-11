@@ -7,10 +7,16 @@ use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateContractBoqItemsAPIRequest;
 use App\Http\Requests\API\UpdateContractBoqItemsAPIRequest;
+use App\Http\Resources\CMContractBoqItemsAmdResource;
+use App\Models\CMContractBoqItemsAmd;
+use App\Models\CMContractUserAssignAmd;
 use App\Models\Company;
 use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
+use App\Models\ContractUserAssign;
+use App\Repositories\CMContractBoqItemsAmdRepository;
 use App\Repositories\ContractBoqItemsRepository;
+use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -29,7 +35,10 @@ class ContractBoqItemsAPIController extends AppBaseController
     /** @var  ContractBoqItemsRepository */
     private $contractBoqItemsRepository;
 
-    public function __construct(ContractBoqItemsRepository $contractBoqItemsRepo)
+    public function __construct
+    (
+        ContractBoqItemsRepository $contractBoqItemsRepo
+    )
     {
         $this->contractBoqItemsRepository = $contractBoqItemsRepo;
     }
@@ -49,7 +58,8 @@ class ContractBoqItemsAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems), 'BOQ Items retrieved successfully');
+        return $this->sendResponse(ContractBoqItemsResource::collection($contractBoqItems),
+            'BOQ Items retrieved successfully');
     }
 
     /**
@@ -82,7 +92,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         /** @var ContractBoqItems $contractBoqItems */
         $contractBoqItems = $this->contractBoqItemsRepository->find($id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Contract Boq Items not found');
         }
 
@@ -105,7 +116,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         /** @var ContractBoqItems $contractBoqItems */
         $contractBoqItems = $this->contractBoqItemsRepository->find($id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Contract Boq Items not found');
         }
 
@@ -129,7 +141,8 @@ class ContractBoqItemsAPIController extends AppBaseController
         $contractResult = ContractBoqItems::select('id')->where('uuid', $id)->first();
         $contractBoqItems = $this->contractBoqItemsRepository->find($contractResult->id);
 
-        if (empty($contractBoqItems)) {
+        if (empty($contractBoqItems))
+        {
             return $this->sendError('Boq Item not found');
         }
 
@@ -146,69 +159,116 @@ class ContractBoqItemsAPIController extends AppBaseController
     public function updateBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)
     {
         $input = $request->all();
-        $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
+        $amendment = $input['amendment'];
+        $model = $amendment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $colname = $amendment ? 'amd_id' : 'id';
 
-        if (empty($contractBoqItems)) {
-            return $this->sendError('BOQ Item not found');
+        if ($amendment)
+        {
+            $getContractHistoryData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+            $getBoqItemAmdData = CMContractBoqItemsAmd::getBoqItemData($getContractHistoryData->id, $input['uuid']);
+            $updateId = $getBoqItemAmdData->amd_id;
+        } else
+        {
+            $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
+            if (empty($contractBoqItems)) {
+                return $this->sendError('BOQ Item not found');
+            }
+            $updateId = $contractBoqItems->id;
         }
 
-        if($input['type'] == 'minQty') {
-            $inputArr = ['minQty' => $input['qty']];
-        } elseif($input['type'] == 'maxQty') {
-            $inputArr = ['maxQty' => $input['qty']];
-        } else {
-            $inputArr = ['qty' => $input['qty']];
-        }
-        $inputArr['updated_by'] = General::currentEmployeeId();
-        $inputArr['updated_at'] = Carbon::now();
-        $contractBoqItems = $this->contractBoqItemsRepository->update($inputArr, $contractBoqItems->id);
+            if ($input['type'] == 'minQty') {
+                $inputArr = ['minQty' => $input['qty']];
+            } elseif ($input['type'] == 'maxQty') {
+                $inputArr = ['maxQty' => $input['qty']];
+            } elseif ($input['type'] == 'price') {
+                $inputArr = ['price' => $input['qty']];
+            } else {
+                $inputArr = ['qty' => $input['qty']];
+            }
+            $inputArr['updated_by'] = General::currentEmployeeId();
+            $inputArr['updated_at'] = Carbon::now();
 
-        return $this->sendResponse(new ContractBoqItemsResource($contractBoqItems), 'BOQ Item updated successfully');
+            $contractBoqItems = $model::where($colname, $updateId)
+                ->update($inputArr);
+
+            return $this->sendResponse($contractBoqItems, 'BOQ Item updated successfully');
+
     }
 
     public function copyBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)
     {
         $input = $request->all();
-        $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($input['uuid']);
+        $amentmend = $input['amendment'];
+        $uuid = $input['uuid'];
 
-        if (empty($contractBoqItems)) {
-            return $this->sendError('BOQ Items not found');
+        if($amentmend)
+        {
+            $getContractHistoryData =ContractManagementUtils::getContractHistoryData($input['historyUuid']);
+            $contractBoqItems =  CMContractBoqItemsAmd::getBoqItemData($getContractHistoryData->id,$input['uuid']);
+            $getValidRangeOfIdsToUpdate = CMContractBoqItemsAmd::copyIdsRange($contractBoqItems);
+        }else
+        {
+
+            $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($uuid);
+            if (empty($contractBoqItems))
+            {
+                return $this->sendError('BOQ Items not found');
+            }
+
+            $getValidRangeOfIdsToUpdate = $this->contractBoqItemsRepository->copyIdsRange($contractBoqItems);
         }
 
-        $getValidRangeOfIdsToUpdate = $this->contractBoqItemsRepository->copyIdsRange($contractBoqItems);
 
-        if($input['type'] == 'minQty') {
+        if($input['type'] == 'minQty')
+        {
             $inputArr = ['minQty' => $input['qty']];
-        } elseif($input['type'] == 'maxQty') {
+        } elseif($input['type'] == 'maxQty')
+        {
             $inputArr = ['maxQty' => $input['qty']];
-        } else {
+        } else
+        {
             $inputArr = ['qty' => $input['qty']];
         }
         $inputArr['updated_by'] = General::currentEmployeeId();
         $inputArr['updated_at'] = Carbon::now();
 
-        return $this->contractBoqItemsRepository->copySameQty($getValidRangeOfIdsToUpdate, $inputArr);
+        return $this->contractBoqItemsRepository->copySameQty($getValidRangeOfIdsToUpdate, $inputArr, $amentmend);
     }
 
     public function addTenderBoqItems(Request $request): array
     {
         $input = $request->all();
-        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'])->first();
+        $id = ContractManagementUtils::getId($input['amendment'],$input['uuid'],$input['selectedCompanyID']);
+        $modelClass = $input['amendment'] ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $model = new $modelClass;
+
         $insertArray = [
             'uuid' => bin2hex(random_bytes(16)),
-            'contractId' => $contractResult->id,
             'itemId' => $input['itemId'],
             'description' => $input['description'],
             'created_by' => General::currentEmployeeId(),
             'created_at' => Carbon::now(),
             'companyId' => $input['companyId']
         ];
+        if($input['amendment'])
+        {
+            $insertArray['contractId'] = $id->contract_id;
+            $insertArray['contract_history_id'] = $id->id;
+        }else
+        {
+            $insertArray['contractId'] = $id;
+        }
+
+
         DB::beginTransaction();
-        try {
-            $this->contractBoqItemsRepository->create($insertArray);
+        try
+        {
+            $model->insert($insertArray);
             DB::commit();
             return ['status' => true, 'message' => 'BOQ Item added successfully'];
-        } catch (\Exception $ex) {
+        } catch (\Exception $ex)
+        {
                 DB::rollBack();
                 return ['status' => false, 'message' => $ex->getMessage()];
             }
@@ -229,9 +289,11 @@ class ContractBoqItemsAPIController extends AppBaseController
         $export = new ContractManagmentExport($contractBoqItems);
         $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
 
-        if ($basePath == '') {
+        if ($basePath == '')
+        {
             return $this->sendError('unable_to_export_excel');
-        } else {
+        } else
+        {
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }

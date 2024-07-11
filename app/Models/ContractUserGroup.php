@@ -68,7 +68,7 @@ class ContractUserGroup extends Model
     public function getContractUserGroupList($companySystemId)
     {
         return ContractUserGroup::select('uuid', 'groupName', 'status', 'isDefault')
-            ->where('companySystemId', $companySystemId)->orderBy('id', 'desc');
+            ->where('companySystemID', $companySystemId)->orderBy('id', 'desc');
     }
 
     public function getContractUserGroupAssignedUsers($companySystemId, $selectUserGroup)
@@ -120,7 +120,7 @@ class ContractUserGroup extends Model
     public function contractUserGroupList($companySystemId,$contractuuid)
     {
         $userGroup =  ContractUserGroup::selectRaw('uuid, groupName AS itemName')
-            ->where('companySystemId', $companySystemId)
+            ->where('companySystemID', $companySystemId)
             ->where('status', 1)
             ->get();
         $contractResult = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
@@ -128,12 +128,21 @@ class ContractUserGroup extends Model
             ->where('status', 1)
             ->pluck('userGroupId')->toArray();
         $userGroupSelected =  ContractUserGroup::selectRaw('uuid, groupName AS itemName')
-            ->where('companySystemId', $companySystemId)
+            ->where('companySystemID', $companySystemId)
             ->whereIn('id', $contractUserAssignedResult)
             ->get();
         return [
             'userGroup' => $userGroup,
             'userGroupSelected' => $userGroupSelected
         ];
+    }
+
+    public static function getActiveDefaultUserGroups($companySystemId)
+    {
+        return ContractUserGroup::select('id')
+            ->where('isDefault', 1)
+            ->where('status',1)
+            ->where('companySystemID', $companySystemId)
+            ->get();
     }
 }

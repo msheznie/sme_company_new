@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Eloquent as Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -29,7 +28,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class CompanyDocumentAttachment extends Model
 {
-    use SoftDeletes;
     use HasFactory;
 
     public $table = 'companydocumentattachment';
@@ -87,21 +85,7 @@ class CompanyDocumentAttachment extends Model
      * @var array
      */
     public static $rules = [
-        'companySystemID' => 'nullable|integer',
-        'companyID' => 'nullable|string|max:45',
-        'documentSystemID' => 'nullable|integer',
-        'documentID' => 'nullable|string|max:45',
-        'docRefNumber' => 'nullable|string|max:300',
-        'isAttachmentYN' => 'nullable|integer',
-        'sendEmailYN' => 'nullable|integer',
-        'codeGeneratorFormat' => 'nullable|string|max:300',
-        'isAmountApproval' => 'nullable|integer',
-        'isServiceLineAccess' => 'nullable|integer',
-        'isServiceLineApproval' => 'nullable|integer',
-        'isCategoryApproval' => 'nullable|integer',
-        'blockYN' => 'nullable|integer',
-        'enableAttachmentAfterApproval' => 'nullable|integer',
-        'timeStamp' => 'nullable'
+        
     ];
 
     public static function companyDocumentAttachment($companySystemID, $documentSystemID)

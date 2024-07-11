@@ -30,8 +30,7 @@ class CreateContractMilestoneAPIRequest extends APIRequest
             'companySystemID' => 'required',
             'contractUuid' => 'required',
             'formData.title' => 'required',
-            'formData.percentage' => 'required',
-            'formData.amount' => 'required',
+            'formData.description' => 'required',
         ];
     }
 
@@ -42,8 +41,7 @@ class CreateContractMilestoneAPIRequest extends APIRequest
             'companySystemID.required' => 'Company Id is required.',
             'contractUuid.required' => 'Contract ID is required.',
             'formData.title.required' => 'Milestone Title is required.',
-            'formData.percentage.title' => 'Percentage is required.',
-            'formData.amount.required' => 'Amount Title is required.',
+            'formData.description.required' => 'Description is required.',
         ];
     }
 }

@@ -5,8 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Http\Requests\API\CreateContractAdditionalDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateContractAdditionalDocumentsAPIRequest;
 use App\Models\ContractAdditionalDocuments;
+use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\ContractAdditionalDocumentsRepository;
 use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\ContractAmendmentService;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractAdditionalDocumentsResource;
@@ -107,8 +110,13 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
     public function update($id, UpdateContractAdditionalDocumentsAPIRequest $request)
     {
         $input = $request->all();
+        $amendment = $input['amendment'];
         /** @var ContractAdditionalDocuments $contractAdditionalDocuments */
-        $contractAdditionalDocuments = $this->contractAdditionalDocumentsRepository->findByUuid($id, ['id']);
+        $contractAdditionalDocuments =$amendment
+            ?
+            ContractAmendmentService::getContractAdditionalDocument($id, $input['contractHistoryUuid'])
+            :
+            $this->contractAdditionalDocumentsRepository->findByUuid($id, ['id']);
 
         if (empty($contractAdditionalDocuments)) {
             return $this->sendError(trans('common.contract_additional_document_not_found'));
@@ -143,26 +151,56 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         $contractAdditionalDocuments->delete();
         return $this->sendSuccess(trans('common.contract_additional_document_deleted_successfully'));
     }
-    public function getAdditionalDocumentList(Request $request) {
+    public function  getAdditionalDocumentList(Request $request) {
         return $this->contractAdditionalDocumentsRepository->additionalDocumentList($request);
     }
     public function addAdditionalAttachment(Request $request)
     {
         $documentMasterID = $request->input('documentMasterID') ?? 122;
-        $additionalDocument = $this->contractAdditionalDocumentsRepository->findByUuid(
-            $request->input('uuid'),
-            ['id', 'documentName']
-        );
+        $amendment = $request->input('amendment');
+        $uuid = $request->input('uuid');
+        $historyId = 0;
+
+        if($amendment)
+        {
+            $additionalDocument = ContractAmendmentService::getContractAdditionalDocument
+            (
+                $uuid, $request->input('contractHistoryUuid')
+            );
+            $historyData = ContractManagementUtils::getContractHistoryData($request->input('contractHistoryUuid'));
+            $historyId = $historyData->id;
+        }else
+        {
+            $additionalDocument =  $this->contractAdditionalDocumentsRepository->findByUuid(
+                $uuid,
+                ['id', 'documentName']);
+        }
+
+
         if(empty($additionalDocument)) {
             return $this->sendError(trans('common.contract_additional_document_not_found'));
         }
-        $deleteOldAttachment = $this->contractAdditionalDocumentsRepository->deleteFile($documentMasterID,
-            $additionalDocument['id']);
+
+
+        if($amendment)
+        {
+            $deleteOldAttachment = ErpDocumentAttachmentsAmd::deleteAttachment($documentMasterID,
+                $additionalDocument['id'],$historyId);
+        }else
+        {
+            $deleteOldAttachment = $this->contractAdditionalDocumentsRepository->deleteFile($documentMasterID,
+                $additionalDocument['id']);
+        }
+
         if(!$deleteOldAttachment['status']){
             return $this->sendError($deleteOldAttachment['message']);
         }
+
         $attachment = $this->erpDocumentAttachmentsRepository
-            ->saveDocumentAttachments($request, $additionalDocument['id']);
+            ->saveDocumentAttachments($request, $additionalDocument['id'], $historyId);
+
+
+
         if(!$attachment['status']) {
             $errorCode = $attachment['code'] ?? 404;
             return $this->sendError($attachment['message'], $errorCode);

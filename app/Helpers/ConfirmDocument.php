@@ -2,126 +2,109 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Helpers\Email;
+use App\Models\CompanyDocumentAttachment;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpApprovalLevel;
 use App\Models\ErpDocumentMaster;
+use App\Models\ErpEmployeesDepartments;
+use App\Utilities\EmailUtils;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ConfirmDocument
 {
-    public static function confirmDocument($params): array {
-        $validation = self::checkValidation($params);
-        if(!$validation['success']){
-            return $validation;
-        }
-        $docInfoArr = self::setDocumentInfoArray($params);
-        if (empty($docInfoArr)) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_id_not_found')
-            ];
-        }
-        $namespacedModel = 'App\Models\\' . $docInfoArr["modelName"];
-        $masterRec = $namespacedModel::find($params["autoID"]);
-
-        if (!$masterRec) {
-            return ['success' => false, 'message' => 'No records found'];
-        }
-        $otherValidation = self::checkOtherValidation($params, $namespacedModel, $docInfoArr);
-        if(!$otherValidation['success']) {
-            return $otherValidation;
-        }
+    public static function confirmDocument($params, $masterRecord): bool
+    {
+        self::checkValidation($params);
+        self::checkOtherValidation($params, $masterRecord);
 
         $employeeSystemID = General::currentEmployeeId();
-        $document = ErpDocumentMaster::select('documentSystemID', 'documentID', 'departmentSystemID')
-            ->where('documentSystemID', $params["document"])->first();
+        $document = ErpDocumentMaster::documentMasterData($params["document"]);
 
-        DB::beginTransaction();
-        try {
-            $masterRec->update([
-                $docInfoArr['confirmColumnName'] => 1,
-                $docInfoArr['confirmedBySystemID'] => $employeeSystemID,
-                $docInfoArr['confirmedDate'] => now(),
-                $docInfoArr['RollLevForApp_curr'] => 1
-            ]);
-
-            $approvalLevel = ErpApprovalLevel::select('approvalLevelID')
-                ->with([
-                    'approvalRole' => function ($q) {
-                        $q->select('rollDescription', 'documentSystemID', 'documentID', 'companySystemID', 'companyID',
-                            'departmentSystemID', 'departmentID', 'serviceLineSystemID', 'serviceLineID', 'rollLevel',
-                            'approvalLevelID', 'approvalGroupID');
-                    }
-                ])
-                ->where('companySystemID', $params['company'])
-                ->where('documentSystemID', $params['document'])
-                ->where('departmentSystemID', $document['departmentSystemID'])
-                ->where('isActive', -1)
-                ->first();
-
-            if (empty($approvalLevel)) {
-                DB::rollback();
-                return [
-                    'success' => false,
-                    'message' => trans('common.no_approval_level_for_this_document')
-                ];
-            }
-
-            $sourceDocument = $namespacedModel::find($params['autoID']);
-            $documentApproved = self::prepareDocumentApprovalData(
-                $approvalLevel,
-                $sourceDocument,
-                $docInfoArr,
-                $params,
-                $employeeSystemID
-            );
-
-            if (!$documentApproved) {
-                return [
-                    'success' => false,
-                    'message' => trans('common.please_set_the_approval_group')
-                ];
-            }
-
-            $docApproved = ErpDocumentApproved::saveDocumentApproved($documentApproved);
-            if (!$docApproved) {
-                DB::rollBack();
-                return [
-                    'success' => false,
-                    'message' => trans('common.failed_to_confirm_document')
-                ];
-            }
-
-            DB::commit();
-            return [
-                'success' => true,
-                'message' => trans('common.document_confirmed_successfully')
-            ];
-        } catch (\Exception $e) {
-            DB::rollback();
-            return [
-                'success' => false,
-                'message' => $e->getMessage() . trans('common.error_occurred')
-            ];
+        $policy = CompanyDocumentAttachment::companyDocumentAttachment($params['company'], $params['document']);
+        if(empty($policy))
+        {
+            throw new CommonException(trans('common.policy_not_available_for_this_document'));
         }
+
+        $masterRecord->confirmed_yn = 1;
+        $masterRecord->confirm_by = $employeeSystemID;
+        $masterRecord->confirmed_date = now();
+        $masterRecord->rollLevelOrder = 1;
+        $saveMasterRecord = $masterRecord->save();
+        if(!$saveMasterRecord)
+        {
+            throw new CommonException(trans('common.failed_to_confirm_document'));
+        }
+        $output = ErpApprovalLevel::approvalLevelValidation($params, $document, $policy);
+
+        if (empty($output))
+        {
+            throw new CommonException(trans('common.no_approval_level_for_this_document'));
+        }
+        if($output && $policy->isAmountApproval)
+        {
+            if(array_key_exists('amount', $params))
+            {
+                if ($params["amount"] >= 0)
+                {
+                    $amount = $params["amount"];
+                    if($output->valueWise == 1 && ($amount < $output->valueFrom || $amount > $output->valueTo))
+                    {
+                        throw new CommonException('Contract amount is not within the specified approval
+                        setup value range');
+                    }
+                } else
+                {
+                    throw new CommonException(trans('common.no_approval_level_for_this_document'));
+                }
+            } else
+            {
+                throw new CommonException(trans('common.amount_parameter_are_missing'));
+            }
+        }
+
+        $documentApproved = self::prepareDocumentApprovalData(
+            $output,
+            $params,
+            $employeeSystemID
+        );
+
+        if (!$documentApproved)
+        {
+            throw new CommonException(trans('common.please_set_the_approval_group'));
+        }
+
+        $docApproved = ErpDocumentApproved::saveDocumentApproved($documentApproved);
+        if (!$docApproved)
+        {
+            throw new CommonException(trans('common.failed_to_confirm_document'));
+        }
+        if ($params["document"] === 123)
+        {
+            self::sendEmail($params, $masterRecord);
+        }
+        return true;
     }
 
     private static function prepareDocumentApprovalData(
         $approvalLevel,
-        $sourceDocument,
-        $docInfoArr,
         $params,
         $employeeSystemID
-    ): array{
+    ): array
+    {
         $documentApproved = [];
-        foreach ($approvalLevel->approvalRole as $val) {
-            if (!$val->approvalGroupID) {
+        foreach ($approvalLevel->approvalRole as $val)
+        {
+            if (!$val->approvalGroupID)
+            {
                 return [];
             }
 
-            $documentCode = $sourceDocument[$docInfoArr['documentCodeColumnName']] ?? $params['documentCode'];
-
+            $documentCode = $params['documentCode'] ?? null;
             $documentApproved[] = [
                 'companySystemID' => $val->companySystemID,
                 'companyID' => $val->companyID,
@@ -143,96 +126,95 @@ class ConfirmDocument
                 'timeStamp' => now()
             ];
         }
-
         return $documentApproved;
     }
-    public static function setDocumentInfoArray($params): array {
-        $docInfoArray = array(
-            'documentCodeColumnName' => '',
-            'confirmColumnName' => '',
-            'confirmedBy' => '',
-            'confirmedBySystemID' => '',
-            'confirmedDate' => '',
-            'tableName' => '',
-            'modelName' => '',
-            'primarykey' => ''
+    private function checkValidation($params): bool
+    {
+        if (!array_key_exists('autoID', $params))
+        {
+            throw new CommonException(trans('common.document_is_already_confirmed'));
+        }
+
+        if (!array_key_exists('company', $params))
+        {
+            throw new CommonException(trans('common.company_not_found'));
+        }
+
+        if (!array_key_exists('document', $params))
+        {
+            throw new CommonException(trans('common.document_not_found'));
+        }
+        return true;
+    }
+    private function checkOtherValidation($params, $masterRecord): bool
+    {
+        $docExist = ErpDocumentApproved::checkApproveDocumentExists(0, 1,
+            $params["document"], $params["autoID"]
         );
-        switch ($params["document"]) {
-            case 123:
-                $docInfoArray["documentCodeColumnName"] = 'title';
-                $docInfoArray["confirmColumnName"] = 'confirmed_yn';
-                $docInfoArray["confirmedBySystemID"] = 'confirm_by';
-                $docInfoArray["confirmedDate"] = 'confirmed_date';
-                $docInfoArray["tableName"] = 'cm_contract_master';
-                $docInfoArray["modelName"] = 'ContractMaster';
-                $docInfoArray["primarykey"] = 'id';
-                $docInfoArray["RollLevForApp_curr"] = 'rollLevelOrder';
-                break;
-            default:
-                return [];
+        if ($docExist)
+        {
+            throw new CommonException(trans('common.document_approval_data_already_generated'));
         }
-        return $docInfoArray;
+
+        $document = ErpDocumentMaster::documentMasterData($params["document"]);
+        if (!$document)
+        {
+            throw new CommonException(trans('common.document_not_found'));
+        }
+
+        if ($masterRecord['confirmed_yn'] == 1)
+        {
+            throw new CommonException(trans('common.document_is_already_confirmed'));
+        }
+        return true;
+
     }
-    private function checkValidation($params): array {
-        if (!array_key_exists('autoID', $params)) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_system_id_not_found')
-            ];
-        }
+    public static function sendEmail($params, $masterRecords)
+    {
+        $documentApproved = ErpDocumentApproved::levelWiseDocumentApproveUsers(
+            $params["document"],
+            $masterRecords->id,
+            1
+        );
+        $emails = [];
+        if($documentApproved && $documentApproved['approvedYN'] == 0)
+        {
+            $companyDocument = CompanyDocumentAttachment::companyDocumentAttachment(
+                $documentApproved->companySystemID,
+                $documentApproved->documentSystemID
+            );
+            if (empty($companyDocument))
+            {
+                throw new CommonException('Policy not found for this document');
+            }
+            $approvalList = ErpEmployeesDepartments::getApprovalListToEmail(
+                $documentApproved['approvalGroupID'],
+                $documentApproved['companySystemID'],
+                $documentApproved['documentSystemID'],
+            );
 
-        if (!array_key_exists('company', $params)) {
-            return [
-                'success' => false,
-                'message' => trans('common.company_not_found')
-            ];
+            $subject = EmailUtils::getEmailSubject($documentApproved->documentSystemID);
+            $body = EmailUtils::getEmailBody($documentApproved->documentSystemID, $masterRecords);
+            foreach($approvalList as $dt)
+            {
+                if ($dt['employee'])
+                {
+                    $emails[] = [
+                        'empSystemID' => $dt['employee']['employeeSystemID'],
+                        'companySystemID' => $documentApproved['companySystemID'],
+                        'docSystemID' => $documentApproved['documentSystemID'],
+                        'alertMessage' => $subject,
+                        'emailAlertMessage' => $body,
+                        'docSystemCode' => $documentApproved['documentSystemCode'],
+                        'error_tag' => $subject,
+                        'error_msg' => '<b>The Employee:'. $dt['employee']['empName'] .
+                            '</b>- Mail ID is invalid!',
+                        'db' => $params['db'] ?? ""
+                    ];
+                }
+            }
         }
-
-        if (!array_key_exists('document', $params)) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_not_found')
-            ];
-        }
-        return [
-            'success' => true,
-            'message' => trans('common.validation_checked_successfully')
-        ];
-    }
-    private function checkOtherValidation($params, $namespacedModel, $docInfoArr): array {
-        $docExist = ErpDocumentApproved::select('documentApprovedID')
-            ->where('documentSystemID', $params["document"])
-            ->where('documentSystemCode', $params["autoID"])
-            ->first();
-        if ($docExist) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_approval_data_already_generated')
-            ];
-        }
-
-        $document = ErpDocumentMaster::select('documentSystemID')
-            ->where('documentSystemID', $params["document"])
-            ->first();
-        if (!$document) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_not_found')
-            ];
-        }
-
-        $isConfirm = $namespacedModel::where($docInfoArr["primarykey"], $params["autoID"])
-            ->where($docInfoArr["confirmColumnName"], 1)
-            ->first();
-        if ($isConfirm) {
-            return [
-                'success' => false,
-                'message' => trans('common.document_is_already_confirmed')
-            ];
-        }
-        return [
-            'success' => true,
-            'message' => trans('common.validation_checked_successfully')
-        ];
+        Email::sendBulkEmail($emails);
+        return true;
     }
 }

@@ -7,6 +7,8 @@ use App\Helpers\General;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 
 /**
  * Class ContractMilestoneRetention
@@ -28,18 +30,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractMilestoneRetention extends Model
 {
-    use SoftDeletes;
-
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_milestone_retention';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
-    protected $dates = ['deleted_at'];
-    protected $hidden = ['id', 'contractId'];
+    protected $hidden = ['id'];
 
 
 
@@ -97,16 +97,41 @@ class ContractMilestoneRetention extends Model
     public function ContractMilestoneRetention($companySystemID, $contractId)
     {
         return ContractMilestoneRetention::with([
-            'milestone' => function ($q) {
-                $q->select('title', 'id', 'amount', 'uuid');
-            }
+            'milestone' => function ($q)
+            {
+                $q->select('title', 'id', 'uuid')
+                  ->with([
+                      'milestonePaymentSchedules' => function ($q1)
+                      {
+                          $q1->select('amount', 'id', 'uuid','milestone_id');
+                      }
+                      ]);
+            },
         ])->where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)
             ->orderBy('id', 'asc');
     }
 
 
-    public function setStartDateAttribute($value){
+    public function setStartDateAttribute($value)
+    {
         $this->attributes['startDate'] = General::convertDateTime($value);
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemId';
+    }
+
+    public static function checkRetentionAddedForContract($contractId, $companySystemID)
+    {
+        return ContractMilestoneRetention::where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
     }
 }

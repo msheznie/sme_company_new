@@ -3,11 +3,14 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Models\CMContractDocumentAmd;
 use App\Models\ContractDocument;
 use App\Models\ContractMaster;
 use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
+use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\BaseRepository;
+use App\Services\ContractAmendmentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -15,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Traits\CrudOperations;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Log;
 /**
  * Class ContractDocumentRepository
  * @package App\Repositories
@@ -79,8 +82,22 @@ class ContractDocumentRepository extends BaseRepository
         $contractUUid = $formData['contractUUid'] ?? null;
         $selectedCompanyID = $formData['selectedCompanyID'] ?? 0;
         $documentTypeId = General::getArrayIds($documentTypes);
+        $amendment = $formData['amendment'];
+        $model = $amendment ? CMContractDocumentAmd::class : ContractDocument::class;
+        $historyId = 0;
 
-        $contractMaster = ContractManagementUtils::checkContractExist($contractUUid, $selectedCompanyID);
+        if($amendment)
+        {
+            $historyData = ContractManagementUtils::getContractHistoryData($formData['contractHistoryUuid']);
+            $historyId = $historyData->id;
+        }
+
+        $contractMaster = $amendment
+            ?
+            ContractAmendmentService::getContractAmendment($contractUUid, $historyId)
+            :
+            ContractManagementUtils::checkContractExist($contractUUid, $selectedCompanyID);
+
         if(empty($contractMaster)){
             return [
                 'status' => false,
@@ -88,13 +105,13 @@ class ContractDocumentRepository extends BaseRepository
             ];
         }
 
-
         DB::beginTransaction();
         try{
-            $insertDocument = self::getInsertData($contractMaster, $documentTypeId, $selectedCompanyID);
+            $insertDocument = self::getInsertData($contractMaster, $documentTypeId, $selectedCompanyID, $historyId);
 
-            if(count($insertDocument) > 0) {
-                ContractDocument::insert($insertDocument);
+            if(count($insertDocument) > 0)
+            {
+                $model::insert($insertDocument);
                 DB::commit();
                 return [
                     'status' => true,
@@ -113,7 +130,7 @@ class ContractDocumentRepository extends BaseRepository
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
     }
-    private function getInsertData($contractMaster, $documentTypeId, $selectedCompanyID): array {
+    private function getInsertData($contractMaster, $documentTypeId, $selectedCompanyID, $historyId): array {
         $insertDocument = [];
         $count = 0;
         foreach($documentTypeId as $id){
@@ -131,6 +148,10 @@ class ContractDocumentRepository extends BaseRepository
                     'created_by' => General::currentEmployeeId(),
                     'created_at' => Carbon::now()
                 ];
+                if($historyId > 0)
+                {
+                    $insertDocument[$count]['contract_history_id'] = $historyId;
+                }
                 $count++;
             }
         }
@@ -142,7 +163,12 @@ class ContractDocumentRepository extends BaseRepository
         $contractUUid = $input['contractUUid'] ?? null;
         $contractMaster = ContractManagementUtils::checkContractExist($contractUUid, $selectedCompanyID);
         $contractID = $contractMaster['id'] ?? 0;
-        $languages =  $this->model->contractDocuments($selectedCompanyID, $contractID);
+        $amenment = $input['amendment'];
+        $languages =  $amenment
+            ?
+            CMContractDocumentAmd::contractDocuments($selectedCompanyID, $contractID, $input['contractHistoryUuid'])
+            :
+            $this->model->contractDocuments($selectedCompanyID, $contractID);
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
@@ -153,11 +179,14 @@ class ContractDocumentRepository extends BaseRepository
         $attachedDate = $formData['formattedAttachedDate'] ?? null;
         $selectedCompanyID = $formData['selectedCompanyID'] ?? null;
         $contractUuid = $formData['contractUuid'] ?? null;
+        $amendment = $formData['amendment'];
+        $model = $amendment ? CMContractDocumentAmd::class : ContractDocument::class;
 
         $documentTypeID = DocumentMaster::select('id')
             ->where('uuid', $documentTypeUuid)
             ->where('companySystemID', $selectedCompanyID)->first();
-        if(empty($documentTypeID)) {
+        if(empty($documentTypeID))
+        {
             return [
                 'status' => false,
                 'message' => trans('common.document_type_not_found')
@@ -172,10 +201,16 @@ class ContractDocumentRepository extends BaseRepository
                 'message' => trans('common.contract_not_found')
             ];
         }
-        $checkHeaderValid = self::checkHeaderValid($formData, $contractMaster['id'], $contractDocumentID);
-        if(!$checkHeaderValid['status']){
-            return $checkHeaderValid;
+
+        if(!$amendment)
+        {
+            $checkHeaderValid = self::checkHeaderValid($formData, $contractMaster['id'], $contractDocumentID);
+            if(!$checkHeaderValid['status']){
+                return $checkHeaderValid;
+            }
         }
+
+
         DB::beginTransaction();
         try{
             $updateData = [
@@ -187,7 +222,7 @@ class ContractDocumentRepository extends BaseRepository
                 'updated_at' => Carbon::now()
             ];
 
-            ContractDocument::where('id', $contractDocumentID)->update($updateData);
+            $model::where('id', $contractDocumentID)->update($updateData);
             DB::commit();
             return [
                 'status' => true,
@@ -209,7 +244,9 @@ class ContractDocumentRepository extends BaseRepository
                 ->where('contractID', $contractID)
                 ->where('id', '!=', $contractDocumentID)
                 ->exists()
-        ) {
+        )
+
+        {
             return [
                 'status' => false,
                 'message' => trans('common.document_description_already_exists')
@@ -235,8 +272,11 @@ class ContractDocumentRepository extends BaseRepository
     public function updateDocumentReceived(Request $request): array{
         $formData = $request->all();
         $file = $formData['file'] ?? null;
+        $amendment = $formData['amendment'];
         $checkValidation = self::checkValidation($formData);
-        if(!$checkValidation['status']) {
+
+        if(!$checkValidation['status'])
+        {
             return [
                 'status' => false,
                 'message' =>  $checkValidation['message'],
@@ -244,19 +284,50 @@ class ContractDocumentRepository extends BaseRepository
             ];
         }
         $companySystemID = $formData['selectedCompanyID'] ?? 0;
-        $contractDocument = ContractDocument::select('id')
+        $historyId =0;
+
+        $modelName = ContractDocument::class;
+
+        if($amendment)
+        {
+            $historyData = ContractManagementUtils::getContractHistoryData($formData['contractHistoryUuid']);
+            $historyId = $historyData->id;
+        }
+
+        $contractDocument = $amendment
+            ?
+                 ContractAmendmentService::getcontractDocumentDataAmd($historyId,$formData['uuid'])
+            :
+            ContractDocument::select('id')
             ->where('uuid', $formData['uuid'])
             ->where('companySystemID', $companySystemID)->first();
-        if(empty($contractDocument)) {
+
+
+
+        if(empty($contractDocument))
+        {
             return [
                 'status' => false,
                 'message' =>  trans('common.contract_document_not_found'),
                 'code' => 404
             ];
         }
-        if(!empty($file)) {
-            $deleteAttachment = ErpDocumentAttachments::deleteAttachment($formData['documentMasterID'],
-                $contractDocument['id']);
+
+        if(!empty($file))
+        {
+
+            if($amendment)
+            {
+                $deleteAttachment = ErpDocumentAttachmentsAmd::deleteAttachment($formData['documentMasterID'],
+                    $contractDocument['id'],$historyId);
+                $modelName = CMContractDocumentAmd::class;
+            }else
+            {
+                $deleteAttachment = ErpDocumentAttachments::deleteAttachment($formData['documentMasterID'],
+                    $contractDocument['id']);
+                $modelName = ContractDocument::class;
+            }
+
             if(!$deleteAttachment['status']) {
                 return [
                     'status' => false,
@@ -265,10 +336,11 @@ class ContractDocumentRepository extends BaseRepository
                 ];
             }
         }
+
         DB::beginTransaction();
         try{
             $updateData = self::getDocumentReceivedUpdateData($formData);
-            ContractDocument::where('id', $contractDocument['id'])->update($updateData);
+            $modelName::where('id', $contractDocument['id'])->update($updateData);
             DB::commit();
             return [
                 'status' => true,
@@ -345,19 +417,43 @@ class ContractDocumentRepository extends BaseRepository
     }
     public function updateDocumentReturned(Request $request): array {
         $formData = $request->all();
-        $returnValidation = self::checkReturnValidation($formData);
+        $amendment = $formData['amendment'];
+        $model = $amendment ? CMContractDocumentAmd::class : COntractDocument::class;
+        $historyId = 0;
+        if(!$amendment)
+        {
+            $returnValidation = self::checkReturnValidation($formData);
 
-        if(!$returnValidation['status']) {
-            return [
-                'status' => false,
-                'message' =>  $returnValidation['message'],
-                'code' => $returnValidation['code'] ?? 422
-            ];
+            if(!$returnValidation['status']) {
+                return [
+                    'status' => false,
+                    'message' =>  $returnValidation['message'],
+                    'code' => $returnValidation['code'] ?? 422
+                ];
+            }
         }
+
+
         $companySystemID = $formData['selectedCompanyID'] ?? 0;
-        $contractDocument = ContractDocument::select('id')
+
+        if($amendment)
+        {
+            $contractHistoryData = ContractManagementUtils::getContractHistoryData($formData['contractHistoryUuid']);
+            $historyId = $contractHistoryData->id;
+        }
+
+
+
+        $contractDocument = $amendment
+
+            ?
+            ContractAmendmentService::getcontractDocumentDataAmd($historyId,$formData['uuid'])
+            :
+            ContractDocument::select('id')
             ->where('uuid', $formData['uuid'])
             ->where('companySystemID', $companySystemID)->first();
+
+
         if(empty($contractDocument)) {
             return [
                 'status' => false,
@@ -373,7 +469,7 @@ class ContractDocumentRepository extends BaseRepository
                 'returnedDate' => Carbon::parse($formData['formattedReturnedDate'])->format('Y-m-d H:i:s'),
                 'status' => 2
             ];
-            ContractDocument::where('id', $contractDocument['id'])->update($updateData);
+            $model::where('id', $contractDocument['id'])->update($updateData);
             DB::commit();
             return [
                 'status' => true,
@@ -409,5 +505,10 @@ class ContractDocumentRepository extends BaseRepository
             'status' => true,
             'message' => trans('common.document_received_validation_success')
         ];
+    }
+
+    public function getcontractDocumentData($contractId)
+    {
+        return $this->model->getcontractDocumentData($contractId);
     }
 }

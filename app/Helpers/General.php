@@ -82,4 +82,49 @@ class General
         }
         return 0;
     }
+
+    public static function convertDateTime($date)
+    {
+        return $date;
+    }
+
+    public static function checkEmployeeDischargedYN(): bool
+    {
+        $user = Users::find(Auth::id());
+        if(!empty($user))
+        {
+            $employee = Employees::find($user->employee_id);
+            if ($employee->discharegedYN == -1)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+    public static function ordinalSuffix($number)
+    {
+        $suffix = 'th';
+        if (!in_array(($number % 100), [11, 12, 13]))
+        {
+            switch ($number % 10)
+            {
+                case 1:
+                    $suffix = 'st';
+                    break;
+                case 2:
+                    $suffix = 'nd';
+                    break;
+                case 3:
+                    $suffix = 'rd';
+                    break;
+                default:
+                    $suffix = '';
+                    break;
+            }
+        }
+        return $number . '<sup>' .$suffix. '</sup>';
+    }
 }

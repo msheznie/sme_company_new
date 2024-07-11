@@ -57,7 +57,7 @@ class ErpDocumentApproved extends Model
     const UPDATED_AT = 'timeStamp';
 
 
-
+    protected $primaryKey = 'documentApprovedID';
 
     public $fillable = [
         'companySystemID',
@@ -150,7 +150,81 @@ class ErpDocumentApproved extends Model
 
     ];
 
-    public function saveDocumentApproved($insertArray) {
+    public function saveDocumentApproved($insertArray)
+    {
         return ErpDocumentApproved::insert($insertArray);
+    }
+    public function contractMaster()
+    {
+        return $this->belongsTo(ContractMaster::class, 'documentSystemCode', 'id');
+    }
+    public static function checkApprovalEligible($documentApprovedID)
+    {
+        return ErpDocumentApproved::where('documentApprovedID', $documentApprovedID)
+            ->where('approvedYN', -1)
+            ->first();
+    }
+    public static function updateDocumentApproved(
+        $documentApprovedID,
+        $approvedComment,
+        $employeeSystemID,
+        $employeeCode
+    )
+    {
+        return ErpDocumentApproved::where('documentApprovedID', $documentApprovedID)
+            ->update([
+                'approvedYN' => -1,
+                'approvedDate' => now(),
+                'approvedComments' => $approvedComment,
+                'employeeSystemID' => $employeeSystemID,
+                'employeeID' => $employeeCode
+            ]);
+    }
+    public static function checkApproveDocumentExists(
+        $documentApprovedID,
+        $isConfirmation = 0,
+        $documentMasterID = 0,
+        $documentSystemCode = 0
+    )
+    {
+        return ErpDocumentApproved::select('documentApprovedID', 'companySystemID', 'approvalGroupID',
+            'departmentSystemID', 'documentSystemID', 'documentSystemCode', 'approvalLevelID', 'approvalGroupID',
+            'approvedYN', 'approvedDate', 'rejectedYN')
+            ->when($isConfirmation == 1, function ($q) use ($documentMasterID, $documentSystemCode)
+            {
+                $q->where([
+                    'documentSystemID' => $documentMasterID,
+                    'documentSystemCode' => $documentSystemCode
+                ]);
+            })
+            ->when($isConfirmation == 0, function ($q) use ($documentApprovedID)
+            {
+                $q->where('documentApprovedID', $documentApprovedID);
+            })
+            ->first();
+    }
+    public function approved_by()
+    {
+        return $this->belongsTo(Employees::class,'employeeSystemID','employeeSystemID');
+    }
+    public function documentApprovedList($documentSystemID, $ids, $companySystemID)
+    {
+        return ErpDocumentApproved::select('documentApprovedID', 'approvedYN', 'rollLevelOrder', 'employeeSystemID',
+            'approvalGroupID', 'rejectedYN', 'rejectedComments', 'rejectedDate', 'approvedComments', 'approvedDate'
+        )
+            ->where('documentSystemID', $documentSystemID)
+            ->whereIn('documentSystemCode', $ids)
+            ->where('companySystemID', $companySystemID)
+            ->with(['approved_by'])
+            ->get();
+    }
+    public static function levelWiseDocumentApproveUsers($documentSystemID, $documentSystemCode, $rollLevelOrder)
+    {
+        return ErpDocumentApproved::select('documentApprovedID', 'companySystemID', 'documentSystemID', 'approvedYN',
+            'documentSystemCode', 'approvalGroupID', 'rollLevelOrder')
+            ->where("documentSystemID", $documentSystemID)
+            ->where("documentSystemCode", $documentSystemCode)
+            ->where("rollLevelOrder", $rollLevelOrder)
+            ->first();
     }
 }

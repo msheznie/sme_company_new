@@ -5,6 +5,8 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 
 /**
  * Class ContractMilestone
@@ -23,16 +25,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractMilestone extends Model
 {
-    use SoftDeletes;
 
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_milestone';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $dates = ['deleted_at'];
 
     protected $hidden = ['id', 'contractID'];
 
@@ -40,12 +42,11 @@ class ContractMilestone extends Model
         'uuid',
         'contractID',
         'title',
-        'percentage',
-        'amount',
         'status',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'description'
     ];
 
     /**
@@ -58,12 +59,11 @@ class ContractMilestone extends Model
         'uuid' => 'string',
         'contractID' => 'integer',
         'title' => 'string',
-        'percentage' => 'float',
-        'amount' => 'float',
         'status' => 'integer',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'description' => 'string'
     ];
 
     /**
@@ -72,19 +72,81 @@ class ContractMilestone extends Model
      * @var array
      */
     public static $rules = [
-        'uuid' => 'required|string|max:200',
-        'contractID' => 'required|integer',
-        'title' => 'required|string|max:255',
-        'percentage' => 'required|numeric',
-        'amount' => 'required|numeric',
-        'status' => 'required|boolean',
-        'companySystemID' => 'required|integer',
-        'created_by' => 'required|integer',
-        'updated_by' => 'required|integer',
-        'deleted_at' => 'required',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+
     ];
 
+    public function milestonePaymentSchedules()
+    {
+        return $this->hasOne('App\Models\MilestonePaymentSchedules', 'milestone_id', 'id');
+    }
 
+    public static function getMilestoneDataByTitle($contractId,$title)
+    {
+            return self::where('title', $title)
+                ->where('contractID', $contractId)
+                ->first();
+    }
+    public static function getMilestoneData($contractId,$id)
+    {
+        return self::where('contractID', $contractId)
+            ->where('id', $id)
+            ->first();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
+    }
+
+    public static function getContractMilestone($contractID, $companySystemID)
+    {
+        return ContractMilestone::select('uuid', 'title', 'description', 'status')
+            ->where('contractID', $contractID)
+            ->where('companySystemID', $companySystemID)
+            ->get();
+
+    }
+
+    public static function getContractMilestoneWithAmount($milestoneUuid)
+    {
+        return ContractMilestone::with([
+            'milestonePaymentSchedules' => function ($q)
+            {
+                $q->select('amount', 'id', 'uuid','milestone_id');
+            }
+        ])->where('uuid', $milestoneUuid)
+          ->first();
+    }
+
+    public function checkMilestoneInPayment()
+    {
+        return $this->belongsTo(MilestonePaymentSchedules::class, 'id', 'milestone_id');
+    }
+
+    public function getMileStone($contractId)
+    {
+        return self::where('contractID',$contractId)->get();
+    }
+
+
+    public function checkContractMilestoneExists($milestoneUuid)
+    {
+        return ContractMilestone::select('id')->where('uuid', $milestoneUuid)->first();
+    }
+    public static function checkContractHasMilestone($contractID)
+    {
+        return ContractMilestone::select('id')->where('contractID', $contractID)->exists();
+    }
+
+    public static function checkMilestoneAddedForContract($contractId, $companySystemID)
+    {
+        return ContractMilestone::where('contractId', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->exists();
+    }
 }

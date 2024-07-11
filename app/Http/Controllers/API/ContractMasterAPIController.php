@@ -2,24 +2,37 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Helpers\inventory;
 use App\Http\Requests\API\CreateContractMasterAPIRequest;
 use App\Http\Requests\API\UpdateContractMasterAPIRequest;
+use App\Http\Requests\API\RejectDocumentAPIRequest;
+use App\Http\Requests\API\ApproveDocumentRequest;
+use App\Http\Requests\API\ContractConfirmRequest;
 use App\Jobs\DeleteFileFromS3Job;
+use App\Models\CMContractBoqItemsAmd;
 use App\Models\Company;
+use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
+use App\Models\ContractSettingDetail;
+use App\Models\ContractSettingMaster;
+use App\Models\contractStatusHistory;
+use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
 use App\Repositories\CompanyRepository;
+use App\Repositories\ContractHistoryRepository;
 use App\Repositories\ContractMasterRepository;
+use App\Services\ContractMasterService;
+use App\Services\ContractHistoryService;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMasterResource;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Response;
 use Yajra\DataTables\DataTables;
@@ -33,15 +46,24 @@ class ContractMasterAPIController extends AppBaseController
 {
     /** @var  ContractMasterRepository */
     private $contractMasterRepository;
+    private $contractMasterService;
     /**
      * @var CompanyRepository
      */
     private $companyRepository;
+    private $contractHistoryRepository;
 
-    public function __construct(ContractMasterRepository $contractMasterRepo, CompanyRepository $companyRepository)
+    public function __construct(
+        ContractMasterRepository $contractMasterRepo,
+        CompanyRepository $companyRepository,
+        ContractMasterService $contractMasterService,
+        ContractHistoryRepository $contractHistoryRepository
+    )
     {
         $this->contractMasterRepository = $contractMasterRepo;
         $this->companyRepository = $companyRepository;
+        $this->contractMasterService = $contractMasterService;
+        $this->contractHistoryRepository = $contractHistoryRepository;
     }
 
     /**
@@ -59,7 +81,8 @@ class ContractMasterAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractMasterResource::collection($contractMasters), 'Contract Masters retrieved successfully');
+        return $this->sendResponse(ContractMasterResource::collection($contractMasters),
+            'Contract Masters retrieved successfully');
     }
 
     /**
@@ -86,26 +109,59 @@ class ContractMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function show($id)
+    public function show($id,Request $request,ContractHistoryService $contractHistoryService)
     {
+        $input = $request->all();
+        $comapnyId = $input['selectedCompanyID'];
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
-            ['uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName', 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner',
-                'contractAmount', 'description', 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate',
-                'startDate', 'endDate', 'notifyDays', 'contractTermPeriod'
+            [   'id', 'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName',
+                'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
+                'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
+                'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
+                'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+                'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id'
             ],
             [
                 "contractTypes" => ['contract_typeId', 'uuid', 'cm_type_name'],
                 "contractUsers" => ['id', 'uuid'],
-                "contractOwners" => ['id', 'uuid']
+                "contractOwners" => ['id', 'uuid'],
+                "contractMasterHistory" => ['id', 'uuid','contractCode']
             ]
         );
-        if (empty($contractMaster)) {
+        if (empty($contractMaster))
+        {
             return $this->sendError( trans('common.contract_not_found'));
         }
+
+        $contractCategoryWiseData =  $contractHistoryService->getCategoryWiseContractCount($contractMaster,$comapnyId);
+        if($contractCategoryWiseData)
+        {
+            $contractMaster['contractCategoryWiseCount'] = count($contractCategoryWiseData);
+        }
+
+
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
+        $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
-        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty']);
+        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid, $comapnyId);
+        $contactMaster = new ContractMaster();
+        $lastSerialNumber  = $contactMaster->getMaxContractId();
+        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+        $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
         $response['editData'] = $editData;
+        $response['newContractCode'] = $contractCode;
+        $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
+        $response['boqActive'] = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'boq');
+        $milestoneActive = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'milestone');
+        $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
+        $response['milestoneActive'] = $milestoneActive && $milestoneHasRec;
+        $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
+        $response['disableContractType'] = $this->contractMasterService->disableContractTypeField(
+            $editData['contractTypeUuid'],
+            $comapnyId,
+            $contractMaster['id']
+        );
+
 
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
     }
@@ -119,25 +175,45 @@ class ContractMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function update($id, UpdateContractMasterAPIRequest $request)
+    public function update($uuid, UpdateContractMasterAPIRequest $request)
     {
         $input = $request->all();
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        $fromAmendment = $request->input('amendment');
 
         /** @var ContractMaster $contractMaster */
-        $contractMaster = $this->contractMasterRepository->findByUuid($id, ['id']);
 
-        if (empty($contractMaster)) {
-            return $this->sendError(trans('common.contract_not_found'));
-        }
+        try
+        {
 
-        $contractMasterUpdate = $this->contractMasterRepository->updateContract($input, $contractMaster['id'], $selectedCompanyID);
+            if ($fromAmendment)
+            {
+                $contractMaster = $this->getContractHistoryId($uuid);
+            } else
+            {
+                $contractMaster = $this->getContractMasterId($uuid);
+            }
+            $exisingContractTypeResult = ContractMaster::getExistingContractType(
+                $selectedCompanyID,
+                $contractMaster['id']
+            );
 
-        if($contractMasterUpdate['status']){
-            return $this->sendResponse(['id' => $id], $contractMasterUpdate['message']);
-        } else{
-            $statusCode = $contractMasterUpdate['code'] ?? 404;
-            return $this->sendError($contractMasterUpdate['message'], $statusCode);
+            $this->contractMasterRepository->updateContract(
+                $input,
+                $contractMaster['id'],
+                $selectedCompanyID,
+                $contractMaster['status'],
+                $exisingContractTypeResult->contractType
+            );
+
+            return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
+
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
         }
     }
 
@@ -156,7 +232,8 @@ class ContractMasterAPIController extends AppBaseController
         /** @var ContractMaster $contractMaster */
         $contractMaster = $this->contractMasterRepository->find($id);
 
-        if (empty($contractMaster)) {
+        if (empty($contractMaster))
+        {
             return $this->sendError(trans('common.contract_not_found'));
         }
 
@@ -173,13 +250,15 @@ class ContractMasterAPIController extends AppBaseController
     public function getAllContractMasterFilters(Request $request)
     {
         $contractMasterFilters = $this->contractMasterRepository->getAllContractMasterFilters($request);
-        return $this->sendResponse($contractMasterFilters, 'Retrieved successfully');
+        return $this->sendResponse($contractMasterFilters,
+            trans('common.retrieved_successfully'));
     }
 
     public function getCounterPartyNames(Request $request)
     {
         $counterPartyNames = $this->contractMasterRepository->getCounterPartyNames($request);
-        return $this->sendResponse($counterPartyNames, 'Retrieved successfully');
+        return $this->sendResponse($counterPartyNames,
+            trans('common.retrieved_successfully'));
     }
 
     public function exportContractMaster(Request $request)
@@ -197,9 +276,11 @@ class ContractMasterAPIController extends AppBaseController
         $export = new ContractManagmentExport($contractMaster);
         $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
 
-        if ($basePath == '') {
+        if ($basePath == '')
+        {
             return $this->sendError('unable_to_export_excel');
-        } else {
+        } else
+        {
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }
@@ -211,23 +292,43 @@ class ContractMasterAPIController extends AppBaseController
         DeleteFileFromS3Job::dispatch($path, $disk)->delay(now()->addMinutes(5));
     }
 
-    public function getUserFormDataContractEdit(Request $request) {
+    public function getUserFormDataContractEdit(Request $request)
+    {
         $contractType = $request->input('search');
         $fromContractType = $request->input('fromContractType');
         $value = $contractType['value'];
 
         $fromData = $this->contractMasterRepository->userFormData($value, $fromContractType);
 
-        if($fromData['status']){
+        if($fromData['status'])
+        {
             return $this->sendResponse($fromData['data'], $fromData['message']);
-        } else{
+        } else
+        {
             $statusCode = $fromData['code'] ?? 404;
             return $this->sendError($fromData['message'], $statusCode);
         }
 
     }
 
-    public function getContractTypeSectionData(Request $request){
+    public function getSupplierTenderList(Request $request)
+    {
+        $counterparty = $request->input('counterParty');
+
+        $fromData = $this->contractMasterRepository->getTenderList($counterparty);
+
+        if($fromData['status'])
+        {
+            return $this->sendResponse($fromData['data'], $fromData['message']);
+        } else
+        {
+            $statusCode = $fromData['code'] ?? 404;
+            return $this->sendError($fromData['message'], $statusCode);
+        }
+    }
+
+    public function getContractTypeSectionData(Request $request)
+    {
         $contractSecs = $this->contractMasterRepository->getContractTypeSectionData($request);
         return $this->sendResponse($contractSecs, 'Retrieved successfully');
     }
@@ -236,20 +337,24 @@ class ContractMasterAPIController extends AppBaseController
     {
         $updateContractSetting = $this->contractMasterRepository->updateContractSettingDetails($request);
 
-        if($updateContractSetting['status']){
+        if($updateContractSetting['status'])
+        {
             return $this->sendResponse([], $updateContractSetting['message']);
-        } else{
+        } else
+        {
             $statusCode = $updateContractSetting['code'] ?? 404;
             return $this->sendError($updateContractSetting['message'], $statusCode);
         }
     }
 
-    public function getActiveContractSectionDetails(Request $request){
+    public function getActiveContractSectionDetails(Request $request)
+    {
         $contractSectionDetails = $this->contractMasterRepository->getActiveContractSectionDetails($request);
         return $this->sendResponse($contractSectionDetails, 'Retrieved successfully');
     }
 
-    public function getContractOverallRetentionData(Request $request){
+    public function getContractOverallRetentionData(Request $request)
+    {
         $contractOverallRetentionData = $this->contractMasterRepository->getContractOverallRetentionData($request);
         return $this->sendResponse($contractOverallRetentionData, 'Overall Retention data retrieved successfully');
     }
@@ -287,7 +392,8 @@ class ContractMasterAPIController extends AppBaseController
             ->addIndexColumn()
             ->with('orderCondition')
             ->addColumn('Actions', 'Actions', "Actions")
-            ->addColumn('current', function ($row) {
+            ->addColumn('current', function ($row)
+            {
                 $data = array('companySystemID' => $row->companySystemID,
                     'itemCodeSystem' => $row->itemCodeSystem,
                     'wareHouseId' => null);
@@ -303,41 +409,60 @@ class ContractMasterAPIController extends AppBaseController
     public function getAssignedItemsByCompanyQry($request)
     {
         $input = $request;
+
+        $amedment = $input['amendment'];
         $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
-        $contractId = $contractResult->id;
+
+
+        $colName = $amedment ? 'contract_history_id' : 'contractId';
+        $id = $amedment ? self::getHistoryId($input['uuid']) :  $contractResult->id;
+        $relationShip = $amedment ? 'contractBoqItemsAmd' : 'contractBoqItems';
+
+
+
+
         $companyId = $input['companyId'];
 
         $isGroup = $this->companyRepository->checkIsCompanyGroup($companyId);
 
-        if ($isGroup) {
+        if ($isGroup)
+        {
             $childCompanies = $this->companyRepository->getGroupCompany($companyId);
-        } else {
+        } else
+        {
             $childCompanies = [$companyId];
         }
 
         $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
             ->whereIn('companySystemID', $childCompanies)
             ->where('financeCategoryMaster', 1)
-            ->whereDoesntHave('contractBoqItems', function ($query) use ($contractId) {
-                $query->where('contractId', $contractId);
+            ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
+            {
+                $query->where($colName, $id);
             })
             ->orderBy('idItemAssigned', 'desc');
 
-        if (array_key_exists('financeCategoryMaster', $input)) {
-            if ($input['financeCategoryMaster'] != null && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])) {
-                $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
-            }
+        if (array_key_exists('financeCategoryMaster', $input)
+            && $input['financeCategoryMaster'] != null
+            && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])
+        )
+        {
+            $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
         }
 
-        if (array_key_exists('financeCategorySub', $input)) {
-            if ($input['financeCategorySub'] != null && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])) {
-                $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
-            }
+        if (array_key_exists('financeCategorySub', $input)
+            && $input['financeCategorySub'] != null
+            && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])
+        )
+        {
+            $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
         }
 
         $search = $input['search']['value'];
-        if ($search) {
-            $itemMasters = $itemMasters->where(function ($query) use ($search) {
+        if ($search)
+        {
+            $itemMasters = $itemMasters->where(function ($query) use ($search)
+            {
                 $query->where('itemPrimaryCode', 'LIKE', "%{$search}%")
                     ->orWhere('secondaryItemCode', 'LIKE', "%{$search}%")
                     ->orWhere('itemDescription', 'LIKE', "%{$search}%");
@@ -346,11 +471,14 @@ class ContractMasterAPIController extends AppBaseController
         return $itemMasters;
     }
 
-    public function getSubcategoriesByMainCategory(Request $request){
-        if($request->get('itemCategoryID') != 0) {
+    public function getSubcategoriesByMainCategory(Request $request)
+    {
+        if($request->get('itemCategoryID') != 0)
+        {
             return FinanceItemCategorySub::where('itemCategoryID',$request->get('itemCategoryID'))->where('isActive',1)
                 ->get();
-        } else{
+        } else
+        {
            return FinanceItemCategorySub::where('isActive',1)->get();
         }
     }
@@ -360,15 +488,98 @@ class ContractMasterAPIController extends AppBaseController
         return $this->contractMasterRepository->getContractConfirmationData($request);
     }
 
-    public function confirmContract(Request $request){
-        $confirmContract = $this->contractMasterRepository->confirmContract($request);
-
-        if($confirmContract['status']){
-            return $this->sendResponse([], $confirmContract['message']);
-        } else{
-            $statusCode = $confirmContract['code'] ?? 404;
-            return $this->sendError($confirmContract['message'], $statusCode);
+    public function confirmContract(ContractConfirmRequest $request)
+    {
+        try
+        {
+            $this->contractMasterRepository->confirmContract($request);
+            return $this->sendResponse([], trans('common.document_confirmed_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
         }
+    }
+    public function getContractApprovals(Request $request)
+    {
+        return $this->contractMasterRepository->getContractApprovals($request);
+    }
+    public function approveContract(ApproveDocumentRequest $request)
+    {
+        try
+        {
+            $this->contractMasterRepository->approveContract($request);
+            return $this->sendResponse([], trans('common.document_approved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+    }
+    public function rejectContract(RejectDocumentAPIRequest $request)
+    {
+        try
+        {
+            $this->contractMasterRepository->rejectContract($request);
+            return $this->sendResponse([], trans('common.document_successfully_rejected'));
+        }
+        catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+    public function getContractViewData(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid') ?? null;
+        $historyUuid = $request->input('historyUuid') ?? null;
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        try
+        {
+            $response = $this->contractMasterService->getContractViewData
+            ($contractUuid, $selectedCompanyID, $historyUuid);
+            return $this->sendResponse($response, trans('common.retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
+    protected function getContractHistoryId($uuid)
+    {
+        $contractHistory = $this->contractHistoryRepository->findByUuid($uuid, ['id']);
+        if (empty($contractHistory))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+        return $contractHistory;
+    }
+
+    protected function getContractMasterId($uuid)
+    {
+        $contractMaster = $this->contractMasterRepository->findByUuid($uuid, ['id']);
+        if (empty($contractMaster))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+        return $contractMaster;
+    }
+
+    public function getHistoryId($id)
+    {
+        $data = ContractManagementUtils::getContractHistoryData($id);
+        return $data;
     }
 
 }

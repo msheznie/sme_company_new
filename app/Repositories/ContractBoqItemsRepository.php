@@ -3,8 +3,11 @@
 namespace App\Repositories;
 
 use App\Helpers\inventory;
+use App\Models\CMContractBoqItemsAmd;
+use App\Models\CMContractMasterAmd;
 use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
+use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
@@ -58,34 +61,48 @@ class ContractBoqItemsRepository extends BaseRepository
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
-        $query = ContractBoqItems::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId')
-            ->with(['itemMaster.unit' => function ($query) {
+        $amedment = $input['amendment'];
+        $model = $amedment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $colName = $amedment ? 'contract_history_id' : 'contractId';
+        $col =  $amedment ? 'amd_id' : 'id';
+        $id = $amedment ? self::getHistoryId($uuid) : $contractId->id;
+
+        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price')
+            ->with(['itemMaster.unit' => function ($query)
+            {
                 $query->select('UnitShortCode');
             }, 'itemMaster.itemAssigned.local_currency'])
             ->where('companyId', $companyId)
-            ->where('contractId', $contractId->id)
-            ->orderBy('id', 'desc');
+            ->where($colName, $id)
+            ->orderBy($col, 'desc');
 
         return DataTables::eloquent($query)
-            ->addColumn('itemDescription', function ($row) {
+            ->addColumn('itemDescription', function ($row)
+            {
                 return $row->itemMaster->itemDescription;
             })
-            ->addColumn('minQty', function ($row) {
+            ->addColumn('minQty', function ($row)
+            {
                 return $row->minQty;
             })
-            ->addColumn('maxQty', function ($row) {
+            ->addColumn('maxQty', function ($row)
+            {
                 return $row->maxQty;
             })
-            ->addColumn('qty', function ($row) {
+            ->addColumn('qty', function ($row)
+            {
                 return $row->qty;
             })
-            ->addColumn('unitShortCode', function ($row) {
+            ->addColumn('unitShortCode', function ($row)
+            {
                 return $row->itemMaster->Unit->UnitShortCode;
             })
-            ->addColumn('primaryCode', function ($row) {
+            ->addColumn('primaryCode', function ($row)
+            {
                 return $row->itemMaster->primaryCode;
             })
-            ->addColumn('local', function ($row) {
+            ->addColumn('local', function ($row)
+            {
                 $data = [
                     'companySystemID' => $row->companyId,
                     'itemCodeSystem' => $row->itemId,
@@ -95,7 +112,8 @@ class ContractBoqItemsRepository extends BaseRepository
 
                 return $itemCurrentCostAndQty['wacValueLocal'];
             })
-            ->addColumn('uuid', function ($row) {
+            ->addColumn('uuid', function ($row)
+            {
                 return $row->uuid;
             })
             ->make(true);
@@ -117,15 +135,20 @@ class ContractBoqItemsRepository extends BaseRepository
             ->toArray();
     }
 
-    public function copySameQty($id, $arr): array
+    public function copySameQty($id, $arr, $amentmend): array
     {
-        try {
-            ContractBoqItems::whereIn('id', $id)
+        $model = $amentmend ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $col =  $amentmend ? 'amd_id' : 'id';
+
+        try
+        {
+            $model::whereIn($col, $id)
                 ->update($arr);
 
             return ['status' => true, 'message' => trans('BoqItems updated successfully')];
 
-        } catch (\Exception $ex) {
+        } catch (\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
@@ -150,7 +173,8 @@ class ContractBoqItemsRepository extends BaseRepository
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id)
             ->get();
-        $lotData = $lotData->map(function ($item) {
+        $lotData = $lotData->map(function ($item)
+        {
             $data = [
                 'companySystemID' => $item->companyId,
                 'itemCodeSystem' => $item->itemId,
@@ -175,10 +199,12 @@ class ContractBoqItemsRepository extends BaseRepository
             COL_AMOUNT => "Amount"
         ];
 
-        if ($lotData) {
+        if ($lotData)
+        {
             $count = 1;
-            foreach ($lotData as $value) {
-                $decimalCount = $value['itemMaster']['itemAssigned']['local_currency']['DecimalPlaces'];
+            foreach ($lotData as $value)
+            {
+                $decimalCount = $value['itemMaster']['itemAssigned']['local_currency']['DecimalPlaces'] ?? 2;
                 $data[$count][COL_ITEM] = isset($value['itemMaster']['primaryCode'])
                     ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode'])
                     : '-';
@@ -202,20 +228,20 @@ class ContractBoqItemsRepository extends BaseRepository
                     ? preg_replace('/^=/', '-', $value['qty'])
                     : '-';
 
-                $data[$count][COL_PRICE] = isset($value['current']['local'])
+                $data[$count][COL_PRICE] = isset($value['price'])
                     ? number_format(
-                        $value['current']['local'],
+                        $value['price'],
                         $decimalCount,
                         '.',
                         ''
                     )
                     : '-';
 
-                $data[$count][COL_AMOUNT] = isset($value['current']['local']) &&
-                is_numeric($value['current']['local']) &&
+                $data[$count][COL_AMOUNT] = isset($value['price']) &&
+                is_numeric($value['price']) &&
                 is_numeric($value['qty'])
                     ? number_format(
-                        $value['current']['local'] * $value['qty'],
+                        $value['price'] * $value['qty'],
                         $decimalCount,
                         '.',
                         ''
@@ -226,6 +252,17 @@ class ContractBoqItemsRepository extends BaseRepository
             }
         }
         return $data;
+    }
+
+    public function getBoqData($id)
+    {
+        return $this->model->getBoqData($id);
+    }
+
+    public function getHistoryId($id)
+    {
+        $data = ContractManagementUtils::getContractHistoryData($id);
+        return $data->id;
     }
 
 }

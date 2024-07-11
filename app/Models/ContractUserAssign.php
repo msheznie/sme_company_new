@@ -6,7 +6,8 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractUserAssign
  * @package App\Models
@@ -22,9 +23,9 @@ use Illuminate\Support\Facades\DB;
  */
 class ContractUserAssign extends Model
 {
-    //use SoftDeletes;
-
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_user_assign';
 
@@ -81,7 +82,8 @@ class ContractUserAssign extends Model
 
         $distinctRecords = ContractUserAssign::with(['userGroup', 'assignedUsers', 'employee', 'updatedByEmployee'])
             ->select('cm_contract_user_assign.*')
-            ->joinSub($subquery, 'sub', function ($join) {
+            ->joinSub($subquery, 'sub', function ($join)
+            {
                 $join->on('cm_contract_user_assign.userGroupId', '=', 'sub.userGroupId')
                     ->on('cm_contract_user_assign.id', '=', 'sub.min_id');
             });
@@ -92,18 +94,20 @@ class ContractUserAssign extends Model
             ->where('contractId', $contractResults->id)
             ->orderBy('id', 'desc');
 
-        // Union the two queries
         return $distinctRecords->union($allRecords);
     }
 
-    public function userGroup(){
+    public function userGroup()
+    {
         return $this->belongsTo('App\Models\ContractUserGroup','userGroupId','id');
     }
 
-    public function assignedUsers(){
+    public function assignedUsers()
+    {
         return $this->hasOne('App\Models\ContractUsers', 'id', 'userId');
     }
-    public function employee(){
+    public function employee()
+    {
         return $this->belongsTo(Employees::class,  'createdBy', 'employeeSystemID');
     }
     public function updatedByEmployee()
@@ -116,4 +120,61 @@ class ContractUserAssign extends Model
     {
         return $this->belongsTo(ContractUserGroupAssignedUser::class, 'userId', 'contractUserId');
     }
+
+    public static function getUserAssignDetailsByContractId($contractId)
+    {
+            return self::where('contractId', $contractId)
+                ->get();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return null;
+    }
+
+    public static function getAssignUserGroups($contractId)
+    {
+        return ContractUserAssign::select('userGroupId')
+            ->where('contractId', $contractId)
+            ->where('status', 1)
+            ->distinct()
+            ->get();
+    }
+
+    public function contractMaster()
+    {
+        return $this->belongsTo(ContractMaster::class, 'contractId', 'id');
+    }
+
+    public static function  getReminderContractExpiryUsers($contractIds)
+    {
+        return self::with(['contractMaster' => function ($query)
+        {
+            $query->select('id', 'contractCode', 'title', 'contractOwner',
+                'counterPartyName', 'companySystemID', 'endDate'
+            );
+        }])
+            ->whereIn('contractId', $contractIds)
+            ->where('status',1)
+            ->get(['userId', 'contractId'])
+            ->map(function ($contractUserAssign)
+            {
+                return [
+                    'userId' => $contractUserAssign->userId,
+                    'contractId' => $contractUserAssign->contractId,
+                    'contractCode' => $contractUserAssign->contractMaster->contractCode,
+                    'title' => $contractUserAssign->contractMaster->title,
+                    'contractOwner' => $contractUserAssign->contractMaster->contractOwner,
+                    'counterPartyName' => $contractUserAssign->contractMaster->counterPartyName,
+                    'companySystemID' => $contractUserAssign->contractMaster->companySystemID,
+                    'endDate' => $contractUserAssign->contractMaster->endDate,
+                ];
+            });
+    }
+
 }

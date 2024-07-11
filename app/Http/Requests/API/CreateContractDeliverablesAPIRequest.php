@@ -27,9 +27,8 @@ class CreateContractDeliverablesAPIRequest extends APIRequest
         return [
             'companySystemID' => 'required',
             'contractUuid' => 'required',
+            'title' => 'required',
             'description' => 'required',
-            'formattedStartDate' => 'required',
-            'formattedEndDate' => 'required',
         ];
     }
 
@@ -38,9 +37,8 @@ class CreateContractDeliverablesAPIRequest extends APIRequest
         return [
             'companySystemID.required' => 'Company ID is required',
             'contractUuid.required' => 'Contract ID is required',
+            'title.required' => 'Deliverable Title is required',
             'description.required' => 'Description is required',
-            'formattedStartDate.required' => 'Start Date is required',
-            'formattedEndDate.required' => 'End Date is required',
         ];
     }
 }

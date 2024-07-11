@@ -5,13 +5,15 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractDocument
  * @package App\Models
  * @version May 8, 2024, 5:23 pm +04
  *
  * @property string $uuid
+ * @property integer $contractID
  * @property integer $documentType
  * @property string $documentName
  * @property string $documentDescription
@@ -33,16 +35,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ContractDocument extends Model
 {
-    use SoftDeletes;
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_document';
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $dates = ['deleted_at'];
-    protected $hidden = ['id', 'documentType'];
+    protected $hidden = ['id'];
 
     public $fillable = [
         'uuid',
@@ -106,16 +108,20 @@ class ContractDocument extends Model
     public static $rules = [
 
     ];
-    public function documentMaster() {
+    public function documentMaster()
+    {
         return $this->belongsTo(DocumentMaster::class, 'documentType', 'id');
     }
-    public function attachment(){
+    public function attachment()
+    {
         return $this->belongsTo(ErpDocumentAttachments::class, 'documentMasterID', 'documentSystemID');
     }
-    public function contractDocuments($selectedCompanyID, $contractID) {
+    public function contractDocuments($selectedCompanyID, $contractID)
+    {
         return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
             'followingRequest', 'attachedDate', 'status')
-            ->with(['documentMaster' => function ($query) {
+            ->with(['documentMaster' => function ($query)
+            {
                 $query->select('id', 'uuid', 'documentType');
             }])
             ->where([
@@ -123,5 +129,32 @@ class ContractDocument extends Model
                 'companySystemID' => $selectedCompanyID
             ])
             ->orderBy('id', 'desc');
+    }
+
+    public static function getContractDocuments($contractId, $selectedCompanyID)
+    {
+            return self::where('companySystemID',$selectedCompanyID)
+            ->where('contractID',$contractId)
+            ->get();
+    }
+    public function pluckContractDocumentID($contractID)
+    {
+        return ContractDocument::where('contractID', $contractID)->pluck('id');
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractID';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemID';
+    }
+
+    public function getcontractDocumentData($contractId)
+    {
+        return self::where('contractID',$contractId)
+            ->get();
     }
 }

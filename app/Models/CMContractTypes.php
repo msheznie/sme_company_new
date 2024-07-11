@@ -161,4 +161,17 @@ class CMContractTypes extends Model
         }
         return $query;
     }
+
+    public static function getContractType($uuid)
+    {
+        return self::where('uuid',$uuid)->first();
+    }
+    public function partyA()
+    {
+        return $this->belongsTo(CMPartiesMaster::class, 'cmPartyA_id', 'cmParty_id');
+    }
+    public function partyB()
+    {
+        return $this->belongsTo(CMPartiesMaster::class, 'cmPartyB_id', 'cmParty_id');
+    }
 }

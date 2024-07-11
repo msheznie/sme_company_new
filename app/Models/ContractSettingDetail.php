@@ -5,7 +5,8 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractSettingDetail
  * @package App\Models
@@ -19,6 +20,8 @@ class ContractSettingDetail extends Model
 {
 
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_contract_setting_detail';
 
@@ -66,5 +69,31 @@ class ContractSettingDetail extends Model
     public function contractSectionDetails()
     {
         return $this->belongsTo(ContractSectionDetail::class, 'sectionDetailId', 'id');
+    }
+
+    public static function getSettingDetails($contractId, $id)
+    {
+        return self::where('contractId', $contractId)
+            ->where('settingMasterId', $id)
+            ->get();
+    }
+
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
+    }
+
+    public static function getCompanyIdColumn()
+    {
+        return null;
+    }
+
+    public function getActiveContractPaymentSchedule($contractID)
+    {
+        return ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractID)
+            ->whereIn('sectionDetailId', [1,2,3])
+            ->where('isActive', 1)
+            ->first();
     }
 }

@@ -26,7 +26,7 @@ class ContractUsers extends Model
     const UPDATED_AT = 'updated_at';
 
     protected $hidden = ['id', 'contractUserId'];
-
+    protected $primaryKey = 'id';
 
     public $fillable = [
         'contractUserId',
@@ -173,6 +173,25 @@ class ContractUsers extends Model
             });
         }
         return $customerMaster;
+    }
+
+    public function getUserData($uuid)
+    {
+        return self::where('uuid', $uuid)->first();
+    }
+
+    public static function getContractUserIdByUuid($uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->select('contractUserId')
+            ->first();
+    }
+    public static function getContractUserIdById($id)
+    {
+        return self::where('id', $id)
+            ->select('contractUserId', 'contractUserType')
+            ->whereIn('contractUserType',[1,3])
+            ->first();
     }
 
 }

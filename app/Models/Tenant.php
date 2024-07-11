@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Tenant
@@ -62,16 +63,15 @@ class Tenant extends Model
      * @var array
      */
     public static $rules = [
-        'name' => 'nullable|string|max:255',
-        'sub_domain' => 'nullable|string|max:255',
-        'erp_domain' => 'nullable|string|max:255',
-        'azureLogin' => 'nullable|integer',
-        'database' => 'nullable|string|max:255',
-        'api_key' => 'nullable|string|max:255',
-        'is_active' => 'nullable|boolean',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+
     ];
 
+    public static function getTenantList()
+    {
+        return Tenant::select('database', DB::raw('MAX(id) as id'), DB::raw('MAX(name) as name'))
+            ->where('is_active', 1)
+            ->groupBy('database')
+            ->get();
+    }
 
 }

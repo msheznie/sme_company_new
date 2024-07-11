@@ -5,7 +5,8 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasContractIdColumn;
+use App\Traits\HasCompanyIdColumn;
 /**
  * Class ContractOverallRetention
  * @package App\Models
@@ -28,6 +29,8 @@ class ContractOverallRetention extends Model
 
 
     use HasFactory;
+    use HasContractIdColumn;
+    use HasCompanyIdColumn;
 
     public $table = 'cm_overall_retention';
 
@@ -62,8 +65,8 @@ class ContractOverallRetention extends Model
         'contractAmount' => 'float',
         'retentionPercentage' => 'float',
         'retentionAmount' => 'float',
-        'startDate' => 'datetime',
-        'dueDate' => 'datetime',
+        'startDate' => 'string',
+        'dueDate' => 'string',
         'retentionWithholdPeriod' => 'string',
         'companySystemId' => 'integer',
         'created_by' => 'integer',
@@ -82,5 +85,20 @@ class ContractOverallRetention extends Model
         return $this->belongsTo(ContractMaster::class, 'contractId', 'id');
     }
 
+    public static function getContractIdColumn()
+    {
+        return 'contractId';
+    }
 
+    public static function getCompanyIdColumn()
+    {
+        return 'companySystemId';
+    }
+
+    public function getContractOverall($contractId,$companyId)
+    {
+      return self::where('companySystemId',$companyId)
+            ->where('contractId',$contractId)
+            ->first();
+    }
 }
