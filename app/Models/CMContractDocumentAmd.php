@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utilities\ContractManagementUtils;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -109,8 +110,9 @@ class CMContractDocumentAmd extends Model
      */
     public static $rules = [];
 
-    public function contractDocuments($selectedCompanyID, $contractID)
+    public function contractDocuments($selectedCompanyID, $contractID,$contractHistoryUuid)
     {
+        $getHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
         return self::select('uuid', 'documentType', 'documentName', 'documentDescription',
             'followingRequest', 'attachedDate', 'status','contract_doc_id')
             ->with(['documentMaster' => function ($query)
@@ -119,6 +121,7 @@ class CMContractDocumentAmd extends Model
             }])
             ->where([
                 'contractID' => $contractID,
+                'contract_history_id'=>$getHistoryData->id,
                 'companySystemID' => $selectedCompanyID
             ])
             ->orderBy('id', 'desc');

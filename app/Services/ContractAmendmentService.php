@@ -581,7 +581,7 @@ class ContractAmendmentService
         return [
             'Contract Info' => [
                 'modelName' => CMContractMasterAmd::class,
-                'skippedFields' => ['level_no', 'contract_history_id'],
+                'skippedFields' => ['level_no', 'contract_history_id','status'],
                 'fieldDescriptions' => [
                     'title' => 'Title',
                     'startDate' => 'Contract Start Date',

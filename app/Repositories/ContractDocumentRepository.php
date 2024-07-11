@@ -166,7 +166,7 @@ class ContractDocumentRepository extends BaseRepository
         $amenment = $input['amendment'];
         $languages =  $amenment
             ?
-            CMContractDocumentAmd::contractDocuments($selectedCompanyID, $contractID)
+            CMContractDocumentAmd::contractDocuments($selectedCompanyID, $contractID, $input['contractHistoryUuid'])
             :
             $this->model->contractDocuments($selectedCompanyID, $contractID);
         return DataTables::eloquent($languages)

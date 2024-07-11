@@ -28,6 +28,14 @@ class DeleteFileFromS3Job implements ShouldQueue
     {
         $this->path = $path;
         $this->disk = $disk;
+
+        if(env('IS_MULTI_TENANCY',false))
+        {
+            self::onConnection('database_main_cm');
+        }else
+        {
+            self::onConnection('database_cm');
+        }
     }
 
     /**
@@ -37,12 +45,14 @@ class DeleteFileFromS3Job implements ShouldQueue
      */
     public function handle()
     {
-        try {
-            // Delete the file from the disk
-            if ($exists = Storage::disk($this->disk)->exists($this->path)) {
+        try
+        {
+            if ($exists = Storage::disk($this->disk)->exists($this->path))
+            {
                 Storage::disk($this->disk)->delete($this->path);
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $e)
+        {
             Log::error('Error deleting file from the disk: ' . $e->getMessage());
         }
     }
