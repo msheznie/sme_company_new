@@ -73,20 +73,19 @@ class EmailUtils
     {
         if(env('IS_MULTI_TENANCY'))
         {
-            $domainUrl = env("DOMAIN_URL");
+            $domainUrl = env("DOMAIN_URL", '');
             $currentUrl = request()->fullUrl();
 
-            $parsedUrl = parse_url($currentUrl);
-            $hostParts = explode('.', $parsedUrl['host']);
-
-            if (count($hostParts) > 2)
+            if (empty($domainUrl))
             {
-                $subDomain = $hostParts[0];
-            } else
-            {
-                throw new CommonException('Host not found');
+                throw new CommonException('Domain url not found');
             }
-
+            $hostParts = explode('/', $currentUrl);
+            $subDomain = count($hostParts) > 3 ? $hostParts[3] : '';
+            if (empty($subDomain))
+            {
+                throw new CommonException('Sub domain not found');
+            }
 
             $redirectUrl = str_replace('*', $subDomain, $domainUrl);
             $redirectUrl .= $path;
