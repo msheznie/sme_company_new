@@ -50,7 +50,7 @@ class CreatePeriodicBillingsAPIRequest extends APIRequest
             'amount.required' => 'amount is required.',
             'start_date.title' => 'Start date is required.',
             'end_date.required' => 'End date is required.',
-            'occurrence_type.required' => 'Occurrence is required.',
+            'occurrence_type.required' => 'Valid occurrence is required.',
             'due_in.required_if' => 'Due in field is required.',
         ];
     }
