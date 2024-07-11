@@ -473,4 +473,12 @@ class ContractMaster extends Model
             ->where('is_addendum', 1)
             ->get();
     }
+
+    public static function getExistingContractType($companyId, $contractId)
+    {
+        return ContractMaster::select('contractType')
+            ->where('companySystemID', $companyId)
+            ->where('id', $contractId)
+            ->first();
+    }
 }

@@ -321,7 +321,7 @@ class ContractMasterRepository extends BaseRepository
 
     }
 
-    public function updateContract($formData, $id, $selectedCompanyID, $checkStatus)
+    public function updateContract($formData, $id, $selectedCompanyID, $checkStatus, $contractType)
     {
         $contractOwner = $formData['contractOwner'] ?? '';
         $fromAmendment = $formData['amendment'];
@@ -370,7 +370,8 @@ class ContractMasterRepository extends BaseRepository
             $id,
             $selectedCompanyID,
             $checkStatus,
-            $fromAmendment)
+            $fromAmendment,
+            $contractType)
         {
             $updateData = [
                 'title' => $formData['title'] ?? null,
@@ -409,12 +410,12 @@ class ContractMasterRepository extends BaseRepository
                 $updateData['status'] = $status;
             }
 
-
             ContractHistoryService::updateOrInsertStatus($id, $status, $selectedCompanyID);
 
             $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
             $colName = $fromAmendment ? 'contract_history_id' : 'id';
-
+            if($contractType != $checkContractTypeID['contract_typeId'])
+            {
             $contractTypeSections = CMContractTypeSections::getContractTypeSections(
                 $checkContractTypeID['contract_typeId'],
                 $selectedCompanyID
@@ -455,11 +456,10 @@ class ContractMasterRepository extends BaseRepository
                     $i++;
                 }
             }
-
             ContractSettingDetail::insert($detailArray);
+            }
 
             return $model::where($colName, $id)->update($updateData);
-
         });
     }
 

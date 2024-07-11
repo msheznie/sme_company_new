@@ -193,13 +193,17 @@ class ContractMasterAPIController extends AppBaseController
             {
                 $contractMaster = $this->getContractMasterId($uuid);
             }
-
+            $exisingContractTypeResult = ContractMaster::getExistingContractType(
+                $selectedCompanyID,
+                $contractMaster['id']
+            );
 
             $this->contractMasterRepository->updateContract(
                 $input,
                 $contractMaster['id'],
                 $selectedCompanyID,
                 $contractMaster['status'],
+                $exisingContractTypeResult->contractType
             );
 
             return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
