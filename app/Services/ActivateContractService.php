@@ -51,7 +51,7 @@ class ActivateContractService
                 $userDetails->push([
                     'userId' => $contractOwnerId,
                     'contractId' => $result->contract_id,
-                    'contractCode' => $result->contract_code,
+                    'contractCode' => $result->contractMaster->contractCode,
                     'title' => $result->contractMaster->title,
                     'contractOwner' => $result->contractMaster->contractOwner,
                     'counterPartyName' => $result->contractMaster->counterPartyName,
@@ -65,7 +65,7 @@ class ActivateContractService
                 $userDetails->push([
                     'userId' => $counterPartyNameId,
                     'contractId' => $result->contract_id,
-                    'contractCode' => $result->contract_code,
+                    'contractCode' => $result->contractMaster->contractCode,
                     'title' => $result->contractMaster->title,
                     'contractOwner' => $result->contractMaster->contractOwner,
                     'counterPartyName' => $result->contractMaster->counterPartyName,
