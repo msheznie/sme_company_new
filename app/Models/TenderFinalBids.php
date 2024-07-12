@@ -174,8 +174,11 @@ class TenderFinalBids extends Model
                     ->where('document_type', 0)
                     ->where('company_id', $companyId);
             }
-        ])
-            ->where('supplier_id', $supplierRegistrationId->id)
+        ])->whereHas('tender_master', function ($q) use ($companyId)
+        {
+            $q->where('company_id', $companyId)
+                ->where('document_type', 0);
+        })->where('supplier_id', $supplierRegistrationId->id)
             ->where('award', 1)
             ->get(['award', 'tender_id']);
 
