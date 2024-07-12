@@ -324,7 +324,8 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                     isset($value['milestoneId']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
                 $data[$count]['Milestone Amount'] =
                     isset($value['milestoneId']) ? number_format(
-                        (float)preg_replace('/^=/', '-', $value['milestone']['amount']), $decimalPlaces, '.', '') : '-';
+                        (float)preg_replace('/^=/', '-', $value['milestone']['milestonePaymentSchedules']['amount']),
+                        $decimalPlaces, '.', '') : '-';
                 $data[$count]['Retention Percentage'] =
                 isset($value['retentionPercentage']) ? preg_replace('/^=/', '-', $value['retentionPercentage']) : '-';
                 $data[$count]['Retention Amount'] =
