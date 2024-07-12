@@ -181,8 +181,14 @@ class TenderFinalBids extends Model
 
         $tenderList->each(function ($item)
         {
-            $item->tender_master_title = $item->tender_master->title;
-            unset($item->tender_master);
+            if($item->tender_master)
+            {
+                $item->tender_master_title = $item->tender_master->title;
+                unset($item->tender_master);
+            } else
+            {
+                $item->tender_master_title = null;
+            }
         });
 
         return $tenderList;
