@@ -270,7 +270,7 @@ class ContractMasterRepository extends BaseRepository
     {
         if (isset($userUuid) && $userUuid->contractUserId !== 0)
         {
-            $tenderList = TenderFinalBids::getTenderListBySupplier($userUuid->contractUserId);
+            $tenderList = TenderFinalBids::getTenderListBySupplier($userUuid->contractUserId, $companyId);
         } else
         {
             $tenderList = [];
@@ -302,7 +302,7 @@ class ContractMasterRepository extends BaseRepository
         return ['status' => true , 'message' => trans('common.contract_form_data_retrieved'), 'data' => $response];
     }
 
-    public function getTenderList($counterparty)
+    public function getTenderList($counterparty, $companySystemID)
     {
         $user = ContractUsers::getContractUserIdByUuid($counterparty);
 
@@ -311,7 +311,7 @@ class ContractMasterRepository extends BaseRepository
             return ['status' => false, 'message' => trans('common.user_not_found'), 'code' => 404];
         }
 
-        $tenderList = TenderFinalBids::getTenderListBySupplier($user->contractUserId);
+        $tenderList = TenderFinalBids::getTenderListBySupplier($user->contractUserId, $companySystemID);
 
         $response = [
             'tenderList' => $tenderList

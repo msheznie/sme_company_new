@@ -314,8 +314,9 @@ class ContractMasterAPIController extends AppBaseController
     public function getSupplierTenderList(Request $request)
     {
         $counterparty = $request->input('counterParty');
+        $companySystemID = $request->selectedCompanyID ?? 0;
 
-        $fromData = $this->contractMasterRepository->getTenderList($counterparty);
+        $fromData = $this->contractMasterRepository->getTenderList($counterparty,$companySystemID);
 
         if($fromData['status'])
         {

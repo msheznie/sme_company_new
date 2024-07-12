@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Eloquent as Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Schema(
@@ -157,15 +158,25 @@ class TenderFinalBids extends Model
         return $this->belongsTo('App\Models\TenderMaster', 'tender_id', 'id');
     }
 
-    public static function getTenderListBySupplier($supplierId)
+    public static function getTenderListBySupplier($supplierId, $companyId)
     {
+        $supplierRegistrationId = SupplierRegistrationLink::getSupplierId($supplierId);
+
+        if (!$supplierRegistrationId)
+        {
+            return collect();
+        }
+
         $tenderList = self::with([
-            'tender_master' => function ($q)
+            'tender_master' => function ($q) use ($companyId)
             {
-                $q->select('id', 'title');
+                $q->select('id', 'title', 'document_type')
+                    ->where('document_type', 0)
+                    ->where('company_id', $companyId);
             }
         ])
-            ->where('supplier_id', $supplierId)
+            ->where('supplier_id', $supplierRegistrationId->id)
+            ->where('award', 1)
             ->get(['award', 'tender_id']);
 
         $tenderList->each(function ($item)
