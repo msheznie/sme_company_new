@@ -602,6 +602,7 @@ class ContractAmendmentService
                     'agreementSignDate' => 'Agreement Sign Date',
                     'contractTermPeriod' => 'Contract Term Period',
                     'notifyDays' => 'Notify Days',
+                    'tender_id' => 'Tender Reference',
                 ],
                 'fieldMappings' => [
                     'contractType' => [
@@ -622,6 +623,11 @@ class ContractAmendmentService
                     'counterPartyName' => [
                         'model' => \App\Models\ContractUsers::class,
                         'attribute' => 'contractUserName',
+                        'colName'=> 'id',
+                    ],
+                    'tender_id' => [
+                        'model' => \App\Models\TenderMaster::class,
+                        'attribute' => 'title',
                         'colName'=> 'id',
                     ],
                 ],
