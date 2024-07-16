@@ -180,7 +180,7 @@ class ContractMasterAPIController extends AppBaseController
         $input = $request->all();
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
         $fromAmendment = $request->input('amendment');
-
+        $contractType = 0;
         /** @var ContractMaster $contractMaster */
 
         try
@@ -192,18 +192,22 @@ class ContractMasterAPIController extends AppBaseController
             } else
             {
                 $contractMaster = $this->getContractMasterId($uuid);
+
+                $exisingContractTypeResult = ContractMaster::getExistingContractType(
+                    $selectedCompanyID,
+                    $contractMaster['id']
+                );
+
+                $contractType = $exisingContractTypeResult->contractType;
             }
-            $exisingContractTypeResult = ContractMaster::getExistingContractType(
-                $selectedCompanyID,
-                $contractMaster['id']
-            );
+
 
             $this->contractMasterRepository->updateContract(
                 $input,
                 $contractMaster['id'],
                 $selectedCompanyID,
                 $contractMaster['status'],
-                $exisingContractTypeResult->contractType
+                $contractType
             );
 
             return $this->sendResponse(['id' => $uuid], trans('common.contract_updated_successfully'));
