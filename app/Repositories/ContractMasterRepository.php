@@ -414,7 +414,9 @@ class ContractMasterRepository extends BaseRepository
 
             $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
             $colName = $fromAmendment ? 'contract_history_id' : 'id';
-            if($contractType != $checkContractTypeID['contract_typeId'])
+
+
+            if(!$fromAmendment && $contractType != $checkContractTypeID['contract_typeId'])
             {
             $contractTypeSections = CMContractTypeSections::getContractTypeSections(
                 $checkContractTypeID['contract_typeId'],
