@@ -86,7 +86,6 @@ class CMContractMasterAmd extends Model
         'startDate',
         'endDate',
         'agreementSignDate',
-        'notifyDays',
         'contractTermPeriod',
         'contractRenewalDate',
         'contractExtensionDate',
@@ -146,7 +145,6 @@ class CMContractMasterAmd extends Model
         'startDate' => 'string',
         'endDate' => 'string',
         'agreementSignDate' => 'string',
-        'notifyDays' => 'integer',
         'contractTermPeriod' => 'string',
         'contractRenewalDate' => 'string',
         'contractExtensionDate' => 'string',
@@ -198,7 +196,7 @@ class CMContractMasterAmd extends Model
         'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
         'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
         'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
-        'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+        'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
         'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id')
             ->with(["contractTypes" => function ($query)
             {

@@ -40,7 +40,6 @@ class CMContractMasterAmdRepository extends BaseRepository
         'startDate',
         'endDate',
         'agreementSignDate',
-        'notifyDays',
         'contractTermPeriod',
         'contractRenewalDate',
         'contractExtensionDate',

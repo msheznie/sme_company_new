@@ -31,7 +31,7 @@ class ContractMasterService
     {
         $contractMaster = ContractMaster::select('id', 'uuid', 'contractCode', 'title', 'description', 'contractType',
                 'counterParty', 'counterPartyName', 'referenceCode', 'contractOwner', 'contractAmount', 'startDate',
-                'endDate', 'agreementSignDate', 'notifyDays', 'contractTermPeriod', 'contractRenewalDate',
+                'endDate', 'agreementSignDate', 'contractTermPeriod', 'contractRenewalDate',
                 'contractExtensionDate', 'contractTerminateDate', 'contractRevisionDate', 'primaryCounterParty',
                 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber'
             )
