@@ -390,7 +390,6 @@ class ContractMasterRepository extends BaseRepository
                     Carbon::parse($formData['formatAgreementSignDate'])
                         ->setTime(Carbon::now()->hour, Carbon::now()->minute, Carbon::now()->second) : null,
                 'contractTermPeriod' => $formData['contractTermPeriod'] ?? null,
-                'notifyDays' => $formData['notifyDays'] ?? null,
                 'primaryCounterParty' => $formData['primaryCounterParty'] ?? null,
                 'primaryEmail' => $formData['primaryEmail'] ?? null,
                 'primaryPhoneNumber' => $formData['primaryPhoneNumber'] ?? null,

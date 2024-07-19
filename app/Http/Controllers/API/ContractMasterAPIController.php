@@ -118,7 +118,7 @@ class ContractMasterAPIController extends AppBaseController
                 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
-                'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+                'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
                 'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id'
             ],
             [

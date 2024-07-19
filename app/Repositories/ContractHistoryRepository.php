@@ -203,7 +203,6 @@ class ContractHistoryRepository extends BaseRepository
             'startDate' => $currentContractDetails["startDate"],
             'endDate' => $currentContractDetails["endDate"],
             'agreementSignDate' => $currentContractDetails["agreementSignDate"],
-            'notifyDays' => $currentContractDetails["notifyDays"],
             'contractTermPeriod' => $currentContractDetails["contractTermPeriod"],
             'contractRenewalDate' => $currentContractDetails["contractRenewalDate"],
             'contractExtensionDate' => $currentContractDetails["contractExtensionDate"],
