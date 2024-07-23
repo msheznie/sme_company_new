@@ -60,7 +60,7 @@ class ContractUserGroupAPIController extends AppBaseController
     {
         $result = $this->contractUserGroupRepository->createRecord($request);
         if ($result['success']) {
-            return $this->sendResponse('', trans('common.user_group_saved_successfully'));
+            return $this->sendResponse($result['data'], trans('common.user_group_saved_successfully'));
         } else {
             return $this->sendError($result['message'], $result['code']);
         }
