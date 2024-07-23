@@ -79,7 +79,7 @@ class ContractUserGroupRepository extends BaseRepository
         $companyId =  $input['selectedCompanyID'];
         $uuid =  $input['uuid'];
         $contractId = 0;
-        if(isset($uuid) && $uuid !== 0){
+        if(isset($uuid) && $uuid !== '0'){
             $result = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
             $contractId = $result->id;
         }
@@ -162,7 +162,7 @@ class ContractUserGroupRepository extends BaseRepository
     {
         $result = ['success' => false, 'message' => '', 'code' => 400];
 
-        if ($uuid === 0) {
+        if ($uuid === '0') {
             $isExist = ContractUserGroup::where('groupName', $input['groupName'])->exists();
             if ($isExist) {
                 $result['message'] = trans('common.group_name_already_exists');
