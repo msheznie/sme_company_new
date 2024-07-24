@@ -93,6 +93,16 @@ class ContractMasterService
         return false;
     }
 
+    public function disableTenderReferenceField($companySystemID, $contractId)
+    {
+        if (ContractBoqItems::checkBoqAddedFormTender($contractId, $companySystemID))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private function checkRecordExistence($sectionId, $contractId, $companySystemID)
     {
         switch ($sectionId)

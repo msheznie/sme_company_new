@@ -223,7 +223,8 @@ class ContractHistoryRepository extends BaseRepository
             'companySystemID' => $companyId,
             'created_by' => General::currentEmployeeId(),
             'created_at' => Carbon::now(),
-            'parent_id' => $currentContractDetails['id']
+            'parent_id' => $currentContractDetails['id'],
+            'tender_id' => $currentContractDetails["tender_id"]
         ];
 
         $categoryFields = ContractHistoryService::getCategories();
