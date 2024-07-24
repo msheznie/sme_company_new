@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\ContractCreationException;
 use App\Http\Requests\API\CreateContractAdditionalDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateContractAdditionalDocumentsAPIRequest;
 use App\Models\ContractAdditionalDocuments;
 use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\ContractAdditionalDocumentsRepository;
 use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\ContractAdditionalDocumentService;
 use App\Services\ContractAmendmentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
@@ -25,16 +27,18 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
     /** @var  ContractAdditionalDocumentsRepository */
     private $contractAdditionalDocumentsRepository;
     private $erpDocumentAttachmentsRepository;
-
+    protected $contractAdditionalDocumentService;
     public function __construct(
         ContractAdditionalDocumentsRepository $contractAdditionalDocumentsRepo,
-        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo
+        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo,
+        ContractAdditionalDocumentService $contractAdditionalDocumentService
     )
     {
         $this->contractAdditionalDocumentsRepository = $contractAdditionalDocumentsRepo;
         $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepo;
+        $this->contractAdditionalDocumentService = $contractAdditionalDocumentService;
     }
-
+    const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
     /**
      * Display a listing of the ContractAdditionalDocuments.
      * GET|HEAD /contractAdditionalDocuments
@@ -64,14 +68,18 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
      */
     public function store(CreateContractAdditionalDocumentsAPIRequest $request)
     {
-        $input = $request->all();
-
-        $contractAdditionalDocuments = $this->contractAdditionalDocumentsRepository->createAdditionalDocument($input);
-
-        if (!$contractAdditionalDocuments['status']) {
-            return $this->sendError($contractAdditionalDocuments['message']);
-        } else {
-            return $this->sendResponse([], $contractAdditionalDocuments['message']);
+        try
+        {
+            $contractId = $this->contractAdditionalDocumentService->createAdditionalDocument($request);
+            return $this->sendResponse($contractId,'Successfully Created');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
         }
     }
 
@@ -208,4 +216,51 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
             return $this->sendResponse([], $attachment['message']);
         }
     }
+
+    public function getAdditionalDocumentByUuid(Request $request)
+    {
+        try
+        {
+            return $this->contractAdditionalDocumentService->getAdditionalDocumentByUuid($request);
+        } catch (\Exception $e)
+        {
+            return $this->sendError( 'Something Went Wrong' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteContractDocumentAttachment(Request $request)
+    {
+        try
+        {
+            $this->contractAdditionalDocumentService->deleteContractDocument($request);
+            return $this->sendResponse([],'Successfully Deleted');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+        }
+    }
+
+    public function updateAdditionalDoc(Request $request)
+    {
+        try
+        {
+            $contractId = $this->contractAdditionalDocumentService->updateAdditionalDoc($request);
+            return $this->sendResponse($contractId,'Successfully updated');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+        }
+    }
+
+
 }
