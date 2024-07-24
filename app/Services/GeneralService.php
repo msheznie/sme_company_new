@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\ContractCreationException;
 use App\Models\FormTemplateMaster;
 use App\Models\{Navigation, Permission, PermissionsModel, Role, RoleHasPermissions, Tenant, UserTenant};
 use Carbon\Carbon;
@@ -94,4 +95,10 @@ class GeneralService
             return '';
         }
     }
+
+    public static function sendException($message, $e = null)
+    {
+        throw new ContractCreationException($message . ($e ? $e->getMessage() : ''));
+    }
+
 }

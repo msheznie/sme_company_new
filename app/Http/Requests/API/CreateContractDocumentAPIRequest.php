@@ -24,11 +24,22 @@ class CreateContractDocumentAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'contractUUid' => 'required',
             'documentTypes' => 'required',
             'selectedCompanyID' => 'required'
         ];
+
+        if ($this->input('followingRequest'))
+        {
+            $rules =
+                [
+                    'attachedDate'=> 'required',
+                ];
+        }
+
+
+        return $rules;
     }
 
     public function messages()
@@ -36,7 +47,8 @@ class CreateContractDocumentAPIRequest extends APIRequest
         return [
             'contractUUid.required' => trans('common.contract_id_is_required'),
             'documentTypes.required' => trans('common.document_type_is_required'),
-            'selectedCompanyID.required' => trans('common.company_id_is_required')
+            'selectedCompanyID.required' => trans('common.company_id_is_required'),
+            'attachedDate.required' => 'Due date is required',
         ];
     }
 }

@@ -162,30 +162,42 @@ class ContractUserGroupRepository extends BaseRepository
     {
         $result = ['success' => false, 'message' => '', 'code' => 400];
 
-        if ($uuid === '0') {
+        if ($uuid === '0')
+        {
             $isExist = ContractUserGroup::where('groupName', $input['groupName'])->exists();
-            if ($isExist) {
+            if ($isExist)
+            {
                 $result['message'] = trans('common.group_name_already_exists');
                 $result['code'] = 409;
-            } else {
+            }
+            else
+            {
                 $input['uuid'] = bin2hex(random_bytes(16));
                 $contractUserGroup = $this->create($input);
                 $result['success'] = true;
                 $result['data'] = $contractUserGroup;
             }
-        } else {
+        }
+        else
+        {
             $contractUserGroup = ContractUserGroup::where('uuid', $uuid)->first();
-            if (!$contractUserGroup) {
+            if (!$contractUserGroup)
+            {
                 $result['message'] = trans('common.group_not_found');
                 $result['code'] = 404;
-            } else {
+            }
+            else
+            {
                 $assignedUserCount = ContractUserGroupAssignedUser::where('userGroupId', $contractUserGroup->id)
                     ->where('status', 1)
                     ->count();
 
-                if ($input['isDefault'] && $assignedUserCount == 0) {
+                if ($input['isDefault'] && $assignedUserCount == 0)
+                {
                     $result['message'] = trans('common.active_user_should_jn_default_user_group');
-                } else {
+                }
+                else
+                {
                     $contractUserGroup->isDefault = $input['isDefault'];
                     $contractUserGroup->save();
                     $result['success'] = true;

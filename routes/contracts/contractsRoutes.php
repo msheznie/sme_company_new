@@ -414,7 +414,40 @@ Route::
         'additionalDocumentAmendment'
     ])->name('Additional Document Amendment');
 
+    Route::post('get-contract-document-uuid', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'getContractDocumentByUuid'
+    ])->name('Contract Document Data');
 
+    Route::post('get-contract-document-path', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'getContractDocumentPath'
+    ])->name('Contract Document Path');
+
+    Route::post('delete-document-tracing', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'deleteDocumentTracing'
+    ])->name('Delete Contract Document');
+
+    Route::post('update-contract-document', [
+        \App\Http\Controllers\API\ContractDocumentAPIController::class,
+        'updateContractDocument'
+    ])->name('Update Contract Document');
+
+    Route::post('get-additional-document-uuid', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'getAdditionalDocumentByUuid'
+    ])->name('Contract Additional Document Data');
+
+    Route::post('delete-contract-document-attachment', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'deleteContractDocumentAttachment'
+    ])->name('Delete Contract Document');
+
+    Route::post('update-additional-document', [
+        \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
+        'updateAdditionalDoc'
+    ])->name('Update additional Document');
 
 });
 
