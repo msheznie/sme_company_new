@@ -442,5 +442,12 @@ class Company extends Model
         'holding_updated_date' => 'nullable'
     ];
 
+    public static function getLocalCurrencyID($companySystemID)
+    {
+        $company = Company::find($companySystemID);
+
+        return $company ? $company->localCurrencyID : "";
+    }
+
 
 }

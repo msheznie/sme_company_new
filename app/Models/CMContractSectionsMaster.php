@@ -19,7 +19,7 @@ class CMContractSectionsMaster extends Model
     use HasFactory;
 
     public $table = 'cm_contract_sections_master';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -52,5 +52,10 @@ class CMContractSectionsMaster extends Model
         'timestamp' => 'nullable'
     ];
 
-    
+    public function sectionDetail()
+    {
+        return $this->hasMany(ContractSectionDetail::class, 'sectionMasterId', 'cmSection_id');
+    }
+
+
 }

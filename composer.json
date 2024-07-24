@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.3|^8.0",
         "ext-json": "*",
+        "awobaz/compoships": "^2.3",
         "doctrine/dbal": "^3.2",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
@@ -57,7 +58,10 @@
         },
         "files": [
             "./app/Helpers/permission.php",
-            "./app/Helpers/General.php"
+            "./app/Helpers/General.php",
+            "./app/Helpers/ConfirmDocument.php",
+            "./app/Helpers/ApproveDocument.php",
+            "./app/Helpers/RejectDocument.php"
         ]
     },
     "autoload-dev": {

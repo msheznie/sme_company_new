@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateCMContractTypesAPIRequest;
 use App\Http\Requests\API\UpdateCMContractTypesAPIRequest;
 use App\Models\CMContractTypes;
@@ -139,9 +140,9 @@ class CMContractTypesAPIController extends AppBaseController
         $contractType = $this->cMContractTypesRepository->saveContractType($request);
 
         if ($contractType['status']) {
-            return $this->sendResponse([$contractType['contract_typeId']], $contractType['message']);
+            return $this->sendResponse([], $contractType['message']);
         } else {
-            $statusCode = isset($contractType['code']) ? $contractType['code'] : 404;
+            $statusCode = $contractType['code'] ?? 404;
             return $this->sendError($contractType['message'], $statusCode);
         }
     }
@@ -157,7 +158,7 @@ class CMContractTypesAPIController extends AppBaseController
         if ($contractType['status']) {
             return $this->sendResponse([], 'The Contract Type has been deleted successfully !');
         } else {
-            $statusCode = isset($catMaster['code']) ? $catMaster['code'] : 404;
+            $statusCode = $catMaster['code'] ?? 404;
             return $this->sendError($contractType['message'], $statusCode);
         }
     }
@@ -167,15 +168,14 @@ class CMContractTypesAPIController extends AppBaseController
         $contractFilters = $this->cMContractTypesRepository->getAllContractFilters($request);
         return $this->sendResponse($contractFilters, 'Retrieved successfully');
     }
-  
+
     public function exportContractTypes(Request $request){
-        $input = $request->all();
         $type = $request->type;
         $disk = $request->disk;
         $docName = $request->doc_name;
+        $companySystemID = $request->selectedCompanyID ?? 0;
         $contractTypes = $this->cMContractTypesRepository->exportContractTypesReport($request);
-        $companyMaster = Company::find(isset($input['companySystemID']) ? $input['companySystemID'] : null);
-        $companyCode = isset($companyMaster->CompanyID) ? $companyMaster->CompanyID : 'common';
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
         $detailArray = array(
             'company_code' => $companyCode
         );
@@ -199,7 +199,12 @@ class CMContractTypesAPIController extends AppBaseController
 
     public function getSectionsFilterDrop(Request $request){
         $contractSecs = $this->cMContractTypesRepository->getSectionsFilterDrop($request);
-        return $this->sendResponse($contractSecs, 'Retrieved successfully');
+        if(!$contractSecs['status']) {
+            $statusCode = $contractSecs['code'] ?? 404;
+            return $this->sendError($contractSecs['message'], $statusCode);
+        } else {
+            return $this->sendResponse($contractSecs['data'], $contractSecs['message']);
+        }
     }
 
     public function updateDynamicFieldDetail(Request $request){
@@ -207,7 +212,7 @@ class CMContractTypesAPIController extends AppBaseController
         if ($updateDynamicField['status']) {
             return $this->sendResponse([], 'Successfully updated');
         } else {
-            $statusCode = isset($updateDynamicField['code']) ? $updateDynamicField['code'] : 404;
+            $statusCode = $updateDynamicField['code'] ?? 404;
             return $this->sendError($updateDynamicField['message'], $statusCode);
         }
     }

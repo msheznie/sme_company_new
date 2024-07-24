@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class CMContractTypeSections
@@ -22,11 +23,12 @@ class CMContractTypeSections extends Model
     use HasFactory;
 
     public $table = 'cm_contract_type_sections';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
     public $fillable = [
+        'uuid',
         'contract_typeId',
         'cmSection_id',
         'is_enabled',
@@ -41,6 +43,7 @@ class CMContractTypeSections extends Model
      * @var array
      */
     protected $casts = [
+        'uuid' => 'string',
         'ct_sectionId' => 'integer',
         'contract_typeId' => 'integer',
         'cmSection_id' => 'integer',
@@ -56,6 +59,7 @@ class CMContractTypeSections extends Model
      * @var array
      */
     public static $rules = [
+        'uuid' => 'required|unique',
         'contract_typeId' => 'nullable|integer',
         'cmSection_id' => 'nullable|integer',
         'is_enabled' => 'required|boolean',
@@ -66,8 +70,21 @@ class CMContractTypeSections extends Model
         'updated_at' => 'nullable'
     ];
 
-    public function contratSectionWithtypes()
+    public function contractSectionWithTypes()
     {
         return $this->belongsTo(CMContractSectionsMaster::class, 'cmSection_id', 'cmSection_id');
+    }
+
+    public function sectionDetail()
+    {
+        return $this->belongsTo(ContractSectionDetail::class, 'cmSection_id', 'sectionMasterId');
+    }
+
+    public static function getContractTypeSections($contractTypeId, $companySystemID)
+    {
+        return CMContractTypeSections::where('contract_typeId', $contractTypeId)
+            ->where('companySystemID', $companySystemID)
+            ->where('is_enabled', 1)
+            ->get();
     }
 }

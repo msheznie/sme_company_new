@@ -136,4 +136,36 @@ class CompanyRepository extends BaseRepository
     {
         return Company::class;
     }
+
+    public static function checkIsCompanyGroup($companyID): bool
+    {
+        $isCompaniesGroup = Company::where('companySystemID', $companyID)->where('isGroup', -1)->exists();
+        return (bool)$isCompaniesGroup;
+    }
+
+
+    public static function getGroupCompany($selectedCompanyId, $excludeSameCompany = false): array
+    {
+        $companiesByGroup = Company::with(['child' => function($q) use($selectedCompanyId,$excludeSameCompany){
+            if($excludeSameCompany){
+                $q->where("companySystemID",'!=', $selectedCompanyId);
+            }
+        }])
+            ->where("masterCompanySystemIDReorting", $selectedCompanyId)
+            ->get();
+
+        $groupCompany = [];
+        if ($companiesByGroup) {
+            foreach ($companiesByGroup as $val) {
+                if ($val['child']) {
+                    foreach ($val['child'] as $val1) {
+                        $groupCompany[] = array('companySystemID' => $val1["companySystemID"], 'CompanyID' => $val1["CompanyID"], 'CompanyName' => $val1["CompanyName"]);
+                    }
+                } else {
+                    $groupCompany[] = array('companySystemID' => $val["companySystemID"], 'CompanyID' => $val["CompanyID"], 'CompanyName' => $val["CompanyName"]);
+                }
+            }
+        }
+        return array_column($groupCompany, 'companySystemID');
+    }
 }
