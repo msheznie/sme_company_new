@@ -142,7 +142,7 @@ class ContractManagementUtils
                     $name = $user['contractSupplierUser']['name'];
                 } elseif($counterPartyId == 2)
                 {
-                    $name = $user['contractCustomerUser']['name'];
+                    $name = $user['contractCustomerUser']['name'] ?? null;
                 } else
                 {
                     $name = $user['contractInternalUser']['name'];

@@ -24,6 +24,9 @@ use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
+use App\Models\SupplierRegistrationLink;
+use App\Models\TenderBoqItems;
+use App\Models\TenderFinalBids;
 use App\Repositories\CompanyRepository;
 use App\Repositories\ContractHistoryRepository;
 use App\Repositories\ContractMasterRepository;
@@ -158,6 +161,10 @@ class ContractMasterAPIController extends AppBaseController
         $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
         $response['disableContractType'] = $this->contractMasterService->disableContractTypeField(
             $editData['contractTypeUuid'],
+            $comapnyId,
+            $contractMaster['id']
+        );
+        $response['disableTenderReferenceField'] = $this->contractMasterService->disableTenderReferenceField(
             $comapnyId,
             $contractMaster['id']
         );
@@ -414,17 +421,20 @@ class ContractMasterAPIController extends AppBaseController
     public function getAssignedItemsByCompanyQry($request)
     {
         $input = $request;
-
         $amedment = $input['amendment'];
-        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
+        $isTender = $input['isTender'];
+        $tenderId = $input['tenderId'];
+        $userUuid = ContractUsers::getContractUserIdByUuid($input['counterPartyNameUuid']);
+        if(isset($userUuid->contractUserId))
+        {
+            $supplierRegistrationId = SupplierRegistrationLink::getSupplierId($userUuid->contractUserId);
+        }
 
+        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
 
         $colName = $amedment ? 'contract_history_id' : 'contractId';
         $id = $amedment ? self::getHistoryId($input['uuid']) :  $contractResult->id;
         $relationShip = $amedment ? 'contractBoqItemsAmd' : 'contractBoqItems';
-
-
-
 
         $companyId = $input['companyId'];
 
@@ -438,30 +448,38 @@ class ContractMasterAPIController extends AppBaseController
             $childCompanies = [$companyId];
         }
 
-        $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
-            ->whereIn('companySystemID', $childCompanies)
-            ->where('financeCategoryMaster', 1)
-            ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
+        if($isTender)
+        {
+            $finalBidResult = TenderFinalBids::getBidByTenderId($tenderId, $supplierRegistrationId);
+            $itemMasters = TenderBoqItems::getBoqItemList($finalBidResult->bid_id);
+        } else
+        {
+            $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
+                ->whereIn('companySystemID', $childCompanies)
+                ->where('financeCategoryMaster', 1)
+                ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
+                {
+                    $query->where($colName, $id);
+                })
+                ->orderBy('idItemAssigned', 'desc');
+
+            if (array_key_exists('financeCategoryMaster', $input)
+                && $input['financeCategoryMaster'] != null
+                && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])
+            )
             {
-                $query->where($colName, $id);
-            })
-            ->orderBy('idItemAssigned', 'desc');
+                $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
+            }
 
-        if (array_key_exists('financeCategoryMaster', $input)
-            && $input['financeCategoryMaster'] != null
-            && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])
-        )
-        {
-            $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
+            if (array_key_exists('financeCategorySub', $input)
+                && $input['financeCategorySub'] != null
+                && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])
+            )
+            {
+                $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
+            }
         }
 
-        if (array_key_exists('financeCategorySub', $input)
-            && $input['financeCategorySub'] != null
-            && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])
-        )
-        {
-            $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
-        }
 
         $search = $input['search']['value'];
         if ($search)

@@ -67,7 +67,7 @@ class ContractBoqItemsRepository extends BaseRepository
         $col =  $amedment ? 'amd_id' : 'id';
         $id = $amedment ? self::getHistoryId($uuid) : $contractId->id;
 
-        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price')
+        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price', 'origin')
             ->with(['itemMaster.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
@@ -164,6 +164,7 @@ class ContractBoqItemsRepository extends BaseRepository
         define('COL_QUANTITY', 'Quantity');
         define('COL_PRICE', 'Price');
         define('COL_AMOUNT', 'Amount');
+        define('COL_ORIGIN', 'Origin');
 
         $input = $request->all();
         $companyId = $input['selectedCompanyID'];
@@ -196,7 +197,8 @@ class ContractBoqItemsRepository extends BaseRepository
             COL_UOM => "UOM",
             COL_QUANTITY => "Quantity",
             COL_PRICE => "Price",
-            COL_AMOUNT => "Amount"
+            COL_AMOUNT => "Amount",
+            COL_ORIGIN => "Added From"
         ];
 
         if ($lotData)
@@ -247,7 +249,10 @@ class ContractBoqItemsRepository extends BaseRepository
                         ''
                     )
                     : '-';
-
+                $origin = $value['origin'] == 1 ? 'Item Master' : 'Tender';
+                $data[$count][COL_ORIGIN] = isset($value['origin'])
+                    ? preg_replace('/^=/', '-', $origin)
+                    : '-';
                 $count++;
             }
         }
