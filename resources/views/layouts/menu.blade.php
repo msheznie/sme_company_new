@@ -463,3 +463,15 @@
         <span>Contract Milestone Penalty Masters</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('thirdPartySystems*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('thirdPartySystems.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Third Party Systems</span>
+    </a>
+</li>
+<li class="nav-item {{ Request::is('thirdPartyIntegrationKeys*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('thirdPartyIntegrationKeys.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Third Party Integration Keys</span>
+    </a>
+</li>
