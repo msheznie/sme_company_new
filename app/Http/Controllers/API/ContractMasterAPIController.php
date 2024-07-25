@@ -12,6 +12,7 @@ use App\Http\Requests\API\UpdateContractMasterAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\ApproveDocumentRequest;
 use App\Http\Requests\API\ContractConfirmRequest;
+use App\Http\Requests\ContractRequest;
 use App\Jobs\DeleteFileFromS3Job;
 use App\Models\CMContractBoqItemsAmd;
 use App\Models\Company;
@@ -603,6 +604,32 @@ class ContractMasterAPIController extends AppBaseController
     {
         $data = ContractManagementUtils::getContractHistoryData($id);
         return $data;
+    }
+
+    public function getContractData(Request $request)
+    {
+
+        $supplierId = $request->input('supplierId');
+
+        if (empty($supplierId))
+        {
+            return $this->sendError('Supplier id required', 500);
+        }
+
+        try
+        {
+            $data = $this->contractMasterRepository->getContractData($request->all());
+            if (empty($data))
+            {
+                return $this->sendError('Contract data not found', 404);
+            }
+            return $this->sendResponse($data, 'Data Retrieved successfully');
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError('Something went wrong'. ' ' . $e->getMessage(), 500);
+        }
+
     }
 
 }

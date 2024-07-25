@@ -449,5 +449,12 @@ class Company extends Model
         return $company ? $company->localCurrencyID : "";
     }
 
+    public static function getData($id)
+    {
+        return self::where([
+            ['companySystemID', '=', $id],
+            ['isActive', '=', 1]
+        ])->exists();
+    }
 
 }

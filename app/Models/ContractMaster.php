@@ -43,7 +43,7 @@ class ContractMaster extends Model
 
 
     protected $dates = ['deleted_at'];
-    protected $hidden = ['id', 'contractType', 'counterPartyName', 'created_by'];
+    protected $hidden = ['contractType' , 'created_by'];
 
 
 
@@ -160,7 +160,9 @@ class ContractMaster extends Model
      *
      * @var array
      */
-    public static $rules = [];
+    public static $rules = [
+        'supplierId'  => 'required',
+    ];
 
     public function contractTypes()
     {
@@ -479,4 +481,68 @@ class ContractMaster extends Model
             ->where('id', $contractId)
             ->first();
     }
+
+    public static function getContractMasterData($input)
+    {
+        $contracts = self::getContractData($input);
+
+        return $contracts->map(function ($contract)
+        {
+            return [
+                'contractReferenceId' => $contract->uuid,
+                'title' => $contract->title,
+                'amount' => $contract->amount,
+                'party' => $contract->counterParties->cmCounterParty_name,
+                'partyName' => $contract->contractUsers->contractUserName ?? null,
+                'partyUuid' => $contract->contractUsers->uuid ?? null,
+                'startDate' => $contract->startDate,
+                'endDate' => $contract->endDate,
+                'overall_retention_uuid' => $contract->overallRetention->uuid ?? null,
+                'retentionPercentage' => $contract->overallRetention->retentionPercentage ?? null,
+                'retentionAmount' => $contract->overallRetention->retentionAmount ?? null,
+                'retentionStartDate' => $contract->overallRetention->startDate ?? null,
+                'retentionDueDate' => $contract->overallRetention->dueDate ?? null
+            ];
+        })->toArray();
+    }
+
+    public function overallRetention()
+    {
+        return $this->hasOne(ContractOverallRetention::class, 'contractId', 'id');
+    }
+
+    public function getContractData($input)
+    {
+       return self::select(
+            'id',
+            'uuid',
+            'title',
+            'contractAmount as amount',
+            'counterParty',
+            'counterPartyName',
+            'startDate',
+            'endDate',
+        )
+            ->with(['counterParties' => function ($q)
+            {
+                $q->select('cmCounterParty_id','cmCounterParty_name');
+            }])
+            ->with(['contractUsers' => function ($q) use ($input)
+            {
+                $q->select('id','uuid','contractUserId','contractUserName')
+                ->where('contractUserId',$input['supplierId']);
+            }])
+            ->with(['overallRetention' => function ($q1)
+            {
+                $q1->select('contractId','uuid','retentionPercentage','retentionAmount','startDate','dueDate');
+            }])
+           ->whereHas('contractUsers', function ($q) use ($input)
+           {
+               $q->where('contractUserId',$input['supplierId']);
+           })
+            ->where('counterParty', 1)
+            ->where('companySystemID', $input['company_id'])
+            ->get();
+    }
+
 }
