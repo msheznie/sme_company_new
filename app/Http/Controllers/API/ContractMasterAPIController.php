@@ -505,7 +505,7 @@ class ContractMasterAPIController extends AppBaseController
                 ->get();
         } else
         {
-           return FinanceItemCategorySub::where('isActive',1)->get();
+            return FinanceItemCategorySub::where('isActive',1)->get();
         }
     }
 
