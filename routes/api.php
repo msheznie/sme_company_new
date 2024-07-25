@@ -33,6 +33,12 @@ Route::group(['middleware' => ['tenant']], function ()
     Route::resource('c_m_contract_types', App\Http\Controllers\API\CMContractTypesAPIController::class);
     Route::resource('c_m_contract_type_sections', App\Http\Controllers\API\CMContractTypeSectionsAPIController::class);
 
+
+    Route::group(['middleware' => ['third_party_integration']], function ()
+    {
+        Route::get('get_contract_data', 'ContractMasterAPIController@getContractData');
+    });
+
     Route::group(['middleware' => ['auth:api']], function ()
     {
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
@@ -91,7 +97,3 @@ Route::get('/contract-expiry-reminder', function ()
     \Artisan::call('reminderContractExpiry');
     return 'Contracts Reminder Expiry Send Successfully!';
 });
-
-
-
-Route::resource('contract_additional_document_amds', App\Http\Controllers\API\ContractAdditionalDocumentAmdAPIController::class);

@@ -1145,5 +1145,10 @@ class ContractMasterRepository extends BaseRepository
 
         return $id;
     }
+
+    public function getContractData($input)
+    {
+        return  ContractMaster::getContractMasterData($input);
+    }
 }
 
