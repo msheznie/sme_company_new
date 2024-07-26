@@ -413,6 +413,22 @@ Route::
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'additionalDocumentAmendment'
     ])->name('Additional Document Amendment');
+    Route::post('overall-penalty-data', [
+        \App\Http\Controllers\API\ContractOverallPenaltyAPIController::class,
+        'overallPenaltyData'
+    ])->name('Overall penalty data');
+    Route::post('overall-penalty', [
+        \App\Http\Controllers\API\ContractOverallPenaltyAPIController::class,
+        'store'
+    ])->name('store overall penalty');
+    Route::put('overall-penalty/{id}', [
+        \App\Http\Controllers\API\ContractOverallPenaltyAPIController::class,
+        'update'
+    ])->name('update overall penalty');
+    Route::post('update-penalty-status', [
+        \App\Http\Controllers\API\ContractOverallPenaltyAPIController::class,
+        'updatePenaltyStatus'
+    ])->name('update penalty status');
 
     Route::post('get-contract-document-uuid', [
         \App\Http\Controllers\API\ContractDocumentAPIController::class,
