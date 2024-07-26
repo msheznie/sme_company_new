@@ -216,4 +216,5 @@
          "Please enable overall penalty or milestone penalty to send the contract for approval",
      "at_least_one_overall_penalty_should_be_available" =>
          "Fill all the mandatory fields in overall penalty",
+     "milestone_payment_schedule" => "Milestone payment schedule is required to retain milestone retention",
  ];
