@@ -18,6 +18,7 @@ use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
+use App\Models\ContractOverallPenalty;
 use App\Models\ContractOverallRetention;
 use App\Models\ContractPaymentTerms;
 use App\Models\ContractSectionDetail;
@@ -408,6 +409,25 @@ class ContractMasterRepository extends BaseRepository
                     $formData['formatEndDate']);
                 $updateData['status'] = $status;
             }
+            if ($formData['contractAmount'])
+            {
+                try
+                {
+                    $overallPenalty = ContractOverallPenalty::getOverallPenalty($id, $selectedCompanyID);
+
+                    if ($overallPenalty)
+                    {
+                        $this->updatePenaltyAmounts($overallPenalty, $formData['contractAmount']);
+                    }
+                }
+                catch (CommonException $ex)
+                {
+                    throw new CommonException('Overall penalty not found.');
+                } catch (\Exception $ex)
+                {
+                    throw new CommonException('Overall penalty not found.');
+                }
+            }
 
             ContractHistoryService::updateOrInsertStatus($id, $status, $selectedCompanyID);
 
@@ -462,6 +482,19 @@ class ContractMasterRepository extends BaseRepository
 
             return $model::where($colName, $id)->update($updateData);
         });
+    }
+
+    private function updatePenaltyAmounts($overallPenalty, $amount)
+    {
+        $updatePenalty = [
+            'minimum_penalty_amount' =>
+                $amount * $overallPenalty['minimum_penalty_percentage'] / 100,
+            'maximum_penalty_amount' =>
+                $amount * $overallPenalty['maximum_penalty_percentage'] / 100,
+            'actual_penalty_amount' => $amount * $overallPenalty['actual_percentage'] / 100,
+        ];
+
+        ContractOverallPenalty::where('uuid', $overallPenalty['uuid'])->update($updatePenalty);
     }
 
     public function checkValidation($formData, $id, $selectedCompanyID)
@@ -855,7 +888,8 @@ class ContractMasterRepository extends BaseRepository
                 throw new CommonException($message);
             }
 
-            $message = $this->checkOverallAndMilestoneRetention($contractMaster['id'], $companySystemID);
+            $message = $this->checkOverallAndMilestoneRetention
+            ($contractMaster['id'], $companySystemID, $contractMaster['startDate']);
             if ($message)
             {
                 throw new CommonException($message);
@@ -951,7 +985,7 @@ class ContractMasterRepository extends BaseRepository
         return null;
     }
 
-    private function checkOverallAndMilestoneRetention($contractId, $companySystemID){
+    private function checkOverallAndMilestoneRetention($contractId, $companySystemID, $startDate){
         $activeSections = ContractSettingDetail::select('sectionDetailId')
             ->where('contractId', $contractId)
             ->where('isActive', 1)
@@ -989,6 +1023,25 @@ class ContractMasterRepository extends BaseRepository
                 if(empty($existPeriodicBilling))
                 {
                     return trans('common.at_least_one_periodic_billing_should_be_available');
+                }
+            }
+            if($activeSection['sectionDetailId'] == 6)
+            {
+                $existOverallPenalty = ContractOverallPenalty::getOverallPenalty($contractId,$companySystemID);
+                if(empty($existOverallPenalty))
+                {
+                    return trans('common.at_least_one_overall_penalty_should_be_available');
+                } else
+                {
+                    $penaltyStartDate =
+                        \DateTime::createFromFormat('d-m-Y', $existOverallPenalty['actual_penalty_start_date']);
+                    $contractStartDate = \DateTime::createFromFormat('d-m-Y', $startDate);
+
+                    if ($penaltyStartDate > $contractStartDate)
+                        {
+                            throw new CommonException('Please update the overall penalty start date according
+                             to the new contract start date');
+                        }
                 }
             }
         }

@@ -212,4 +212,8 @@
      "price_is_a_mandatory_field" => "Price is a mandatory field for added BOQ Items",
      "empty_quantity_or_price_values" => "There are BOQ records with empty quantity or price values",
      "quantity_or_price_values_equal_to_zero" => "There are BOQ items with quantity or price values equal to 0",
+     "at_least_one_penalty_should_be_available" =>
+         "Please enable overall penalty or milestone penalty to send the contract for approval",
+     "at_least_one_overall_penalty_should_be_available" =>
+         "Fill all the mandatory fields in overall penalty",
  ];
