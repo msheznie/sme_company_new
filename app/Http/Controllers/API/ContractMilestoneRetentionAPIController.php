@@ -180,4 +180,15 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }
+
+    public function checkMilestoneRetention(Request $request)
+    {
+        try
+        {
+            return $this->contractMilestoneRetentionRepository->checkMilestoneRetention($request);
+        } catch (\Exception $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+    }
 }

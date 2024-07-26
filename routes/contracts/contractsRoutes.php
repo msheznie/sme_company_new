@@ -68,6 +68,9 @@ Route::
     post('/milestone_retention',
         [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'store'])
         ->name('store contract milestone retention');
+    Route::post('/check-milestone-retention',
+        [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'checkMilestoneRetention'])
+        ->name('check contract milestone retention');
     Route::
     post('/get-contract-milestone-retention-data',
         [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'getContractMilestoneRetentionData'])
