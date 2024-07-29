@@ -259,10 +259,10 @@ class ContractHistoryService
 
                 if($categoryId == 2 || $categoryId == 3 || $categoryId == 5)
                 {
-                     ContractHistoryService::updateOrInsertStatus
+                    ContractHistoryService::updateOrInsertStatus
                     (
-                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
-                         $contractHistoryId
+                        $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
+                        $contractHistoryId
                     );
                 }
                 else
@@ -756,7 +756,7 @@ class ContractHistoryService
             {
                 $data = ['updated_at' => Carbon::now()];
                 contractStatusHistory::where('id', $id)
-                ->update($data);
+                    ->update($data);
             });
         } catch (\Exception $e)
         {

@@ -96,7 +96,7 @@ class ApproveDocument
 
             if($formData['documentSystemID'] == 123 && $masterRecord['parent_id'] == 0)
             {
-                    self::updateContractStatus($masterRecord);
+                self::updateContractStatus($masterRecord);
             }
 
             $update = $masterRecord->save();
