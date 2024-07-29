@@ -277,4 +277,22 @@ class ContractHistory extends Model
             ->where('company_id', $companySystemID)
             ->first();
     }
+
+    public static function getInActiveChildData()
+    {
+        return self::select('contract_id','company_id')
+            ->with(['contractMaster' => function ($query)
+            {
+                $query->select('id', 'contractCode', 'contractType', 'startDate', 'endDate')
+                    ->where('approved_yn', 1);
+            }])
+            ->whereHas('contractMaster', function ($query)
+            {
+                $query->select('id', 'contractCode', 'contractType')
+                    ->where('approved_yn', 1);
+            })
+            ->whereIn('category', [2, 3, 5])
+            ->whereNotNull('status')
+            ->get();
+    }
 }

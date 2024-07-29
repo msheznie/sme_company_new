@@ -401,14 +401,14 @@ class ContractMasterRepository extends BaseRepository
                 'updated_at' => Carbon::now(),
                 'tender_id' => $formData['tenderId'] ?? null
             ];
-            $status = 0;
+          /*  $status = 0;
 
             if($checkStatus == 0)
             {
                 $status = ContractHistoryService::checkContractDateBetween($formData['formatStartDate'],
                     $formData['formatEndDate']);
                 $updateData['status'] = $status;
-            }
+            }*/
             if ($formData['contractAmount'])
             {
                 try
@@ -429,7 +429,7 @@ class ContractMasterRepository extends BaseRepository
                 }
             }
 
-            ContractHistoryService::updateOrInsertStatus($id, $status, $selectedCompanyID);
+
 
             $model = $fromAmendment ? CMContractMasterAmd::class : ContractMaster::class;
             $colName = $fromAmendment ? 'contract_history_id' : 'id';

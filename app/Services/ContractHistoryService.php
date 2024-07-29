@@ -241,23 +241,41 @@ class ContractHistoryService
                 $contractId = $getContractId->id;
                 $contractHistoryId  = $getContractHistoryData->id;
 
+
                 $cloneStatus = self::checkContractDateBetween
                 (
                     $getContractCloneData['startDate'],$getContractCloneData['endDate']
                 );
+
+
                 $cloneStatus = ($categoryId == 6) ? $categoryId : $cloneStatus;
                 self::updateContractMaster($contractId, $companyId,$categoryId);
+
+                if($categoryId == 2 || $categoryId == 3 || $categoryId == 5)
+                {
+                     ContractHistoryService::updateOrInsertStatus
+                    (
+                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID
+                    );
+                }
+                else
+                {
+                    self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
+
+                }
+
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
-                self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
                 self::insertHistoryStatus($contractId,$categoryId,$companyId);
+
                 if($categoryId === 6)
                 {
                     contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
                 }
 
             });
-        }catch (\Exception $e)
+        }
+        catch (\Exception $e)
         {
             throw new ContractCreationException(trans('common.failed_to_update_contract_status: ' . $e->getMessage()));
         }
