@@ -359,7 +359,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             ];
         }
 
-        $totalRecords = ContractManagementUtils::getMilestonesWithAmount($contract['id'], $companySystemID)->count();
+        $totalRecords = ContractMilestoneRetention::checkRetentionExistWithMilestone($contract->id, $companySystemID);
 
         if($totalRecords != 0)
         {

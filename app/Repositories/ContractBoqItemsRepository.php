@@ -71,7 +71,7 @@ class ContractBoqItemsRepository extends BaseRepository
             ->with(['itemMaster.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
-            }, 'itemMaster.itemAssigned.local_currency'])
+            }, 'itemMaster.itemAssigned.local_currency', 'boqItem'])
             ->where('companyId', $companyId)
             ->where($colName, $id)
             ->orderBy($col, 'desc');
@@ -79,7 +79,13 @@ class ContractBoqItemsRepository extends BaseRepository
         return DataTables::eloquent($query)
             ->addColumn('itemDescription', function ($row)
             {
-                return $row->itemMaster->itemDescription;
+                if($row->origin == 2)
+                {
+                    return $row->boqItem->description;
+                } else
+                {
+                    return $row->itemMaster->itemDescription;
+                }
             })
             ->addColumn('minQty', function ($row)
             {
@@ -99,7 +105,13 @@ class ContractBoqItemsRepository extends BaseRepository
             })
             ->addColumn('primaryCode', function ($row)
             {
-                return $row->itemMaster->primaryCode;
+                if($row->origin == 2)
+                {
+                    return $row->boqItem->item_name;
+                } else
+                {
+                    return $row->itemMaster->primaryCode;
+                }
             })
             ->addColumn('local', function ($row)
             {
