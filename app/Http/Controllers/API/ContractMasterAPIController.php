@@ -608,14 +608,6 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getContractData(Request $request)
     {
-
-        $supplierId = $request->input('supplierId');
-
-        if (empty($supplierId))
-        {
-            return $this->sendError('Supplier id required', 500);
-        }
-
         try
         {
             $data = $this->contractMasterRepository->getContractData($request->all());

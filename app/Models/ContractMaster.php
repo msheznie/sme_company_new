@@ -515,7 +515,7 @@ class ContractMaster extends Model
 
     public function getContractData($input)
     {
-       return self::select(
+        $query = self::select(
             'id',
             'uuid',
             'title',
@@ -523,26 +523,33 @@ class ContractMaster extends Model
             'counterParty',
             'counterPartyName',
             'startDate',
-            'endDate',
+            'endDate'
         )
             ->with(['counterParties' => function ($q)
             {
-                $q->select('cmCounterParty_id','cmCounterParty_name');
+                $q->select('cmCounterParty_id', 'cmCounterParty_name');
             }])
             ->with(['contractUsers' => function ($q) use ($input)
             {
-                $q->select('id','uuid','contractUserId','contractUserName')
-                ->where('contractUserId',$input['supplierId']);
+                $q->select('id', 'uuid', 'contractUserId', 'contractUserName');
+                if (!empty($input['supplierId']))
+                {
+                    $q->where('contractUserId', $input['supplierId']);
+                }
             }])
             ->with(['overallRetention' => function ($q1)
             {
-                $q1->select('contractId','uuid','retentionPercentage','retentionAmount','startDate','dueDate');
-            }])
-           ->whereHas('contractUsers', function ($q) use ($input)
-           {
-               $q->where('contractUserId',$input['supplierId']);
-           })
-            ->where('counterParty', 1)
+                $q1->select('contractId', 'uuid', 'retentionPercentage', 'retentionAmount', 'startDate', 'dueDate');
+            }]);
+
+        if (!empty($input['supplierId'])) {
+            $query->whereHas('contractUsers', function ($q) use ($input)
+            {
+                $q->where('contractUserId', $input['supplierId']);
+            });
+        }
+
+        return $query->where('counterParty', 1)
             ->where('companySystemID', $input['company_id'])
             ->get();
     }

@@ -73,7 +73,7 @@ return [
     "returned_date_time_is_required" => "Returned date & time is Required",
     "contract_additional_document_created_successfully" => "Contract additional document created successfully",
     "contract_additional_document_updated_successfully" => "Contract additional document updated successfully",
-    "contract_additional_document_deleted_successfully" => "Contract additional document deleted successfully",
+    "contract_additional_document_deleted_successfully" => "Contract document deleted successfully",
     "contract_additional_document_retrieved_successfully" => "Contract additional documents retrieved successfully",
     "contract_additional_document_not_found" => "Contract additional document not found",
     "attachment_successfully_deleted" => "Attachment successfully deleted",

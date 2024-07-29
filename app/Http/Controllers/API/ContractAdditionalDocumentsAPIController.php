@@ -245,7 +245,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         }
     }
 
-    public function updateAdditionalDoc(Request $request)
+    public function updateAdditionalDoc(CreateContractAdditionalDocumentsAPIRequest $request)
     {
         try
         {

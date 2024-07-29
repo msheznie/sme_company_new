@@ -60,7 +60,7 @@
      "contract_document_id_not_found" => "Contract document ID not found",
      "document_type_not_found" => "Document type not found",
      "contract_document_updated_successfully" => "Contract document update successfully",
-     "contract_document_removed_successfully" => "Contract document removed successfully",
+     "contract_document_removed_successfully" => "Document Tracking removed successfully",
      "contract_document_retrieved_successfully" => "Contract document retrieved successfully",
      "document_version_number_validation_message" =>
          "The document version number must be a number with up to three digits after the decimal point.",
