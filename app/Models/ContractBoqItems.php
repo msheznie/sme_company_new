@@ -88,6 +88,11 @@ class ContractBoqItems extends Model
     {
         return $this->belongsTo(ItemMaster::class, 'itemId', 'itemCodeSystem');
     }
+
+    public function boqItem()
+    {
+        return $this->belongsTo(TenderBoqItems::class, 'itemId', 'id');
+    }
     public static function getContractIdColumn()
     {
         return 'contractId';
