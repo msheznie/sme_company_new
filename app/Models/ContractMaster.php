@@ -431,6 +431,8 @@ class ContractMaster extends Model
         return ContractMaster::select('id', 'companySystemID')
             ->whereDate('startDate', $todayDate)
             ->where('status', 0)
+            ->where('parent_id', 0)
+            ->where('approved_yn', 1)
             ->get();
     }
     public function contractHistoryStatus()

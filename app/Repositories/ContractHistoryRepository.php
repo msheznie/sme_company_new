@@ -215,10 +215,7 @@ class ContractHistoryRepository extends BaseRepository
             'secondaryEmail' => $currentContractDetails["secondaryEmail"],
             'secondaryPhoneNumber' => $currentContractDetails["secondaryPhoneNumber"],
             'documentMasterId' => $currentContractDetails["documentMasterId"],
-            'status' => ContractHistoryService::checkContractDateBetween
-            (
-                $currentContractDetails["startDate"], $currentContractDetails["endDate"]
-            ),
+            'status' => 0,
             'uuid' => $uuid,
             'companySystemID' => $companyId,
             'created_by' => General::currentEmployeeId(),

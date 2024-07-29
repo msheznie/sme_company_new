@@ -7,7 +7,9 @@ use App\Models\CompanyDocumentAttachment;
 use App\Models\ErpApprovalLevel;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpEmployeesDepartments;
+use App\Services\ContractHistoryService;
 use App\Utilities\EmailUtils;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\CommonException;
 use Illuminate\Support\Facades\Log;
@@ -91,12 +93,24 @@ class ApproveDocument
             $masterRecord->approved_yn = 1;
             $masterRecord->approved_by = $employeeSystemID;
             $masterRecord->approved_date = now();
+
+            if($formData['documentSystemID'] == 123)
+            {
+                if($masterRecord['parent_id'] == 0)
+                {
+                    self::updateContractStatus($masterRecord);
+                }
+            }
+
             $update = $masterRecord->save();
+
             if(!$update)
             {
                 throw new CommonException(trans('common.failed_to_approve_document'));
             }
-        } else
+
+        }
+        else
         {
             $masterRecord->rollLevelOrder = $formData['rollLevelOrder'] + 1;
             $update = $masterRecord->save();
@@ -162,5 +176,23 @@ class ApproveDocument
         }
         Email::sendBulkEmail($emails);
         return true;
+    }
+
+    public static function updateContractStatus($masterRecord)
+    {
+        $startDate = Carbon::parse($masterRecord['startDate'])->format('Y-m-d');
+        $endDate = Carbon::parse($masterRecord['endDate'])->format('Y-m-d');
+
+        $status = ContractHistoryService::checkContractDateBetween(
+            $startDate,
+            $endDate
+        );
+
+        $masterRecord->status = $status;
+
+        return ContractHistoryService::updateOrInsertStatus
+        (
+            $masterRecord->id, $status, $masterRecord->companySystemID
+        );
     }
 }
