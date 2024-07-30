@@ -98,6 +98,10 @@ class MilestonePaymentSchedules extends Model
     {
         return $this->belongsTo(CurrencyMaster::class, 'currency_id', 'currencyID');
     }
+    public function contractMaster()
+    {
+        return $this->belongsTo(ContractMaster::class, 'contract_id', 'id');
+    }
     public function milestonePaymentSchedules($searchKeyword, $companyId, $contractUuid)
     {
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
@@ -160,5 +164,107 @@ class MilestonePaymentSchedules extends Model
     public static function checkMilestoneUsedInRetention($milestoneID)
     {
         return ContractMilestoneRetention::where('milestoneId', $milestoneID)->exists();
+    }
+    public function milestonePaymentSchedulesReport($search, $companyId, $filter)
+    {
+        $contractTypeUuid = $filter['contractTypeID'] ?? null;
+        $milestoneStatus = $filter['milestoneStatus'] ?? 3;
+        $contractType = CMContractTypes::select('contract_typeId')
+            ->where('uuid',$contractTypeUuid)
+            ->where('companySystemID', $companyId)
+            ->first();
+        $contractTypeID = $contractType['contract_typeId'] ?? 0;
+
+        $results =  MilestonePaymentSchedules::select(
+            'id',
+            'uuid',
+            'contract_id',
+            'milestone_id',
+            'description',
+            'percentage',
+            'amount',
+            'milestone_status'
+        )
+        ->with([
+            'contractMaster' => function ($query) use($contractTypeID)
+            {
+                $query->select('id', 'contractCode', 'title', 'contractAmount', 'counterParty', 'counterPartyName',
+                    'contractType'
+                )
+                ->with([
+                    'contractUsers' => function ($query)
+                    {
+                        $query->select('id', 'uuid', 'contractUserId', 'contractUserType', 'contractUserName')
+                        ->with([
+                            'contractSupplierUser' => function ($q)
+                            {
+                                $q->select('supplierCodeSystem', 'supplierName');
+                            },
+                            'contractCustomerUser' => function ($q)
+                            {
+                                $q->select('customerCodeSystem', 'CustomerName');
+                            }
+                        ]);
+                    }, 'contractTypes' => function ($q)
+                    {
+                        $q->select('contract_typeId', 'cm_type_name', 'uuid');
+                    }
+                ])
+                ->when($contractTypeID > 0, function ($q) use ($contractTypeID)
+                {
+                    $q->where('contractType', $contractTypeID);
+                });
+            }, 'milestoneDetail' => function ($query)
+            {
+                $query->select('id', 'uuid', 'title');
+            }
+        ])
+        ->when($contractTypeID > 0, function ($query) use ($contractTypeID)
+        {
+            $query->where(function ($query1) use($contractTypeID)
+            {
+                $query1->whereHas('contractMaster', function ($q) use ($contractTypeID)
+                {
+                    $q->where('contractType', $contractTypeID);
+                    $q->whereHas('contractTypes');
+                });
+            });
+        })
+        ->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
+        {
+            $q->where('milestone_status', $milestoneStatus);
+        });
+
+        if ($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $results = $results->where(function ($results) use ($search)
+            {
+                $results->orWhere('amount', 'LIKE', "%{$search}%");
+                $results->orWhereHas('contractMaster', function ($query1) use ($search)
+                {
+                    $query1->where('contractCode', 'LIKE', "%{$search}%");
+                    $query1->orWhere('title', 'LIKE', "%{$search}%");
+                    $query1->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search)
+                    {
+                        $query3->where('supplierName', 'LIKE', "%{$search}%");
+                    });
+                    $query1->orWhereHas('contractUsers.contractCustomerUser', function ($query3) use ($search)
+                    {
+                        $query3->where('CustomerName', 'LIKE', "%{$search}%");
+                    });
+                });
+                $results->orWhereHas('contractMaster.contractTypes', function ($query1) use ($search)
+                {
+                    $query1->where('cm_type_name', 'LIKE', "%{$search}%");
+                });
+                $results->orWhereHas('milestoneDetail', function ($query1) use ($search)
+                {
+                    $query1->where('title', 'LIKE', "%{$search}%");
+                });
+
+            });
+        }
+        return $results->orderBy('contract_id', 'desc');
     }
 }

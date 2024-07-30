@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Exports\ContractManagmentExport;
+use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateMilestonePaymentSchedulesAPIRequest;
 use App\Http\Requests\API\UpdateMilestonePaymentSchedulesAPIRequest;
 use App\Models\MilestonePaymentSchedules;
@@ -192,5 +195,32 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function getMilestonePaymentSchedules(Request $request)
     {
         return $this->milestonePaymentSchedulesRepository->getMilestonePaymentSchedules($request);
+    }
+    public function getMilestoneDetailsReport(Request $request)
+    {
+        return $this->milestonePaymentSchedulesRepository->getMilestoneDetailsReport($request);
+    }
+    public function exportContractMilestoneReport(Request $request)
+    {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $milestones = $this->milestonePaymentSchedulesRepository->exportContractMilestoneReport($request);
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
+
+        $export = new ContractManagmentExport($milestones);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '')
+        {
+            return $this->sendError('unable_to_export_excel');
+        } else
+        {
+            return $this->sendResponse($basePath, trans('success_export'));
+        }
     }
 }

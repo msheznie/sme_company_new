@@ -165,4 +165,77 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             MilestonePaymentSchedules::where('id', $id)->update($postData);
         });
     }
+    public function getMilestoneDetailsReport($request)
+    {
+        $input = $request->all();
+        $searchKeyword = $request->input('search.value');
+        $companyId =  $input['selectedCompanyID'];
+        $filter =  $input['filter'] ?? null;
+        $languages =  $this->model->milestonePaymentSchedulesReport($searchKeyword, $companyId, $filter);
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
+    }
+    public function exportContractMilestoneReport($request)
+    {
+        $input  = $request->all();
+        $search = false;
+        $selectedCompanyID =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+
+        $milestones = $this->model->milestonePaymentSchedulesReport($search, $selectedCompanyID, $filter)->get();
+        $data[0][trans('common.contract_code')] = trans('common.contract_code');
+        $data[0][trans('common.title')] = trans('common.title');
+        $data[0][trans('common.counter_party_name')] = trans('common.counter_party_name');
+        $data[0][trans('common.contract_type')] = trans('common.contract_type');
+        $data[0][trans('common.contract_amount')] = trans('common.contract_amount');
+        $data[0][trans('common.milestone')] = trans('common.milestone');
+        $data[0][trans('common.milestone_amount')] = trans('common.milestone_amount');
+        $data[0][trans('common.milestone_status')] = trans('common.milestone_status');
+        if ($milestones)
+        {
+            $count = 1;
+            foreach ($milestones as $value)
+            {
+                $contractMaster = $value['contractMaster'] ?? null;
+                $contractPartyName = '-';
+                if ($contractMaster)
+                {
+                    $contractUsers = $contractMaster['contractUsers'] ?? [];
+                    if ($contractMaster['counterParty'] == 1)
+                    {
+                        $contractPartyName = $contractUsers['contractSupplierUser']['supplierName'] ?? '-';
+                    } else if ($contractMaster['counterParty'] == 2)
+                    {
+                        $contractPartyName = $contractUsers['contractCustomerUser']['CustomerName'] ?? '-';
+                    }
+                }
+                $statusMap = [
+                    1 => 'In Progress',
+                    2 => 'Completed',
+                ];
+
+                $status = $statusMap[$value['milestone_status']] ?? 'Pending';
+                $data[$count] = [
+                    trans('common.contract_code') => $contractMaster['contractCode'] ?? '-',
+                    trans('common.title') => $contractMaster['title'] ?? '-',
+                    trans('common.counter_party_name') => $contractPartyName,
+                    trans('common.contract_type') => $contractMaster['contractTypes']['cm_type_name'] ?? '-',
+                    trans('common.contract_amount') => isset($contractMaster['contractAmount'])
+                        ? number_format($contractMaster['contractAmount'], $decimalPlaces, '.', ',')
+                        : '-',
+                    trans('common.milestone') => $value['milestoneDetail']['title'] ?? '-',
+                    trans('common.milestone_amount') => isset($value['amount'])
+                        ? number_format($value['amount'], $decimalPlaces, '.', ',')
+                        : '-',
+                    trans('common.milestone_status') => $status,
+                ];
+                $count++;
+            }
+        }
+        return $data;
+    }
 }
