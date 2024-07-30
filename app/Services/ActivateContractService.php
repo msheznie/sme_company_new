@@ -19,10 +19,11 @@ class ActivateContractService
         $todayDate = Carbon::now()->format('Y-m-d');
         $contractList = ContractMaster::getCurrentInactiveContract($todayDate);
         $contractListChild = ContractHistory::getInActiveChildData($todayDate);
-
+        Log::info('API Email send start');
         self::processContracts($contractList);
         if(!empty($contractListChild))
         {
+
             foreach ($contractListChild as $value)
             {
                 $status = ContractHistoryService::checkContractDateBetween(
@@ -31,7 +32,7 @@ class ActivateContractService
                 );
                 ContractHistoryService::updateOrInsertStatus
                 (
-                    $value->contract_id, $status, $value->company_id
+                    $value->contract_id, $status, $value->company_id, null,true
                 );
 
                 self::updateContractChildMaster($status, $value->company_id, $value->contract_id);
