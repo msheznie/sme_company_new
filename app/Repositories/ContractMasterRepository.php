@@ -361,7 +361,7 @@ class ContractMasterRepository extends BaseRepository
             throw new CommonException('Agreement Sign Date cannot be greater than the Contract Start Date');
         }
 
-        $this->checkValidation($formData, $id, $selectedCompanyID);
+        // $this->checkValidation($formData, $id, $selectedCompanyID);
 
         return DB::transaction(function () use (
             $formData,
