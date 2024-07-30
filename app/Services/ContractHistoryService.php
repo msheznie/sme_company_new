@@ -16,6 +16,7 @@ use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
 use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\ContractHistoryRepository;
+use App\Repositories\contractStatusHistoryRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,10 +25,13 @@ use App\Exceptions\ContractCreationException;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
+    protected $contractStatusHistoryRepository;
 
-    public function __construct(ContractHistoryRepository $contractHistoryRepository)
+    public function __construct(ContractHistoryRepository $contractHistoryRepository,
+                                contractStatusHistoryRepository $contractStatusHistoryRepository)
     {
         $this->contractHistoryRepository = $contractHistoryRepository;
+        $this->contractStatusHistoryRepository = $contractStatusHistoryRepository;
     }
     public function deleteContractHistory($input)
     {
@@ -255,7 +259,8 @@ class ContractHistoryService
                 {
                      ContractHistoryService::updateOrInsertStatus
                     (
-                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID
+                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
+                         $contractHistoryId
                     );
                 }
                 else
@@ -266,7 +271,7 @@ class ContractHistoryService
 
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
-                self::insertHistoryStatus($contractId,$categoryId,$companyId);
+                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId);
 
                 if($categoryId === 6)
                 {
@@ -757,7 +762,7 @@ class ContractHistoryService
         }
     }
 
-    public static function updateOrInsertStatus($id, $status, $selectedCompanyID)
+    public static function updateOrInsertStatus($id, $status, $selectedCompanyID, $contractHistoryId = null, $systemUser = false)
     {
         $latestRecordStatus = ContractHistoryService::getLatestRecordHistory($id);
         if ($latestRecordStatus)
@@ -768,13 +773,18 @@ class ContractHistoryService
             }
             else
             {
-                self::insertHistoryStatus($id, $status, $selectedCompanyID);
+                self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId, $systemUser);
             }
         }
         else
         {
-            self::insertHistoryStatus($id, $status, $selectedCompanyID);
+            self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId , $systemUser);
         }
+    }
+
+    public  function getContractStatusHistory($request)
+    {
+        return $this->contractStatusHistoryRepository->getContractStatusHistory($request);
     }
 
 

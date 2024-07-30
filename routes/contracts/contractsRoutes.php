@@ -468,6 +468,11 @@ Route::
         'updateAdditionalDoc'
     ])->name('Update additional Document');
 
+    Route::post('get-contract-status-history', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'getContractStatusHistory'
+    ])->name('Get Contract History');
+
 });
 
 

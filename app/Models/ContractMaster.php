@@ -551,6 +551,7 @@ class ContractMaster extends Model
 
         return $query->where('counterParty', 1)
             ->where('companySystemID', $input['company_id'])
+            ->where('status','!=',0)
             ->get();
     }
 

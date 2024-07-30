@@ -89,7 +89,62 @@ class contractStatusHistory extends Model
 
         foreach ($updatedIdList as $i)
         {
-            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId, $contractId);
+            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId);
         }
+    }
+
+    public function getContractStatusHistory($contractId, $companySystemID)
+    {
+         $query = self::getStatusData($contractId);
+        return $query->map(function ($contract)
+    {
+        return [
+            'status' => $contract->status,
+            'systemUser' => $contract->system_user,
+            'empName' => $contract->employee->empName ?? null,
+            'createdAt' => $contract->created_at,
+            'contractCode' => ($contract->contract_history_id) ?  $contract->contractHistory
+                ->contractMaster->contractCode
+                : $contract->contractMaster->contractCode,
+            'title' => ($contract->contract_history_id) ?  $contract->contractHistory->contractMaster->title
+        : $contract->contractMaster->title,
+        ];
+    })->toArray();
+
+
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employees::class,  'created_by', 'employeeSystemID');
+    }
+    public function getStatusData($contractId)
+    {
+        return self::with(['employee' => function ($query)
+        {
+            $query->select('employeeSystemID','empName');
+        },'contractHistory' => function ($query)
+        {
+            $query->select('id','contract_id')
+                ->with(['contractMaster' => function ($q)
+                {
+                    $q->select('id','contractCode','title');
+                }]);
+        },'contractMaster'=> function ($q)
+        {
+            $q->select('id','contractCode','title');
+        }])
+            ->where('contract_id',$contractId)
+            ->get();
+    }
+
+    public function contractHistory()
+    {
+        return $this->hasOne(ContractHistory::class, 'id', 'contract_history_id');
+    }
+
+    public function contractMaster()
+    {
+        return $this->hasOne(ContractMaster::class, 'id', 'contract_id');
     }
 }
