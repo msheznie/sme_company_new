@@ -16,7 +16,8 @@ use App\Models\ContractMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Company;
 use App\Utilities\ContractManagementUtils;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Yajra\DataTables\DataTables;
 
 class ContractMasterService
 {
@@ -131,5 +132,72 @@ class ContractMasterService
 
         return $result;
     }
+    public function getContractDetailsReport($request)
+    {
+        $input  = $request->all();
+        $searchKeyword = $request->input('search.value');
+        $companyId =  $input['companyId'];
+        $filter = $input['filter'] ?? null;
+        $languages =  ContractMaster::contractDetailReport($searchKeyword, $companyId, $filter);
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
+    }
+    public function getContractReportFormData($request)
+    {
+        $selectedCompanyID = $request->input('selectedCompanyID');
+        $contractTypes = ContractManagementUtils::getContractTypes();
+        $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+        return [
+            'decimalPlace' => $decimalPlaces,
+            'contractTypes' => $contractTypes
+        ];
+    }
+    public function exportContractDetailsReport($request)
+    {
+        $input  = $request->all();
+        $search = false;
+        $selectedCompanyID =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
 
+        $contractDetails = ContractMaster::contractDetailReport($search, $selectedCompanyID, $filter)->get();
+        $data[0][trans('common.contract_code')] = trans('common.contract_code');
+        $data[0][trans('common.title')] = trans('common.title');
+        $data[0][trans('common.counter_party_name')] = trans('common.counter_party_name');
+        $data[0][trans('common.contract_type')] = trans('common.contract_type');
+        $data[0][trans('common.contract_start_date')] = trans('common.contract_start_date');
+        $data[0][trans('common.contract_end_date')] = trans('common.contract_end_date');
+        $data[0][trans('common.amount')] = trans('common.amount');
+        if ($contractDetails)
+        {
+            $count = 1;
+            foreach ($contractDetails as $value)
+            {
+                $contractPartyName = $value->counterParty == 1
+                    ? ($value['contractUsers']['contractSupplierUser']['supplierName'] ?? '-')
+                    : ($value['contractUsers']['contractCustomerUser']['CustomerName'] ?? '-');
+
+                $data[$count] = [
+                    trans('common.contract_code') => $value['contractCode'] ?? '-',
+                    trans('common.title') => $value['title'] ?? '-',
+                    trans('common.counter_party_name') => $contractPartyName,
+                    trans('common.contract_type') => $value['contractTypes']['cm_type_name'] ?? '-',
+                    trans('common.contract_start_date') => isset($value['startDate']) ?
+                        preg_replace('/^=/', '-', Carbon::parse($value['startDate'])->toDateString()) : '-',
+                    trans('common.contract_end_date') => isset($value['endDate']) ?
+                        preg_replace('/^=/', '-', Carbon::parse($value['endDate'])->toDateString()) : '-',
+                    trans('common.amount') => isset($value['contractAmount']) ?
+                        number_format((float)preg_replace('/^=/', '-', $value['contractAmount']),
+                            $decimalPlaces, '.', '') : '-',
+                ];
+
+                $count++;
+            }
+        }
+        return $data;
+    }
 }

@@ -217,4 +217,15 @@
      "at_least_one_overall_penalty_should_be_available" =>
          "Fill all the mandatory fields in overall penalty",
      "milestone_payment_schedule" => "Milestone payment schedule is required to retain milestone retention",
+     "contract_code" => "Contract Code",
+     "title" => "Title",
+     "counter_party_name" => "Counter Party Name",
+     "contract_type" => "Contract Type",
+     "contract_start_date" => "Contract Start Date",
+     "contract_end_date" => "Contract End Date",
+     "amount" => "Amount",
+     "contract_amount" => "Contract Amount",
+     "milestone" => "Milestone",
+     "milestone_amount" => "Milestone Amount",
+     "milestone_status" => "Milestone Status",
  ];

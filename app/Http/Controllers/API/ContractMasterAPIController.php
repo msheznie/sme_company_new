@@ -623,5 +623,36 @@ class ContractMasterAPIController extends AppBaseController
         }
 
     }
+    public function getContractDetailsReport(Request $request)
+    {
+        return $this->contractMasterService->getContractDetailsReport($request);
+    }
+    public function getContractReportFormData(Request $request)
+    {
+        $response = $this->contractMasterService->getContractReportFormData($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
+    }
+    public function exportContractDetailsReport(Request $request)
+    {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $contractMaster = $this->contractMasterService->exportContractDetailsReport($request);
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
 
+        $export = new ContractManagmentExport($contractMaster);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '')
+        {
+            return $this->sendError('unable_to_export_excel');
+        } else
+        {
+            return $this->sendResponse($basePath, trans('success_export'));
+        }
+    }
 }

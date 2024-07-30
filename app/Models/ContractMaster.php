@@ -554,5 +554,71 @@ class ContractMaster extends Model
             ->where('status','!=',0)
             ->get();
     }
+    public function contractDetailReport($search, $companyId, $filter)
+    {
+        $contractTypeID = $filter['contractTypeID'] ?? null;
+        $contractTypeId = CMContractTypes::select('contract_typeId')
+            ->where('uuid',$contractTypeID)
+            ->where('companySystemID', $companyId)
+            ->first();
 
+        $results =  self::select(
+            'id',
+            'uuid',
+            'title',
+            'contractAmount',
+            'counterParty',
+            'counterPartyName',
+            'startDate',
+            'endDate',
+            'contractCode',
+            'contractType'
+        )
+            ->with([
+                'contractTypes' => function ($q)
+                {
+                    $q->select('contract_typeId', 'cm_type_name', 'uuid');
+                },
+                'contractUsers' => function ($q3)
+                {
+                    $q3->with([
+                        'contractSupplierUser',
+                        'contractCustomerUser'
+                    ]);
+                }
+            ]);
+        if($contractTypeId)
+        {
+            $results->where('contractType', $contractTypeId['contract_typeId']);
+        }
+
+        if ($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $results = $results->where(function ($results) use ($search)
+            {
+                $results->orWhere('contractCode', 'LIKE', "%{$search}%");
+                $results->orWhere('title', 'LIKE', "%{$search}%");
+                $results->orWhere('referenceCode', 'LIKE', "%{$search}%");
+                $results->orWhere('contractAmount', 'LIKE', "%{$search}%");
+                $results->orWhereHas('contractTypes', function ($query1) use ($search)
+                {
+                    $query1->where('cm_type_name', 'LIKE', "%{$search}%");
+                });
+                $results->orWhereHas('counterParties', function ($query2) use ($search)
+                {
+                    $query2->where('cmCounterParty_name', 'LIKE', "%{$search}%");
+                });
+                $results->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search)
+                {
+                    $query3->where('supplierName', 'LIKE', "%{$search}%");
+                });
+                $results->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search)
+                {
+                    $query4->where('customerName', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+        return $results->orderBy('id', 'desc');
+    }
 }
