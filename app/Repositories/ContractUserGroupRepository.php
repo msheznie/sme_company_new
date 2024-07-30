@@ -79,11 +79,12 @@ class ContractUserGroupRepository extends BaseRepository
         $companyId =  $input['selectedCompanyID'];
         $uuid =  $input['uuid'];
         $contractId = 0;
+        $isActive =  isset($input['isActive']) ? 1 : 0;
         if(isset($uuid) && $uuid !== '0'){
             $result = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
             $contractId = $result->id;
         }
-        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId);
+        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId, $isActive);
         return DataTables::eloquent($contractUserList)
             ->addColumn('Actions', 'Actions', "Actions")
             ->order(function ($query) use ($input) {
