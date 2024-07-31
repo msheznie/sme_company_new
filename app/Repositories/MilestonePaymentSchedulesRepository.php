@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Models\Company;
+use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\CurrencyMaster;
 use App\Models\MilestonePaymentSchedules;
@@ -12,6 +13,7 @@ use App\Repositories\BaseRepository;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
@@ -165,6 +167,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             MilestonePaymentSchedules::where('id', $id)->update($postData);
         });
     }
+
     public function getMilestoneDetailsReport($request)
     {
         $input = $request->all();
@@ -177,6 +180,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             ->addIndexColumn()
             ->make(true);
     }
+
     public function exportContractMilestoneReport($request)
     {
         $input  = $request->all();
@@ -237,5 +241,16 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             }
         }
         return $data;
+    }
+
+    public function getContractMilestoneListGraph(Request $request) {
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $contractList = MilestonePaymentSchedules::getContractMilestone($companyId, $filter);
+        return DataTables::eloquent($contractList)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
     }
 }

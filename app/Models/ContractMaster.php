@@ -8,9 +8,12 @@ use App\Traits\HasCompanyIdColumn;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Awobaz\Compoships\Compoships;
 use App\Traits\HasContractIdColumn;
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class ContractMaster
  * @package App\Models
@@ -206,7 +209,18 @@ class ContractMaster extends Model
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;
         $counterPartyNameID = $filter['counterPartyNameID'] ?? 0;
+        $status = $filter['status'] ?? 0;
+        $contractType = $filter['contractType'] ?? null;
         $currentEmployeeId = General::currentEmployeeId();
+        $now = Carbon::now();
+        $categoryId = 0;
+        if($status == 'Active')
+        {
+            $categoryId = -1;
+        } elseif ($status == 'Terminated')
+        {
+            $categoryId = 6;
+        }
 
         $contractId = CMContractTypes::select('contract_typeId')
             ->where('uuid',$contractTypeID)
@@ -222,6 +236,8 @@ class ContractMaster extends Model
         $contractUserId = ContractUsers::select('id')
             ->where('contractUserId',$currentEmployeeId)
             ->first();
+
+        $contractResult = CMContractTypes::getContractTypeIdByName($contractType,$companyId);
 
         $query = ContractMaster::with(['contractTypes' => function ($q)
         {
@@ -248,8 +264,34 @@ class ContractMaster extends Model
                     ->orderBy('id', 'asc');
 
             },'contractAssignedUsers.contractUserGroupAssignedUser'
-        ])->where('companySystemID', $companyId)
-            ->orderBy('id', 'desc');
+        ])->where('companySystemID', $companyId);
+
+        if(isset($filter['status']) && $categoryId != 0)
+        {
+            $query = $query->where('status', $categoryId);
+        }
+
+        if(isset($filter['status']) && $status == 'Expired')
+        {
+            $query = $query->where('enddate', '<' , $now);
+        }
+
+        if(isset($filter['status']) && $status != 0 && $status === 'Upcoming')
+        {
+            $query = $query->where('confirmed_yn', 1)
+                ->where('approved_yn', 1)
+                ->where('startDate', '>', $now);
+        }
+
+        if(isset($contractType) && $contractType != null)
+        {
+            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractResult) {
+                $query->where('uuid', $contractResult->uuid);
+            });
+        }
+
+        $query = $query->orderBy('id', 'desc');
+
         if ($filter)
         {
             if (isset($filter['counterPartyID']))
@@ -621,4 +663,154 @@ class ContractMaster extends Model
         }
         return $results->orderBy('id', 'desc');
     }
+
+    public static function getContractStatusWise($companyId)
+    {
+        $now = Carbon::now();
+
+        $query = self::where('companySystemID', $companyId);
+
+        $activeCount = (clone $query)->where('status', -1)->count();
+        $upcomingCount = (clone $query)->where('status', -1)
+            ->where('confirmed_yn', 1)
+            ->where('approved_yn', 1)
+            ->where('startDate', '>', $now)
+            ->count();
+        $terminatedCount = (clone $query)->where('status', 6)->count();
+        $expiredCount = (clone $query)->where('endDate', '<', $now)->count();
+
+        return [
+            'active' => $activeCount,
+            'upcoming' => $upcomingCount,
+            'terminated' => $terminatedCount,
+            'expired' => $expiredCount
+        ];
+    }
+
+    public static function getContractTypeWiseActiveContracts()
+    {
+        $contracts = ContractMaster::with('contractTypes')
+            ->where('status', -1)
+            ->get();
+
+        return $contracts->groupBy('contractTypes.cm_type_name')
+            ->map(function ($group) {
+                return $group->count();
+            })
+            ->toArray();
+    }
+
+    public static function getContractExpiry($companyId, $filter)
+    {
+        $now = Carbon::now();
+
+        $query = self::select('contractCode', 'title', 'endDate', 'counterPartyName')
+            ->with(['contractUsers'])
+            ->where('companySystemId', $companyId)
+            ->where('endDate', '<', $now)
+            ->orderBy('id', 'desc');
+
+        if ($filter)
+        {
+            if (isset($filter['month']))
+            {
+                $query->whereMonth('endDate', $filter['month']);
+            }
+        }
+
+        return $query;
+    }
+
+    public function contractMasterForGraph($search, $companyId, $filter, $category, $contractType)
+    {
+        $categoryId = 0;
+        $now = Carbon::now();
+        if($category == 'Active')
+        {
+            $categoryId = -1;
+        } elseif ($category == 'Terminated')
+        {
+            $categoryId = 6;
+        }
+        $currentEmployeeId = General::currentEmployeeId();
+
+        $contractId = CMContractTypes::getContractTypeIdByName($contractType, $companyId);
+
+        $contractUserId = ContractUsers::getUserId($currentEmployeeId);
+
+        $query = ContractMaster::with(['contractTypes' => function ($q)
+        {
+            $q->select('contract_typeId', 'cm_type_name', 'uuid');
+        }, 'counterParties' => function ($q1)
+        {
+            $q1->select('cmCounterParty_id', 'cmCounterParty_name');
+        }, 'createdUser' => function ($q2)
+        {
+            $q2->select('employeeSystemID', 'empName');
+        }, 'contractUsers' => function ($q3)
+        {
+            $q3->with(['contractSupplierUser','contractCustomerUser']);
+        }, 'contractAssignedUsers' => function ($q4) use ($contractUserId)
+        {
+            $q4->select('contractId', 'userId')
+                ->where('userId', $contractUserId->id)
+                ->where('status', 1);
+        },'contractHistoryStatus' => function ($q5) use ($companyId)
+        {
+            $q5->select(DB::raw('MIN(id) as id'), 'contract_id', 'status')
+                ->where('company_id', $companyId)
+                ->groupBy('contract_id', 'status')
+                ->orderBy('id', 'asc');
+
+        },'contractAssignedUsers.contractUserGroupAssignedUser'
+        ])->where('companySystemID', $companyId);
+
+        if($categoryId != 0)
+        {
+            $query = $query->where('status', $categoryId);
+        }
+
+        if($category == 'Expired')
+        {
+            $query = $query->where('endDate', '<', $now);
+        }
+
+        if($contractType != null)
+        {
+            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractId) {
+                $query->where('uuid', $contractId->uuid);
+            });
+        }
+
+        $query = $query->orderBy('id', 'desc');
+
+        if($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $query = $query->where(function ($query) use ($search)
+            {
+                $query->orWhere('contractCode', 'LIKE', "%{$search}%");
+                $query->orWhere('title', 'LIKE', "%{$search}%");
+                $query->orWhere('referenceCode', 'LIKE', "%{$search}%");
+                $query->orWhereHas('contractTypes', function ($query1) use ($search)
+                {
+                    $query1->where('cm_type_name', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('counterParties', function ($query2) use ($search)
+                {
+                    $query2->where('cmCounterParty_name', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractUsers.contractSupplierUser', function ($query3) use ($search)
+                {
+                    $query3->where('supplierName', 'LIKE', "%{$search}%");
+                });
+                $query->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search)
+                {
+                    $query4->where('customerName', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+        return $query;
+    }
+
 }

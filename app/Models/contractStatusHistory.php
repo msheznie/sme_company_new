@@ -6,6 +6,7 @@ use App\Services\ContractHistoryService;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class contractStatusHistory
@@ -27,6 +28,14 @@ class contractStatusHistory extends Model
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
+
+    const STATUS_AMENDED = 1;
+    const STATUS_ADDENDUM = 2;
+    const STATUS_RENEWAL = 3;
+    const STATUS_EXTENSION = 4;
+    const STATUS_REVISION = 5;
+    const STATUS_TERMINATE = 6;
+    const STATUS_COMPLETED = 7;
 
     public $fillable = [
         'contract_id',
@@ -147,4 +156,68 @@ class contractStatusHistory extends Model
     {
         return $this->hasOne(ContractMaster::class, 'id', 'contract_id');
     }
+
+    public static function getTotalContractStatus($companyId, $filter)
+    {
+        return contractStatusHistory::select('uuid', 'contract_id')
+            ->where('company_id', $companyId);
+    }
+
+    public static function getContractStatusCounts($companyId)
+    {
+        $latestStatuses = contractStatusHistory::select('contract_id', DB::raw('MAX(id) as latest_id'))
+            ->groupBy('contract_id');
+
+        $statuses = contractStatusHistory::joinSub($latestStatuses, 'latest_statuses', function($join) {
+            $join->on('cm_contract_status_history.id', '=', 'latest_statuses.latest_id');
+        })
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->whereIn('status', [
+                self::STATUS_AMENDED,
+                self::STATUS_ADDENDUM,
+                self::STATUS_RENEWAL,
+                self::STATUS_EXTENSION,
+                self::STATUS_REVISION,
+                self::STATUS_TERMINATE,
+                self::STATUS_COMPLETED,
+            ])
+            ->groupBy('status')
+            ->get();
+
+        $statusCounts = [
+            'Amended' => 0,
+            'Addended' => 0,
+            'Renewed' => 0,
+            'Extended' => 0,
+            'Revised' => 0,
+            'Terminated' => 0,
+        ];
+
+        foreach ($statuses as $status) {
+            switch ($status->status) {
+                case self::STATUS_AMENDED:
+                    $statusCounts['Amended'] = $status->count;
+                    break;
+                case self::STATUS_ADDENDUM:
+                    $statusCounts['Addended'] = $status->count;
+                    break;
+                case self::STATUS_RENEWAL:
+                    $statusCounts['Renewed'] = $status->count;
+                    break;
+                case self::STATUS_EXTENSION:
+                    $statusCounts['Extended'] = $status->count;
+                    break;
+                case self::STATUS_REVISION:
+                    $statusCounts['Revised'] = $status->count;
+                    break;
+                case self::STATUS_TERMINATE:
+                    $statusCounts['Terminated'] = $status->count;
+                    break;
+            }
+        }
+
+        return response()->json($statusCounts);
+    }
+
+
 }
