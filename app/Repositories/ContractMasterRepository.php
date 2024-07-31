@@ -670,26 +670,27 @@ class ContractMasterRepository extends BaseRepository
             ])
             ->get();
         $pluckedData = [];
-        /*foreach ($activeSetting as $setting)
+        foreach ($activeSetting as $setting)
         {
             if ($isDrop)
             {
-                $pluckedData[] = [
+                $pluckedData = [];
+               /* $pluckedData[] = [
                     'id' => $setting->contractTypeSection->cmSection_id,
                     'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
-                ];
+                ];*/
             } else
             {
                 $pluckedData[] = $setting->contractTypeSection->cmSection_id;
             }
-        }*/
+        }
 
         if ($isDrop) {
             $pluckedData[] = [
                 'id' => 12,
                 'description' => 'Contract Info',
             ];
-          /*  $pluckedData[] = [
+           /* $pluckedData[] = [
                 'id' => 13,
                 'description' => 'User & User Group',
             ];*/
