@@ -15,6 +15,7 @@ use App\Models\DocumentAttachments;
 use App\Models\ErpDocumentAttachments;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
+use App\Services\ContractMasterService;
 use App\Services\GeneralService;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
@@ -186,15 +187,16 @@ class ContractHistoryRepository extends BaseRepository
 
     private function createContractInfo($currentContractDetails, $companyId, $categoryId)
     {
-        $contactMaster = new ContractMaster();
-        $lastSerialNumber  = $contactMaster->getMaxContractId();
-        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+        $contractCodeData = ContractMasterService::generateContractCode($companyId);
+        $lastSerialNumber  = $contractCodeData['lastSerialNumber'];
+        $contractCode = $contractCodeData['contractCode'];
         $uuid = ContractManagementUtils::generateUuid();
 
         $insert = [
             'contractCode' => $contractCode,
             'title' => $currentContractDetails['title'],
             'description' => $currentContractDetails['description'],
+            'serial_no' => $lastSerialNumber,
             'contractType' => $currentContractDetails["contractType"],
             'counterParty' => $currentContractDetails["counterParty"],
             'counterPartyName' => $currentContractDetails["counterPartyName"],
