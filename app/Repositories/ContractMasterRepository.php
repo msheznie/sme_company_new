@@ -37,6 +37,7 @@ use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
+use App\Services\ContractMasterService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -175,20 +176,15 @@ class ContractMasterRepository extends BaseRepository
             ->where('uuid', $input['contractType'])
             ->first();
 
-        $lastSerialNumber = 1;
-        $lastId = ContractMaster::select('id')->orderBy('id', 'desc')->first();
-        if ($lastId) {
-            $lastSerialNumber = intval($lastId->id) + 1;
-        }
-        $contractCode =  ('CO'  . str_pad($lastSerialNumber, 4, '0', STR_PAD_LEFT));
-
+        $contractCodeData = ContractMasterService::generateContractCode($companySystemID);
         $insertArray = [];
 
         DB::beginTransaction();
         try{
             $insertArray = [
-                'contractCode' => $contractCode,
+                'contractCode' => $contractCodeData['contractCode'],
                 'title' => $title,
+                'serial_no' => $contractCodeData['lastSerialNumber'],
                 'contractType' => $contractType["contract_typeId"],
                 'counterParty' => $contractType["cmCounterParty_id"],
                 'uuid' => bin2hex(random_bytes(16)),

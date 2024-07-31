@@ -200,4 +200,17 @@ class ContractMasterService
         }
         return $data;
     }
+
+    public static function generateContractCode($companySystemID)
+    {
+        $lastSerialNumber = ContractMaster::where('companySystemID', $companySystemID)
+            ->max('serial_no');
+
+        $lastSerialNumber = $lastSerialNumber ? intval($lastSerialNumber) + 1 : 1;
+
+        $contractCode =  ContractManagementUtils::generateCode($lastSerialNumber,'CO',4);
+
+        return ['contractCode' => $contractCode, 'lastSerialNumber' => $lastSerialNumber];
+
+    }
 }
