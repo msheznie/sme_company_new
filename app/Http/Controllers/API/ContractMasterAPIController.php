@@ -655,4 +655,9 @@ class ContractMasterAPIController extends AppBaseController
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }
+
+    public function getContractMasterResultsForGraph(Request $request)
+    {
+        return $this->contractMasterRepository->getContractMasterForGraph($request);
+    }
 }

@@ -6,6 +6,7 @@ use App\Utilities\ContractManagementUtils;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Class MilestonePaymentSchedules
@@ -165,6 +166,7 @@ class MilestonePaymentSchedules extends Model
     {
         return ContractMilestoneRetention::where('milestoneId', $milestoneID)->exists();
     }
+
     public function milestonePaymentSchedulesReport($search, $companyId, $filter)
     {
         $contractTypeUuid = $filter['contractTypeID'] ?? null;
@@ -266,5 +268,35 @@ class MilestonePaymentSchedules extends Model
             });
         }
         return $results->orderBy('contract_id', 'desc');
+    }
+
+    public static function getContractMilestone($companyId, $filter)
+    {
+        $query = MilestonePaymentSchedules::select('uuid', 'contract_id', 'milestone_id', 'description',
+            'percentage', 'amount', 'payment_due_date', 'actual_payment_date', 'milestone_due_date', 'currency_id',
+            'milestone_status')
+            ->where('company_id', $companyId)
+            ->with([
+                'milestoneDetail' => function ($q) {
+                    $q->select('id', 'uuid', 'title');
+                },
+                'contractMaster' => function ($q1) {
+                    $q1->select('id', 'contractCode', 'title');
+                }
+            ]);
+
+        if ($filter)
+        {
+            if (isset($filter['month']))
+            {
+                $query->whereMonth('payment_due_date', $filter['month']);
+            }
+
+            if (isset($filter['year']))
+            {
+                $query->whereYear('payment_due_date', $filter['year']);
+            }
+        }
+        return $query;
     }
 }

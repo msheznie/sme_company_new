@@ -7,7 +7,8 @@ use App\Repositories\BaseRepository;
 use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\DataTables;
+
 /**
  * Class contractStatusHistoryRepository
  * @package App\Repositories
@@ -79,5 +80,11 @@ class contractStatusHistoryRepository extends BaseRepository
         {
             GeneralService::sendException('Failed to get Document tracing data', $ex);
         }
+    }
+
+    public function getContractHistoryStatusCount(Request $request) {
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        return contractStatusHistory::getContractStatusCounts($companyId);
     }
 }

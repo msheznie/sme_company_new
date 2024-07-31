@@ -473,6 +473,34 @@ Route::
         'getContractStatusHistory'
     ])->name('Get Contract History');
 
+    Route::get('dashboard-total-contracts', [
+        \App\Http\Controllers\API\DashboardController::class,
+        'getTotalContracts'
+    ])->name('Get Total Contracts');
+
+    Route::get('dashboard-contract-type-active-contracts', [
+        \App\Http\Controllers\API\DashboardController::class,
+        'getContractTypeWiseActiveContracts'
+    ])->name('Get Contract Type Wise Active Contracts');
+
+    Route::post('dashboard-contract-expiry', [
+        \App\Http\Controllers\API\DashboardController::class,
+        'getContractExpiry'
+    ])->name('Get Expiry Contract');
+
+    Route::post('dashboard-contract-milestone', [
+        \App\Http\Controllers\API\DashboardController::class,
+        'getContractMilestone'
+    ])->name('Get Milestone Contract');
+
+    Route::post('dashboard-total-contract-status', [
+        \App\Http\Controllers\API\DashboardController::class,
+        'getTotalContractStatus'
+    ])->name('Get Total Contract Status');
+
+    Route::post('/get-contract-master-graph',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractMasterResultsForGraph'])
+        ->name('Contract Master Graph');
 });
 
 

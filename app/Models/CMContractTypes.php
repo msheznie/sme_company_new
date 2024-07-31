@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class CMContractTypes
@@ -173,5 +174,15 @@ class CMContractTypes extends Model
     public function partyB()
     {
         return $this->belongsTo(CMPartiesMaster::class, 'cmPartyB_id', 'cmParty_id');
+    }
+
+    public static function getContractTypeIdByName($contractType,$companyId)
+    {
+        $contractType = trim($contractType);
+
+        return CMContractTypes::select('uuid')
+            ->where('cm_type_name', $contractType)
+            ->where('companySystemID', $companyId)
+            ->first();
     }
 }

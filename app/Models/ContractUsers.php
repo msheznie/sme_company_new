@@ -194,4 +194,11 @@ class ContractUsers extends Model
             ->first();
     }
 
+    public static function getUserId($currentEmployeeId)
+    {
+        return ContractUsers::select('id')
+            ->where('contractUserId',$currentEmployeeId)
+            ->first();
+    }
+
 }

@@ -1207,5 +1207,42 @@ class ContractMasterRepository extends BaseRepository
     {
         return  ContractMaster::getContractMasterData($input);
     }
+
+    public static function getContractMasterData($input)
+    {
+        $companyId =  $input['selectedCompanyID'];
+        return ContractMaster::getContractStatusWise($companyId);
+    }
+
+    public static function getContractTypeWiseActiveContracts($input)
+    {
+        return ContractMaster::getContractTypeWiseActiveContracts();
+    }
+
+    public function getContractExpiryListGraph(Request $request) {
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $contractList = ContractMaster::getContractExpiry($companyId, $filter);
+        return DataTables::eloquent($contractList)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    public function getContractMasterForGraph(Request $request)
+    {
+        $input  = $request->all();
+        $search_keyword = $request->input('search.value');
+        $companyId =  $input['companyId'];
+        $category =  $input['category'] ?? null;
+        $contractType = $input['contractType'] ?? null;
+        $filter = $input['filter'] ?? null;
+        $languages =  $this->model->contractMasterForGraph($search_keyword, $companyId, $filter, $category, $contractType);
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
+    }
 }
 
