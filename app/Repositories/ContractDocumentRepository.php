@@ -110,6 +110,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
                 $insertData = [
                     'uuid' => ContractManagementUtils::generateUuid(),
                     'contractID' => $contractData->id,
+                    'documentDescription' => $input['documentDescription'] ?? null,
                     'documentMasterID' => $input['documentMasterID'],
                     'documentType' => $documentTypeByUuid->id,
                     'documentName' => $input['documentName'],
