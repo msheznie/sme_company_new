@@ -16,50 +16,43 @@ class ActivateContractService
 {
     public static function activateContract()
     {
-        $todayDate = Carbon::now()->format('Y-m-d');
-        $contractList = ContractMaster::getCurrentInactiveContract($todayDate);
-        $contractListChild = ContractHistory::getInActiveChildData($todayDate);
-        Log::info('API Email send start');
-        self::processContracts($contractList);
-        if(!empty($contractListChild))
-        {
+        $contractList = ContractMaster::getCurrentInactiveContract();
+        $contractListChild = ContractHistory::getInActiveChildData();
 
-            foreach ($contractListChild as $value)
+        self::processContracts($contractList, false);
+        self::processContracts($contractListChild, true);
+    }
+
+    private static function processContracts($contractList, $fromChild)
+    {
+        if(!empty($contractList))
+        {
+            foreach ($contractList as $value)
             {
+                if($fromChild)
+                {
+                    $startDate = $value->contractMaster->startDate;
+                    $endDate = $value->contractMaster->endDate;
+                } else
+                {
+                    $startDate = $value->startDate;
+                    $endDate = $value->endDate;
+                }
                 $status = ContractHistoryService::checkContractDateBetween(
-                    $value->contractMaster->startDate,
-                    $value->contractMaster->endDate
+                    $startDate,
+                    $endDate
                 );
                 ContractHistoryService::updateOrInsertStatus
                 (
                     $value->contract_id, $status, $value->company_id, null,true
                 );
 
-                self::updateContractChildMaster($status, $value->company_id, $value->contract_id);
-            }
-        }
-
-
-    }
-
-    private static function processContracts($contractList)
-    {
-        if ($contractList && $contractList->isNotEmpty())
-        {
-            $contractIds = $contractList->pluck('id')->toArray();
-            ContractMaster::whereIn('id', $contractIds)->update(['status' => -1]);
-
-            foreach ($contractList as $contract)
-            {
-                $contractId = $contract->id;
-                $currentStatus = -1;
-                $companyId = $contract->companySystemID;
-                ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null, true);
+                self::updateContractMaster($status, $value->company_id, $value->contract_id);
             }
         }
     }
 
-    public function updateContractChildMaster($status, $companyId, $contractId)
+    public function updateContractMaster($status, $companyId, $contractId)
     {
             $data = [
                 'status'  => $status

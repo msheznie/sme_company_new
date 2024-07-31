@@ -219,7 +219,7 @@
      "milestone_payment_schedule" => "Milestone payment schedule is required to retain milestone retention",
      "contract_code" => "Contract Code",
      "title" => "Title",
-     "counter_party_name" => "Counter Party Name",
+     "counter_party_name" => "Counterparty Name",
      "contract_type" => "Contract Type",
      "contract_start_date" => "Contract Start Date",
      "contract_end_date" => "Contract End Date",

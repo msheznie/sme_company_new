@@ -210,7 +210,7 @@ return [
     "milestone_payment_schedule" => "Milestone payment schedule is required to retain milestone retention AR",
     "contract_code" => "Contract Code AR",
     "title" => "Title AR",
-    "counter_party_name" => "Counter Party Name AR",
+    "counter_party_name" => "Counterparty Name AR",
     "contract_type" => "Contract Type AR",
     "contract_start_date" => "Contract Start Date AR",
     "contract_end_date" => "Contract End Date AR",
