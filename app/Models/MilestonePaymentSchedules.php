@@ -215,17 +215,19 @@ class MilestonePaymentSchedules extends Model
                 ->when($contractTypeID > 0, function ($q) use ($contractTypeID)
                 {
                     $q->where('contractType', $contractTypeID);
-                });
+                })
+                ->where('approved_yn', 1);
             }, 'milestoneDetail' => function ($query)
             {
                 $query->select('id', 'uuid', 'title');
             }
         ])
-        ->when($contractTypeID > 0, function ($query) use ($contractTypeID)
+        ->where(function ($query) use($contractTypeID)
         {
-            $query->where(function ($query1) use($contractTypeID)
+            $query->whereHas('contractMaster', function ($q) use ($contractTypeID)
             {
-                $query1->whereHas('contractMaster', function ($q) use ($contractTypeID)
+                $q->where('approved_yn', 1);
+                $q->when($contractTypeID > 0, function ($q) use ($contractTypeID)
                 {
                     $q->where('contractType', $contractTypeID);
                     $q->whereHas('contractTypes');
