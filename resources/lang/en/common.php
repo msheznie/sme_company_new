@@ -60,7 +60,7 @@
      "contract_document_id_not_found" => "Contract document ID not found",
      "document_type_not_found" => "Document type not found",
      "contract_document_updated_successfully" => "Contract document update successfully",
-     "contract_document_removed_successfully" => "Document Tracking removed successfully",
+     "contract_document_removed_successfully" => "Document tracking removed successfully",
      "contract_document_retrieved_successfully" => "Contract document retrieved successfully",
      "document_version_number_validation_message" =>
          "The document version number must be a number with up to three digits after the decimal point.",
@@ -80,7 +80,7 @@
      "returned_date_time_is_required" => "Returned date & time is Required",
      "contract_additional_document_created_successfully" => "Contract additional document created successfully",
      "contract_additional_document_updated_successfully" => "Contract additional document updated successfully",
-     "contract_additional_document_deleted_successfully" => "Contract additional document deleted successfully",
+     "contract_additional_document_deleted_successfully" => "Contract document deleted successfully",
      "contract_additional_document_retrieved_successfully" => "Contract additional documents retrieved successfully",
      "contract_additional_document_not_found" => "Contract additional document not found",
      "attachment_successfully_deleted" => "Attachment successfully deleted",

@@ -501,6 +501,10 @@ Route::
     Route::post('/get-contract-master-graph',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractMasterResultsForGraph'])
         ->name('Contract Master Graph');
+
+    Route::post('/export-contract-status-history',
+        [\App\Http\Controllers\API\contractStatusHistoryAPIController::class, 'exportContractStatusHistory'])
+        ->name('Export Contract Status History');
 });
 
 

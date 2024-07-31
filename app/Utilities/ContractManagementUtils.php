@@ -346,4 +346,30 @@ class ContractManagementUtils
         }
         return $supplier;
     }
+    public static function getContractStatus($status)
+    {
+        switch ($status)
+        {
+            case 0:
+                return 'In-active';
+            case -1:
+                return 'Active';
+            case 1:
+                return 'Amended';
+            case 2:
+                return 'Addended';
+            case 3:
+                return 'Renewed';
+            case 4:
+                return 'Extended';
+            case 5:
+                return 'Revised';
+            case 6:
+                return 'Terminated';
+            case 7:
+                return 'Ended';
+            default:
+                return 'Ended';
+        }
+    }
 }
