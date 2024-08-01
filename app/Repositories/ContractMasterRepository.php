@@ -405,7 +405,7 @@ class ContractMasterRepository extends BaseRepository
                     $formData['formatEndDate']);
                 $updateData['status'] = $status;
             }*/
-            /*if ($formData['contractAmount'])
+            if ($formData['contractAmount'])
             {
                 try
                 {
@@ -423,7 +423,7 @@ class ContractMasterRepository extends BaseRepository
                 {
                     throw new CommonException('Overall penalty not found.');
                 }
-            }*/
+            }
 
 
 
