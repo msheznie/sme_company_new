@@ -148,9 +148,11 @@ class ContractMasterRepository extends BaseRepository
         $data[0]['Start Date'] = "Start Date";
         $data[0]['End Date'] = "End Date";
         $data[0]['Status'] = "Status";
-        if ($lotData) {
+        if ($lotData)
+        {
             $count = 1;
-            foreach ($lotData as $value) {
+            foreach ($lotData as $value)
+            {
                 $data[$count]['Contract Code'] = isset($value['contractCode']) ? preg_replace('/^=/', '-', $value['contractCode']) : '-';
                 $data[$count]['Title'] = isset($value['title']) ? preg_replace('/^=/', '-', $value['title']) : '-';
                 $data[$count]['Contract Type'] = isset($value['contractTypes']) ? preg_replace('/^=/', '-', $value['contractTypes']['cm_type_name']) : '-';
@@ -218,7 +220,8 @@ class ContractMasterRepository extends BaseRepository
                 $contractTypeSectionDetail = ContractSettingMaster::with([
                     'contractTypeSection' => function ($q) {
                         $q->select('ct_sectionId', 'cmSection_id', 'contract_typeId', 'companySystemID')
-                            ->with(['contractSectionWithTypes' => function ($q1) {
+                            ->with(['contractSectionWithTypes' => function ($q1)
+                            {
                                 $q1->select('cmSection_id','cmSection_detail')
                                     ->with(['sectionDetail']);
                             }]);
@@ -229,10 +232,12 @@ class ContractMasterRepository extends BaseRepository
                 $contractSettingDetailArray = [];
                 $i = 0;
 
-                foreach ($contractTypeSectionDetail as $contractSectionDetail){
+                foreach ($contractTypeSectionDetail as $contractSectionDetail)
+                {
                     $sectionDetails = $contractSectionDetail['contractTypeSection']['contractSectionWithTypes']['sectionDetail'];
 
-                    foreach ($sectionDetails as $sectionDetail){
+                    foreach ($sectionDetails as $sectionDetail)
+                    {
                         $sectionDetailId = $sectionDetail['id'];
                         $contractSettingDetailArray[$i] = [
                             'uuid' => bin2hex(random_bytes(16)),
@@ -257,7 +262,8 @@ class ContractMasterRepository extends BaseRepository
                 ];
             }
 
-        } catch (\Exception $ex){
+        } catch (\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage()];
         }
@@ -281,13 +287,17 @@ class ContractMasterRepository extends BaseRepository
         ];
     }
 
-    public function userFormData($value, $fromContractType){
-        if($fromContractType) {
+    public function userFormData($value, $fromContractType)
+    {
+        if($fromContractType)
+        {
             $checkCounterParty = CMContractTypes::where('uuid', $value)->pluck('cmCounterParty_id')->first();
-            if(empty($checkCounterParty)) {
+            if(empty($checkCounterParty))
+            {
                 return ['status' => false, 'message' => trans('common.contract_type_not_found')];
             }
-        } else {
+        } else
+        {
             $checkCounterParty = $value;
         }
 
@@ -526,7 +536,8 @@ class ContractMasterRepository extends BaseRepository
         return true;
     }
 
-    public function unsetValues($contract) {
+    public function unsetValues($contract)
+    {
         $contract['contractTypeUuid'] = $contract['contractTypes']['uuid'] ?? null;
         unset($contract['contractTypes']);
         $contract['counterPartyNameUuid'] =  $contract['contractUsers']['uuid'] ?? null;
@@ -555,10 +566,12 @@ class ContractMasterRepository extends BaseRepository
                         'contractSectionWithTypes'
                     ]);
                 },
-                'contractSettingDetails' => function ($q) {
+                'contractSettingDetails' => function ($q)
+                {
                     $q->select('id', 'uuid', 'contractId', 'settingMasterId', 'sectionDetailId', 'isActive')
                         ->with([
-                            'contractSectionDetails' => function ($q) {
+                            'contractSectionDetails' => function ($q)
+                            {
                                 $q->select('id', 'sectionMasterId', 'description', 'inputType');
                             }
                         ]);
@@ -567,16 +580,20 @@ class ContractMasterRepository extends BaseRepository
             ->where('contractId', $contractId->id)
             ->get();
         $masterData = [];
-        if($settingMaster) {
-            foreach($settingMaster as $key => $master) {
+        if($settingMaster)
+        {
+            foreach($settingMaster as $key => $master)
+            {
                 $masterData[$key] = [
                     'masterUUid' => $master['uuid'],
                     'isActive' => $master['isActive'],
                     'masterDescription' => $master['contractTypeSection']['contractSectionWithTypes']['cmSection_detail'] ?? null,
                     'details' => []
                 ];
-                if($master['contractSettingDetails']) {
-                    foreach($master['contractSettingDetails'] as $details) {
+                if($master['contractSettingDetails'])
+                {
+                    foreach($master['contractSettingDetails'] as $details)
+                    {
                         $masterData[$key]['details'][] = [
                             'settingDetailUuid' => $details['uuid'],
                             'isActive' => $details['isActive'],
@@ -597,21 +614,26 @@ class ContractMasterRepository extends BaseRepository
         $settingMasters = $formData['settingMasters'] ?? [];
 
         $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
-        if(empty($contractID)) {
+        if(empty($contractID))
+        {
             return ['status' => false, 'message' => trans('common.contract_not_found'), 'line' => __LINE__];
         }
 
-        if(empty($settingMasters)){
+        if(empty($settingMasters))
+        {
             return ['status' => false, 'message' => 'Cannot update, no record found', 'line' => __LINE__];
         }
 
-        try {
+        try
+        {
             DB::beginTransaction();
 
-            foreach ($settingMasters as $master) {
+            foreach ($settingMasters as $master)
+            {
                 $settingMaster = ContractSettingMaster::where('uuid', $master['id'])->first();
 
-                if (!$settingMaster) {
+                if (!$settingMaster)
+                {
                     return [
                         'status' => false,
                         'message' => 'Contract setting master not found for UUID: ' . $master['id'],
@@ -622,11 +644,14 @@ class ContractMasterRepository extends BaseRepository
                 $masterActive = $master['isActive'] ?? 0;
                 $settingMaster->update(['isActive' => $masterActive ? 1 : 0]);
 
-                if (!empty($master['settingDetail'])) {
-                    foreach ($master['settingDetail'] as $details) {
+                if (!empty($master['settingDetail']))
+                {
+                    foreach ($master['settingDetail'] as $details)
+                    {
                         $settingDetail = ContractSettingDetail::where('uuid', $details['settingDetailUuid'])->first();
 
-                        if (!$settingDetail) {
+                        if (!$settingDetail)
+                        {
                             return [
                                 'status' => false,
                                 'message' => 'Contract setting detail not found for UUID: ' . $details['settingDetailUuid'],
@@ -642,7 +667,8 @@ class ContractMasterRepository extends BaseRepository
 
             DB::commit();
             return ['status' => true, 'message' => trans('common.contract_updated_successfully')];
-        } catch(\Exception $ex) {
+        } catch(\Exception $ex)
+        {
             DB::rollBack();
             return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
         }
@@ -659,7 +685,8 @@ class ContractMasterRepository extends BaseRepository
         $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
             ->where('isActive', 1)
             ->with([
-                'contractTypeSection' => function ($q) {
+                'contractTypeSection' => function ($q)
+                {
                     $q->select('ct_sectionId', 'cmSection_id')
                         ->with(['contractSectionWithTypes']);
                 }
@@ -681,7 +708,8 @@ class ContractMasterRepository extends BaseRepository
             }
         }
 
-        if ($isDrop) {
+        if ($isDrop)
+        {
             $pluckedData[] = [
                 'id' => 12,
                 'description' => 'Contract Info',
@@ -700,7 +728,8 @@ class ContractMasterRepository extends BaseRepository
         ];
     }
 
-    public function getContractOverallRetentionData(Request $request){
+    public function getContractOverallRetentionData(Request $request)
+    {
         $input = $request->all();
         $contractUuid = $input['contractId'];
         $companySystemID = $input['selectedCompanyID'];
@@ -798,7 +827,8 @@ class ContractMasterRepository extends BaseRepository
         } else
         {
             DB::beginTransaction();
-            try{
+            try
+            {
 
                 $data = [
                     'retentionPercentage' => $formData['retentionPercentage'] ?? null,
@@ -846,14 +876,16 @@ class ContractMasterRepository extends BaseRepository
                 DB::commit();
                 return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];
 
-            } catch (\Exception $ex){
+            } catch (\Exception $ex)
+            {
                 DB::rollBack();
                 return ['status' => false, 'message' => $ex->getMessage()];
             }
         }
     }
 
-    public function getContractConfirmationData(Request $request){
+    public function getContractConfirmationData(Request $request)
+    {
         $input = $request->all();
         $contractUuid = $input['contractUuid'];
 
@@ -915,11 +947,13 @@ class ContractMasterRepository extends BaseRepository
         });
     }
 
-    private function checkActiveMasters($contractId, $companySystemID){
+    private function checkActiveMasters($contractId, $companySystemID)
+    {
         $activeMasters = ContractSettingMaster::where('contractId', $contractId)
             ->where('isActive', 1)
             ->with([
-                'contractTypeSection' => function ($q) {
+                'contractTypeSection' => function ($q)
+                {
                     $q->select('ct_sectionId', 'cmSection_id');
                 }
             ])
@@ -932,8 +966,10 @@ class ContractMasterRepository extends BaseRepository
 
         $existRetention = $activeSections->pluck('sectionDetailId')->toArray();
 
-        foreach ($activeMasters as $activeMaster){
-            if($activeMaster['contractTypeSection']['cmSection_id'] == 1){
+        foreach ($activeMasters as $activeMaster)
+        {
+            if($activeMaster['contractTypeSection']['cmSection_id'] == 1)
+            {
                 $existBoq = ContractBoqItems::select('qty', 'price')->where('contractId', $contractId)
                     ->where('companyId', $companySystemID)
                     ->first();
@@ -941,7 +977,8 @@ class ContractMasterRepository extends BaseRepository
                 $checkZeroValues = ContractBoqItems::checkValues($contractId, $companySystemID, 'zero');
                 $checkEmptyValues = ContractBoqItems::checkValues($contractId, $companySystemID, 'empty');
 
-                if(empty($existBoq)) {
+                if(empty($existBoq))
+                {
                     return  trans('common.at_least_one_boq_item_should_be_available');
                 }
                 if($checkZeroValues->isNotEmpty())
@@ -953,17 +990,20 @@ class ContractMasterRepository extends BaseRepository
                     return  trans('common.empty_quantity_or_price_values');
                 }
             }
-            if($activeMaster['contractTypeSection']['cmSection_id'] == 2){
+            if($activeMaster['contractTypeSection']['cmSection_id'] == 2)
+            {
                 $existMilestone = ContractMilestone::where('contractID', $contractId)
                     ->where('companySystemID', $companySystemID)
                     ->first();
-                if(empty($existMilestone)){
+                if(empty($existMilestone))
+                {
                     return trans('common.at_least_one_milestone_should_be_available');
                 }
             }
             if(($activeMaster['contractTypeSection']['cmSection_id'] == 4 && !in_array(4, $existRetention) &&
                 !in_array(5, $existRetention)) || ($activeMaster['contractTypeSectionId'] == 4 &&
-                    $existRetention == null)){
+                    $existRetention == null))
+            {
                 return trans('common.at_least_one_retention_should_be_available');
             }
             if(($activeMaster['contractTypeSection']['cmSection_id'] == 3 && !in_array(1, $existRetention) &&
@@ -985,26 +1025,32 @@ class ContractMasterRepository extends BaseRepository
         return null;
     }
 
-    private function checkOverallAndMilestoneRetention($contractId, $companySystemID, $startDate){
+    private function checkOverallAndMilestoneRetention($contractId, $companySystemID, $startDate)
+    {
         $activeSections = ContractSettingDetail::select('sectionDetailId')
             ->where('contractId', $contractId)
             ->where('isActive', 1)
             ->get();
 
-        foreach ($activeSections as $activeSection) {
-            if($activeSection['sectionDetailId'] == 4){
+        foreach ($activeSections as $activeSection)
+        {
+            if($activeSection['sectionDetailId'] == 4)
+            {
                 $existOverallRetention = ContractOverallRetention::where('contractId', $contractId)
                     ->where('companySystemId', $companySystemID)
                     ->first();
-                if(empty($existOverallRetention)) {
+                if(empty($existOverallRetention))
+                {
                     return trans('common.at_least_one_overall_retention_should_be_available');
                 }
             }
-            if($activeSection['sectionDetailId'] == 5){
+            if($activeSection['sectionDetailId'] == 5)
+            {
                 $existMilestoneRetention = ContractMilestoneRetention::where('contractId', $contractId)
                     ->where('companySystemId', $companySystemID)
                     ->first();
-                if(empty($existMilestoneRetention)) {
+                if(empty($existMilestoneRetention))
+                {
                     return trans('common.at_least_one_milestone_retention_should_be_available');
                 }
             }
@@ -1072,16 +1118,20 @@ class ContractMasterRepository extends BaseRepository
 
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
 
-        if($totalRecords != $recordsWithMilestoneId){
+        if($totalRecords != $recordsWithMilestoneId)
+        {
             return trans('common.milestone_title_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithRetentionPercentage){
+        if($totalRecords != $recordsWithRetentionPercentage)
+        {
             return trans('common.retention_percentage_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithStartDate){
+        if($totalRecords != $recordsWithStartDate)
+        {
             return trans('common.start_date_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithDueDate){
+        if($totalRecords != $recordsWithDueDate)
+        {
             return trans('common.due_date_is_a_mandatory_field');
         }
         if($contract['contractAmount'] == 0 || $contract['startDate'] == null || $contract['endDate'] == null)
@@ -1104,7 +1154,8 @@ class ContractMasterRepository extends BaseRepository
             ->whereIn('userGroupId', $defaultUserIds)
             ->where('status', 1)
             ->get();
-        foreach ($userIdsAssignedUserGroup as $user) {
+        foreach ($userIdsAssignedUserGroup as $user)
+        {
             $userGroupId = $user['userGroupId'];
             $userId = $user['contractUserId'];
             $existingRecord = ContractUserAssign::where('contractId', $contractId)
@@ -1113,7 +1164,8 @@ class ContractMasterRepository extends BaseRepository
                 ->where('status', 1)
                 ->first();
 
-            if (!$existingRecord) {
+            if (!$existingRecord)
+            {
                 $input = [
                     'uuid' => bin2hex(random_bytes(16)),
                     'contractId' => $contractId,
@@ -1215,7 +1267,8 @@ class ContractMasterRepository extends BaseRepository
         return ContractMaster::getContractTypeWiseActiveContracts();
     }
 
-    public function getContractExpiryListGraph(Request $request) {
+    public function getContractExpiryListGraph(Request $request)
+    {
         $input  = $request->all();
         $companyId =  $input['selectedCompanyID'];
         $filter = $input['filter'] ?? null;
@@ -1229,12 +1282,13 @@ class ContractMasterRepository extends BaseRepository
     public function getContractMasterForGraph(Request $request)
     {
         $input  = $request->all();
-        $search_keyword = $request->input('search.value');
+        $searchKeyword = $request->input('search.value');
         $companyId =  $input['companyId'];
         $category =  $input['category'] ?? null;
         $contractType = $input['contractType'] ?? null;
         $filter = $input['filter'] ?? null;
-        $languages =  $this->model->contractMasterForGraph($search_keyword, $companyId, $filter, $category, $contractType);
+        $languages =  $this->model->contractMasterForGraph($searchKeyword, $companyId, $filter,
+            $category, $contractType);
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()

@@ -94,12 +94,9 @@ class ApproveDocument
             $masterRecord->approved_by = $employeeSystemID;
             $masterRecord->approved_date = now();
 
-            if($formData['documentSystemID'] == 123)
+            if($formData['documentSystemID'] == 123 && $masterRecord['parent_id'] == 0)
             {
-                if($masterRecord['parent_id'] == 0)
-                {
                     self::updateContractStatus($masterRecord);
-                }
             }
 
             $update = $masterRecord->save();

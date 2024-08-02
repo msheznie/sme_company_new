@@ -279,10 +279,12 @@ class MilestonePaymentSchedules extends Model
             'milestone_status')
             ->where('company_id', $companyId)
             ->with([
-                'milestoneDetail' => function ($q) {
+                'milestoneDetail' => function ($q)
+                {
                     $q->select('id', 'uuid', 'title');
                 },
-                'contractMaster' => function ($q1) {
+                'contractMaster' => function ($q1)
+                {
                     $q1->select('id', 'contractCode', 'title');
                 }
             ]);

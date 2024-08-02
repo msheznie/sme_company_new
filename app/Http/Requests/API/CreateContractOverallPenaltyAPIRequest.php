@@ -34,8 +34,10 @@ class CreateContractOverallPenaltyAPIRequest extends APIRequest
             'penalty_circulation_frequency' => 'required',
             'due_in' => [
                 'required_if:penalty_circulation_frequency,7',
-                function ($attribute, $value, $fail) {
-                    if ($this->input('penalty_circulation_frequency') == 7 && $value <= 0) {
+                function ($attribute, $value, $fail)
+                {
+                    if ($this->input('penalty_circulation_frequency') == 7 && $value <= 0)
+                    {
                         $fail('The due in field must be greater than 0.');
                     }
                 },
