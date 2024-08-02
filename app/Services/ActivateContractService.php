@@ -29,6 +29,7 @@ class ActivateContractService
         {
             foreach ($contractList as $value)
             {
+                $alreadyActiveContract = false;
                 if($fromChild)
                 {
                     $startDate = $value->contractMaster->startDate;
@@ -46,8 +47,14 @@ class ActivateContractService
                 (
                     $value->contract_id, $status, $value->company_id, null,true
                 );
-
-                self::updateContractMaster($status, $value->company_id, $value->contract_id);
+                if($status == -1)
+                {
+                    $alreadyActiveContract = ContractHistoryService::checkAlreadyActiveContract($value->contract_id);
+                }
+                if(!$alreadyActiveContract)
+                {
+                    self::updateContractMaster($status, $value->company_id, $value->contract_id);
+                }
             }
         }
     }

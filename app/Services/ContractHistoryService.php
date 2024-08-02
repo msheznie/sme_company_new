@@ -26,6 +26,7 @@ class ContractHistoryService
 {
     protected $contractHistoryRepository;
     protected $contractStatusHistoryRepository;
+    protected $contractHistoryModel = 'App\\Models\\ContractHistory';
 
     public function __construct(ContractHistoryRepository $contractHistoryRepository,
                                 contractStatusHistoryRepository $contractStatusHistoryRepository)
@@ -89,7 +90,7 @@ class ContractHistoryService
             if($amendment)
             {
 
-                $contractColumn = ($modelName === 'App\\Models\\ContractHistory') ? 'id' : 'contract_history_id';
+                $contractColumn = ($modelName === $this->contractHistoryModel) ? 'id' : 'contract_history_id';
                 $colValue = $historyId;
             }else
             {
@@ -104,7 +105,7 @@ class ContractHistoryService
             if ($contractColumn)
             {
                 $query = $model::where($contractColumn, $colValue);
-                if ($modelName === 'App\\Models\\ContractHistory')
+                if ($modelName === $this->contractHistoryModel)
                 {
                     $query->where('category', $categoryId);
                 }
@@ -705,7 +706,7 @@ class ContractHistoryService
     {
         $defaultModels = [
             'App\\Models\\ContractMaster',
-            'App\\Models\\ContractHistory',
+            $this->contractHistoryModel,
             'App\\Models\\ContractUserAssign',
             'App\\Models\\ContractSettingMaster',
             'App\\Models\\ContractSettingDetail',
@@ -722,7 +723,7 @@ class ContractHistoryService
         {
             return [
                 'App\\Models\\CMContractMasterAmd',
-                'App\\Models\\ContractHistory',
+                $this->contractHistoryModel,
                 'App\\Models\\CMContractUserAssignAmd',
                 'App\\Models\\CMContractDocumentAmd',
                 'App\\Models\\CMContractBoqItemsAmd',
@@ -762,9 +763,16 @@ class ContractHistoryService
         }
     }
 
-    public static function updateOrInsertStatus($id, $status, $selectedCompanyID, $contractHistoryId = null, $systemUser = false)
+    public static function updateOrInsertStatus($id, $status, $selectedCompanyID, $contractHistoryId = null,
+                                                $systemUser = false)
     {
         $latestRecordStatus = ContractHistoryService::getLatestRecordHistory($id);
+        $alreadyActiveContract = false;
+        if($status == -1)
+        {
+            $alreadyActiveContract = self::checkAlreadyActiveContract($id);
+        }
+
         if ($latestRecordStatus)
         {
             if ($latestRecordStatus->status == $status)
@@ -773,7 +781,10 @@ class ContractHistoryService
             }
             else
             {
-                self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId, $systemUser);
+                if(!$alreadyActiveContract)
+                {
+                    self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId, $systemUser);
+                }
             }
         }
         else
@@ -787,5 +798,9 @@ class ContractHistoryService
         return $this->contractStatusHistoryRepository->getContractStatusHistory($request);
     }
 
+    public function checkAlreadyActiveContract($contractID)
+    {
+        return contractStatusHistory::where('contract_id', $contractID)->where('status', -1)->exists();
+    }
 
 }
