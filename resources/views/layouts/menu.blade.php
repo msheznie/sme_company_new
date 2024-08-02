@@ -463,27 +463,3 @@
         <span>Contract Milestone Penalty Masters</span>
     </a>
 </li>
-<li class="nav-item {{ Request::is('thirdPartySystems*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('thirdPartySystems.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Third Party Systems</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('thirdPartyIntegrationKeys*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('thirdPartyIntegrationKeys.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Third Party Integration Keys</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractOverallPenalties*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenalties.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalties</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractOverallPenaltyAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenaltyAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalty Amds</span>
-    </a>
-</li>
