@@ -17,6 +17,7 @@ use App\Models\ContractBoqItems;
 use App\Models\ContractDeliverables;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\ContractMilestonePenaltyDetail;
 use App\Models\ContractMilestoneRetention;
 use App\Models\ContractOverallPenalty;
 use App\Models\ContractOverallRetention;
@@ -1012,6 +1013,12 @@ class ContractMasterRepository extends BaseRepository
             {
                 return trans('common.at_least_one_milestone_and_payment_schedule_should_be_available');
             }
+            if(($activeMaster['contractTypeSection']['cmSection_id'] == 5 && !in_array(6, $existRetention) &&
+                    !in_array(7, $existRetention)) ||
+                ($activeMaster['contractTypeSection']['cmSection_id'] ==5 && $existRetention == null))
+            {
+                return trans('common.at_least_one_penalty_should_be_available');
+            }
             if($activeMaster['contractTypeSection']['cmSection_id'] == 6)
             {
                 $existPaymentTerm = ContractPaymentTerms::paymentTermExist($contractId, $companySystemID);
@@ -1079,15 +1086,38 @@ class ContractMasterRepository extends BaseRepository
                     return trans('common.at_least_one_overall_penalty_should_be_available');
                 } else
                 {
-                    $penaltyStartDate =
-                        \DateTime::createFromFormat('d-m-Y', $existOverallPenalty['actual_penalty_start_date']);
-                    $contractStartDate = \DateTime::createFromFormat('d-m-Y', $startDate);
+                    $penaltyStartDate = (new \DateTime($existOverallPenalty['actual_penalty_start_date']))->
+                    format('Y-m-d');
+                    $contractStartDate = (new \DateTime($startDate))->format('Y-m-d');
 
-                    if ($penaltyStartDate > $contractStartDate)
+                    if ($penaltyStartDate < $contractStartDate)
+                    {
+                        throw new CommonException('Please update the overall penalty start date according
+                             to the new contract start date');
+                    }
+                }
+            }
+            if($activeSection['sectionDetailId'] == 7)
+            {
+                $existMilestonePenalty = ContractMilestonePenaltyDetail::getRecordsWithMilestone(
+                    $contractId, $companySystemID);
+                if(empty($existMilestonePenalty))
+                {
+                    return trans('common.at_least_one_milestone_penalty_should_be_available');
+                } else
+                {
+                    foreach ($existMilestonePenalty as $penaltyDetail)
+                    {
+                        $penaltyStartDate = (new \DateTime($penaltyDetail['penalty_start_date']))->
+                        format('Y-m-d');
+                        $contractStartDate = (new \DateTime($startDate))->format('Y-m-d');
+
+                        if ($penaltyStartDate < $contractStartDate)
                         {
-                            throw new CommonException('Please update the overall penalty start date according
+                            throw new CommonException('Please update the milestone penalty start date according
                              to the new contract start date');
                         }
+                    }
                 }
             }
         }

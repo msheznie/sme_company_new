@@ -228,4 +228,9 @@
      "milestone" => "Milestone",
      "milestone_amount" => "Milestone Amount",
      "milestone_status" => "Milestone Status",
+     'existing_milestones_are_already_used_for_penalties' =>
+         'Existing milestone payment schedules are already used for penalties, If you want to add more penalties,
+         please add new milestone payment schedules',
+     "at_least_one_milestone_penalty_should_be_available" =>
+         "At least one milestone penalty should be available to send the contract for approval",
  ];

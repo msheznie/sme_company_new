@@ -467,6 +467,50 @@ Route::
         \App\Http\Controllers\API\ContractAdditionalDocumentsAPIController::class,
         'updateAdditionalDoc'
     ])->name('Update additional Document');
+    Route::post('milestone-penalty-master-data', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyMasterAPIController::class,
+        'milestonePenaltyMasterData'
+    ])->name('Milestone penalty master data');
+    Route::post('milestone-penalty-master', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyMasterAPIController::class,
+        'store'
+    ])->name('store milestone penalty master');
+    Route::put('milestone-penalty-master/{id}', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyMasterAPIController::class,
+        'update'
+    ])->name('update milestone penalty master');
+    Route::post('milestone-penalty-details', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'milestonePenaltyDetails'
+    ])->name('Milestone penalty detail');
+    Route::post('milestone-penalty-detail', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'store'
+    ])->name('store milestone penalty detail');
+    Route::post('milestone-penalty-detail-form-data', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'getMilestonePenaltyDetailFormData'
+    ])->name('get milestone penalty detail form data');
+    Route::post('get_milestone-amount', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'getMilestoneAmount'
+    ])->name('get milestone amount');
+    Route::put('milestone-penalty-detail/{id}', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'update'
+    ])->name('update milestone penalty detail');
+    Route::delete('milestone-penalty-detail/{id}', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'destroy'
+    ])->name('delete milestone penalty detail');
+    Route::post('update-milestone-penalty-status', [
+        \App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+        'updateMilestonePenaltyStatus'
+    ])->name('update milestone penalty status');
+    Route::post('/export-milestone-penalty',
+        [\App\Http\Controllers\API\ContractMilestonePenaltyDetailAPIController::class,
+            'exportMilestonePenalty'])
+        ->name('Export milestone penalty');
 
     Route::post('get-contract-status-history', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,

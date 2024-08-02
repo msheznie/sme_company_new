@@ -219,4 +219,13 @@ return [
     "milestone" => "Milestone AR",
     "milestone_amount" => "Milestone Amount AR",
     "milestone_status" => "Milestone Status AR",
+    "at_least_one_penalty_should_be_available" =>
+        "Please enable overall penalty or milestone penalty to send the contract for approval AR",
+    "at_least_one_overall_penalty_should_be_available" =>
+        "Fill all the mandatory fields in overall penalty AR",
+    'existing_milestones_are_already_used_for_penalties' =>
+        'Existing milestone payment schedules are already used for penalties, If you want to add more penalties,
+         please add new milestone payment schedules AR',
+    "at_least_one_milestone_penalty_should_be_available" =>
+        "At least one milestone penalty should be available to send the contract for approval AR",
 ];
