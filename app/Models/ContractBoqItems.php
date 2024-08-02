@@ -105,7 +105,7 @@ class ContractBoqItems extends Model
 
     public function getBoqItemDetails($uuid)
     {
-        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price')
+        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price', 'origin')
             ->with([
                 'itemMaster' => function ($q)
                 {
@@ -116,6 +116,9 @@ class ContractBoqItems extends Model
                             $q->select('idItemAssigned', 'itemCodeSystem', 'wacValueLocal');
                         }
                     ]);
+                }, 'boqItem', 'boqItem.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
                 }
             ])
             ->where('uuid', $uuid)
