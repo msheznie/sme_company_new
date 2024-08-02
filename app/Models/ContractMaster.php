@@ -287,7 +287,8 @@ class ContractMaster extends Model
 
         if(isset($contractType) && $contractType != null)
         {
-            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractResult) {
+            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractResult)
+            {
                 $query->where('uuid', $contractResult->uuid);
             });
         }
@@ -585,7 +586,8 @@ class ContractMaster extends Model
                 $q1->select('contractId', 'uuid', 'retentionPercentage', 'retentionAmount', 'startDate', 'dueDate');
             }]);
 
-        if (!empty($input['supplierId'])) {
+        if (!empty($input['supplierId']))
+        {
             $query->whereHas('contractUsers', function ($q) use ($input)
             {
                 $q->where('contractUserId', $input['supplierId']);
@@ -695,7 +697,8 @@ class ContractMaster extends Model
             ->get();
 
         return $contracts->groupBy('contractTypes.cm_type_name')
-            ->map(function ($group) {
+            ->map(function ($group)
+            {
                 return $group->count();
             })
             ->toArray();
@@ -711,12 +714,9 @@ class ContractMaster extends Model
             ->where('endDate', '<', $now)
             ->orderBy('id', 'desc');
 
-        if ($filter)
+        if ($filter && isset($filter['month']))
         {
-            if (isset($filter['month']))
-            {
                 $query->whereMonth('endDate', $filter['month']);
-            }
         }
 
         return $query;
@@ -778,7 +778,8 @@ class ContractMaster extends Model
 
         if($contractType != null)
         {
-            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractId) {
+            $query = $query->where('status', -1)->whereHas('contractTypes', function ($query) use ($contractId)
+            {
                 $query->where('uuid', $contractId->uuid);
             });
         }

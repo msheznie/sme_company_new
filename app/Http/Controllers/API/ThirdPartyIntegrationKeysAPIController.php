@@ -41,7 +41,8 @@ class ThirdPartyIntegrationKeysAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ThirdPartyIntegrationKeysResource::collection($thirdPartyIntegrationKeys), 'Third Party Integration Keys retrieved successfully');
+        return $this->sendResponse(ThirdPartyIntegrationKeysResource::collection($thirdPartyIntegrationKeys),
+            'Third Party Integration Keys retrieved successfully');
     }
 
     /**
@@ -58,7 +59,8 @@ class ThirdPartyIntegrationKeysAPIController extends AppBaseController
 
         $thirdPartyIntegrationKeys = $this->thirdPartyIntegrationKeysRepository->create($input);
 
-        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys), 'Third Party Integration Keys saved successfully');
+        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys),
+            'Third Party Integration Keys saved successfully');
     }
 
     /**
@@ -74,11 +76,13 @@ class ThirdPartyIntegrationKeysAPIController extends AppBaseController
         /** @var ThirdPartyIntegrationKeys $thirdPartyIntegrationKeys */
         $thirdPartyIntegrationKeys = $this->thirdPartyIntegrationKeysRepository->find($id);
 
-        if (empty($thirdPartyIntegrationKeys)) {
+        if (empty($thirdPartyIntegrationKeys))
+        {
             return $this->sendError('Third Party Integration Keys not found');
         }
 
-        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys), 'Third Party Integration Keys retrieved successfully');
+        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys),
+            'Third Party Integration Keys retrieved successfully');
     }
 
     /**
@@ -97,13 +101,15 @@ class ThirdPartyIntegrationKeysAPIController extends AppBaseController
         /** @var ThirdPartyIntegrationKeys $thirdPartyIntegrationKeys */
         $thirdPartyIntegrationKeys = $this->thirdPartyIntegrationKeysRepository->find($id);
 
-        if (empty($thirdPartyIntegrationKeys)) {
+        if (empty($thirdPartyIntegrationKeys))
+        {
             return $this->sendError('Third Party Integration Keys not found');
         }
 
         $thirdPartyIntegrationKeys = $this->thirdPartyIntegrationKeysRepository->update($input, $id);
 
-        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys), 'ThirdPartyIntegrationKeys updated successfully');
+        return $this->sendResponse(new ThirdPartyIntegrationKeysResource($thirdPartyIntegrationKeys),
+            'ThirdPartyIntegrationKeys updated successfully');
     }
 
     /**
@@ -121,7 +127,8 @@ class ThirdPartyIntegrationKeysAPIController extends AppBaseController
         /** @var ThirdPartyIntegrationKeys $thirdPartyIntegrationKeys */
         $thirdPartyIntegrationKeys = $this->thirdPartyIntegrationKeysRepository->find($id);
 
-        if (empty($thirdPartyIntegrationKeys)) {
+        if (empty($thirdPartyIntegrationKeys))
+        {
             return $this->sendError('Third Party Integration Keys not found');
         }
 

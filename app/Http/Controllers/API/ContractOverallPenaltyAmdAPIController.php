@@ -41,7 +41,8 @@ class ContractOverallPenaltyAmdAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractOverallPenaltyAmdResource::collection($contractOverallPenaltyAmds), 'Contract Overall Penalty Amds retrieved successfully');
+        return $this->sendResponse(ContractOverallPenaltyAmdResource::collection($contractOverallPenaltyAmds),
+            'Contract Overall Penalty Amds retrieved successfully');
     }
 
     /**
@@ -58,7 +59,8 @@ class ContractOverallPenaltyAmdAPIController extends AppBaseController
 
         $contractOverallPenaltyAmd = $this->contractOverallPenaltyAmdRepository->create($input);
 
-        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd), 'Contract Overall Penalty Amd saved successfully');
+        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd),
+            'Contract Overall Penalty Amd saved successfully');
     }
 
     /**
@@ -74,11 +76,13 @@ class ContractOverallPenaltyAmdAPIController extends AppBaseController
         /** @var ContractOverallPenaltyAmd $contractOverallPenaltyAmd */
         $contractOverallPenaltyAmd = $this->contractOverallPenaltyAmdRepository->find($id);
 
-        if (empty($contractOverallPenaltyAmd)) {
+        if (empty($contractOverallPenaltyAmd))
+        {
             return $this->sendError('Contract Overall Penalty Amd not found');
         }
 
-        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd), 'Contract Overall Penalty Amd retrieved successfully');
+        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd),
+            'Contract Overall Penalty Amd retrieved successfully');
     }
 
     /**
@@ -97,13 +101,15 @@ class ContractOverallPenaltyAmdAPIController extends AppBaseController
         /** @var ContractOverallPenaltyAmd $contractOverallPenaltyAmd */
         $contractOverallPenaltyAmd = $this->contractOverallPenaltyAmdRepository->find($id);
 
-        if (empty($contractOverallPenaltyAmd)) {
+        if (empty($contractOverallPenaltyAmd))
+        {
             return $this->sendError('Contract Overall Penalty Amd not found');
         }
 
         $contractOverallPenaltyAmd = $this->contractOverallPenaltyAmdRepository->update($input, $id);
 
-        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd), 'ContractOverallPenaltyAmd updated successfully');
+        return $this->sendResponse(new ContractOverallPenaltyAmdResource($contractOverallPenaltyAmd),
+            'ContractOverallPenaltyAmd updated successfully');
     }
 
     /**
@@ -121,7 +127,8 @@ class ContractOverallPenaltyAmdAPIController extends AppBaseController
         /** @var ContractOverallPenaltyAmd $contractOverallPenaltyAmd */
         $contractOverallPenaltyAmd = $this->contractOverallPenaltyAmdRepository->find($id);
 
-        if (empty($contractOverallPenaltyAmd)) {
+        if (empty($contractOverallPenaltyAmd))
+        {
             return $this->sendError('Contract Overall Penalty Amd not found');
         }
 

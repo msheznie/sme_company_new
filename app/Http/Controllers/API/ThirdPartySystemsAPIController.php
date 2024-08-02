@@ -41,7 +41,8 @@ class ThirdPartySystemsAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ThirdPartySystemsResource::collection($thirdPartySystems), 'Third Party Systems retrieved successfully');
+        return $this->sendResponse(ThirdPartySystemsResource::collection($thirdPartySystems),
+            'Third Party Systems retrieved successfully');
     }
 
     /**
@@ -58,7 +59,8 @@ class ThirdPartySystemsAPIController extends AppBaseController
 
         $thirdPartySystems = $this->thirdPartySystemsRepository->create($input);
 
-        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems), 'Third Party Systems saved successfully');
+        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems),
+            'Third Party Systems saved successfully');
     }
 
     /**
@@ -74,11 +76,13 @@ class ThirdPartySystemsAPIController extends AppBaseController
         /** @var ThirdPartySystems $thirdPartySystems */
         $thirdPartySystems = $this->thirdPartySystemsRepository->find($id);
 
-        if (empty($thirdPartySystems)) {
+        if (empty($thirdPartySystems))
+        {
             return $this->sendError('Third Party Systems not found');
         }
 
-        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems), 'Third Party Systems retrieved successfully');
+        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems),
+            'Third Party Systems retrieved successfully');
     }
 
     /**
@@ -97,13 +101,15 @@ class ThirdPartySystemsAPIController extends AppBaseController
         /** @var ThirdPartySystems $thirdPartySystems */
         $thirdPartySystems = $this->thirdPartySystemsRepository->find($id);
 
-        if (empty($thirdPartySystems)) {
+        if (empty($thirdPartySystems))
+        {
             return $this->sendError('Third Party Systems not found');
         }
 
         $thirdPartySystems = $this->thirdPartySystemsRepository->update($input, $id);
 
-        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems), 'ThirdPartySystems updated successfully');
+        return $this->sendResponse(new ThirdPartySystemsResource($thirdPartySystems),
+            'ThirdPartySystems updated successfully');
     }
 
     /**
@@ -121,7 +127,8 @@ class ThirdPartySystemsAPIController extends AppBaseController
         /** @var ThirdPartySystems $thirdPartySystems */
         $thirdPartySystems = $this->thirdPartySystemsRepository->find($id);
 
-        if (empty($thirdPartySystems)) {
+        if (empty($thirdPartySystems))
+        {
             return $this->sendError('Third Party Systems not found');
         }
 

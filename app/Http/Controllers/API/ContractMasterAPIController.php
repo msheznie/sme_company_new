@@ -602,8 +602,7 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getHistoryId($id)
     {
-        $data = ContractManagementUtils::getContractHistoryData($id);
-        return $data;
+        return ContractManagementUtils::getContractHistoryData($id);
     }
 
     public function getContractData(Request $request)
@@ -619,7 +618,7 @@ class ContractMasterAPIController extends AppBaseController
         }
         catch (\Exception $e)
         {
-            return $this->sendError('Something went wrong'. ' ' . $e->getMessage(), 500);
+            return $this->sendError('Something went wrong '. $e->getMessage(), 500);
         }
 
     }

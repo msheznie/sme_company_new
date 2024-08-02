@@ -193,7 +193,8 @@ class ContractBoqItemsRepository extends BaseRepository
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
         $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency',
-            'boqItem', 'boqItem.unit' => function ($query) {
+            'boqItem', 'boqItem.unit' => function ($query)
+            {
             $query->select('UnitShortCode');
         }])
             ->where('companyId', $companyId)
@@ -276,7 +277,8 @@ class ContractBoqItemsRepository extends BaseRepository
                         : '-';
                 }
 
-                if($value['origin'] == 2) {
+                if($value['origin'] == 2)
+                {
                     $data[$count][COL_UOM] = isset($value['boqItem']['Unit']['UnitShortCode'])
                         ? preg_replace('/^=/', '-', $value['boqItem']['Unit']['UnitShortCode'])
                         : '-';

@@ -42,7 +42,8 @@ class ContractOverallPenaltyAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractOverallPenaltyResource::collection($contractOverallPenalties), 'Contract Overall Penalties retrieved successfully');
+        return $this->sendResponse(ContractOverallPenaltyResource::collection($contractOverallPenalties),
+            'Contract Overall Penalties retrieved successfully');
     }
 
     /**
@@ -84,11 +85,13 @@ class ContractOverallPenaltyAPIController extends AppBaseController
         /** @var ContractOverallPenalty $contractOverallPenalty */
         $contractOverallPenalty = $this->contractOverallPenaltyRepository->find($id);
 
-        if (empty($contractOverallPenalty)) {
+        if (empty($contractOverallPenalty))
+        {
             return $this->sendError('Contract Overall Penalty not found');
         }
 
-        return $this->sendResponse(new ContractOverallPenaltyResource($contractOverallPenalty), 'Contract Overall Penalty retrieved successfully');
+        return $this->sendResponse(new ContractOverallPenaltyResource($contractOverallPenalty),
+            'Contract Overall Penalty retrieved successfully');
     }
 
     /**
@@ -137,7 +140,8 @@ class ContractOverallPenaltyAPIController extends AppBaseController
         /** @var ContractOverallPenalty $contractOverallPenalty */
         $contractOverallPenalty = $this->contractOverallPenaltyRepository->find($id);
 
-        if (empty($contractOverallPenalty)) {
+        if (empty($contractOverallPenalty))
+        {
             return $this->sendError('Contract Overall Penalty not found');
         }
 

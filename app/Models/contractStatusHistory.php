@@ -168,7 +168,8 @@ class contractStatusHistory extends Model
         $latestStatuses = contractStatusHistory::select('contract_id', DB::raw('MAX(id) as latest_id'))
             ->groupBy('contract_id');
 
-        $statuses = contractStatusHistory::joinSub($latestStatuses, 'latest_statuses', function($join) {
+        $statuses = contractStatusHistory::joinSub($latestStatuses, 'latest_statuses', function($join)
+        {
             $join->on('cm_contract_status_history.id', '=', 'latest_statuses.latest_id');
         })
             ->select('status', DB::raw('COUNT(*) as count'))
@@ -193,8 +194,10 @@ class contractStatusHistory extends Model
             'Terminated' => 0,
         ];
 
-        foreach ($statuses as $status) {
-            switch ($status->status) {
+        foreach ($statuses as $status)
+        {
+            switch ($status->status)
+            {
                 case self::STATUS_AMENDED:
                     $statusCounts['Amended'] = $status->count;
                     break;
