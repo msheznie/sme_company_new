@@ -463,15 +463,3 @@
         <span>Contract Milestone Penalty Masters</span>
     </a>
 </li>
-<li class="nav-item {{ Request::is('contractOverallPenalties*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenalties.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalties</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractOverallPenaltyAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenaltyAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalty Amds</span>
-    </a>
-</li>

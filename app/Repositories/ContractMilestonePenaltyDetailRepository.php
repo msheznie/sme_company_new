@@ -26,7 +26,7 @@ use Yajra\DataTables\DataTables;
  * Class ContractMilestonePenaltyDetailRepository
  * @package App\Repositories
  * @version July 28, 2024, 10:45 am +04
-*/
+ */
 
 class ContractMilestonePenaltyDetailRepository extends BaseRepository
 {
@@ -438,6 +438,10 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             $count = 1;
             foreach ($lotData as $value)
             {
+                $duePenaltyAmount = isset($value['due_penalty_amount']) && $value['due_penalty_amount'] !== null
+                    ? $value['due_penalty_amount']
+                    : ($penaltyAmountDict[$value['id']] ?? 0);
+
                 $data[$count][trans('common.milestone_title')] =
                     isset($value['milestone_title']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
                 $data[$count][trans('common.milestone_amount')] =
@@ -457,9 +461,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                         '/^=/', '-', $value['billingFrequencies']['description']) : '-';
                 $data[$count][trans('common.due_in')] =
                     isset($value['due_in']) ? preg_replace('/^=/', '-', $value['due_in']) : '-';
-                $data[$count][trans('common.due_penalty_amount')] =
-                    isset($value['due_penalty_amount']) ? preg_replace(
-                        '/^=/', '-', $value['due_penalty_amount']) : $penaltyAmountDict[$value['id']];
+                $data[$count][trans('common.due_penalty_amount')] = number_format($duePenaltyAmount,$decimalPlaces,'.','');
                 $data[$count][trans('common.status')] = $value['status'] == 1 ? 'Paid' : 'Pending';
                 $count++;
             }
