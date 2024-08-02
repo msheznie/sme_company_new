@@ -152,9 +152,11 @@ class ContractMasterAPIController extends AppBaseController
         $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
         $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
+        $activePenalty = ContractSettingDetail::getActiveContractPenalty($contractMaster['id']);
         $response['editData'] = $editData;
         $response['newContractCode'] = $contractCode;
         $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
+        $response['activePenalty'] = $activePenalty['sectionDetailId'] ?? 0;
         $response['boqActive'] = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'boq');
         $milestoneActive = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'milestone');
         $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);

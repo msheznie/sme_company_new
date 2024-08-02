@@ -279,28 +279,31 @@ class MilestonePaymentSchedules extends Model
             'milestone_status')
             ->where('company_id', $companyId)
             ->with([
-                'milestoneDetail' => function ($q)
-                {
+                'milestoneDetail' => function ($q) {
                     $q->select('id', 'uuid', 'title');
                 },
-                'contractMaster' => function ($q1)
-                {
+                'contractMaster' => function ($q1) {
                     $q1->select('id', 'contractCode', 'title');
                 }
             ]);
 
-        if ($filter)
-        {
-            if (isset($filter['month']))
-            {
+        if ($filter) {
+            if (isset($filter['month'])) {
                 $query->whereMonth('payment_due_date', $filter['month']);
             }
 
-            if (isset($filter['year']))
-            {
+            if (isset($filter['year'])) {
                 $query->whereYear('payment_due_date', $filter['year']);
             }
         }
         return $query;
+    }
+
+    public static function checkContractHasMilestone($contractID, $companyId)
+    {
+        return MilestonePaymentSchedules::select('id')
+            ->where('contract_id', $contractID)
+            ->where('company_id', $companyId)
+            ->exists();
     }
 }
