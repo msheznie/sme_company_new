@@ -13,6 +13,7 @@ use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CrudOperations;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TimeMaterialConsumptionRepository
@@ -154,13 +155,13 @@ class TimeMaterialConsumptionRepository extends BaseRepository
                 $postData[] = [
                     'uuid' => ContractManagementUtils::generateUuid(),
                     'contract_id' => $contract['id'],
-                    'item' => $boq['itemMaster']['primaryCode'] ?? null,
-                    'description' => $boq['description'] ?? null,
+                    'item' => ($boq['origin'] == 1) ? $boq['itemMaster']['primaryCode'] ?? null : $boq['boqItem']['item_name'],
+                    'description' => ($boq['origin'] == 1) ? $boq['description'] ?? null : $boq['boqItem']['description'],
                     'min_quantity' => $boq['minQty'] ?? 0,
                     'max_quantity' => $boq['maxQty'] ?? 0,
                     'price' => $price,
                     'quantity' => $qty,
-                    'uom_id' => $boq['itemMaster']['unit'] ?? null,
+                    'uom_id' => ($boq['origin'] == 1) ? $boq['itemMaster']['unit'] ?? null : $boq['boqItem']['Unit']['UnitID'],
                     'amount' => $amount,
                     'boq_id' => $boq['id'],
                     'currency_id' => $currencyId ?? null,
