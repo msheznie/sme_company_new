@@ -674,7 +674,7 @@ class ContractMaster extends Model
         $query = self::where('companySystemID', $companyId);
 
         $activeCount = (clone $query)->where('status', -1)->count();
-        $upcomingCount = (clone $query)->where('status', -1)
+        $upcomingCount = (clone $query)
             ->where('confirmed_yn', 1)
             ->where('approved_yn', 1)
             ->where('startDate', '>', $now)
