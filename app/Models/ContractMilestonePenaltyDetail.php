@@ -128,9 +128,9 @@ class ContractMilestonePenaltyDetail extends Model
             ->get();
     }
 
-    public function ContractMilestonePenaltyDetail($contractId, $companySystemID, $milestonePenaltyMasterId)
+    public function ContractMilestonePenaltyDetail($contractId, $companySystemID, $milestonePenaltyMasterId, $search)
     {
-        return ContractMilestonePenaltyDetail::with([
+        $query = ContractMilestonePenaltyDetail::with([
             'milestone' => function ($q)
             {
                 $q->select('title', 'id', 'uuid')
@@ -149,6 +149,20 @@ class ContractMilestonePenaltyDetail extends Model
             ->where('milestone_penalty_master_id', $milestonePenaltyMasterId)
             ->where('company_id', $companySystemID)
             ->orderBy('id', 'asc');
+
+        if ($search)
+        {
+            $search = str_replace("\\", "\\\\", $search);
+            $query = $query->where(function ($query) use ($search)
+            {
+                $query->orWhereHas('milestone', function ($query1) use ($search)
+                {
+                    $query1->where('title', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+
+        return $query;
     }
 
     public static function getMilestoneTitle($milestoneId, $contractId, $companyId)

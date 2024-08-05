@@ -80,6 +80,11 @@ class ContractMilestone extends Model
         return $this->hasOne('App\Models\MilestonePaymentSchedules', 'milestone_id', 'id');
     }
 
+    public function milestonePenalty()
+    {
+        return $this->hasOne('App\Models\ContractMilestonePenaltyDetail', 'milestone_title', 'id');
+    }
+
     public static function getMilestoneDataByTitle($contractId,$title)
     {
             return self::where('title', $title)
