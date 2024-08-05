@@ -306,4 +306,11 @@ class MilestonePaymentSchedules extends Model
             ->where('company_id', $companyId)
             ->exists();
     }
+
+    public static function getMilestonePaymentSchedule($uuid)
+    {
+        return MilestonePaymentSchedules::select('milestone_id')
+            ->where('uuid', $uuid)
+            ->first();
+    }
 }

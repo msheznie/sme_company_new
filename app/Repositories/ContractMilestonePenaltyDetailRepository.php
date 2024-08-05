@@ -98,13 +98,6 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                 throw new CommonException(trans('common.add_new_milestones'));
             }
 
-            $recordsWithMilestoneId = ContractMilestonePenaltyDetail::getRecordsWithMilestone(
-                $contract['id'],$companyId)->count();
-            if($totalRecords == $recordsWithMilestoneId)
-            {
-                throw new CommonException(trans('common.existing_milestones_are_already_used_for_penalties'));
-            }
-
             $milestoneUuid = $input['milestone_title'];
             $milestone = ContractMilestone::getContractMilestoneWithAmount($milestoneUuid);
             $duplicateMilestone = ContractMilestonePenaltyDetail::getMilestoneTitle(
@@ -152,6 +145,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
     public function getMilestonePenaltyDetails(Request $request)
     {
         $input = $request->all();
+        $search_keyword = $request->input('search.value');
         $contractUuid = $input['contractUuid'];
         $companySystemID = $input['selectedCompanyID'];
 
@@ -178,7 +172,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         }
 
         $languages =  $this->model->ContractMilestonePenaltyDetail(
-            $contract['id'], $companySystemID, $milestonePenaltyMasterId);
+            $contract['id'], $companySystemID, $milestonePenaltyMasterId, $search_keyword);
         return DataTables::eloquent($languages)
             ->addColumn('duePenaltyAmount', function ($row) use ($penaltyAmountDict)
             {
@@ -196,7 +190,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
-        $milestones = ContractManagementUtils::getMilestonesWithAmount($contract['id'], $companyID);
+        $milestones = ContractManagementUtils::getPenaltyMilestones($contract['id'], $companyID);
         $currencyId = Company::getLocalCurrencyID($companyID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         $currencyCode = CurrencyMaster::getCurrencyCode($currencyId);
@@ -261,6 +255,9 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             $daysDifference = $penaltyStartDate->diffInDays($today);
             $penaltyCirculationFrequency = $penaltyDetails['penalty_frequency'];
 
+            $newPenaltyStartDate = (new \DateTime($today))->format('Y-m-d');
+            $newPenaltyEndDate = (new \DateTime($penaltyStartDate))->format('Y-m-d');
+
             if($penaltyCirculationFrequency == 1)
             {
                 $noOfInstallments = $daysDifference / 14;
@@ -310,6 +307,10 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                 if($penaltyMaster['maximum_penalty_amount'] > $calculatedAmount)
                 {
                     $duePenaltyAmount = $calculatedAmount;
+                }
+                if ($newPenaltyStartDate < $newPenaltyEndDate)
+                {
+                    $duePenaltyAmount = 0;
                 }
             }
 
@@ -391,6 +392,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
     public function exportMilestonePenalty(Request $request)
     {
         $input = $request->all();
+        $search = false;
         $contractUuid = $input['contractUuid'];
         $companySystemID = $input['selectedCompanyID'];
 
@@ -405,9 +407,22 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
 
         $milestonePenaltyMasterId = $milestonePenaltyMaster['id'] ?? null;
 
+        $duePenaltyAmount = [];
+        if($milestonePenaltyMaster)
+        {
+            $duePenaltyAmount = $this->duePenaltyAmountCalculation(
+                $milestonePenaltyMaster, $contract['id'], $companySystemID);
+        }
+
+        $penaltyAmountDict = [];
+        foreach ($duePenaltyAmount as $penalty)
+        {
+            $penaltyAmountDict[$penalty['id']] = $penalty['duePenaltyAmount'];
+        }
+
 
         $lotData = $this->model->ContractMilestonePenaltyDetail(
-            $contractId, $companySystemID, $milestonePenaltyMasterId)->get();
+            $contractId, $companySystemID, $milestonePenaltyMasterId, $search)->get();
         $data[0]['Milestone Title'] = "Milestone Title";
         $data[0]['Milestone Amount'] = "Milestone Amount";
         $data[0]['Penalty Percentage'] = "Penalty Percentage";
@@ -418,9 +433,11 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         $data[0]['Due Penalty Amount'] = "Due Penalty Amount";
         $data[0]['Status'] = "Status";
 
-        if ($lotData) {
+        if ($lotData)
+        {
             $count = 1;
-            foreach ($lotData as $value) {
+            foreach ($lotData as $value)
+            {
                 $data[$count]['Milestone Title'] =
                     isset($value['milestone_title']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
                 $data[$count]['Milestone Amount'] =
@@ -441,9 +458,9 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                 $data[$count]['Due In'] =
                     isset($value['due_in']) ? preg_replace('/^=/', '-', $value['due_in']) : '-';
                 $data[$count]['Due Penalty Amount'] =
-                    isset($value['due_penalty_amount']) ? preg_replace('/^=/', '-', $value['due_penalty_amount']) : '-';
-                $data[$count]['Status'] =
-                    isset($value['status']) ? preg_replace('/^=/', '-', $value['status']) : '-';
+                    isset($value['due_penalty_amount']) ? preg_replace(
+                        '/^=/', '-', $value['due_penalty_amount']) : $penaltyAmountDict[$value['id']];
+                $data[$count]['Status'] = $value['status'] == 1 ? 'Paid' : 'Pending';
                 $count++;
             }
         }

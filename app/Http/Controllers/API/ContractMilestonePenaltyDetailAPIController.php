@@ -144,7 +144,7 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
                 throw new CommonException('Milestone Penalty Detail not found');
             }
             $contractMilestonePenaltyDetail->delete();
-            return $this->sendSuccess('Milestone Penalty Detail deleted successfully');
+            return $this->sendSuccess('Milestone penalty detail deleted successfully');
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());

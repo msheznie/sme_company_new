@@ -372,4 +372,14 @@ class ContractManagementUtils
                 return 'Ended';
         }
     }
+
+    public static function getPenaltyMilestones($contractId, $companySystemID)
+    {
+        return ContractMilestone::with('milestonePaymentSchedules', 'milestonePenalty')
+            ->where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->has('milestonePaymentSchedules')
+            ->whereDoesntHave('milestonePenalty')
+            ->get();
+    }
 }

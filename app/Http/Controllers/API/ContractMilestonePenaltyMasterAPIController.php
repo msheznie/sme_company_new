@@ -113,7 +113,7 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
                 throw new CommonException('Milestone penalty not found.');
             }
             $this->contractMilestonePenaltyMasterRepository->updateMilestonePenalty($input, $milestonePenalty['id']);
-            return $this->sendResponse(['id' => $id], trans('Milestone penalty updated successfully.'));
+            return $this->sendResponse(['id' => $id], trans('Milestone penalty master updated successfully.'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());

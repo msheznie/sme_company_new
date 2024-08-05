@@ -139,8 +139,8 @@ class ContractMilestonePenaltyMasterRepository extends BaseRepository
                 if ($penaltyPercentage < $input['minimum_penalty_percentage'] ||
                     $penaltyPercentage > $input['maximum_penalty_percentage'])
                 {
-                    throw new CommonException('Actual penalty percentage should be equal to or greater
-                    than minimum percentage');
+                    throw new CommonException('If you want to update milestone penalty master details,
+                    Please delete already added milestone penalty records first');
                 }
             }
 

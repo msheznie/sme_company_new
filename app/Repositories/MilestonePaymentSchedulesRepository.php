@@ -7,11 +7,13 @@ use App\Helpers\General;
 use App\Models\Company;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\ContractMilestonePenaltyDetail;
 use App\Models\CurrencyMaster;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\BaseRepository;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
+use AWS\CRT\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,6 +82,15 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
         $milestoneExists = ContractMilestone::checkContractHasMilestone($contract['id']);
         $totalPSAmount = MilestonePaymentSchedules::getTotalAmount($contract['id'], $isEdit, $uuid);
         $totalPSPercentage = MilestonePaymentSchedules::getTotalPercentage($contract['id'],$isEdit, $uuid);
+
+        $penaltyExists = false;
+        if ($isEdit == 1)
+        {
+            $paymentSchedule = MilestonePaymentSchedules::getMilestonePaymentSchedule($uuid);
+            $penaltyExists = ContractMilestonePenaltyDetail::getMilestoneTitle(
+                $paymentSchedule['milestone_id'], $contract['id'], $companyID);
+        }
+
         return [
             'milestones' => $milestones,
             'currencyCode' => $currencyCode,
@@ -87,7 +98,8 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             'milestoneExists' => $milestoneExists,
             'contractAmount' => $contract['contractAmount'] ?? 0,
             'totalPSAmount' => $totalPSAmount ?? 0,
-            'totalPSPercentage' => $totalPSPercentage ?? 0
+            'totalPSPercentage' => $totalPSPercentage ?? 0,
+            'penaltyExists' => $isEdit == 1 ? !empty($penaltyExists) : false,
         ];
     }
 
