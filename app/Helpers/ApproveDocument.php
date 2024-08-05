@@ -178,7 +178,8 @@ class ApproveDocument
     public static function updateContractStatus($masterRecord)
     {
         $startDate = Carbon::parse($masterRecord['startDate'])->format('Y-m-d');
-        $endDate = Carbon::parse($masterRecord['endDate'])->format('Y-m-d');
+        $endDate = Carbon::parse($masterRecord['endDate'])
+            ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
 
         $status = ContractHistoryService::checkContractDateBetween(
             $startDate,
