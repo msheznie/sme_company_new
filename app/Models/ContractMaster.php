@@ -275,10 +275,10 @@ class ContractMaster extends Model
 
         if(isset($filter['status']) && $status == 'Expired')
         {
-            $query = $query->where('enddate', '<' , $now);
+            $query = $query->where('status', 7);
         }
 
-        if(isset($filter['status']) && $status != 0 && $status === 'Upcoming')
+        if(isset($filter['status']) && $status === 'Upcoming')
         {
             $query = $query->where('confirmed_yn', 1)
                 ->where('approved_yn', 1)
@@ -680,7 +680,7 @@ class ContractMaster extends Model
             ->where('startDate', '>', $now)
             ->count();
         $terminatedCount = (clone $query)->where('status', 6)->count();
-        $expiredCount = (clone $query)->where('endDate', '<', $now)->count();
+        $expiredCount = (clone $query)->where('status', 7)->count();
 
         return [
             'active' => $activeCount,
@@ -773,7 +773,13 @@ class ContractMaster extends Model
 
         if($category == 'Expired')
         {
-            $query = $query->where('endDate', '<', $now);
+            $query = $query->where('status', 7);
+        }
+
+        if($category == 'Upcoming')
+        {
+            $query = $query->where('confirmed_yn', 1)->where('approved_yn', 1)
+                ->where('startDate', '>', $now);
         }
 
         if($contractType != null)
