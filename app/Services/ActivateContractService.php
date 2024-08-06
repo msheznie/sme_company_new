@@ -33,11 +33,13 @@ class ActivateContractService
                 if($fromChild)
                 {
                     $startDate = $value->contractMaster->startDate;
-                    $endDate = $value->contractMaster->endDate;
+                    $endDate = Carbon::parse($value->contractMaster->endDate)
+                        ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
                 } else
                 {
                     $startDate = $value->startDate;
-                    $endDate = $value->endDate;
+                    $endDate = Carbon::parse($value->endDate)
+                        ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
                 }
                 $status = ContractHistoryService::checkContractDateBetween(
                     $startDate,
