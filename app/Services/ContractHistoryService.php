@@ -246,10 +246,11 @@ class ContractHistoryService
                 $contractId = $getContractId->id;
                 $contractHistoryId  = $getContractHistoryData->id;
 
-
+                $endDate = Carbon::parse($getContractCloneData['endDate'])
+                    ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
                 $cloneStatus = self::checkContractDateBetween
                 (
-                    $getContractCloneData['startDate'],$getContractCloneData['endDate']
+                    $getContractCloneData['startDate'], $endDate
                 );
 
 
