@@ -373,13 +373,30 @@ class ContractManagementUtils
         }
     }
 
-    public static function getPenaltyMilestones($contractId, $companySystemID)
+    public static function getPenaltyMilestones($contractId, $companySystemID, $milestonePenaltyUuid, $isEdit = false)
     {
         return ContractMilestone::with('milestonePaymentSchedules', 'milestonePenalty')
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
-            ->has('milestonePaymentSchedules')
-            ->whereDoesntHave('milestonePenalty')
+            ->when($isEdit, function($query) use ($milestonePenaltyUuid)
+            {
+                $query->where(function($subQuery) use ($milestonePenaltyUuid)
+                {
+                    $subQuery->has('milestonePaymentSchedules')
+                        ->where(function ($subSubQuery) use ($milestonePenaltyUuid)
+                        {
+                            $subSubQuery->doesntHave('milestonePenalty')
+                                ->orWhereHas('milestonePenalty', function($penaltyQuery) use ($milestonePenaltyUuid)
+                                {
+                                    $penaltyQuery->where('uuid', $milestonePenaltyUuid);
+                                });
+                        });
+                });
+            }, function($query)
+            {
+                $query->has('milestonePaymentSchedules')
+                    ->doesntHave('milestonePenalty');
+            })
             ->get();
     }
 }

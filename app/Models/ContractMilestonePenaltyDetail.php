@@ -90,26 +90,7 @@ class ContractMilestonePenaltyDetail extends Model
      *
      * @var array
      */
-    public static $rules = [
-        'uuid' => 'required|string|max:255',
-        'contract_id' => 'required|integer',
-        'milestone_penalty_master_id' => 'required|integer',
-        'milestone_title' => 'nullable|integer',
-        'milestone_amount' => 'nullable|numeric',
-        'penalty_percentage' => 'nullable|numeric',
-        'penalty_amount' => 'nullable|numeric',
-        'penalty_start_date' => 'nullable',
-        'penalty_frequency' => 'nullable|integer',
-        'due_in' => 'nullable|integer',
-        'due_penalty_amount' => 'nullable|numeric',
-        'status' => 'nullable|integer',
-        'company_id' => 'nullable|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
-    ];
+    public static $rules = [];
 
     public function milestone()
     {

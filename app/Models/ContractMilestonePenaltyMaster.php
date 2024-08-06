@@ -72,20 +72,7 @@ class ContractMilestonePenaltyMaster extends Model
      *
      * @var array
      */
-    public static $rules = [
-        'uuid' => 'required|string|max:255',
-        'contract_id' => 'required|integer',
-        'minimum_penalty_percentage' => 'nullable|numeric',
-        'minimum_penalty_amount' => 'nullable|numeric',
-        'maximum_penalty_percentage' => 'nullable|numeric',
-        'maximum_penalty_amount' => 'nullable|numeric',
-        'company_id' => 'nullable|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
-    ];
+    public static $rules = [];
 
     public static function getMilestonePenaltyMaster($contractID, $companyId)
     {

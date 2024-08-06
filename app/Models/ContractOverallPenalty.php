@@ -95,27 +95,7 @@ class ContractOverallPenalty extends Model
      *
      * @var array
      */
-    public static $rules = [
-        'uuid' => 'required|string|max:255',
-        'contract_id' => 'required|integer',
-        'minimum_penalty_percentage' => 'nullable|numeric',
-        'minimum_penalty_amount' => 'nullable|numeric',
-        'maximum_penalty_percentage' => 'nullable|numeric',
-        'maximum_penalty_amount' => 'nullable|numeric',
-        'actual_percentage' => 'nullable|numeric',
-        'actual_penalty_amount' => 'nullable|numeric',
-        'penalty_circulation_start_date' => 'nullable',
-        'actual_penalty_start_date' => 'nullable',
-        'penalty_circulation_frequency' => 'nullable|boolean',
-        'due_in' => 'nullable|integer',
-        'due_penalty_amount' => 'nullable|numeric',
-        'company_id' => 'nullable|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
-    ];
+    public static $rules = [];
 
     public static function getOverallPenalty($contractID, $companyId)
     {

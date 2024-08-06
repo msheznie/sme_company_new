@@ -45,7 +45,8 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractMilestonePenaltyDetailResource::collection($contractMilestonePenaltyDetails), 'Contract Milestone Penalty Details retrieved successfully');
+        return $this->sendResponse(ContractMilestonePenaltyDetailResource::collection($contractMilestonePenaltyDetails),
+            'Contract Milestone Penalty Details retrieved successfully');
     }
 
     /**
@@ -84,11 +85,13 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
         /** @var ContractMilestonePenaltyDetail $contractMilestonePenaltyDetail */
         $contractMilestonePenaltyDetail = $this->contractMilestonePenaltyDetailRepository->find($id);
 
-        if (empty($contractMilestonePenaltyDetail)) {
+        if (empty($contractMilestonePenaltyDetail))
+        {
             return $this->sendError('Contract Milestone Penalty Detail not found');
         }
 
-        return $this->sendResponse(new ContractMilestonePenaltyDetailResource($contractMilestonePenaltyDetail), 'Contract Milestone Penalty Detail retrieved successfully');
+        return $this->sendResponse(new ContractMilestonePenaltyDetailResource($contractMilestonePenaltyDetail),
+            'Contract Milestone Penalty Detail retrieved successfully');
     }
 
     /**
@@ -172,10 +175,12 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
     {
         $contractUuid = $request->input('contractUuid') ?? null;
         $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $uuid = $request->input('uuid') ?? null;
+        $isEdit = $request->input('edit');
         try
         {
             $response = $this->contractMilestonePenaltyDetailRepository->getMilestonePenaltyDetailFormData(
-                $contractUuid, $companySystemID);
+                $contractUuid, $companySystemID, $uuid, $isEdit);
             return $this->sendResponse($response, trans('common.retrieved_successfully'));
         } catch (CommonException $ex)
         {

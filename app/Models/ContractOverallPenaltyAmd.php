@@ -37,7 +37,7 @@ class ContractOverallPenaltyAmd extends Model
     use HasFactory;
 
     public $table = 'cm_overall_penalty_amd';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -99,29 +99,7 @@ class ContractOverallPenaltyAmd extends Model
      *
      * @var array
      */
-    public static $rules = [
-        'overall_penalty_id' => 'nullable|integer',
-        'contract_history_id' => 'nullable|integer',
-        'uuid' => 'required|string|max:255',
-        'contract_id' => 'required|integer',
-        'minimum_penalty_percentage' => 'nullable|numeric',
-        'minimum_penalty_amount' => 'nullable|numeric',
-        'maximum_penalty_percentage' => 'nullable|numeric',
-        'maximum_penalty_amount' => 'nullable|numeric',
-        'actual_percentage' => 'nullable|numeric',
-        'actual_penalty_amount' => 'nullable|numeric',
-        'penalty_circulation_start_date' => 'nullable',
-        'actual_penalty_start_date' => 'nullable',
-        'penalty_circulation_frequency' => 'nullable|boolean',
-        'due_in' => 'nullable|integer',
-        'due_penalty_amount' => 'nullable|numeric',
-        'company_id' => 'nullable|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
-    ];
+    public static $rules = [];
 
-    
+
 }
