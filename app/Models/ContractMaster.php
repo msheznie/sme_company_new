@@ -718,7 +718,7 @@ class ContractMaster extends Model
         $query = self::select('contractCode', 'title', 'endDate', 'counterPartyName')
             ->with(['contractUsers'])
             ->where('companySystemId', $companyId)
-            ->where('endDate', '<', $now)
+            ->where('status', 7)
             ->orderBy('id', 'desc');
 
         if ($filter && isset($filter['month']))
