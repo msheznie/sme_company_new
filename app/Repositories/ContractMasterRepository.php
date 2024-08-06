@@ -162,7 +162,7 @@ class ContractMasterRepository extends BaseRepository
                 $data[$count]['Reference Code'] = isset($value['referenceCode']) ? preg_replace('/^=/', '-', $value['referenceCode']) : '-';
                 $data[$count]['Start Date'] = Carbon::parse($value['startDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['startDate'])) : '-';
                 $data[$count]['End Date'] = Carbon::parse($value['endDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['endDate'])) : '-';
-                $data[$count]['Status'] = $value['status'] == 1 ? 'Active' : 'In-active';
+                $data[$count]['Status'] = $value['status'] == -1 ? 'Active' : 'In-active';
                 $count++;
             }
         }

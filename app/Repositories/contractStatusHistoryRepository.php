@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
 use App\Helpers\General;
+use App\Models\ContractMaster;
 use App\Models\contractStatusHistory;
 use App\Repositories\BaseRepository;
 use App\Services\GeneralService;
@@ -88,7 +89,7 @@ class contractStatusHistoryRepository extends BaseRepository
     public function getContractHistoryStatusCount(Request $request) {
         $input  = $request->all();
         $companyId =  $input['selectedCompanyID'];
-        return contractStatusHistory::getContractStatusCounts($companyId);
+        return ContractMaster::getContractStatusCounts($companyId);
     }
 
     public function exportContractStatusHistory(Request $request)
