@@ -44,6 +44,13 @@ class ContractMaster extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    const STATUS_AMENDED = 1;
+    const STATUS_ADDENDUM = 2;
+    const STATUS_RENEWAL = 3;
+    const STATUS_EXTENSION = 4;
+    const STATUS_REVISION = 5;
+    const STATUS_TERMINATE = 6;
+    const STATUS_COMPLETED = 7;
 
     protected $dates = ['deleted_at'];
     protected $hidden = ['contractType' , 'created_by'];
@@ -819,6 +826,59 @@ class ContractMaster extends Model
             });
         }
         return $query;
+    }
+
+    public static function getContractStatusCounts($companyId)
+    {
+        $statuses = ContractMaster::select('status', DB::raw('COUNT(*) as count'))
+            ->whereIn('status', [
+                self::STATUS_AMENDED,
+                self::STATUS_ADDENDUM,
+                self::STATUS_RENEWAL,
+                self::STATUS_EXTENSION,
+                self::STATUS_REVISION,
+                self::STATUS_TERMINATE,
+                self::STATUS_COMPLETED,
+            ])
+            ->where('companySystemID', $companyId)
+            ->groupBy('status')
+            ->get();
+
+        $statusCounts = [
+            'Amended' => 0,
+            'Addended' => 0,
+            'Renewed' => 0,
+            'Extended' => 0,
+            'Revised' => 0,
+            'Terminated' => 0,
+        ];
+
+        foreach ($statuses as $status)
+        {
+            switch ($status->status)
+            {
+                case self::STATUS_AMENDED:
+                    $statusCounts['Amended'] = $status->count;
+                    break;
+                case self::STATUS_ADDENDUM:
+                    $statusCounts['Addended'] = $status->count;
+                    break;
+                case self::STATUS_RENEWAL:
+                    $statusCounts['Renewed'] = $status->count;
+                    break;
+                case self::STATUS_EXTENSION:
+                    $statusCounts['Extended'] = $status->count;
+                    break;
+                case self::STATUS_REVISION:
+                    $statusCounts['Revised'] = $status->count;
+                    break;
+                case self::STATUS_TERMINATE:
+                    $statusCounts['Terminated'] = $status->count;
+                    break;
+            }
+        }
+
+        return response()->json($statusCounts);
     }
 
 }
