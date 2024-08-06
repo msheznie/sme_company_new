@@ -228,4 +228,12 @@ return [
          please add new milestone payment schedules AR',
     "at_least_one_milestone_penalty_should_be_available" =>
         "At least one milestone penalty should be available to send the contract for approval AR",
+    "milestone_title" => "Milestone Title AR",
+    "penalty_percentage" => "Penalty Percentage AR",
+    "penalty_amount" => "Penalty Amount AR",
+    "start_date" => "Start Date AR",
+    "penalty_frequency" => "Penalty Frequency AR",
+    "due_in" => "Due In AR",
+    "due_penalty_amount" => "Due Penalty Amount AR",
+    "status" => "Status AR",
 ];

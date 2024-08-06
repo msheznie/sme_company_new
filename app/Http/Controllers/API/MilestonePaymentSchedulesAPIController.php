@@ -8,11 +8,13 @@ use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateMilestonePaymentSchedulesAPIRequest;
 use App\Http\Requests\API\UpdateMilestonePaymentSchedulesAPIRequest;
+use App\Models\ContractMilestonePenaltyDetail;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\MilestonePaymentSchedulesRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\MilestonePaymentSchedulesResource;
+use Illuminate\Support\Facades\Log;
 use Response;
 
 /**
@@ -146,7 +148,7 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     {
         /** @var MilestonePaymentSchedules $milestonePaymentSchedules */
         $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->findByUuid($id,
-            ['id', 'milestone_id']);
+            ['id', 'milestone_id', 'contract_id', 'company_id']);
         try
         {
             if (empty($milestonePaymentSchedules))
@@ -160,6 +162,15 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
             {
                 throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
                  milestone retention');
+            }
+            $penaltyExists = ContractMilestonePenaltyDetail::getMilestoneTitle(
+                $milestonePaymentSchedules['milestone_id'],
+                $milestonePaymentSchedules['contract_id'],
+                $milestonePaymentSchedules['company_id']);
+            if($penaltyExists)
+            {
+                throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
+                 milestone penalty');
             }
             $milestonePaymentSchedules->delete();
 

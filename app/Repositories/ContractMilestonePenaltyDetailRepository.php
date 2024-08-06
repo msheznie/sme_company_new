@@ -145,7 +145,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
     public function getMilestonePenaltyDetails(Request $request)
     {
         $input = $request->all();
-        $search_keyword = $request->input('search.value');
+        $search = $request->input('search.value');
         $contractUuid = $input['contractUuid'];
         $companySystemID = $input['selectedCompanyID'];
 
@@ -172,7 +172,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         }
 
         $languages =  $this->model->ContractMilestonePenaltyDetail(
-            $contract['id'], $companySystemID, $milestonePenaltyMasterId, $search_keyword);
+            $contract['id'], $companySystemID, $milestonePenaltyMasterId, $search);
         return DataTables::eloquent($languages)
             ->addColumn('duePenaltyAmount', function ($row) use ($penaltyAmountDict)
             {
@@ -183,14 +183,14 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             ->make(true);
     }
 
-    public function getMilestonePenaltyDetailFormData($contractUuid, $companyID)
+    public function getMilestonePenaltyDetailFormData($contractUuid, $companyID, $uuid, $isEdit)
     {
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyID);
         if(empty($contract))
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
-        $milestones = ContractManagementUtils::getPenaltyMilestones($contract['id'], $companyID);
+        $milestones = ContractManagementUtils::getPenaltyMilestones($contract['id'], $companyID,$uuid,$isEdit);
         $currencyId = Company::getLocalCurrencyID($companyID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         $currencyCode = CurrencyMaster::getCurrencyCode($currencyId);
@@ -423,44 +423,44 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
 
         $lotData = $this->model->ContractMilestonePenaltyDetail(
             $contractId, $companySystemID, $milestonePenaltyMasterId, $search)->get();
-        $data[0]['Milestone Title'] = "Milestone Title";
-        $data[0]['Milestone Amount'] = "Milestone Amount";
-        $data[0]['Penalty Percentage'] = "Penalty Percentage";
-        $data[0]['Penalty Amount'] = "Penalty Amount";
-        $data[0]['Start Date'] = "Start Date";
-        $data[0]['Penalty Frequency'] = "Penalty Frequency";
-        $data[0]['Due In'] = "Due In";
-        $data[0]['Due Penalty Amount'] = "Due Penalty Amount";
-        $data[0]['Status'] = "Status";
+        $data[0][trans('common.milestone_title')] = trans('common.milestone');
+        $data[0][trans('common.milestone_amount')] = trans('common.milestone_amount');
+        $data[0][trans('common.penalty_percentage')] = trans('common.penalty_percentage');
+        $data[0][trans('common.penalty_amount')] = trans('common.penalty_amount');
+        $data[0][trans('common.start_date')] = trans('common.start_date');
+        $data[0][trans('common.penalty_frequency')] = trans('common.penalty_frequency');
+        $data[0][trans('common.due_in')] = trans('common.due_in');
+        $data[0][trans('common.due_penalty_amount')] = trans('common.due_penalty_amount');
+        $data[0][trans('common.status')] = trans('common.status');
 
         if ($lotData)
         {
             $count = 1;
             foreach ($lotData as $value)
             {
-                $data[$count]['Milestone Title'] =
+                $data[$count][trans('common.milestone_title')] =
                     isset($value['milestone_title']) ? preg_replace('/^=/', '-', $value['milestone']['title']) : '-';
-                $data[$count]['Milestone Amount'] =
+                $data[$count][trans('common.milestone_amount')] =
                     isset($value['milestone_title']) ? number_format(
                         (float)preg_replace('/^=/', '-', $value['milestone']['milestonePaymentSchedules']['amount']),
                         $decimalPlaces, '.', '') : '-';
-                $data[$count]['Penalty Percentage'] =
+                $data[$count][trans('common.penalty_percentage')] =
                     isset($value['penalty_percentage']) ? preg_replace('/^=/', '-', $value['penalty_percentage']) : '-';
-                $data[$count]['Penalty Amount'] =
+                $data[$count][trans('common.penalty_amount')] =
                     isset($value['penalty_amount']) ? number_format(
                         (float)preg_replace('/^=/', '-', $value['penalty_amount']), $decimalPlaces, '.', '') : '-';
-                $data[$count]['Start Date'] =
+                $data[$count][trans('common.start_date')] =
                     isset($value['penalty_start_date']) ? preg_replace(
                         '/^=/', '-', Carbon::parse($value['penalty_start_date'])) : '-';
-                $data[$count]['Penalty Frequency'] =
+                $data[$count][trans('common.penalty_frequency')] =
                     isset($value['penalty_frequency']) ? preg_replace(
                         '/^=/', '-', $value['billingFrequencies']['description']) : '-';
-                $data[$count]['Due In'] =
+                $data[$count][trans('common.due_in')] =
                     isset($value['due_in']) ? preg_replace('/^=/', '-', $value['due_in']) : '-';
-                $data[$count]['Due Penalty Amount'] =
+                $data[$count][trans('common.due_penalty_amount')] =
                     isset($value['due_penalty_amount']) ? preg_replace(
                         '/^=/', '-', $value['due_penalty_amount']) : $penaltyAmountDict[$value['id']];
-                $data[$count]['Status'] = $value['status'] == 1 ? 'Paid' : 'Pending';
+                $data[$count][trans('common.status')] = $value['status'] == 1 ? 'Paid' : 'Pending';
                 $count++;
             }
         }

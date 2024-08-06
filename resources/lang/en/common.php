@@ -233,4 +233,12 @@
          please add new milestone payment schedules',
      "at_least_one_milestone_penalty_should_be_available" =>
          "At least one milestone penalty should be available to send the contract for approval",
+     "milestone_title" => "Milestone Title",
+     "penalty_percentage" => "Penalty Percentage",
+     "penalty_amount" => "Penalty Amount",
+     "start_date" => "Start Date",
+     "penalty_frequency" => "Penalty Frequency",
+     "due_in" => "Due In",
+     "due_penalty_amount" => "Due Penalty Amount",
+     "status" => "Status",
  ];

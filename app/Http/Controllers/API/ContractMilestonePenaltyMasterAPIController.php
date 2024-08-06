@@ -42,7 +42,8 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ContractMilestonePenaltyMasterResource::collection($contractMilestonePenaltyMasters), 'Contract Milestone Penalty Masters retrieved successfully');
+        return $this->sendResponse(ContractMilestonePenaltyMasterResource::collection($contractMilestonePenaltyMasters),
+            'Contract Milestone Penalty Masters retrieved successfully');
     }
 
     /**
@@ -85,11 +86,13 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
         /** @var ContractMilestonePenaltyMaster $contractMilestonePenaltyMaster */
         $contractMilestonePenaltyMaster = $this->contractMilestonePenaltyMasterRepository->find($id);
 
-        if (empty($contractMilestonePenaltyMaster)) {
+        if (empty($contractMilestonePenaltyMaster))
+        {
             return $this->sendError('Contract Milestone Penalty Master not found');
         }
 
-        return $this->sendResponse(new ContractMilestonePenaltyMasterResource($contractMilestonePenaltyMaster), 'Contract Milestone Penalty Master retrieved successfully');
+        return $this->sendResponse(new ContractMilestonePenaltyMasterResource($contractMilestonePenaltyMaster),
+            'Contract Milestone Penalty Master retrieved successfully');
     }
 
     /**
@@ -138,7 +141,8 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
         /** @var ContractMilestonePenaltyMaster $contractMilestonePenaltyMaster */
         $contractMilestonePenaltyMaster = $this->contractMilestonePenaltyMasterRepository->find($id);
 
-        if (empty($contractMilestonePenaltyMaster)) {
+        if (empty($contractMilestonePenaltyMaster))
+        {
             return $this->sendError('Contract Milestone Penalty Master not found');
         }
 
