@@ -127,6 +127,8 @@ class ContractOverallPenaltyRepository extends BaseRepository
     {
         $penaltyStartDate = Carbon::parse($overallPenalty['actual_penalty_start_date']);
         $today = Carbon::now();
+        $newPenaltyStartDate = (new \DateTime($today))->format('Y-m-d');
+        $newPenaltyEndDate = (new \DateTime($penaltyStartDate))->format('Y-m-d');
         $daysDifference = $penaltyStartDate->diffInDays($today);
         $penaltyCirculationFrequency = $overallPenalty['penalty_circulation_frequency'];
 
@@ -180,6 +182,10 @@ class ContractOverallPenaltyRepository extends BaseRepository
             if($overallPenalty['maximum_penalty_amount'] > $calculatedAmount)
             {
                 $duePenaltyAmount = $calculatedAmount;
+            }
+            if ($newPenaltyStartDate < $newPenaltyEndDate)
+            {
+                $duePenaltyAmount = 0;
             }
         }
 
