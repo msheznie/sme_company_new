@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Exports\ContractManagmentExport;
+use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateMilestonePaymentSchedulesAPIRequest;
 use App\Http\Requests\API\UpdateMilestonePaymentSchedulesAPIRequest;
+use App\Models\ContractMilestonePenaltyDetail;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\MilestonePaymentSchedulesRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\MilestonePaymentSchedulesResource;
+use Illuminate\Support\Facades\Log;
 use Response;
 
 /**
@@ -143,7 +148,7 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     {
         /** @var MilestonePaymentSchedules $milestonePaymentSchedules */
         $milestonePaymentSchedules = $this->milestonePaymentSchedulesRepository->findByUuid($id,
-            ['id', 'milestone_id']);
+            ['id', 'milestone_id', 'contract_id', 'company_id']);
         try
         {
             if (empty($milestonePaymentSchedules))
@@ -157,6 +162,15 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
             {
                 throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
                  milestone retention');
+            }
+            $penaltyExists = ContractMilestonePenaltyDetail::getMilestoneTitle(
+                $milestonePaymentSchedules['milestone_id'],
+                $milestonePaymentSchedules['contract_id'],
+                $milestonePaymentSchedules['company_id']);
+            if($penaltyExists)
+            {
+                throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
+                 milestone penalty');
             }
             $milestonePaymentSchedules->delete();
 
@@ -192,5 +206,32 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
     public function getMilestonePaymentSchedules(Request $request)
     {
         return $this->milestonePaymentSchedulesRepository->getMilestonePaymentSchedules($request);
+    }
+    public function getMilestoneDetailsReport(Request $request)
+    {
+        return $this->milestonePaymentSchedulesRepository->getMilestoneDetailsReport($request);
+    }
+    public function exportContractMilestoneReport(Request $request)
+    {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $milestones = $this->milestonePaymentSchedulesRepository->exportContractMilestoneReport($request);
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
+
+        $export = new ContractManagmentExport($milestones);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '')
+        {
+            return $this->sendError('unable_to_export_excel');
+        } else
+        {
+            return $this->sendResponse($basePath, trans('success_export'));
+        }
     }
 }

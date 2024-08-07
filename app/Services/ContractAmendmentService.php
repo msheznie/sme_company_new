@@ -601,7 +601,6 @@ class ContractAmendmentService
                     'secondaryPhoneNumber' => 'Secondary Phone Number',
                     'agreementSignDate' => 'Agreement Sign Date',
                     'contractTermPeriod' => 'Contract Term Period',
-                    'notifyDays' => 'Notify Days',
                     'tender_id' => 'Tender Reference',
                 ],
                 'fieldMappings' => [

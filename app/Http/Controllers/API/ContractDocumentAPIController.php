@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\ContractCreationException;
 use App\Http\Requests\API\CreateContractDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractDocumentAPIRequest;
 use App\Models\ContractDocument;
 use App\Repositories\ContractDocumentRepository;
 use App\Repositories\ErpDocumentAttachmentsRepository;
 use App\Services\ContractAmendmentService;
+use App\Services\ContractDocumentService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -26,15 +28,18 @@ class ContractDocumentAPIController extends AppBaseController
     private $contractDocumentRepository;
     private $erpDocumentAttachmentsRepository;
 
+    protected $contractDocumentService;
     public function __construct(
         ContractDocumentRepository $contractDocumentRepo,
-        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo
+        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo,
+        ContractDocumentService $contractDocumentService
     )
     {
         $this->contractDocumentRepository = $contractDocumentRepo;
         $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepo;
+        $this->contractDocumentService = $contractDocumentService;
     }
-
+    const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
     /**
      * Display a listing of the ContractDocument.
      * GET|HEAD /contractDocuments
@@ -64,13 +69,18 @@ class ContractDocumentAPIController extends AppBaseController
      */
     public function store(CreateContractDocumentAPIRequest $request)
     {
-        $input = $request->all();
-        $contractDocument = $this->contractDocumentRepository->createContractDocument($input);
-
-        if (!$contractDocument['status']) {
-            return $this->sendError($contractDocument['message']);
-        } else {
-            return $this->sendResponse([], $contractDocument['message']);
+        try
+        {
+            $contractId = $this->contractDocumentService->createContractDocument($request);
+            return $this->sendResponse($contractId,'Successfully Created');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
         }
     }
 
@@ -169,7 +179,8 @@ class ContractDocumentAPIController extends AppBaseController
     }
 
     public function getContractDocumentList(Request $request){
-        return $this->contractDocumentRepository->getContractDocumentList($request);
+        $input = $request->all();
+        return $this->contractDocumentRepository->getContractDocumentList($input);
     }
     public function updateDocumentReceived(Request $request) {
         $documentReceived = $this->contractDocumentRepository->updateDocumentReceived($request);
@@ -218,7 +229,8 @@ class ContractDocumentAPIController extends AppBaseController
             return $this->sendResponse([], $documentReceived['message']);
         }
     }
-    public function updateDocumentReturn(Request $request){
+    public function updateDocumentReturn(Request $request)
+    {
         $documentReturned = $this->contractDocumentRepository->updateDocumentReturned($request);
         if (!$documentReturned['status']) {
             $errorCode = $documentReturned['code'] ?? 404;
@@ -227,4 +239,63 @@ class ContractDocumentAPIController extends AppBaseController
             return $this->sendResponse([], $documentReturned['message']);
         }
     }
+
+    public function getContractDocumentByUuid(Request $request)
+    {
+        try
+        {
+            return $this->contractDocumentService->getContractDocumentByUuid($request);
+        } catch (\Exception $e)
+        {
+            return $this->sendError( 'Something Went Wrong' . $e->getMessage(), 500);
+        }
+    }
+
+    public function getContractDocumentPath(Request $request)
+    {
+        try
+        {
+            $data = $this->contractDocumentService->getContractDocumentPath($request);
+            $responseData = ['data' => $data];
+            return response()->json($responseData);
+        } catch (\Exception $e)
+        {
+            return $this->sendError( 'Something Went Wrong' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteDocumentTracing(Request $request)
+    {
+        try
+        {
+            $this->contractDocumentService->deleteDocumentTracing($request);
+            return $this->sendResponse([],'Successfully Deleted');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+        }
+    }
+
+    public function updateContractDocument(CreateContractDocumentAPIRequest $request)
+    {
+        try
+        {
+            $contractId = $this->contractDocumentService->updateContractDocument($request);
+            return $this->sendResponse($contractId,'Successfully updated');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+        }
+    }
+
 }

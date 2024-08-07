@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Email;
 use App\Models\CMContractScenarioAssign;
+use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractUserAssign;
 use App\Services\ContractHistoryService;
@@ -15,22 +16,61 @@ class ActivateContractService
 {
     public static function activateContract()
     {
-        $todayDate = Carbon::now()->format('Y-m-d');
-        $contractList = ContractMaster::getCurrentInactiveContract($todayDate);
-        if ($contractList && $contractList->isNotEmpty())
+        $contractList = ContractMaster::getCurrentInactiveContract();
+        $contractListChild = ContractHistory::getInActiveChildData();
+
+        self::processContracts($contractList, false);
+        self::processContracts($contractListChild, true);
+    }
+
+    private static function processContracts($contractList, $fromChild)
+    {
+        if(!empty($contractList))
         {
-            $contractIds = $contractList->pluck('id')->toArray();
-            ContractMaster::whereIn('id', $contractIds)->update(['status' => -1]);
-
-            foreach ($contractList as $contract)
+            foreach ($contractList as $value)
             {
-                $contractId = $contract->id;
-                $currentStatus = -1;
-                $companyId = $contract->companySystemID;
-                ContractHistoryService::insertHistoryStatus($contractId, $currentStatus, $companyId, null, true);
+                $alreadyActiveContract = false;
+                if($fromChild)
+                {
+                    $startDate = $value->contractMaster->startDate;
+                    $endDate = Carbon::parse($value->contractMaster->endDate)
+                        ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
+                } else
+                {
+                    $startDate = $value->startDate;
+                    $endDate = Carbon::parse($value->endDate)
+                        ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
+                }
+                $status = ContractHistoryService::checkContractDateBetween(
+                    $startDate,
+                    $endDate
+                );
+                ContractHistoryService::updateOrInsertStatus
+                (
+                    $value->contract_id, $status, $value->company_id, null,true
+                );
+                if($status == -1)
+                {
+                    $alreadyActiveContract = ContractHistoryService::checkAlreadyActiveContract($value->contract_id);
+                }
+                if(!$alreadyActiveContract)
+                {
+                    self::updateContractMaster($status, $value->company_id, $value->contract_id);
+                }
             }
-
         }
+    }
+
+    public function updateContractMaster($status, $companyId, $contractId)
+    {
+            $data = [
+                'status'  => $status
+            ];
+
+            ContractMaster::where('companySystemID', $companyId)
+                ->where('id', $contractId)
+                ->update($data);
+
     }
 
     public static function reminderContractExpiry()

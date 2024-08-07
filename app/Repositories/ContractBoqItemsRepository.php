@@ -67,11 +67,14 @@ class ContractBoqItemsRepository extends BaseRepository
         $col =  $amedment ? 'amd_id' : 'id';
         $id = $amedment ? self::getHistoryId($uuid) : $contractId->id;
 
-        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price')
+        $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price', 'origin')
             ->with(['itemMaster.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
-            }, 'itemMaster.itemAssigned.local_currency'])
+            }, 'itemMaster.itemAssigned.local_currency', 'boqItem', 'boqItem.unit' => function ($query)
+            {
+                $query->select('UnitShortCode');
+            }])
             ->where('companyId', $companyId)
             ->where($colName, $id)
             ->orderBy($col, 'desc');
@@ -79,7 +82,13 @@ class ContractBoqItemsRepository extends BaseRepository
         return DataTables::eloquent($query)
             ->addColumn('itemDescription', function ($row)
             {
-                return $row->itemMaster->itemDescription;
+                if($row->origin == 2)
+                {
+                    return $row->boqItem->description;
+                } else
+                {
+                    return $row->itemMaster->itemDescription;
+                }
             })
             ->addColumn('minQty', function ($row)
             {
@@ -95,11 +104,24 @@ class ContractBoqItemsRepository extends BaseRepository
             })
             ->addColumn('unitShortCode', function ($row)
             {
-                return $row->itemMaster->Unit->UnitShortCode;
+                if($row->origin == 2)
+                {
+                    return $row->boqItem->Unit->UnitShortCode;
+                } else
+                {
+                    return $row->itemMaster->Unit->UnitShortCode;
+                }
+
             })
             ->addColumn('primaryCode', function ($row)
             {
-                return $row->itemMaster->primaryCode;
+                if($row->origin == 2)
+                {
+                    return $row->boqItem->item_name;
+                } else
+                {
+                    return $row->itemMaster->primaryCode;
+                }
             })
             ->addColumn('local', function ($row)
             {
@@ -164,12 +186,17 @@ class ContractBoqItemsRepository extends BaseRepository
         define('COL_QUANTITY', 'Quantity');
         define('COL_PRICE', 'Price');
         define('COL_AMOUNT', 'Amount');
+        define('COL_ORIGIN', 'Origin');
 
         $input = $request->all();
         $companyId = $input['selectedCompanyID'];
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
-        $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency'])
+        $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency',
+            'boqItem', 'boqItem.unit' => function ($query)
+            {
+            $query->select('UnitShortCode');
+        }])
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id)
             ->get();
@@ -196,7 +223,8 @@ class ContractBoqItemsRepository extends BaseRepository
             COL_UOM => "UOM",
             COL_QUANTITY => "Quantity",
             COL_PRICE => "Price",
-            COL_AMOUNT => "Amount"
+            COL_AMOUNT => "Amount",
+            COL_ORIGIN => "Added From"
         ];
 
         if ($lotData)
@@ -205,12 +233,34 @@ class ContractBoqItemsRepository extends BaseRepository
             foreach ($lotData as $value)
             {
                 $decimalCount = $value['itemMaster']['itemAssigned']['local_currency']['DecimalPlaces'] ?? 2;
-                $data[$count][COL_ITEM] = isset($value['itemMaster']['primaryCode'])
-                    ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode'])
-                    : '-';
-                $data[$count][COL_DESCRIPTION] = isset($value['description'])
-                    ? preg_replace('/^=/', '-', $value['description'])
-                    : '-';
+
+                if($value['origin'] == 1)
+                {
+                    $data[$count][COL_ITEM] = isset($value['itemMaster']['primaryCode'])
+                        ? preg_replace('/^=/', '-', $value['itemMaster']['primaryCode'])
+                        : '-';
+                }
+
+                if($value['origin'] == 2)
+                {
+                    $data[$count][COL_ITEM] = isset($value['boqItem']['item_name'])
+                        ? preg_replace('/^=/', '-', $value['boqItem']['item_name'])
+                        : '-';
+                }
+
+                if($value['origin'] == 1)
+                {
+                    $data[$count][COL_DESCRIPTION] = isset($value['description'])
+                        ? preg_replace('/^=/', '-', $value['description'])
+                        : '-';
+                }
+
+                if($value['origin'] == 2)
+                {
+                    $data[$count][COL_DESCRIPTION] = isset($value['boqItem']['description'])
+                        ? preg_replace('/^=/', '-', $value['boqItem']['description'])
+                        : '-';
+                }
 
                 $data[$count][COL_MIN_QTY] = isset($value['minQty'])
                     ? preg_replace('/^=/', '-', $value['minQty'])
@@ -220,9 +270,19 @@ class ContractBoqItemsRepository extends BaseRepository
                     ? preg_replace('/^=/', '-', $value['maxQty'])
                     : '-';
 
-                $data[$count][COL_UOM] = isset($value['itemMaster']['Unit']['UnitShortCode'])
-                    ? preg_replace('/^=/', '-', $value['itemMaster']['Unit']['UnitShortCode'])
-                    : '-';
+                if($value['origin'] == 1)
+                {
+                    $data[$count][COL_UOM] = isset($value['itemMaster']['Unit']['UnitShortCode'])
+                        ? preg_replace('/^=/', '-', $value['itemMaster']['Unit']['UnitShortCode'])
+                        : '-';
+                }
+
+                if($value['origin'] == 2)
+                {
+                    $data[$count][COL_UOM] = isset($value['boqItem']['Unit']['UnitShortCode'])
+                        ? preg_replace('/^=/', '-', $value['boqItem']['Unit']['UnitShortCode'])
+                        : '-';
+                }
 
                 $data[$count][COL_QUANTITY] = isset($value['qty'])
                     ? preg_replace('/^=/', '-', $value['qty'])
@@ -247,7 +307,10 @@ class ContractBoqItemsRepository extends BaseRepository
                         ''
                     )
                     : '-';
-
+                $origin = $value['origin'] == 1 ? 'Item Master' : 'Tender';
+                $data[$count][COL_ORIGIN] = isset($value['origin'])
+                    ? preg_replace('/^=/', '-', $origin)
+                    : '-';
                 $count++;
             }
         }

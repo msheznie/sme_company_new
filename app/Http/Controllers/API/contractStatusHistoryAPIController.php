@@ -153,4 +153,16 @@ class contractStatusHistoryAPIController extends AppBaseController
             return $this->sendError($e->getMessage(), 500);
         }
     }
+
+    public function exportContractStatusHistory(Request $request)
+    {
+        try
+        {
+            $data =  $this->contractStatusHistoryRepository->exportContractStatusHistory($request);
+            return $this->sendResponse($data, 'Success');
+        } catch (\Exception $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+    }
 }

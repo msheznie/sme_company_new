@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         'company' => \App\Http\Middleware\CheckCompanyAccess::class,
         'tenant' => \App\Http\Middleware\TenantEnforce::class,
+        'third_party_integration' => \App\Http\Middleware\ThirdPartyIntegration::class
     ];
 }

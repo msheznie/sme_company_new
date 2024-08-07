@@ -527,4 +527,17 @@ class ContractHistoryAPIController extends AppBaseController
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
         }
     }
+
+    public function getContractStatusHistory(Request $request)
+    {
+        try
+        {
+            $data = $this->contractHistoryService->getContractStatusHistory($request);
+            $responseData = ['data' => $data];
+            return response()->json($responseData);
+        } catch (\Exception $e)
+        {
+            return $this->sendError( 'Something Went Wrong' . $e->getMessage(), 500);
+        }
+    }
 }

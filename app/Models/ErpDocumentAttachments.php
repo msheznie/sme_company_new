@@ -199,4 +199,10 @@ class ErpDocumentAttachments extends Model
             ->where('documentSystemCode',$id)
             ->get();
     }
+
+    public function getErpAttachmentsById($id)
+    {
+        return self::where('attachmentID',$id)
+            ->first();
+    }
 }

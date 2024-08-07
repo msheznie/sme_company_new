@@ -5,13 +5,17 @@ namespace App\Repositories;
 use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Models\Company;
+use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\ContractMilestonePenaltyDetail;
 use App\Models\CurrencyMaster;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\BaseRepository;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
+use AWS\CRT\Log;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
@@ -78,6 +82,15 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
         $milestoneExists = ContractMilestone::checkContractHasMilestone($contract['id']);
         $totalPSAmount = MilestonePaymentSchedules::getTotalAmount($contract['id'], $isEdit, $uuid);
         $totalPSPercentage = MilestonePaymentSchedules::getTotalPercentage($contract['id'],$isEdit, $uuid);
+
+        $penaltyExists = false;
+        if ($isEdit == 1)
+        {
+            $paymentSchedule = MilestonePaymentSchedules::getMilestonePaymentSchedule($uuid);
+            $penaltyExists = ContractMilestonePenaltyDetail::getMilestoneTitle(
+                $paymentSchedule['milestone_id'], $contract['id'], $companyID);
+        }
+
         return [
             'milestones' => $milestones,
             'currencyCode' => $currencyCode,
@@ -85,7 +98,8 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             'milestoneExists' => $milestoneExists,
             'contractAmount' => $contract['contractAmount'] ?? 0,
             'totalPSAmount' => $totalPSAmount ?? 0,
-            'totalPSPercentage' => $totalPSPercentage ?? 0
+            'totalPSPercentage' => $totalPSPercentage ?? 0,
+            'penaltyExists' => $isEdit == 1 ? !empty($penaltyExists) : false,
         ];
     }
 
@@ -164,5 +178,91 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             ];
             MilestonePaymentSchedules::where('id', $id)->update($postData);
         });
+    }
+
+    public function getMilestoneDetailsReport($request)
+    {
+        $input = $request->all();
+        $searchKeyword = $request->input('search.value');
+        $companyId =  $input['selectedCompanyID'];
+        $filter =  $input['filter'] ?? null;
+        $languages =  $this->model->milestonePaymentSchedulesReport($searchKeyword, $companyId, $filter);
+        return DataTables::eloquent($languages)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    public function exportContractMilestoneReport($request)
+    {
+        $input  = $request->all();
+        $search = false;
+        $selectedCompanyID =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
+
+        $milestones = $this->model->milestonePaymentSchedulesReport($search, $selectedCompanyID, $filter)->get();
+        $data[0][trans('common.contract_code')] = trans('common.contract_code');
+        $data[0][trans('common.title')] = trans('common.title');
+        $data[0][trans('common.counter_party_name')] = trans('common.counter_party_name');
+        $data[0][trans('common.contract_type')] = trans('common.contract_type');
+        $data[0][trans('common.contract_amount')] = trans('common.contract_amount');
+        $data[0][trans('common.milestone')] = trans('common.milestone');
+        $data[0][trans('common.milestone_amount')] = trans('common.milestone_amount');
+        $data[0][trans('common.milestone_status')] = trans('common.milestone_status');
+        if ($milestones)
+        {
+            $count = 1;
+            foreach ($milestones as $value)
+            {
+                $contractMaster = $value['contractMaster'] ?? null;
+                $contractPartyName = '-';
+                if ($contractMaster)
+                {
+                    $contractUsers = $contractMaster['contractUsers'] ?? [];
+                    if ($contractMaster['counterParty'] == 1)
+                    {
+                        $contractPartyName = $contractUsers['contractSupplierUser']['supplierName'] ?? '-';
+                    } else if ($contractMaster['counterParty'] == 2)
+                    {
+                        $contractPartyName = $contractUsers['contractCustomerUser']['CustomerName'] ?? '-';
+                    }
+                }
+                $statusMap = [
+                    1 => 'In Progress',
+                    2 => 'Completed',
+                ];
+
+                $status = $statusMap[$value['milestone_status']] ?? 'Pending';
+                $data[$count] = [
+                    trans('common.contract_code') => $contractMaster['contractCode'] ?? '-',
+                    trans('common.title') => $contractMaster['title'] ?? '-',
+                    trans('common.counter_party_name') => $contractPartyName,
+                    trans('common.contract_type') => $contractMaster['contractTypes']['cm_type_name'] ?? '-',
+                    trans('common.contract_amount') => isset($contractMaster['contractAmount'])
+                        ? number_format($contractMaster['contractAmount'], $decimalPlaces, '.', ',')
+                        : '-',
+                    trans('common.milestone') => $value['milestoneDetail']['title'] ?? '-',
+                    trans('common.milestone_amount') => isset($value['amount'])
+                        ? number_format($value['amount'], $decimalPlaces, '.', ',')
+                        : '-',
+                    trans('common.milestone_status') => $status,
+                ];
+                $count++;
+            }
+        }
+        return $data;
+    }
+
+    public function getContractMilestoneListGraph(Request $request) {
+        $input  = $request->all();
+        $companyId =  $input['selectedCompanyID'];
+        $filter = $input['filter'] ?? null;
+        $contractList = MilestonePaymentSchedules::getContractMilestone($companyId, $filter);
+        return DataTables::eloquent($contractList)
+            ->addColumn('Actions', 'Actions', "Actions")
+            ->addIndexColumn()
+            ->make(true);
     }
 }

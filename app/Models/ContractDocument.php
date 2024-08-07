@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Awobaz\Compoships\Compoships;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +39,7 @@ class ContractDocument extends Model
     use HasFactory;
     use HasContractIdColumn;
     use HasCompanyIdColumn;
+    use Compoships;
 
     public $table = 'cm_contract_document';
 
@@ -114,12 +116,13 @@ class ContractDocument extends Model
     }
     public function attachment()
     {
-        return $this->belongsTo(ErpDocumentAttachments::class, 'documentMasterID', 'documentSystemID');
+        return $this->belongsTo(ErpDocumentAttachments::class, ['documentMasterID', 'id'],
+            ['documentSystemID', 'documentSystemCode']);
     }
     public function contractDocuments($selectedCompanyID, $contractID)
     {
         return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
-            'followingRequest', 'attachedDate', 'status')
+            'followingRequest', 'attachedDate', 'status','documentExpiryDate')
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
@@ -156,5 +159,22 @@ class ContractDocument extends Model
     {
         return self::where('contractID',$contractId)
             ->get();
+    }
+
+    public function fetchByUuid($uuid)
+    {
+        return self::where('uuid',$uuid)
+            ->with([
+                'attachment' => function ($q)
+                {
+                    $q->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
+                },
+                'documentMaster' => function ($q1)
+                {
+                    $q1->select('id', 'uuid');
+                }
+            ])
+            ->first();
     }
 }

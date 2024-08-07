@@ -86,15 +86,15 @@ class ContractAdditionalDocuments extends Model
         return $this->belongsTo(ErpDocumentAttachments::class, ['documentMasterID', 'id'],
             ['documentSystemID', 'documentSystemCode']);
     }
-    public function additionalDocumentList($selectedCompanyID, $contractID){
-        return ContractAdditionalDocuments::select('id', 'documentMasterID', 'uuid', 'documentType', 'documentName',
+    public function additionalDocumentList($selectedCompanyID, $contractID)
+    {
+        $additionalDocumentsQuery = ContractAdditionalDocuments::select(
+            'id', 'documentMasterID', 'uuid', 'documentType', 'documentName',
             'documentDescription', 'expiryDate')
             ->with([
-                'documentMaster' => function ($query) {
+                'documentMaster' => function ($query)
+                {
                     $query->select('id', 'uuid', 'documentType');
-                },
-                'attachment' => function ($query) {
-                    $query->select('attachmentID', 'documentSystemID', 'documentSystemCode', 'myFileName');
                 }
             ])
             ->where([
@@ -102,6 +102,23 @@ class ContractAdditionalDocuments extends Model
                 'companySystemID' => $selectedCompanyID
             ])
             ->orderBy('id', 'desc');
+
+        $contractDocumentsQuery = ContractDocument::select(
+            'id','documentMasterID','uuid', 'documentType', 'documentName',
+            'documentDescription','documentExpiryDate as expiryDate')
+            ->with(['documentMaster' => function ($query)
+            {
+                $query->select('id', 'uuid', 'documentType');
+            }])
+            ->where([
+                'contractID' => $contractID,
+                'companySystemID' => $selectedCompanyID,
+                'followingRequest' => 0
+            ])
+            ->orderBy('id', 'desc');
+
+        return $additionalDocumentsQuery->union($contractDocumentsQuery)->orderBy('id', 'desc');
+
     }
 
     public static function getContractAdditionalDocuments($contractId, $selectedCompanyID)
@@ -121,8 +138,25 @@ class ContractAdditionalDocuments extends Model
         return 'companySystemID';
     }
 
-        public function additionalDocumentData($contractId)
-        {
-            return self::where('contractID',$contractId)->get();
-        }
+    public function additionalDocumentData($contractId)
+    {
+        return self::where('contractID',$contractId)->get();
+    }
+
+    public function fetchByUuid($uuid)
+    {
+        return self::where('uuid',$uuid)
+            ->with([
+                'attachment' => function ($q)
+                {
+                    $q->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
+                },
+                'documentMaster' => function ($q1)
+                {
+                    $q1->select('id', 'uuid');
+                }
+            ])
+            ->first();
+    }
 }

@@ -142,7 +142,7 @@ class ContractManagementUtils
                     $name = $user['contractSupplierUser']['name'];
                 } elseif($counterPartyId == 2)
                 {
-                    $name = $user['contractCustomerUser']['name'];
+                    $name = $user['contractCustomerUser']['name'] ?? null;
                 } else
                 {
                     $name = $user['contractInternalUser']['name'];
@@ -345,5 +345,58 @@ class ContractManagementUtils
             ];
         }
         return $supplier;
+    }
+    public static function getContractStatus($status)
+    {
+        switch ($status)
+        {
+            case 0:
+                return 'In-active';
+            case -1:
+                return 'Active';
+            case 1:
+                return 'Amended';
+            case 2:
+                return 'Addended';
+            case 3:
+                return 'Renewed';
+            case 4:
+                return 'Extended';
+            case 5:
+                return 'Revised';
+            case 6:
+                return 'Terminated';
+            case 7:
+                return 'Ended';
+            default:
+                return 'Ended';
+        }
+    }
+
+    public static function getPenaltyMilestones($contractId, $companySystemID, $milestonePenaltyUuid, $isEdit = false)
+    {
+        return ContractMilestone::with('milestonePaymentSchedules', 'milestonePenalty')
+            ->where('contractID', $contractId)
+            ->where('companySystemID', $companySystemID)
+            ->when($isEdit, function($query) use ($milestonePenaltyUuid)
+            {
+                $query->where(function($subQuery) use ($milestonePenaltyUuid)
+                {
+                    $subQuery->has('milestonePaymentSchedules')
+                        ->where(function ($subSubQuery) use ($milestonePenaltyUuid)
+                        {
+                            $subSubQuery->doesntHave('milestonePenalty')
+                                ->orWhereHas('milestonePenalty', function($penaltyQuery) use ($milestonePenaltyUuid)
+                                {
+                                    $penaltyQuery->where('uuid', $milestonePenaltyUuid);
+                                });
+                        });
+                });
+            }, function($query)
+            {
+                $query->has('milestonePaymentSchedules')
+                    ->doesntHave('milestonePenalty');
+            })
+            ->get();
     }
 }
