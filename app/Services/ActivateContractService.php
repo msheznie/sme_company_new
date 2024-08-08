@@ -45,14 +45,14 @@ class ActivateContractService
                     $startDate,
                     $endDate
                 );
-                ContractHistoryService::updateOrInsertStatus
-                (
-                    $value->contract_id, $status, $value->company_id, null,true
-                );
                 if($status == -1)
                 {
                     $alreadyActiveContract = ContractHistoryService::checkAlreadyActiveContract($value->contract_id);
                 }
+                ContractHistoryService::updateOrInsertStatus
+                (
+                    $value->contract_id, $status, $value->company_id, null,true
+                );
                 if(!$alreadyActiveContract)
                 {
                     self::updateContractMaster($status, $value->company_id, $value->contract_id);
