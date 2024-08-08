@@ -639,24 +639,24 @@ class ContractHistoryRepository extends BaseRepository
         $contractId = $currentContractDetails['id'];
         try
         {
-        $contractExists = ContractAmendmentService::getContractAmendment($currentContractDetails['uuid'],null,true);
-        if(empty($contractExists))
-        {
+            $contractExists = ContractAmendmentService::getContractAmendment($currentContractDetails['uuid'],null,true);
+            if(empty($contractExists))
+            {
 
-            $this->cmContractMasterAmdRepository->saveInitialRecord($currentContractDetails);
+                $this->cmContractMasterAmdRepository->saveInitialRecord($currentContractDetails);
 
-        }
-        $historyData = $this->createHistory($input,$contractId,$contractId);
-        $historyId = $historyData['historyId'];
-        $this->cmContractMasterAmdRepository->save($historyId,$currentContractDetails);
-        $this->cmContractUserAmdRepository->save($historyId,$contractId);
-        $this->cmContractBoqItemsAmdRepository->save($historyId,$contractId);
-        $this->cmContractMileStoneAmdRepository->save($historyId,$contractId);
-        $this->cmContractDeliverableAmdRepository->save($historyId,$contractId);
-        $this->cmContractOverallRetentionAmdRepository->save($historyId,$contractId,$input);
-        $this->cmContractDocumentAmdRepository->save($historyId,$contractId,$input);
-        $this->contractAmendmentAreaRepository->save($input,$contractId,$historyId);
-        $this->contractAdditionalDocumentAmd->save($input,$contractId,$historyId);
+            }
+            $historyData = $this->createHistory($input,$contractId,$contractId);
+            $historyId = $historyData['historyId'];
+            $this->cmContractMasterAmdRepository->save($historyId,$currentContractDetails);
+            $this->cmContractUserAmdRepository->save($historyId,$contractId);
+            $this->cmContractBoqItemsAmdRepository->save($historyId,$contractId);
+            $this->cmContractMileStoneAmdRepository->save($historyId,$contractId);
+            $this->cmContractDeliverableAmdRepository->save($historyId,$contractId);
+            $this->cmContractOverallRetentionAmdRepository->save($historyId,$contractId,$input);
+            $this->cmContractDocumentAmdRepository->save($historyId,$contractId,$input);
+            $this->contractAmendmentAreaRepository->save($input,$contractId,$historyId);
+            $this->contractAdditionalDocumentAmd->save($input,$contractId,$historyId);
         }
         catch (Exception $e)
         {

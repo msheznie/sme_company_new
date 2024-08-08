@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  * Class ContractMilestonePenaltyMasterRepository
  * @package App\Repositories
  * @version July 28, 2024, 10:50 am +04
-*/
+ */
 
 class ContractMilestonePenaltyMasterRepository extends BaseRepository
 {

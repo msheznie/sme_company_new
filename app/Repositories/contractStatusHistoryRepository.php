@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  * Class contractStatusHistoryRepository
  * @package App\Repositories
  * @version June 26, 2024, 10:27 am +04
-*/
+ */
 
 class contractStatusHistoryRepository extends BaseRepository
 {
@@ -158,7 +158,7 @@ class contractStatusHistoryRepository extends BaseRepository
                         ? 'System User'
                         :
                         (
-                            isset($value['empName'])
+                        isset($value['empName'])
                             ?
                             preg_replace('/^=/', '-', $value['empName']) :
                             '-'
