@@ -2,8 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Exceptions\CommonException;
 use App\Models\FinanceDocuments;
+use App\Models\ErpDirectInvoiceDetails;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
 
 /**
  * Class FinanceDocumentsRepository
@@ -43,5 +46,15 @@ class FinanceDocumentsRepository extends BaseRepository
     public function model()
     {
         return FinanceDocuments::class;
+    }
+
+    public function getFinanceDocumentFilters($contractUuid, $selectedCompanyID)
+    {
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
+        if(empty($contract))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+        return ErpDirectInvoiceDetails::getContractLinkedWithErp($contractUuid, $selectedCompanyID);
     }
 }
