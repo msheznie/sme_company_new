@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ErpBookingSupplierMasterResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        return [
+            'bookingSuppMasInvAutoID' => $this->bookingSuppMasInvAutoID,
+            'companySystemID' => $this->companySystemID,
+            'companyID' => $this->companyID,
+            'documentSystemID' => $this->documentSystemID,
+            'documentID' => $this->documentID,
+            'projectID' => $this->projectID,
+            'serialNo' => $this->serialNo,
+            'companyFinanceYearID' => $this->companyFinanceYearID,
+            'FYBiggin' => $this->FYBiggin,
+            'FYEnd' => $this->FYEnd,
+            'companyFinancePeriodID' => $this->companyFinancePeriodID,
+            'FYPeriodDateFrom' => $this->FYPeriodDateFrom,
+            'FYPeriodDateTo' => $this->FYPeriodDateTo,
+            'bookingInvCode' => $this->bookingInvCode,
+            'bookingDate' => $this->bookingDate,
+            'comments' => $this->comments,
+            'secondaryRefNo' => $this->secondaryRefNo,
+            'supplierID' => $this->supplierID,
+            'supplierGLCodeSystemID' => $this->supplierGLCodeSystemID,
+            'supplierGLCode' => $this->supplierGLCode,
+            'UnbilledGRVAccountSystemID' => $this->UnbilledGRVAccountSystemID,
+            'UnbilledGRVAccount' => $this->UnbilledGRVAccount,
+            'supplierInvoiceNo' => $this->supplierInvoiceNo,
+            'supplierInvoiceDate' => $this->supplierInvoiceDate,
+            'custInvoiceDirectAutoID' => $this->custInvoiceDirectAutoID,
+            'supplierTransactionCurrencyID' => $this->supplierTransactionCurrencyID,
+            'supplierTransactionCurrencyER' => $this->supplierTransactionCurrencyER,
+            'companyReportingCurrencyID' => $this->companyReportingCurrencyID,
+            'companyReportingER' => $this->companyReportingER,
+            'localCurrencyID' => $this->localCurrencyID,
+            'localCurrencyER' => $this->localCurrencyER,
+            'bookingAmountTrans' => $this->bookingAmountTrans,
+            'bookingAmountLocal' => $this->bookingAmountLocal,
+            'bookingAmountRpt' => $this->bookingAmountRpt,
+            'confirmedYN' => $this->confirmedYN,
+            'confirmedByEmpSystemID' => $this->confirmedByEmpSystemID,
+            'confirmedByEmpID' => $this->confirmedByEmpID,
+            'confirmedByName' => $this->confirmedByName,
+            'confirmedDate' => $this->confirmedDate,
+            'approved' => $this->approved,
+            'approvedDate' => $this->approvedDate,
+            'approvedByUserID' => $this->approvedByUserID,
+            'approvedByUserSystemID' => $this->approvedByUserSystemID,
+            'postedDate' => $this->postedDate,
+            'documentType' => $this->documentType,
+            'refferedBackYN' => $this->refferedBackYN,
+            'timesReferred' => $this->timesReferred,
+            'RollLevForApp_curr' => $this->RollLevForApp_curr,
+            'interCompanyTransferYN' => $this->interCompanyTransferYN,
+            'createdUserGroup' => $this->createdUserGroup,
+            'createdUserSystemID' => $this->createdUserSystemID,
+            'createdUserID' => $this->createdUserID,
+            'createdPcID' => $this->createdPcID,
+            'modifiedUserSystemID' => $this->modifiedUserSystemID,
+            'modifiedUser' => $this->modifiedUser,
+            'modifiedPc' => $this->modifiedPc,
+            'createdDateTime' => $this->createdDateTime,
+            'createdDateAndTime' => $this->createdDateAndTime,
+            'cancelYN' => $this->cancelYN,
+            'cancelComment' => $this->cancelComment,
+            'cancelDate' => $this->cancelDate,
+            'canceledByEmpSystemID' => $this->canceledByEmpSystemID,
+            'canceledByEmpID' => $this->canceledByEmpID,
+            'canceledByEmpName' => $this->canceledByEmpName,
+            'timestamp' => $this->timestamp,
+            'rcmActivated' => $this->rcmActivated,
+            'vatRegisteredYN' => $this->vatRegisteredYN,
+            'isLocalSupplier' => $this->isLocalSupplier,
+            'VATAmount' => $this->VATAmount,
+            'VATAmountLocal' => $this->VATAmountLocal,
+            'VATAmountRpt' => $this->VATAmountRpt,
+            'retentionVatAmount' => $this->retentionVatAmount,
+            'retentionDueDate' => $this->retentionDueDate,
+            'retentionAmount' => $this->retentionAmount,
+            'retentionPercentage' => $this->retentionPercentage,
+            'netAmount' => $this->netAmount,
+            'netAmountLocal' => $this->netAmountLocal,
+            'netAmountRpt' => $this->netAmountRpt,
+            'VATPercentage' => $this->VATPercentage,
+            'serviceLineSystemID' => $this->serviceLineSystemID,
+            'wareHouseSystemCode' => $this->wareHouseSystemCode,
+            'supplierVATEligible' => $this->supplierVATEligible,
+            'employeeID' => $this->employeeID,
+            'employeeControlAcID' => $this->employeeControlAcID,
+            'createMonthlyDeduction' => $this->createMonthlyDeduction,
+            'deliveryAppoinmentID' => $this->deliveryAppoinmentID,
+            'whtApplicableYN' => $this->whtApplicableYN,
+            'whtType' => $this->whtType,
+            'whtApplicable' => $this->whtApplicable,
+            'whtAmount' => $this->whtAmount,
+            'whtEdited' => $this->whtEdited,
+            'whtPercentage' => $this->whtPercentage,
+            'isWHTApplicableVat' => $this->isWHTApplicableVat
+        ];
+    }
+}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Http\Requests\API\CreateFinanceDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateFinanceDocumentsAPIRequest;
 use App\Models\FinanceDocuments;
@@ -136,5 +137,20 @@ class FinanceDocumentsAPIController extends AppBaseController
         $financeDocuments->delete();
 
         return $this->sendSuccess('Finance Documents deleted successfully');
+    }
+    public function getFinanceDocumentFilters($id, Request $request)
+    {
+        $selectedCompanyID = $request->input('selectedCompanyID');
+        try
+        {
+            $response = $this->financeDocumentsRepository->getFinanceDocumentFilters($id, $selectedCompanyID);
+            return $this->sendResponse($response, trans('common.data_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
     }
 }

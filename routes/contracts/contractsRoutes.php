@@ -549,6 +549,10 @@ Route::
     Route::post('/export-contract-status-history',
         [\App\Http\Controllers\API\contractStatusHistoryAPIController::class, 'exportContractStatusHistory'])
         ->name('Export Contract Status History');
+
+    Route::get('/finance-document-filters/{id}',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getFinanceDocumentFilters'])
+        ->name('Get finance document filters');
 });
 
 
