@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.1.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.0.0...v1.1.0) (2024-08-12)
+
+
+### Features
+
+* **Contract History Amendment:** Enhancement | Contract | Amendment [CM-281] ([#207](https://github.com/pbsgears/Contract_Management_Backend/issues/207)) ([033bacc](https://github.com/pbsgears/Contract_Management_Backend/commit/033baccf5e1537204b6b8c9df24c21f3ca4b686b))
+* **Contract History Status:** Contract History | Status History. [CM-34] ([#204](https://github.com/pbsgears/Contract_Management_Backend/issues/204)) ([8bc8851](https://github.com/pbsgears/Contract_Management_Backend/commit/8bc8851d91a0940724bd1444a8cbdd8e65f137ed))
+* **Contract info:** Remove the Primary and Secondary email duplication validation in 'Contract Info' page [CM-316] ([#205](https://github.com/pbsgears/Contract_Management_Backend/issues/205)) ([cde19ca](https://github.com/pbsgears/Contract_Management_Backend/commit/cde19cac23b47d79d06ae3eae2c8c1d30f06c6f6))
+* **Contract:** API Development to show the contract ID / Reference in Finance & Proc [CM-284] ([#196](https://github.com/pbsgears/Contract_Management_Backend/issues/196)) ([6d37f83](https://github.com/pbsgears/Contract_Management_Backend/commit/6d37f8374c8e5c394c1d407fefa6daeb414e776a))
+* **contract:** contract reports [CM-292] ([#208](https://github.com/pbsgears/Contract_Management_Backend/issues/208)) ([2aeda97](https://github.com/pbsgears/Contract_Management_Backend/commit/2aeda97b84dc5badba43b2df98dc69fa3b8ab4fa))
+* **Contract:** Enhancement | Contract | Attach Document [CM-159] ([#194](https://github.com/pbsgears/Contract_Management_Backend/issues/194)) ([d92323d](https://github.com/pbsgears/Contract_Management_Backend/commit/d92323d03743278d3bbf699f14eaad01892f1dde))
+* **Contract:** Enhancement |Contract History | Validation | Action | Renewal, Addendum, Revision, Termination [CM-291] ([#200](https://github.com/pbsgears/Contract_Management_Backend/issues/200)) ([63f12a4](https://github.com/pbsgears/Contract_Management_Backend/commit/63f12a406fa6ee394e2dda3c848b086446afb339))
+* **contract:** Enhancement contract status ended [CM-285] ([#211](https://github.com/pbsgears/Contract_Management_Backend/issues/211)) ([f61b8cd](https://github.com/pbsgears/Contract_Management_Backend/commit/f61b8cd0bdfbe6efe09dd7046459b804301e3d3e))
+* **contracts:** Contract | Create Penalty | Milestone Penalty [CM-18] ([#218](https://github.com/pbsgears/Contract_Management_Backend/issues/218)) ([fc51060](https://github.com/pbsgears/Contract_Management_Backend/commit/fc510601491be39fef2336a21c1695df5c449996))
+* **contracts:** Contract | Create Penalty | Overall Penalty [CM-17] ([#198](https://github.com/pbsgears/Contract_Management_Backend/issues/198)) ([03e0547](https://github.com/pbsgears/Contract_Management_Backend/commit/03e05472d22c5f14d637669c626e38482ffbc437))
+* **contracts:** Enhancement | Contract Info | remove Notify Days [CM-287] ([#190](https://github.com/pbsgears/Contract_Management_Backend/issues/190)) ([9925308](https://github.com/pbsgears/Contract_Management_Backend/commit/9925308ae6f4b19d35d0152d466670e6a6bd44b0))
+
+
+### Bug Fixes
+
+* **Contract Master:** Add serial numbers to contracts [CM-365] ([#212](https://github.com/pbsgears/Contract_Management_Backend/issues/212)) ([f23a1b3](https://github.com/pbsgears/Contract_Management_Backend/commit/f23a1b38150c116498400439d4cda9a9a163b80f))
+* **contract:** contract status does not get activated once the contract start date is reached [CM-379] ([#230](https://github.com/pbsgears/Contract_Management_Backend/issues/230)) ([28688cb](https://github.com/pbsgears/Contract_Management_Backend/commit/28688cb28dfed9545127b4a566ef28f57dd126ee))
+* **contracts:** Due Penalty Amount field is null in the excel file when the Due Penalty Amount is displays as 0 in front-end [CM-378] ([#229](https://github.com/pbsgears/Contract_Management_Backend/issues/229)) ([a7b8dba](https://github.com/pbsgears/Contract_Management_Backend/commit/a7b8dba25af36a4f69adf608f59cb9f6fd3330ce))
+* **contracts:** User can add multiple milestone penalties with same milestone [CM-375] ([#222](https://github.com/pbsgears/Contract_Management_Backend/issues/222)) ([5191d89](https://github.com/pbsgears/Contract_Management_Backend/commit/5191d895675881773cf90b7c9177477bf174b436))
+
 ## 1.0.0 (2024-07-24)
 
 
