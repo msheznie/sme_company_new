@@ -196,4 +196,12 @@ class TenderFinalBids extends Model
 
         return $tenderList;
     }
+
+    public static function getBidByTenderId($tenderId, $supplierId)
+    {
+        return self::select('bid_id')
+        ->where('tender_id', $tenderId)
+        ->where('supplier_id', $supplierId->id)
+        ->first();
+    }
 }

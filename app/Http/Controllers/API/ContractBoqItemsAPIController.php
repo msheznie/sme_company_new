@@ -247,7 +247,10 @@ class ContractBoqItemsAPIController extends AppBaseController
             'uuid' => bin2hex(random_bytes(16)),
             'itemId' => $input['itemId'],
             'description' => $input['description'],
+            'origin' => ($input['isTender'] == 0) ? 1 : 2,
             'created_by' => General::currentEmployeeId(),
+            'qty' => $input['qty'],
+            'price' => $input['price'],
             'created_at' => Carbon::now(),
             'companyId' => $input['companyId']
         ];

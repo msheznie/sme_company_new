@@ -19,6 +19,7 @@ class ContractUserGroupResource extends JsonResource
             'uuid' => $this->uuid,
             'group_name' => $this->group_name,
             'status' => $this->status,
+            'isDefault' => $this->isDefault,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];

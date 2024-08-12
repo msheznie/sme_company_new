@@ -79,11 +79,12 @@ class ContractUserGroupRepository extends BaseRepository
         $companyId =  $input['selectedCompanyID'];
         $uuid =  $input['uuid'];
         $contractId = 0;
-        if(isset($uuid) && $uuid !== 0){
+        $isActive =  isset($input['isActive']) ? 1 : 0;
+        if(isset($uuid) && $uuid !== '0'){
             $result = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
             $contractId = $result->id;
         }
-        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId);
+        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId, $isActive);
         return DataTables::eloquent($contractUserList)
             ->addColumn('Actions', 'Actions', "Actions")
             ->order(function ($query) use ($input) {
@@ -135,22 +136,26 @@ class ContractUserGroupRepository extends BaseRepository
 
             // Handle group creation or fetching existing group
             $contractUserGroup = $this->handleGroup($input, $uuid);
-            if (!$contractUserGroup['success']) {
+            if (!$contractUserGroup['success'])
+            {
                 return $contractUserGroup;
             }
             $contractUserGroup = $contractUserGroup['data'];
 
             // Assign selected users to the group
-            if (!empty($input['selectedUsers'])) {
+            if (!empty($input['selectedUsers']))
+            {
                 $this->assignUsersToGroup($input, $contractUserGroup);
             }
 
             DB::commit();
             return ['success' => true, 'data' => new ContractUserGroupResource($contractUserGroup)];
 
-        } catch (QueryException $e) {
+        } catch (QueryException $e)
+        {
             DB::rollBack();
-            if ($e->errorInfo[1] == 1062) {
+            if ($e->errorInfo[1] == 1062)
+            {
                 return ['success' => false, 'message' => trans('common.group_name_already_exists'), 'code' => 409];
             }
 
@@ -162,30 +167,46 @@ class ContractUserGroupRepository extends BaseRepository
     {
         $result = ['success' => false, 'message' => '', 'code' => 400];
 
-        if ($uuid === 0) {
+        if ($uuid === '0')
+        {
+            if (!isset($input['isDefault']))
+            {
+                $input['isDefault'] = 0;
+            }
             $isExist = ContractUserGroup::where('groupName', $input['groupName'])->exists();
-            if ($isExist) {
+            if ($isExist)
+            {
                 $result['message'] = trans('common.group_name_already_exists');
                 $result['code'] = 409;
-            } else {
+            }
+            else
+            {
                 $input['uuid'] = bin2hex(random_bytes(16));
                 $contractUserGroup = $this->create($input);
                 $result['success'] = true;
                 $result['data'] = $contractUserGroup;
             }
-        } else {
+        }
+        else
+        {
             $contractUserGroup = ContractUserGroup::where('uuid', $uuid)->first();
-            if (!$contractUserGroup) {
+            if (!$contractUserGroup)
+            {
                 $result['message'] = trans('common.group_not_found');
                 $result['code'] = 404;
-            } else {
+            }
+            else
+            {
                 $assignedUserCount = ContractUserGroupAssignedUser::where('userGroupId', $contractUserGroup->id)
                     ->where('status', 1)
                     ->count();
 
-                if ($input['isDefault'] && $assignedUserCount == 0) {
+                if ($input['isDefault'] && $assignedUserCount == 0)
+                {
                     $result['message'] = trans('common.active_user_should_jn_default_user_group');
-                } else {
+                }
+                else
+                {
                     $contractUserGroup->isDefault = $input['isDefault'];
                     $contractUserGroup->save();
                     $result['success'] = true;

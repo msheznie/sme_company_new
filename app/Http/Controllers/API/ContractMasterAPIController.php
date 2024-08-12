@@ -12,6 +12,7 @@ use App\Http\Requests\API\UpdateContractMasterAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\ApproveDocumentRequest;
 use App\Http\Requests\API\ContractConfirmRequest;
+use App\Http\Requests\ContractRequest;
 use App\Jobs\DeleteFileFromS3Job;
 use App\Models\CMContractBoqItemsAmd;
 use App\Models\Company;
@@ -24,6 +25,9 @@ use App\Models\ContractUsers;
 use App\Models\FinanceItemCategoryMaster;
 use App\Models\FinanceItemCategorySub;
 use App\Models\ItemAssigned;
+use App\Models\SupplierRegistrationLink;
+use App\Models\TenderBoqItems;
+use App\Models\TenderFinalBids;
 use App\Repositories\CompanyRepository;
 use App\Repositories\ContractHistoryRepository;
 use App\Repositories\ContractMasterRepository;
@@ -118,7 +122,7 @@ class ContractMasterAPIController extends AppBaseController
                 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
-                'notifyDays', 'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+                'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
                 'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id'
             ],
             [
@@ -148,9 +152,11 @@ class ContractMasterAPIController extends AppBaseController
         $lastSerialNumber  = $contactMaster->getMaxContractId();
         $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
         $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
+        $activePenalty = ContractSettingDetail::getActiveContractPenalty($contractMaster['id']);
         $response['editData'] = $editData;
         $response['newContractCode'] = $contractCode;
         $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
+        $response['activePenalty'] = $activePenalty['sectionDetailId'] ?? 0;
         $response['boqActive'] = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'boq');
         $milestoneActive = ContractSettingMaster::checkActiveContractSettings($contractMaster['id'], 'milestone');
         $milestoneHasRec = ContractManagementUtils::checkContractMilestoneExists($contractMaster['id']);
@@ -158,6 +164,10 @@ class ContractMasterAPIController extends AppBaseController
         $response['disableAmount'] = $this->contractMasterService->disableAmountField($contractMaster['id']);
         $response['disableContractType'] = $this->contractMasterService->disableContractTypeField(
             $editData['contractTypeUuid'],
+            $comapnyId,
+            $contractMaster['id']
+        );
+        $response['disableTenderReferenceField'] = $this->contractMasterService->disableTenderReferenceField(
             $comapnyId,
             $contractMaster['id']
         );
@@ -414,17 +424,20 @@ class ContractMasterAPIController extends AppBaseController
     public function getAssignedItemsByCompanyQry($request)
     {
         $input = $request;
-
         $amedment = $input['amendment'];
-        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
+        $isTender = $input['isTender'];
+        $tenderId = $input['tenderId'];
+        $userUuid = ContractUsers::getContractUserIdByUuid($input['counterPartyNameUuid']);
+        if(isset($userUuid->contractUserId))
+        {
+            $supplierRegistrationId = SupplierRegistrationLink::getSupplierId($userUuid->contractUserId);
+        }
 
+        $contractResult = ContractMaster::select('id')->where('uuid', $input['uuid'] )->first();
 
         $colName = $amedment ? 'contract_history_id' : 'contractId';
         $id = $amedment ? self::getHistoryId($input['uuid']) :  $contractResult->id;
         $relationShip = $amedment ? 'contractBoqItemsAmd' : 'contractBoqItems';
-
-
-
 
         $companyId = $input['companyId'];
 
@@ -438,30 +451,38 @@ class ContractMasterAPIController extends AppBaseController
             $childCompanies = [$companyId];
         }
 
-        $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
-            ->whereIn('companySystemID', $childCompanies)
-            ->where('financeCategoryMaster', 1)
-            ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
+        if($isTender)
+        {
+            $finalBidResult = TenderFinalBids::getBidByTenderId($tenderId, $supplierRegistrationId);
+            $itemMasters = TenderBoqItems::getBoqItemList($finalBidResult->bid_id);
+        } else
+        {
+            $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
+                ->whereIn('companySystemID', $childCompanies)
+                ->where('financeCategoryMaster', 1)
+                ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)
+                {
+                    $query->where($colName, $id);
+                })
+                ->orderBy('idItemAssigned', 'desc');
+
+            if (array_key_exists('financeCategoryMaster', $input)
+                && $input['financeCategoryMaster'] != null
+                && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])
+            )
             {
-                $query->where($colName, $id);
-            })
-            ->orderBy('idItemAssigned', 'desc');
+                $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
+            }
 
-        if (array_key_exists('financeCategoryMaster', $input)
-            && $input['financeCategoryMaster'] != null
-            && $input['financeCategoryMaster']['value'] > 0 && !is_null($input['financeCategoryMaster']['value'])
-        )
-        {
-            $itemMasters->where('financeCategoryMaster', $input['financeCategoryMaster']['value']);
+            if (array_key_exists('financeCategorySub', $input)
+                && $input['financeCategorySub'] != null
+                && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])
+            )
+            {
+                $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
+            }
         }
 
-        if (array_key_exists('financeCategorySub', $input)
-            && $input['financeCategorySub'] != null
-            && $input['financeCategorySub']['value'] > 0 && !is_null($input['financeCategorySub']['value'])
-        )
-        {
-            $itemMasters->where('financeCategorySub', $input['financeCategorySub']['value']);
-        }
 
         $search = $input['search']['value'];
         if ($search)
@@ -583,8 +604,61 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getHistoryId($id)
     {
-        $data = ContractManagementUtils::getContractHistoryData($id);
-        return $data;
+        return ContractManagementUtils::getContractHistoryData($id);
     }
 
+    public function getContractData(Request $request)
+    {
+        try
+        {
+            $data = $this->contractMasterRepository->getContractData($request->all());
+            if (empty($data))
+            {
+                return $this->sendError('Contract data not found', 404);
+            }
+            return $this->sendResponse($data, 'Data Retrieved successfully');
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError('Something went wrong '. $e->getMessage(), 500);
+        }
+
+    }
+    public function getContractDetailsReport(Request $request)
+    {
+        return $this->contractMasterService->getContractDetailsReport($request);
+    }
+    public function getContractReportFormData(Request $request)
+    {
+        $response = $this->contractMasterService->getContractReportFormData($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
+    }
+    public function exportContractDetailsReport(Request $request)
+    {
+        $type = $request->input('type');
+        $disk = $request->input('disk');
+        $docName = $request->input('doc_name');
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        $contractMaster = $this->contractMasterService->exportContractDetailsReport($request);
+        $companyCode = $companySystemID > 0 ? General::getCompanyById($companySystemID) ?? 'common' : 'common';
+        $detailArray = array(
+            'company_code' => $companyCode
+        );
+
+        $export = new ContractManagmentExport($contractMaster);
+        $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
+
+        if ($basePath == '')
+        {
+            return $this->sendError('unable_to_export_excel');
+        } else
+        {
+            return $this->sendResponse($basePath, trans('success_export'));
+        }
+    }
+
+    public function getContractMasterResultsForGraph(Request $request)
+    {
+        return $this->contractMasterRepository->getContractMasterForGraph($request);
+    }
 }

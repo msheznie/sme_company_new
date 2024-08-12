@@ -25,7 +25,7 @@ class ContractUsers extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-    protected $hidden = ['id', 'contractUserId'];
+    protected $hidden = ['id'];
     protected $primaryKey = 'id';
 
     public $fillable = [
@@ -191,6 +191,13 @@ class ContractUsers extends Model
         return self::where('id', $id)
             ->select('contractUserId', 'contractUserType')
             ->whereIn('contractUserType',[1,3])
+            ->first();
+    }
+
+    public static function getUserId($currentEmployeeId)
+    {
+        return ContractUsers::select('id')
+            ->where('contractUserId',$currentEmployeeId)
             ->first();
     }
 

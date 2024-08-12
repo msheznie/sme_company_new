@@ -50,6 +50,7 @@ class ContractBoqItems extends Model
         'maxQty',
         'qty',
         'price',
+        'origin',
         'companyId',
         'created_by',
         'updated_by'
@@ -69,6 +70,7 @@ class ContractBoqItems extends Model
         'minQty' => 'integer',
         'maxQty' => 'integer',
         'qty' => 'integer',
+        'origin' => 'integer',
         'price' => 'float',
         'companyId' => 'integer',
         'created_by' => 'string',
@@ -86,6 +88,11 @@ class ContractBoqItems extends Model
     {
         return $this->belongsTo(ItemMaster::class, 'itemId', 'itemCodeSystem');
     }
+
+    public function boqItem()
+    {
+        return $this->belongsTo(TenderBoqItems::class, 'itemId', 'id');
+    }
     public static function getContractIdColumn()
     {
         return 'contractId';
@@ -98,7 +105,7 @@ class ContractBoqItems extends Model
 
     public function getBoqItemDetails($uuid)
     {
-        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price')
+        return ContractBoqItems::select('id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price', 'origin')
             ->with([
                 'itemMaster' => function ($q)
                 {
@@ -109,6 +116,9 @@ class ContractBoqItems extends Model
                             $q->select('idItemAssigned', 'itemCodeSystem', 'wacValueLocal');
                         }
                     ]);
+                }, 'boqItem', 'boqItem.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
                 }
             ])
             ->where('uuid', $uuid)
@@ -148,6 +158,14 @@ class ContractBoqItems extends Model
     {
         return ContractBoqItems::where('contractId', $contractId)
             ->where('companyId', $companySystemID)
+            ->exists();
+    }
+
+    public static function checkBoqAddedFormTender($contractId, $companySystemID)
+    {
+        return ContractBoqItems::where('contractId', $contractId)
+            ->where('companyId', $companySystemID)
+            ->where('origin', 2)
             ->exists();
     }
 }

@@ -342,4 +342,33 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         }
         return $data;
     }
+
+    public function checkMilestoneRetention(Request $request)
+    {
+        $input = $request->all();
+        $contractUuid = $input['contractId'];
+        $companySystemID = $input['selectedCompanyID'];
+
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+
+        if(empty($contract))
+        {
+            return [
+                'status' => false,
+                'message' => trans('common.contract_id_not_found')
+            ];
+        }
+
+        $totalRecords = ContractMilestoneRetention::checkRetentionExistWithMilestone($contract->id, $companySystemID);
+
+        if($totalRecords != 0)
+        {
+            return [
+                'status' => true,
+                'message' => trans('common.milestone_payment_schedule')
+            ];
+        }
+
+        return false;
+    }
 }

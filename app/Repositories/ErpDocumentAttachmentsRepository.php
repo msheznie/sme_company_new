@@ -12,6 +12,7 @@ use App\Models\ErpDocumentAttachmentsAmd;
 use App\Models\ErpDocumentMaster;
 use App\Repositories\BaseRepository;
 use App\Services\AttachmentService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -428,6 +429,35 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
             ];
         }
 
+    }
+
+    public function deleteDocumentAttachment($attachmentId, $path)
+    {
+        $attachment = $this->model->where('attachmentId', $attachmentId)->first();
+
+        if (!$attachment)
+        {
+            GeneralService::sendException('Attachment not found.');
+        }
+
+        if (Storage::disk('s3')->exists($path))
+        {
+            if (!Storage::disk('s3')->delete($path))
+            {
+                GeneralService::sendException('Failed to delete file from S3.');
+            }
+        }
+        else
+        {
+            GeneralService::sendException('File not found on S3.');
+        }
+
+        if (!$attachment->delete())
+        {
+            GeneralService::sendException('Failed to delete the attachment record.');
+        }
+
+        return true;
     }
 
 }

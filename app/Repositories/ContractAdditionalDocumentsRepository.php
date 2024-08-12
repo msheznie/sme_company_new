@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\General;
+use App\Interfaces\AdditionalDocumentRepositoryInterface;
 use App\Models\CMContractMasterAmd;
 use App\Models\ContractAdditionalDocumentAmd;
 use App\Models\ContractAdditionalDocuments;
@@ -11,25 +12,34 @@ use App\Models\DocumentMaster;
 use App\Models\ErpDocumentAttachments;
 use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
+use Illuminate\Container\Container as Application;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use App\Traits\CrudOperations;
-
+use Exception;
 /**
  * Class ContractAdditionalDocumentsRepository
  * @package App\Repositories
  * @version May 15, 2024, 5:23 am +04
 */
 
-class ContractAdditionalDocumentsRepository extends BaseRepository
+class ContractAdditionalDocumentsRepository extends BaseRepository implements AdditionalDocumentRepositoryInterface
 {
     /**
      * @var array
      */
     use CrudOperations;
+
+    protected $erpDocumentAttachmentsRepository;
+    public function __construct(Application $app, ErpDocumentAttachmentsRepository  $erpDocumentAttachmentsRepository)
+    {
+        parent::__construct($app);
+        $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepository;
+    }
 
     protected $fieldSearchable = [
         'uuid',
@@ -96,58 +106,58 @@ class ContractAdditionalDocumentsRepository extends BaseRepository
             ->make(true);
     }
 
-    public function createAdditionalDocument($formData): array {
-        $documentTypes = $formData['documentTypes'] ?? [];
-        $contractUUid = $formData['contractUUid'] ?? null;
-        $selectedCompanyID = $formData['selectedCompanyID'] ?? 0;
-        $documentTypeId = General::getArrayIds($documentTypes);
-        $amendment = $formData['amendment'];
-        $model = $amendment ? ContractAdditionalDocumentAmd::class : ContractAdditionalDocuments::class;
-        $historyId = 0;
-
-
-        if($amendment)
+    public function createAdditionalDocument($request)
+    {
+        try
         {
-            $historyData = ContractManagementUtils::getContractHistoryData($formData['contractHistoryUuid']);
-            $historyId = $historyData->id;
+            DB::transaction(function () use ($request)
+            {
+                $input = $request->all();
+                $companyId = $input['selectedCompanyID'];
+                $documentTypeByUuid = DocumentMaster::documentMasterByUuid($input['documentTypes']);
+                $contractData = ContractManagementUtils::checkContractExist(
+                    $input['contractUUid'], $companyId
+                );
+
+                if (!$contractData)
+                {
+                    GeneralService::sendException('Contract Not Found');
+                }
+
+                $insertData = [
+                    'uuid' => ContractManagementUtils::generateUuid(),
+                    'contractID' => $contractData->id,
+                    'documentMasterID' => $input['documentMasterID'],
+                    'documentType' => $documentTypeByUuid->id,
+                    'documentName' => $input['documentName'],
+                    'companySystemID' => $companyId,
+                ];
+
+                if (isset($input['documentExpiryDate']) && $input['documentExpiryDate'])
+                {
+                    $insertData['expiryDate'] = new Carbon($input['documentExpiryDate']);
+                }
+
+
+                $insert = $this->model->create($insertData);
+
+                if (isset($input['file']))
+                {
+                    $attachment = $this->erpDocumentAttachmentsRepository->saveDocumentAttachments
+                    (
+                        $request, $insert->id
+                    );
+
+                    if (!$attachment['status'])
+                    {
+                        GeneralService::sendException($attachment['message']);
+                    }
+                }
+            });
         }
-
-        $contractMaster = $amendment
-            ?
-            ContractAmendmentService::getContractAmendment($contractUUid, $historyId)
-            :
-            ContractManagementUtils::checkContractExist($contractUUid, $selectedCompanyID);
-
-        if(empty($contractMaster))
+        catch (Exception $e)
         {
-            return [
-                'status' => false,
-                'message' => trans('common.contract_not_found')
-            ];
-        }
-
-        DB::beginTransaction();
-        try{
-            $insertDocument = self::getInsertData($contractMaster, $documentTypeId, $selectedCompanyID,$historyId);
-
-            if(count($insertDocument) > 0) {
-                $model::insert($insertDocument);
-                DB::commit();
-                return [
-                    'status' => true,
-                    'message' => trans('common.contract_additional_document_created_successfully')
-                ];
-            } else{
-                DB::rollBack();
-                return [
-                    'status' => false,
-                    'message' => trans('common.something_went_wrong')
-                ];
-            }
-
-        } catch (\Exception $ex){
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
+            GeneralService::sendException('Failed to create Document tracing', $e);
         }
     }
     private function getInsertData($contractMaster, $documentTypeId, $selectedCompanyID,$historyId): array {
@@ -296,5 +306,102 @@ class ContractAdditionalDocumentsRepository extends BaseRepository
     public function additionalDocumentData($contractId)
     {
         return $this->model->additionalDocumentData($contractId);
+    }
+
+    public function getAdditionalDocumentByUuid($request)
+    {
+        try
+        {
+            $input = $request->all();
+            $contractDocument = ContractAdditionalDocuments::fetchByUuid($input['additionalDocumentUuid']);
+            if (!$contractDocument)
+            {
+                GeneralService::sendException('Contract Document Not Found');
+            }
+
+            return $contractDocument;
+        }
+        catch (\Exception $ex)
+        {
+            GeneralService::sendException('Failed to get contract document data', $ex);
+        }
+    }
+
+    public function deleteContractDocument($request)
+    {
+        try
+        {
+            DB::transaction(function () use ($request)
+            {
+                $input = $request->all();
+                $additionalDocumentuuid = $input['contractDocumentUuid'];
+
+                $additionalDocument = $this->model()::where('uuid', $additionalDocumentuuid)->first();
+
+                if (!$additionalDocument)
+                {
+                    GeneralService::sendException('Contract document not found.'. $additionalDocumentuuid);
+                }
+
+                $additionalDocument->update([
+                    'expiryDate' => null,
+                ]);
+
+                $this->erpDocumentAttachmentsRepository->deleteDocumentAttachment(
+                    $input['attachmentID'], $input['path']
+                );
+            });
+
+        } catch (\Exception $e)
+        {
+            GeneralService::sendException('Failed to Delete Document tracing data', $e);
+        }
+    }
+
+    public function updateAdditionalDoc($request)
+    {
+        try
+        {
+            DB::transaction(function () use ($request)
+            {
+                $input = $request->all();
+                $documentTypeByUuid = DocumentMaster::documentMasterByUuid($input['documentTypes']);
+
+                $contractDocument = $this->model()::where('uuid', $input['uuid'])->first();
+
+                if (isset($input['documentExpiryDate']) && $input['documentExpiryDate'])
+                {
+                    $contractDocument['expiryDate'] = new Carbon($input['documentExpiryDate']);
+                }
+                else
+                {
+                    $contractDocument['expiryDate']  = null;
+                }
+
+                $contractDocument->update([
+                    'documentType' => $documentTypeByUuid->id,
+                    'documentName' => $input['documentName'],
+                    'documentDescription' => $input['documentDescription']
+                ]);
+
+
+                if(isset($input['fileUpload']) && $input['fileUpload'])
+                {
+                    $attachment = $this->erpDocumentAttachmentsRepository->saveDocumentAttachments
+                    (
+                        $request, $contractDocument->id
+                    );
+
+                    if (!$attachment['status'])
+                    {
+                        GeneralService::sendException($attachment['message']);
+                    }
+                }
+            });
+        }
+        catch (Exception $e)
+        {
+            GeneralService::sendException('Failed to update Document Contract ', $e);
+        }
     }
 }

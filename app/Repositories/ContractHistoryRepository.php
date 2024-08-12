@@ -15,6 +15,8 @@ use App\Models\DocumentAttachments;
 use App\Models\ErpDocumentAttachments;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
+use App\Services\ContractMasterService;
+use App\Services\GeneralService;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\Log;
@@ -185,15 +187,16 @@ class ContractHistoryRepository extends BaseRepository
 
     private function createContractInfo($currentContractDetails, $companyId, $categoryId)
     {
-        $contactMaster = new ContractMaster();
-        $lastSerialNumber  = $contactMaster->getMaxContractId();
-        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+        $contractCodeData = ContractMasterService::generateContractCode($companyId);
+        $lastSerialNumber  = $contractCodeData['lastSerialNumber'];
+        $contractCode = $contractCodeData['contractCode'];
         $uuid = ContractManagementUtils::generateUuid();
 
         $insert = [
             'contractCode' => $contractCode,
             'title' => $currentContractDetails['title'],
             'description' => $currentContractDetails['description'],
+            'serial_no' => $lastSerialNumber,
             'contractType' => $currentContractDetails["contractType"],
             'counterParty' => $currentContractDetails["counterParty"],
             'counterPartyName' => $currentContractDetails["counterPartyName"],
@@ -203,7 +206,6 @@ class ContractHistoryRepository extends BaseRepository
             'startDate' => $currentContractDetails["startDate"],
             'endDate' => $currentContractDetails["endDate"],
             'agreementSignDate' => $currentContractDetails["agreementSignDate"],
-            'notifyDays' => $currentContractDetails["notifyDays"],
             'contractTermPeriod' => $currentContractDetails["contractTermPeriod"],
             'contractRenewalDate' => $currentContractDetails["contractRenewalDate"],
             'contractExtensionDate' => $currentContractDetails["contractExtensionDate"],
@@ -216,15 +218,13 @@ class ContractHistoryRepository extends BaseRepository
             'secondaryEmail' => $currentContractDetails["secondaryEmail"],
             'secondaryPhoneNumber' => $currentContractDetails["secondaryPhoneNumber"],
             'documentMasterId' => $currentContractDetails["documentMasterId"],
-            'status' => ContractHistoryService::checkContractDateBetween
-            (
-                $currentContractDetails["startDate"], $currentContractDetails["endDate"]
-            ),
+            'status' => 0,
             'uuid' => $uuid,
             'companySystemID' => $companyId,
             'created_by' => General::currentEmployeeId(),
             'created_at' => Carbon::now(),
-            'parent_id' => $currentContractDetails['id']
+            'parent_id' => $currentContractDetails['id'],
+            'tender_id' => $currentContractDetails["tender_id"]
         ];
 
         $categoryFields = ContractHistoryService::getCategories();

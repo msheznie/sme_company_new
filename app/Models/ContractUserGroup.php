@@ -85,13 +85,21 @@ class ContractUserGroup extends Model
            ->orderBy('id', 'desc');
     }
 
-    public function getContractUserListForUserGroup($companySystemId, $groupId)
+    public function getContractUserListForUserGroup($companySystemId, $groupId, $isActive)
     {
-        return ContractUsers::select('uuid', 'contractUserId', 'contractUserName as itemName')
-            ->whereDoesntHave('assignedContractUserGroup', function ($query) use ($groupId) {
+        $query = ContractUsers::select('uuid', 'contractUserId', 'contractUserName as itemName')
+            ->whereDoesntHave('assignedContractUserGroup', function ($query) use ($groupId)
+            {
                 $query->where('userGroupId', $groupId);
             })
             ->where('companySystemId', $companySystemId);
+
+        if ($isActive == 1)
+        {
+            $query->where('isActive', 1);
+        }
+
+        return $query;
     }
 
     public function getContractUserListToAssign($companySystemId, $contractId)

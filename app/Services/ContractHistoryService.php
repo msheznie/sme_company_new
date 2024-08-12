@@ -16,6 +16,7 @@ use App\Models\ErpDocumentApproved;
 use App\Models\ErpDocumentAttachments;
 use App\Models\ErpDocumentAttachmentsAmd;
 use App\Repositories\ContractHistoryRepository;
+use App\Repositories\contractStatusHistoryRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,10 +25,14 @@ use App\Exceptions\ContractCreationException;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
+    protected $contractStatusHistoryRepository;
+    protected $contractHistoryModel = 'App\\Models\\ContractHistory';
 
-    public function __construct(ContractHistoryRepository $contractHistoryRepository)
+    public function __construct(ContractHistoryRepository $contractHistoryRepository,
+                                contractStatusHistoryRepository $contractStatusHistoryRepository)
     {
         $this->contractHistoryRepository = $contractHistoryRepository;
+        $this->contractStatusHistoryRepository = $contractStatusHistoryRepository;
     }
     public function deleteContractHistory($input)
     {
@@ -85,7 +90,7 @@ class ContractHistoryService
             if($amendment)
             {
 
-                $contractColumn = ($modelName === 'App\\Models\\ContractHistory') ? 'id' : 'contract_history_id';
+                $contractColumn = ($modelName === $this->contractHistoryModel) ? 'id' : 'contract_history_id';
                 $colValue = $historyId;
             }else
             {
@@ -100,7 +105,7 @@ class ContractHistoryService
             if ($contractColumn)
             {
                 $query = $model::where($contractColumn, $colValue);
-                if ($modelName === 'App\\Models\\ContractHistory')
+                if ($modelName === $this->contractHistoryModel)
                 {
                     $query->where('category', $categoryId);
                 }
@@ -241,23 +246,43 @@ class ContractHistoryService
                 $contractId = $getContractId->id;
                 $contractHistoryId  = $getContractHistoryData->id;
 
+                $endDate = Carbon::parse($getContractCloneData['endDate'])
+                    ->setTime(23, 59, 59)->format('Y-m-d H:i:s');
                 $cloneStatus = self::checkContractDateBetween
                 (
-                    $getContractCloneData['startDate'],$getContractCloneData['endDate']
+                    $getContractCloneData['startDate'], $endDate
                 );
+
+
                 $cloneStatus = ($categoryId == 6) ? $categoryId : $cloneStatus;
                 self::updateContractMaster($contractId, $companyId,$categoryId);
+
+                if($categoryId == 2 || $categoryId == 3 || $categoryId == 5)
+                {
+                     ContractHistoryService::updateOrInsertStatus
+                    (
+                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
+                         $contractHistoryId
+                    );
+                }
+                else
+                {
+                    self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
+
+                }
+
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
-                self::updateContractHistoryStatus($getContractCloneData['id'],$contractHistoryId,$cloneStatus);
-                self::insertHistoryStatus($contractId,$categoryId,$companyId);
+                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId);
+
                 if($categoryId === 6)
                 {
                     contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
                 }
 
             });
-        }catch (\Exception $e)
+        }
+        catch (\Exception $e)
         {
             throw new ContractCreationException(trans('common.failed_to_update_contract_status: ' . $e->getMessage()));
         }
@@ -682,7 +707,7 @@ class ContractHistoryService
     {
         $defaultModels = [
             'App\\Models\\ContractMaster',
-            'App\\Models\\ContractHistory',
+            $this->contractHistoryModel,
             'App\\Models\\ContractUserAssign',
             'App\\Models\\ContractSettingMaster',
             'App\\Models\\ContractSettingDetail',
@@ -699,7 +724,7 @@ class ContractHistoryService
         {
             return [
                 'App\\Models\\CMContractMasterAmd',
-                'App\\Models\\ContractHistory',
+                $this->contractHistoryModel,
                 'App\\Models\\CMContractUserAssignAmd',
                 'App\\Models\\CMContractDocumentAmd',
                 'App\\Models\\CMContractBoqItemsAmd',
@@ -739,9 +764,16 @@ class ContractHistoryService
         }
     }
 
-    public static function updateOrInsertStatus($id, $status, $selectedCompanyID)
+    public static function updateOrInsertStatus($id, $status, $selectedCompanyID, $contractHistoryId = null,
+                                                $systemUser = false)
     {
         $latestRecordStatus = ContractHistoryService::getLatestRecordHistory($id);
+        $alreadyActiveContract = false;
+        if($status == -1)
+        {
+            $alreadyActiveContract = self::checkAlreadyActiveContract($id);
+        }
+
         if ($latestRecordStatus)
         {
             if ($latestRecordStatus->status == $status)
@@ -750,14 +782,26 @@ class ContractHistoryService
             }
             else
             {
-                self::insertHistoryStatus($id, $status, $selectedCompanyID);
+                if(!$alreadyActiveContract)
+                {
+                    self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId, $systemUser);
+                }
             }
         }
         else
         {
-            self::insertHistoryStatus($id, $status, $selectedCompanyID);
+            self::insertHistoryStatus($id, $status, $selectedCompanyID, $contractHistoryId , $systemUser);
         }
     }
 
+    public  function getContractStatusHistory($request)
+    {
+        return $this->contractStatusHistoryRepository->getContractStatusHistory($request);
+    }
+
+    public function checkAlreadyActiveContract($contractID)
+    {
+        return contractStatusHistory::where('contract_id', $contractID)->where('status', -1)->exists();
+    }
 
 }
