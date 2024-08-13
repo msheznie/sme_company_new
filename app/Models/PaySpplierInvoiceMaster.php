@@ -462,5 +462,22 @@ class PaySpplierInvoiceMaster extends Model
 
     ];
 
-
+    public function checkSupplierPVExists($id, $selectedCompanyId)
+    {
+        return PaySpplierInvoiceMaster::select('PayMasterAutoId', 'documentSystemID', 'BPVcode')
+            ->where('PayMasterAutoId', $id)
+            ->where('companySystemID', $selectedCompanyId)
+            ->first();
+    }
+    public function getPaymentVoucherForFilters($directPVIds, $selectedCompanyID)
+    {
+        return PaySpplierInvoiceMaster::whereIn('PayMasterAutoId', $directPVIds)
+            ->where('companySystemID', $selectedCompanyID)
+            ->select('PayMasterAutoId', 'BPVcode')
+            ->get();
+    }
+    public function currency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'directPayeeCurrency', 'currencyID');
+    }
 }
