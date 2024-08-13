@@ -141,13 +141,13 @@ class ContractMasterRepository extends BaseRepository
         $statusMappings = [
             0 => 'In Active',
             -1 => 'Active',
-            1 => 'Amended',
-            2 => 'Addended',
+            1 => 'Active',
+            2 => 'Active',
             3 => 'Renewed',
-            4 => 'Extended',
+            4 => 'Active',
             5 => 'Revised',
             6 => 'Terminated',
-            7 => 'Completed',
+            7 => 'Ended',
         ];
 
         $lotData = $this->model->contractMaster($search, $companyId, $input)->get();
