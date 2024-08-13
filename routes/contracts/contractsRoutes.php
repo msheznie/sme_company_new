@@ -581,5 +581,3 @@ Route::group(['prefix' => 'contract'], function (){
         'destroy'
     ])->name('Delete finance document');
 });
-
-

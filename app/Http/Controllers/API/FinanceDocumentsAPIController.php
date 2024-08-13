@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Exports\ContractManagmentExport;
+use App\Helpers\CreateExcel;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateFinanceDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateFinanceDocumentsAPIRequest;
 use App\Models\FinanceDocuments;
@@ -11,7 +14,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\FinanceDocumentsResource;
 use Response;
-
+use Illuminate\Support\Facades\Log;
+use Mpdf\Mpdf;
 /**
  * Class FinanceDocumentsController
  * @package App\Http\Controllers\API
@@ -144,6 +148,7 @@ class FinanceDocumentsAPIController extends AppBaseController
 
         return $this->sendSuccess('Finance Documents deleted successfully');
     }
+
     public function getFinanceDocumentFilters(Request $request)
     {
         $contractUuid = $request->input('contractUuid');
@@ -160,7 +165,41 @@ class FinanceDocumentsAPIController extends AppBaseController
         } catch (\Exception $ex)
         {
             return $this->sendError($ex->getMessage());
+
         }
+    }
+
+    public function getFinanceSummaryData(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid') ?? null;
+        $companySystemID = $request->input('selectedCompanyID') ?? 0;
+        try
+        {
+            $response = $this->financeDocumentsRepository->getFinanceSummaryData($contractUuid, $companySystemID);
+            return $this->sendResponse($response, trans('common.retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
+    public function printFinancialSummary(Request $request)
+    {
+        $contractUuid = $request->get('contractUuid');
+        $companySystemID = $request->get('selectedCompanyID');
+
+        $order = array();
+        $fileName = 'financial_summary.pdf';
+        $html = view('financial_summary', $order);
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('tmp'), 'mode' => 'utf-8', 'format' => 'A4-P',
+            'setAutoTopMargin' => 'stretch', 'autoMarginPadding' => -10]);
+        $mpdf->AddPage('P');
+        $mpdf->setAutoBottomMargin = 'stretch';
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output($fileName, 'I');
     }
     public function getContractInvoices(Request $request)
     {

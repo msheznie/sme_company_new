@@ -169,6 +169,7 @@ class FinanceDocuments extends Model
                     ]);
                 }
             ])
+
             ->where('document_type', $documentType)
             ->where('document_id', $documentId)
             ->where('contract_id', $contractID)
@@ -176,6 +177,7 @@ class FinanceDocuments extends Model
             ->orderBy('document_system_id', 'desc')
             ->get();
     }
+
 
     public static function getPaymentVoucher($contractID, $companyId, $documentType, $documentId)
     {
@@ -201,3 +203,10 @@ class FinanceDocuments extends Model
             ->get();
     }
 }
+
+
+
+
+
+
+

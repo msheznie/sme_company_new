@@ -457,4 +457,12 @@ class Company extends Model
         ])->exists();
     }
 
+    public static function getCompanyData($id)
+    {
+        return self::where([
+            ['companySystemID', '=', $id],
+            ['isActive', '=', 1]
+        ])->first();
+    }
+
 }
