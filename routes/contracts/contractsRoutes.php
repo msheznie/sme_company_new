@@ -565,6 +565,11 @@ Route::
     Route::post('/get-contract-payment-voucher',
         [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getContractPaymentVoucher'])
         ->name('Get contract payment voucher');
+
+    Route::post('finance-summary-data', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'getFinanceSummaryData'
+    ])->name('Finance Summary Data');
 });
 
 

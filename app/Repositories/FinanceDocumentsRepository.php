@@ -6,6 +6,7 @@ use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Models\DirectPaymentDetails;
 use App\Models\ErpBookingSupplierMaster;
+use App\Models\Employees;
 use App\Models\FinanceDocuments;
 use App\Models\ErpDirectInvoiceDetails;
 use App\Models\PaySpplierInvoiceMaster;
@@ -13,6 +14,12 @@ use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Company;
+use App\Models\ContractOverallPenalty;
+use App\Models\CurrencyMaster;
+use App\Models\PurchaseOrderMaster;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class FinanceDocumentsRepository
@@ -57,6 +64,7 @@ class FinanceDocumentsRepository extends BaseRepository
     public function getFinanceDocumentFilters($contractUuid, $selectedCompanyID, $documentType)
     {
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
+
         if(empty($contract))
         {
             throw new CommonException(trans('common.contract_not_found'));
@@ -193,4 +201,29 @@ class FinanceDocumentsRepository extends BaseRepository
         return FinanceDocuments::getPaymentVoucher($contractMaster['id'], $selectedCompanyID, $documentType,
             $documentID);
     }
+
+    public function getFinanceSummaryData($uuid, $companySystemID)
+    {
+        $contract = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
+        if(empty($contract))
+        {
+            throw new CommonException(trans('common.contract_not_found'));
+        }
+
+        $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
+        $employeeId = General::currentEmployeeId();
+        $createdBy = Employees::getEmployee($employeeId);
+        $createdAt = Carbon::now();
+        $company = Company::getCompanyData($companySystemID);
+
+        return [
+            'purchaseOrder' => $purchaseOrder,
+            'contract' => $contract,
+            'created_by' => $createdBy,
+            'created_at' => $createdAt,
+            'company' => $company,
+        ];
+    }
+
+
 }
