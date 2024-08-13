@@ -222,5 +222,13 @@ class DirectPaymentDetails extends Model
 
     ];
 
-
+    public function getContractLinkedWithErp($contractUuid, $companySystemID)
+    {
+        $directPaymentAutoIDs = DirectPaymentDetails::where('contractID', $contractUuid)
+            ->where('companySystemID', $companySystemID)
+            ->groupBy('directPaymentAutoID')
+            ->get(['directPaymentAutoID']);
+        return !empty($directPaymentAutoIDs) ? collect($directPaymentAutoIDs)
+            ->pluck('directPaymentAutoID') : [];
+    }
 }

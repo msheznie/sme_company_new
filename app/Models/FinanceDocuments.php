@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Eloquent as Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -22,8 +21,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class FinanceDocuments extends Model
 {
-    use SoftDeletes;
-
     use HasFactory;
 
     public $table = 'cm_finance_documents';
@@ -33,7 +30,7 @@ class FinanceDocuments extends Model
 
 
     protected $dates = ['deleted_at'];
-
+    protected $hidden = ['id', 'contract_id', 'company_id'];
 
 
     public $fillable = [
@@ -72,6 +69,135 @@ class FinanceDocuments extends Model
     public static $rules = [
 
     ];
+    public function invoiceMaster()
+    {
+        return $this->belongsTo(ErpBookingSupplierMaster::class, 'document_system_id', 'bookingSuppMasInvAutoID');
+    }
+    public function paymentVoucherMaster()
+    {
+        return $this->belongsTo(PaySpplierInvoiceMaster::class, 'document_system_id', 'PayMasterAutoId');
+    }
 
+    public function getExistingRecords($contractID, $documentType, $selectedCompanyID, $documentID)
+    {
+        return FinanceDocuments::where('contract_id', $contractID)
+            ->where('document_id', $documentID)
+            ->where('document_type', $documentType)
+            ->where('company_id', $selectedCompanyID)
+            ->pluck('document_system_id')
+            ->toArray();
+    }
+    public function createFinanceDocuments($insertRec)
+    {
+        return FinanceDocuments::insert($insertRec);
+    }
+    public function deleteFinanceDocuments($toDelete, $contractId, $documentType, $documentID, $selectedCompanyID)
+    {
+        return FinanceDocuments::whereIn('document_system_id', $toDelete)
+            ->where('contract_id', $contractId)
+            ->where('document_type', $documentType)
+            ->where('document_id', $documentID)
+            ->where('company_id', $selectedCompanyID)
+            ->delete();
+    }
+    public function getContractFinanceDocument($contractID, $documentType, $documentID)
+    {
+        $financeDocument = FinanceDocuments::select('uuid', 'contract_id', 'document_type', 'document_id',
+            'document_system_id')
+            ->where('contract_id', $contractID)
+            ->where('document_id', $documentID)
+            ->where('document_type', $documentType)
+            ->when($documentID == 4, function ($q)
+            {
+                $q->with([
+                    'paymentVoucherMaster' => function ($q)
+                    {
+                        $q->select('PayMasterAutoId', 'BPVcode');
+                    }
+                ]);
+            })->when($documentID == 11, function ($q)
+            {
+                $q->with([
+                    'invoiceMaster' => function ($q)
+                    {
+                        $q->select('bookingSuppMasInvAutoID', 'bookingInvCode');
+                    }
+                ]);
+            })
+            ->get();
+        $response = [];
+        if(!empty($financeDocument))
+        {
+            foreach($financeDocument as $fDoc)
+            {
+                if($documentID == 4)
+                {
+                    if($fDoc['paymentVoucherMaster'])
+                    {
+                        $response[] = [
+                            'id' => $fDoc['paymentVoucherMaster']['PayMasterAutoId'],
+                            'itemName' => $fDoc['paymentVoucherMaster']['BPVcode']
+                        ];
+                    }
+                } else
+                {
+                    if($fDoc['invoiceMaster'])
+                    {
+                        $response[] = [
+                            'id' => $fDoc['invoiceMaster']['bookingSuppMasInvAutoID'],
+                            'itemName' => $fDoc['invoiceMaster']['bookingInvCode']
+                        ];
+                    }
+                }
+            }
+        }
+        return $response;
+    }
+    public static function getSupplierInvoice($contractID, $companyId, $documentType, $documentId)
+    {
+        return FinanceDocuments::select('uuid', 'contract_id', 'document_system_id')
+            ->with([
+                'invoiceMaster' => function ($q)
+                {
+                    $q->select('bookingSuppMasInvAutoID', 'bookingAmountTrans', 'supplierTransactionCurrencyID',
+                    'bookingInvCode', 'confirmedYN', 'approved', 'refferedBackYN', 'createdDateAndTime')
+                    ->with([
+                        'currency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        }
+                    ]);
+                }
+            ])
+            ->where('document_type', $documentType)
+            ->where('document_id', $documentId)
+            ->where('contract_id', $contractID)
+            ->where('company_id', $companyId)
+            ->orderBy('document_system_id', 'desc')
+            ->get();
+    }
 
+    public static function getPaymentVoucher($contractID, $companyId, $documentType, $documentId)
+    {
+        return FinanceDocuments::select('uuid', 'contract_id', 'document_system_id')
+            ->with([
+                'paymentVoucherMaster' => function ($q)
+                {
+                    $q->select('PayMasterAutoId', 'payAmountSuppTrans', 'directPayeeCurrency', 'BPVcode',
+                        'confirmedYN', 'approved', 'refferedBackYN', 'createdDateTime')
+                        ->with([
+                            'currency' => function ($q)
+                            {
+                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                            }
+                        ]);
+                }
+            ])
+            ->where('document_type', $documentType)
+            ->where('document_id', $documentId)
+            ->where('contract_id', $contractID)
+            ->where('company_id', $companyId)
+            ->orderBy('document_system_id', 'desc')
+            ->get();
+    }
 }

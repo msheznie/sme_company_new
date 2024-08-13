@@ -550,9 +550,21 @@ Route::
         [\App\Http\Controllers\API\contractStatusHistoryAPIController::class, 'exportContractStatusHistory'])
         ->name('Export Contract Status History');
 
-    Route::get('/finance-document-filters/{id}',
+    Route::post('/finance-document-filters',
         [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getFinanceDocumentFilters'])
         ->name('Get finance document filters');
+
+    Route::post('/pull-finance-document-from-erp',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'store'])
+        ->name('Pull finance document from erp');
+
+    Route::post('/get-contract-invoices',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getContractInvoices'])
+        ->name('Get contract invoices');
+
+    Route::post('/get-contract-payment-voucher',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getContractPaymentVoucher'])
+        ->name('Get contract payment voucher');
 });
 
 

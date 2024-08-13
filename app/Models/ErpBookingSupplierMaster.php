@@ -106,19 +106,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ErpBookingSupplierMaster extends Model
 {
-    use SoftDeletes;
-
-    use HasFactory;
-
     public $table = 'erp_bookinvsuppmaster';
-    
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
 
+    const CREATED_AT = 'createdDateAndTime';
+    const UPDATED_AT = 'timestamp';
 
-    protected $dates = ['deleted_at'];
-
-
+    protected $primaryKey = 'bookingSuppMasInvAutoID';
 
     public $fillable = [
         'companySystemID',
@@ -278,7 +271,6 @@ class ErpBookingSupplierMaster extends Model
         'modifiedUser' => 'string',
         'modifiedPc' => 'string',
         'createdDateTime' => 'string',
-        'createdDateAndTime' => 'datetime',
         'cancelYN' => 'integer',
         'cancelComment' => 'string',
         'cancelDate' => 'datetime',
@@ -322,99 +314,26 @@ class ErpBookingSupplierMaster extends Model
      * @var array
      */
     public static $rules = [
-        'companySystemID' => 'nullable|integer',
-        'companyID' => 'nullable|string|max:50',
-        'documentSystemID' => 'nullable|integer',
-        'documentID' => 'nullable|string|max:45',
-        'projectID' => 'nullable|integer',
-        'serialNo' => 'nullable|integer',
-        'companyFinanceYearID' => 'nullable|integer',
-        'FYBiggin' => 'nullable',
-        'FYEnd' => 'nullable',
-        'companyFinancePeriodID' => 'nullable|integer',
-        'FYPeriodDateFrom' => 'nullable',
-        'FYPeriodDateTo' => 'nullable',
-        'bookingInvCode' => 'nullable|string|max:100',
-        'bookingDate' => 'nullable',
-        'comments' => 'nullable|string',
-        'secondaryRefNo' => 'nullable|string|max:300',
-        'supplierID' => 'nullable|integer',
-        'supplierGLCodeSystemID' => 'nullable|integer',
-        'supplierGLCode' => 'nullable|string|max:100',
-        'UnbilledGRVAccountSystemID' => 'nullable|integer',
-        'UnbilledGRVAccount' => 'nullable|string|max:20',
-        'supplierInvoiceNo' => 'nullable|string|max:200',
-        'supplierInvoiceDate' => 'nullable',
-        'custInvoiceDirectAutoID' => 'nullable|integer',
-        'supplierTransactionCurrencyID' => 'nullable|integer',
-        'supplierTransactionCurrencyER' => 'nullable|numeric',
-        'companyReportingCurrencyID' => 'nullable|integer',
-        'companyReportingER' => 'nullable|numeric',
-        'localCurrencyID' => 'nullable|integer',
-        'localCurrencyER' => 'nullable|numeric',
-        'bookingAmountTrans' => 'nullable|numeric',
-        'bookingAmountLocal' => 'nullable|numeric',
-        'bookingAmountRpt' => 'nullable|numeric',
-        'confirmedYN' => 'nullable|integer',
-        'confirmedByEmpSystemID' => 'nullable|integer',
-        'confirmedByEmpID' => 'nullable|string|max:100',
-        'confirmedByName' => 'nullable|string|max:500',
-        'confirmedDate' => 'nullable',
-        'approved' => 'nullable|integer',
-        'approvedDate' => 'nullable',
-        'approvedByUserID' => 'nullable|string|max:30',
-        'approvedByUserSystemID' => 'nullable|integer',
-        'postedDate' => 'nullable',
-        'documentType' => 'nullable|integer',
-        'refferedBackYN' => 'nullable|integer',
-        'timesReferred' => 'nullable|integer',
-        'RollLevForApp_curr' => 'nullable|integer',
-        'interCompanyTransferYN' => 'nullable|integer',
-        'createdUserGroup' => 'nullable|string|max:100',
-        'createdUserSystemID' => 'nullable|integer',
-        'createdUserID' => 'nullable|string|max:100',
-        'createdPcID' => 'nullable|string|max:100',
-        'modifiedUserSystemID' => 'nullable|integer',
-        'modifiedUser' => 'nullable|string|max:100',
-        'modifiedPc' => 'nullable|string|max:100',
-        'createdDateTime' => 'nullable|string|max:100',
-        'createdDateAndTime' => 'nullable',
-        'cancelYN' => 'nullable|integer',
-        'cancelComment' => 'nullable|string',
-        'cancelDate' => 'nullable',
-        'canceledByEmpSystemID' => 'nullable|integer',
-        'canceledByEmpID' => 'nullable|string|max:100',
-        'canceledByEmpName' => 'nullable|string|max:500',
-        'timestamp' => 'nullable',
-        'rcmActivated' => 'nullable|integer',
-        'vatRegisteredYN' => 'nullable|integer',
-        'isLocalSupplier' => 'nullable|integer',
-        'VATAmount' => 'nullable|numeric',
-        'VATAmountLocal' => 'nullable|numeric',
-        'VATAmountRpt' => 'nullable|numeric',
-        'retentionVatAmount' => 'required|numeric',
-        'retentionDueDate' => 'nullable',
-        'retentionAmount' => 'required|numeric',
-        'retentionPercentage' => 'required|numeric',
-        'netAmount' => 'nullable|numeric',
-        'netAmountLocal' => 'nullable|numeric',
-        'netAmountRpt' => 'nullable|numeric',
-        'VATPercentage' => 'nullable|numeric',
-        'serviceLineSystemID' => 'nullable|integer',
-        'wareHouseSystemCode' => 'nullable|integer',
-        'supplierVATEligible' => 'nullable|integer',
-        'employeeID' => 'nullable|integer',
-        'employeeControlAcID' => 'nullable|integer',
-        'createMonthlyDeduction' => 'nullable|integer',
-        'deliveryAppoinmentID' => 'nullable|integer',
-        'whtApplicableYN' => 'required|boolean',
-        'whtType' => 'required|integer',
-        'whtApplicable' => 'required|boolean',
-        'whtAmount' => 'nullable|numeric',
-        'whtEdited' => 'required|boolean',
-        'whtPercentage' => 'required|integer',
-        'isWHTApplicableVat' => 'required|boolean'
+
     ];
 
-    
+    public function currency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'supplierTransactionCurrencyID', 'currencyID');
+    }
+
+    public function checkSupplierInvoiceMasterExists($id, $selectedCompanyId)
+    {
+        return ErpBookingSupplierMaster::select('bookingSuppMasInvAutoID', 'documentSystemID', 'bookingInvCode')
+            ->where('bookingSuppMasInvAutoID', $id)
+            ->where('companySystemID', $selectedCompanyId)
+            ->first();
+    }
+    public function getInvoicesForFilters($directInvoiceIds, $selectedCompanyID)
+    {
+        return ErpBookingSupplierMaster::whereIn('bookingSuppMasInvAutoID', $directInvoiceIds)
+            ->where('companySystemID', $selectedCompanyID)
+            ->select('bookingSuppMasInvAutoID', 'bookingInvCode')
+            ->get();
+    }
 }

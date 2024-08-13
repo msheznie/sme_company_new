@@ -24,6 +24,21 @@ class CreateFinanceDocumentsAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return FinanceDocuments::$rules;
+        return [
+            'selectedCompanyID' => 'required',
+            'contractUuid' => 'required',
+            'documentType' => 'required',
+            'selectedType' => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'selectedCompanyID.required' => 'Company Id is required.',
+            'contractUuid.required' => 'Contract ID is required.',
+            'documentType.required' => 'Document type is required.',
+            'selectedType.required' => 'Selected type is required.',
+        ];
     }
 }

@@ -58,11 +58,17 @@ class FinanceDocumentsAPIController extends AppBaseController
     public function store(CreateFinanceDocumentsAPIRequest $request)
     {
         $input = $request->all();
-
-        $financeDocuments = $this->financeDocumentsRepository->create($input);
-
-        return $this->sendResponse(new FinanceDocumentsResource($financeDocuments),
-            'Finance Documents saved successfully');
+        try
+        {
+            $this->financeDocumentsRepository->pullFinanceDocumentFromErp($input);
+            return $this->sendResponse([], 'Finance document pulled successfully');
+        } catch (CommonException $exception)
+        {
+            return $this->sendError($exception->getMessage());
+        } catch (\Exception $exception)
+        {
+            return $this->sendError($exception->getMessage());
+        }
     }
 
     /**
@@ -138,13 +144,54 @@ class FinanceDocumentsAPIController extends AppBaseController
 
         return $this->sendSuccess('Finance Documents deleted successfully');
     }
-    public function getFinanceDocumentFilters($id, Request $request)
+    public function getFinanceDocumentFilters(Request $request)
     {
+        $contractUuid = $request->input('contractUuid');
         $selectedCompanyID = $request->input('selectedCompanyID');
+        $documentType = $request->input('documentType');
         try
         {
-            $response = $this->financeDocumentsRepository->getFinanceDocumentFilters($id, $selectedCompanyID);
+            $response = $this->financeDocumentsRepository->getFinanceDocumentFilters($contractUuid, $selectedCompanyID,
+                $documentType);
             return $this->sendResponse($response, trans('common.data_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+    }
+    public function getContractInvoices(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid');
+        $selectedCompanyID = $request->input('selectedCompanyID');
+        $documentType = $request->input('documentType');
+        $documentID = $request->input('documentID');
+        try
+        {
+            $contractInvoice = $this->financeDocumentsRepository->getContractInvoices($contractUuid,
+                $selectedCompanyID, $documentType, $documentID);
+            return $this->sendResponse($contractInvoice, trans('common.data_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+    }
+    public function getContractPaymentVoucher(Request $request)
+    {
+        $contractUuid = $request->input('contractUuid');
+        $selectedCompanyID = $request->input('selectedCompanyID');
+        $documentType = $request->input('documentType');
+        $documentID = $request->input('documentID');
+        try
+        {
+            $contractInvoice = $this->financeDocumentsRepository->getContractPaymentVoucher($contractUuid,
+                $selectedCompanyID, $documentType, $documentID);
+            return $this->sendResponse($contractInvoice, trans('common.data_retrieved_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
