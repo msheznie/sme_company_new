@@ -105,4 +105,12 @@ class ContractSettingDetail extends Model
             ->where('isActive', 1)
             ->first();
     }
+
+    public static function getActiveSections($contractId)
+    {
+        return ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractId)
+            ->where('isActive', 1)
+            ->get();
+    }
 }

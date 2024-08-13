@@ -1138,6 +1138,9 @@ class ContractMasterRepository extends BaseRepository
 
     private function checkMandatoryDetails($contractId, $companySystemID, $contractUuid)
     {
+        $activeSections = ContractSettingDetail::getActiveSections($contractId);
+        $containsRetention = $activeSections->contains('sectionDetailId', 5);
+
         $totalRecords = ContractMilestoneRetention::where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)->count();
         $recordsWithMilestoneId = ContractMilestoneRetention::whereNotNull('milestoneId')
@@ -1163,15 +1166,15 @@ class ContractMasterRepository extends BaseRepository
         {
             return trans('common.milestone_title_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithRetentionPercentage)
+        if($containsRetention && ($totalRecords != $recordsWithRetentionPercentage))
         {
             return trans('common.retention_percentage_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithStartDate)
+        if( $containsRetention && ($totalRecords != $recordsWithStartDate))
         {
             return trans('common.start_date_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithDueDate)
+        if($containsRetention && ($totalRecords != $recordsWithDueDate))
         {
             return trans('common.due_date_is_a_mandatory_field');
         }
