@@ -8,8 +8,13 @@ use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateFinanceDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateFinanceDocumentsAPIRequest;
+use App\Models\Company;
+use App\Models\Employees;
 use App\Models\FinanceDocuments;
+use App\Models\PurchaseOrderMaster;
 use App\Repositories\FinanceDocumentsRepository;
+use App\Utilities\ContractManagementUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\FinanceDocumentsResource;
@@ -188,10 +193,30 @@ class FinanceDocumentsAPIController extends AppBaseController
 
     public function printFinancialSummary(Request $request)
     {
-        $contractUuid = $request->get('contractUuid');
+        $uuid = $request->get('contractUuid');
         $companySystemID = $request->get('selectedCompanyID');
 
-        $order = array();
+        $contract = ContractManagementUtils::checkContractExist($uuid, $companySystemID);
+        $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
+        $createdAt = Carbon::now();
+        $company = Company::getCompanyData($companySystemID);
+
+        $retentionSI = FinanceDocuments::getSupplierInvoice($contract['id'], $companySystemID,2,11);
+        $retentionPV = FinanceDocuments::getPaymentVoucher($contract['id'], $companySystemID,2,4);
+        $milestoneSI = FinanceDocuments::getSupplierInvoice($contract['id'], $companySystemID,1,11);
+        $milestonePV = FinanceDocuments::getPaymentVoucher($contract['id'], $companySystemID,1,4);
+
+
+        $order = array(
+            'contract' => $contract,
+            'createdAt' => $createdAt,
+            'company' => $company,
+            'purchaseOrder' => $purchaseOrder,
+            'retentionSI' => $retentionSI,
+            'retentionPV' => $retentionPV,
+            'milestoneSI' => $milestoneSI,
+            'milestonePV' => $milestonePV,
+        );
         $fileName = 'financial_summary.pdf';
         $html = view('financial_summary', $order);
         $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('tmp'), 'mode' => 'utf-8', 'format' => 'A4-P',
