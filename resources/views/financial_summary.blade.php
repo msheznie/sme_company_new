@@ -365,19 +365,23 @@
                     <td class="text-center">{{$loop->iteration}}</td>
                     <td class="text-center">{{$item->purchaseOrderCode}}</td>
                     <td class="text-center">{{$item->currency->CurrencyCode}}
-                        {{number_format($item->poTotalSupplierTransactionCurrency, $item->currency->DecimalPlaces)}}</td>
+                        {{number_format($item->poTotalSupplierTransactionCurrency,
+ $item->currency->DecimalPlaces)}}</td>
                     <td class="text-center">
                         @if($item->poConfirmedYN == 0 && $item->approved == 0)
                             <span>Not Confirmed</span>
                         @endif
-                        @if($item->poConfirmedYN == 1 && $item->approved == 0)
+                        @if($item->poConfirmedYN == 1 && $item->approved == 0 && $item->refferedBackYN == 0)
                             <span>Pending Approval</span>
                         @endif
-                        @if($item->poConfirmedYN == 1 && $item->refferedBackYN == 1)
+                        @if($item->poConfirmedYN == 1 && $item->approved == 0 && $item->refferedBackYN == 1)
                             <span>Rejected</span>
                         @endif
-                        @if($item->poConfirmedYN == 1 && $item->approved == 1)
+                        @if($item->poConfirmedYN == 1 && ($item->approved == -1 || $item->approved == 1))
                             <span>Fully Approved</span>
+                        @endif
+                        @if($item->poConfirmedYN == 1 && $item->approved == 0 && $item->refferedBackYN == -1)
+                            <span>Referred Back</span>
                         @endif
                     </td>
                     <td class="text-center">{{ \App\helpers\General::dateFormat($item->createdDateTime)}}</td>
@@ -419,15 +423,21 @@
                         @if($item->invoiceMaster->confirmedYN == 0 && $item->invoiceMaster->approved == 0)
                             <span>Not Confirmed</span>
                         @endif
-                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0)
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == 0)
                             <span>Pending Approval</span>
                         @endif
-                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->refferedBackYN == 1)
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == 1)
                             <span>Rejected</span>
                         @endif
                         @if($item->invoiceMaster->confirmedYN == 1 &&
                             ($item->invoiceMaster->approved == -1 || $item->invoiceMaster->approved == 1))
                             <span>Fully Approved</span>
+                        @endif
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == -1)
+                            <span>Referred Back</span>
                         @endif
                     </td>
                     <td class="text-center">
@@ -468,16 +478,22 @@
                         @if($item->paymentVoucherMaster->confirmedYN == 0 && $item->paymentVoucherMaster->approved == 0)
                             <span>Not Confirmed</span>
                         @endif
-                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0)
+                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0
+ && $item->paymentVoucherMaster->refferedBackYN == 0)
                             <span>Pending Approval</span>
                         @endif
                         @if(
-                    $item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->refferedBackYN == 1)
+                    $item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0 &&
+                     $item->paymentVoucherMaster->refferedBackYN == 1)
                             <span>Rejected</span>
                         @endif
                         @if($item->paymentVoucherMaster->confirmedYN == 1 &&
                         ($item->paymentVoucherMaster->approved == -1 || $item->paymentVoucherMaster->approved == 1))
                             <span>Fully Approved</span>
+                        @endif
+                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0
+ && $item->paymentVoucherMaster->refferedBackYN == -1)
+                            <span>Referred Back</span>
                         @endif
                     </td>
                     <td class="text-center">
@@ -521,16 +537,25 @@
                         @if($item->invoiceMaster->confirmedYN == 0 && $item->invoiceMaster->approved == 0)
                             <span>Not Confirmed</span>
                         @endif
-                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0)
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == 0)
                             <span>Pending Approval</span>
                         @endif
-                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->refferedBackYN == 1)
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == 1)
                             <span>Rejected</span>
                         @endif
                         @if($item->invoiceMaster->confirmedYN == 1 &&
                             ($item->invoiceMaster->approved == -1 || $item->invoiceMaster->approved == 1))
                             <span>Fully Approved</span>
                         @endif
+                        @if($item->invoiceMaster->confirmedYN == 1 && $item->invoiceMaster->approved == 0 &&
+ $item->invoiceMaster->refferedBackYN == -1)
+                            <span>Referred Back</span>
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
                     </td>
                     <td class="text-center">
                         {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
@@ -570,16 +595,22 @@
                         @if($item->paymentVoucherMaster->confirmedYN == 0 && $item->paymentVoucherMaster->approved == 0)
                             <span>Not Confirmed</span>
                         @endif
-                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0)
+                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0
+ && $item->paymentVoucherMaster->refferedBackYN == 0)
                             <span>Pending Approval</span>
                         @endif
                         @if(
-                    $item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->refferedBackYN == 1)
+                    $item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0 &&
+                     $item->paymentVoucherMaster->refferedBackYN == 1)
                             <span>Rejected</span>
                         @endif
                         @if($item->paymentVoucherMaster->confirmedYN == 1 &&
                         ($item->paymentVoucherMaster->approved == -1 || $item->paymentVoucherMaster->approved == 1))
                             <span>Fully Approved</span>
+                        @endif
+                        @if($item->paymentVoucherMaster->confirmedYN == 1 && $item->paymentVoucherMaster->approved == 0
+ && $item->paymentVoucherMaster->refferedBackYN == -1)
+                            <span>Referred Back</span>
                         @endif
                     </td>
                     <td class="text-center">
