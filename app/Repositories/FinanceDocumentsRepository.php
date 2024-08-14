@@ -213,12 +213,15 @@ class FinanceDocumentsRepository extends BaseRepository
         $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
         $createdAt = Carbon::now();
         $company = Company::getCompanyData($companySystemID);
+        $currencyId = Company::getLocalCurrencyID($companySystemID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
 
         return [
             'purchaseOrder' => $purchaseOrder,
             'contract' => $contract,
             'created_at' => $createdAt,
             'company' => $company,
+            'decimalPlaces' => $decimalPlaces,
         ];
     }
 

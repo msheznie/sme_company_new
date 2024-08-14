@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Company;
+use App\Models\CompanyPolicyMaster;
 use App\Models\Employees;
 use App\Models\Users;
 use Illuminate\Support\Facades\Auth;
@@ -137,6 +138,15 @@ class General
         {
             return '';
         }
+    }
+
+    public static function checkPolicy($companySystemID = 0, $policyId = 0)
+    {
+
+        return CompanyPolicyMaster::where('companySystemID', $companySystemID)
+            ->where('companyPolicyCategoryID', $policyId)
+            ->where('isYesNO', 1)
+            ->exists();
     }
 
 
