@@ -87,6 +87,10 @@ Route::group(['middleware' => ['tenant']], function ()
             App\Http\Controllers\API\CMContractSectionsMasterAPIController::class);
         Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
+    Route::get('/print-financial-summary', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinancialSummary'
+    ]);
 });
 
 Route::get('/activate-contract', function ()
@@ -100,8 +104,3 @@ Route::get('/contract-expiry-reminder', function ()
     \Artisan::call('reminderContractExpiry');
     return 'Contracts Reminder Expiry Send Successfully!';
 });
-
-Route::get('/print-financial-summary', [
-    \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
-    'printFinancialSummary'
-]);

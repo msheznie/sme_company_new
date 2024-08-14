@@ -9,6 +9,7 @@ use App\Helpers\General;
 use App\Http\Requests\API\CreateFinanceDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateFinanceDocumentsAPIRequest;
 use App\Models\Company;
+use App\Models\CurrencyMaster;
 use App\Models\Employees;
 use App\Models\FinanceDocuments;
 use App\Models\PurchaseOrderMaster;
@@ -200,6 +201,8 @@ class FinanceDocumentsAPIController extends AppBaseController
         $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
         $createdAt = Carbon::now();
         $company = Company::getCompanyData($companySystemID);
+        $currencyId = Company::getLocalCurrencyID($companySystemID);
+        $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
 
         $retentionSI = FinanceDocuments::getSupplierInvoice($contract['id'], $companySystemID,2,11);
         $retentionPV = FinanceDocuments::getPaymentVoucher($contract['id'], $companySystemID,2,4);
@@ -211,6 +214,7 @@ class FinanceDocumentsAPIController extends AppBaseController
             'contract' => $contract,
             'createdAt' => $createdAt,
             'company' => $company,
+            'decimalPlaces' => $decimalPlaces,
             'purchaseOrder' => $purchaseOrder,
             'retentionSI' => $retentionSI,
             'retentionPV' => $retentionPV,

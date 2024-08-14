@@ -275,7 +275,7 @@
                             <td>
                             <span>
                                 @if($contract)
-                                    {{$contract->contractAmount}}
+                                    {{number_format($contract->contractAmount, $decimalPlaces)}}
                                 @endif
                             </span>
                             </td>
@@ -353,8 +353,8 @@
             <thead>
             <tr class="theme-tr-head">
                 <th>#</th>
-                <th class="text-center">Amount</th>
                 <th class="text-center">Document Code</th>
+                <th class="text-center">Amount</th>
                 <th class="text-center">Document Status</th>
                 <th class="text-center">Created Date</th>
             </tr>
@@ -363,9 +363,9 @@
             @foreach ($purchaseOrder as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
-                    <td class="text-center">{{$item->currency->CurrencyCode}}
-                        {{number_format($item->poTotalComRptCurrency, $item->currency->DecimalPlaces)}}</td>
                     <td class="text-center">{{$item->purchaseOrderCode}}</td>
+                    <td class="text-center">{{$item->currency->CurrencyCode}}
+                        {{number_format($item->poTotalSupplierTransactionCurrency, $item->currency->DecimalPlaces)}}</td>
                     <td class="text-center">
                         @if($item->poConfirmedYN == 0 && $item->approved == 0)
                             <span>Not Confirmed</span>
@@ -383,6 +383,11 @@
                     <td class="text-center">{{ \App\helpers\General::dateFormat($item->createdDateTime)}}</td>
                 </tr>
             @endforeach
+            @if(count($purchaseOrder) == 0)
+                <tr>
+                    <td colspan="5" class="text-center">No records found !</td>
+                </tr>
+            @endif
             </tbody>
         </table>
     </div>
@@ -430,6 +435,11 @@
                     </td>
                 </tr>
             @endforeach
+            @if(count($retentionSI) == 0)
+                <tr>
+                    <td colspan="5" class="text-center">No records found !</td>
+                </tr>
+            @endif
             </tbody>
         </table>
         <br>
@@ -475,6 +485,11 @@
                     </td>
                 </tr>
             @endforeach
+            @if(count($retentionPV) == 0)
+                <tr>
+                    <td colspan="5" class="text-center">No records found !</td>
+                </tr>
+            @endif
             </tbody>
         </table>
     </div>
@@ -522,6 +537,11 @@
                     </td>
                 </tr>
             @endforeach
+            @if(count($milestoneSI) == 0)
+                <tr>
+                    <td colspan="5" class="text-center">No records found !</td>
+                </tr>
+            @endif
             </tbody>
         </table>
         <br>
@@ -567,6 +587,11 @@
                     </td>
                 </tr>
             @endforeach
+            @if(count($milestonePV) == 0)
+                <tr>
+                    <td colspan="5" class="text-center">No records found !</td>
+                </tr>
+            @endif
             </tbody>
         </table>
     </div>
