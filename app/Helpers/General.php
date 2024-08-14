@@ -127,4 +127,17 @@ class General
         }
         return $number . '<sup>' .$suffix. '</sup>';
     }
+
+    public static function dateFormat($date)
+    {
+        if ($date)
+        {
+            return date("d/m/Y", strtotime($date));
+        } else
+        {
+            return '';
+        }
+    }
+
+
 }

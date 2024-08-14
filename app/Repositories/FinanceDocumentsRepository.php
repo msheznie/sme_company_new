@@ -211,15 +211,12 @@ class FinanceDocumentsRepository extends BaseRepository
         }
 
         $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
-        $employeeId = General::currentEmployeeId();
-        $createdBy = Employees::getEmployee($employeeId);
         $createdAt = Carbon::now();
         $company = Company::getCompanyData($companySystemID);
 
         return [
             'purchaseOrder' => $purchaseOrder,
             'contract' => $contract,
-            'created_by' => $createdBy,
             'created_at' => $createdAt,
             'company' => $company,
         ];
