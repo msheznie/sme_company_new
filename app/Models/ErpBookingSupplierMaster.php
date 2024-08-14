@@ -321,6 +321,23 @@ class ErpBookingSupplierMaster extends Model
     {
         return $this->belongsTo(CurrencyMaster::class, 'supplierTransactionCurrencyID', 'currencyID');
     }
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'companySystemID', 'companySystemID');
+    }
+
+    public function directDetail()
+    {
+        return $this->hasMany(ErpDirectInvoiceDetails::class, 'directInvoiceAutoID', 'bookingSuppMasInvAutoID');
+    }
+    public function supplier()
+    {
+        return $this->belongsTo(SupplierMaster::class, 'supplierID', 'supplierCodeSystem');
+    }
+    public function approvedBy()
+    {
+        return $this->hasMany(ErpDocumentApproved::class, 'documentSystemCode', 'bookingSuppMasInvAutoID');
+    }
 
     public function checkSupplierInvoiceMasterExists($id, $selectedCompanyId)
     {
@@ -335,5 +352,29 @@ class ErpBookingSupplierMaster extends Model
             ->where('companySystemID', $selectedCompanyID)
             ->select('bookingSuppMasInvAutoID', 'bookingInvCode')
             ->get();
+    }
+    public function getInvoiceMasterDetails($invoiceID)
+    {
+        return ErpBookingSupplierMaster::where('bookingSuppMasInvAutoID', $invoiceID)
+            ->with([
+                'directDetail' => function ($q)
+                {
+                    $q->with([
+                        'project',
+                        'segment'
+                    ]);
+                },
+                'company',
+                'supplier',
+                'currency',
+                'approvedBy' => function ($q)
+                {
+                    $q->with([
+                        'employee'
+                    ])
+                    ->where('documentSystemID', 11);
+                }
+            ])
+            ->first();
     }
 }
