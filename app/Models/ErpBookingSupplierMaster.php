@@ -338,6 +338,10 @@ class ErpBookingSupplierMaster extends Model
     {
         return $this->hasMany(ErpDocumentApproved::class, 'documentSystemCode', 'bookingSuppMasInvAutoID');
     }
+    public function confirmedBy()
+    {
+        return $this->belongsTo(Employees::class, 'confirmedByEmpSystemID', 'employeeSystemID');
+    }
 
     public function checkSupplierInvoiceMasterExists($id, $selectedCompanyId)
     {
@@ -373,7 +377,8 @@ class ErpBookingSupplierMaster extends Model
                         'employee'
                     ])
                     ->where('documentSystemID', 11);
-                }
+                },
+                'confirmedBy'
             ])
             ->first();
     }

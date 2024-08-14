@@ -575,6 +575,11 @@ Route::
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'showErpFinanceDocument'
     ])->name('Show erp finance document');
+
+    Route::delete('delete-finance-document/{id}', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'destroy'
+    ])->name('Delete finance document');
 });
 
 
