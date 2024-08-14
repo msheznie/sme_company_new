@@ -231,7 +231,7 @@ class FinanceDocumentsRepository extends BaseRepository
         ];
     }
 
-    public function showFinanceDocumentIndv($financeUuid, $documentID, $selectedCompanyID)
+    public function showFinanceDocument($financeUuid, $documentID, $selectedCompanyID)
     {
         $finance = $this->findByUuid($financeUuid);
         if(empty($finance))
@@ -242,6 +242,12 @@ class FinanceDocumentsRepository extends BaseRepository
         {
             throw new CommonException('Document id not found');
         }
-        return ErpBookingSupplierMaster::getInvoiceMasterDetails($finance['document_system_id']);
+        if($documentID == 11)
+        {
+            return ErpBookingSupplierMaster::getInvoiceMasterDetails($finance['document_system_id']);
+        } else
+        {
+            return PaySpplierInvoiceMaster::paymentVoucherMaster($finance['document_system_id']);
+        }
     }
 }

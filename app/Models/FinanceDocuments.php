@@ -185,10 +185,16 @@ class FinanceDocuments extends Model
             ->with([
                 'paymentVoucherMaster' => function ($q)
                 {
-                    $q->select('PayMasterAutoId', 'payAmountSuppTrans', 'directPayeeCurrency', 'BPVcode',
-                        'confirmedYN', 'approved', 'refferedBackYN', 'createdDateTime')
-                        ->with([
+                    $q->with([
                             'currency' => function ($q)
+                            {
+                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                            },
+                            'bankCurrency' => function ($q)
+                            {
+                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                            },
+                            'supplierCurrency'=> function ($q)
                             {
                                 $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
                             }

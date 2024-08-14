@@ -480,4 +480,84 @@ class PaySpplierInvoiceMaster extends Model
     {
         return $this->belongsTo(CurrencyMaster::class, 'directPayeeCurrency', 'currencyID');
     }
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'companySystemID', 'companySystemID');
+    }
+    public function paymentMode()
+    {
+        return $this->belongsTo(PaymentType::class, 'payment_mode', 'id');
+    }
+    public function supplier()
+    {
+        return $this->belongsTo(SupplierMaster::class, 'BPVsupplierID', 'supplierCodeSystem');
+    }
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'BPVAccount', 'bankAccountAutoID');
+    }
+    public function directDetail()
+    {
+        return $this->hasMany(DirectPaymentDetails::class, 'directPaymentAutoID', 'PayMasterAutoId');
+    }
+    public function localCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'localCurrencyID', 'currencyID');
+    }
+
+    public function rptCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'companyRptCurrencyID', 'currencyID');
+    }
+    public function approvedBy()
+    {
+        return $this->hasMany(ErpDocumentApproved::class, 'documentSystemCode', 'PayMasterAutoId');
+    }
+
+    public function confirmedBy()
+    {
+        return $this->belongsTo(Employees::class, 'confirmedByEmpSystemID', 'employeeSystemID');
+    }
+    public function bankCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class , 'BPVbankCurrency', 'currencyID');
+    }
+    public function supplierCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'supplierTransCurrencyID', 'currencyID');
+    }
+    public function paymentVoucherMaster($paymentVoucherID)
+    {
+        return PaySpplierInvoiceMaster::where('PayMasterAutoId', $paymentVoucherID)
+            ->with([
+                'company',
+                'paymentMode',
+                'supplier',
+                'bankAccount' => function ($q)
+                {
+                    $q->with([
+                        'currency'
+                    ]);
+                },
+                'currency',
+                'directDetail' => function ($q)
+                {
+                    $q->with([
+                        'project',
+                        'segment'
+                    ]);
+                },
+                'localCurrency',
+                'rptCurrency',
+                'approvedBy' => function ($q)
+                {
+                    $q->with([
+                        'employee'
+                    ])
+                        ->where('documentSystemID', 4);
+                },
+                'confirmedBy'
+            ])
+            ->first();
+    }
 }

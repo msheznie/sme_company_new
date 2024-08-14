@@ -143,16 +143,20 @@ class FinanceDocumentsAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var FinanceDocuments $financeDocuments */
-        $financeDocuments = $this->financeDocumentsRepository->find($id);
+        $financeDocuments = $this->financeDocumentsRepository->findByUuid($id);
 
         if (empty($financeDocuments))
         {
             return $this->sendError($this->errorMessage);
         }
-
+        $message = 'Invoice deleted successfully';
+        if($financeDocuments['document_id'] == 4)
+        {
+            $message = 'Payment voucher deleted successfully';
+        }
         $financeDocuments->delete();
 
-        return $this->sendSuccess('Finance Documents deleted successfully');
+        return $this->sendResponse([], $message);
     }
 
     public function getFinanceDocumentFilters(Request $request)
@@ -275,7 +279,7 @@ class FinanceDocumentsAPIController extends AppBaseController
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
         try
         {
-            $data = $this->financeDocumentsRepository->showFinanceDocumentIndv($financeUuid,
+            $data = $this->financeDocumentsRepository->showFinanceDocument($financeUuid,
                 $documentID, $selectedCompanyID);
             return $this->sendResponse($data, trans('common.data_retrieved_successfully'));
         } catch (CommonException $ex)

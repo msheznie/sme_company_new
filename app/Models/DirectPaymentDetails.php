@@ -231,4 +231,12 @@ class DirectPaymentDetails extends Model
         return !empty($directPaymentAutoIDs) ? collect($directPaymentAutoIDs)
             ->pluck('directPaymentAutoID') : [];
     }
+    public function segment()
+    {
+        return $this->belongsTo(SegmentMaster::class, 'serviceLineSystemID', 'serviceLineSystemID');
+    }
+    public function project()
+    {
+        return $this->belongsTo(ProjectMaster::class, 'detail_project_id', 'id');
+    }
 }
