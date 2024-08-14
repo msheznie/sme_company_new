@@ -20,6 +20,7 @@ use App\Models\CurrencyMaster;
 use App\Models\PurchaseOrderMaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Traits\CrudOperations;
 
 /**
  * Class FinanceDocumentsRepository
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 
 class FinanceDocumentsRepository extends BaseRepository
 {
+    use CrudOperations;
     /**
      * @var array
      */
@@ -59,6 +61,10 @@ class FinanceDocumentsRepository extends BaseRepository
     public function model()
     {
         return FinanceDocuments::class;
+    }
+    protected function getModel()
+    {
+        return new FinanceDocuments();
     }
 
     public function getFinanceDocumentFilters($contractUuid, $selectedCompanyID, $documentType)
@@ -225,5 +231,17 @@ class FinanceDocumentsRepository extends BaseRepository
         ];
     }
 
-
+    public function showFinanceDocumentIndv($financeUuid, $documentID, $selectedCompanyID)
+    {
+        $finance = $this->findByUuid($financeUuid);
+        if(empty($finance))
+        {
+            throw new CommonException('Finance document not found');
+        }
+        if($documentID == 0)
+        {
+            throw new CommonException('Document id not found');
+        }
+        return ErpBookingSupplierMaster::getInvoiceMasterDetails($finance['document_system_id']);
+    }
 }

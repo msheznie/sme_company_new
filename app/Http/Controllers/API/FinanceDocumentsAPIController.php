@@ -268,4 +268,22 @@ class FinanceDocumentsAPIController extends AppBaseController
             return $this->sendError($ex->getMessage());
         }
     }
+    public function showErpFinanceDocument(Request $request)
+    {
+        $financeUuid = $request->input('financeUuid') ?? null;
+        $documentID = $request->input('documentID') ?? 0;
+        $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
+        try
+        {
+            $data = $this->financeDocumentsRepository->showFinanceDocumentIndv($financeUuid,
+                $documentID, $selectedCompanyID);
+            return $this->sendResponse($data, trans('common.data_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch(\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+    }
 }

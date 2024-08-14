@@ -570,6 +570,11 @@ Route::
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'getFinanceSummaryData'
     ])->name('Finance Summary Data');
+
+    Route::post('show-erp-finance-document', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'showErpFinanceDocument'
+    ])->name('Show erp finance document');
 });
 
 

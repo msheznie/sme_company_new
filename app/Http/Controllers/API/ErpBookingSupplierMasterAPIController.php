@@ -20,6 +20,7 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
 {
     /** @var  ErpBookingSupplierMasterRepository */
     private $erpBookingSupplierMasterRepository;
+    protected $errorMessage = 'Erp Booking Supplier Master not found';
 
     public function __construct(ErpBookingSupplierMasterRepository $erpBookingSupplierMasterRepo)
     {
@@ -41,7 +42,8 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        return $this->sendResponse(ErpBookingSupplierMasterResource::collection($erpBookingSupplierMasters), 'Erp Booking Supplier Masters retrieved successfully');
+        return $this->sendResponse(ErpBookingSupplierMasterResource::collection($erpBookingSupplierMasters),
+            'Erp Booking Supplier Masters retrieved successfully');
     }
 
     /**
@@ -58,7 +60,8 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
 
         $erpBookingSupplierMaster = $this->erpBookingSupplierMasterRepository->create($input);
 
-        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster), 'Erp Booking Supplier Master saved successfully');
+        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster),
+            'Erp Booking Supplier Master saved successfully');
     }
 
     /**
@@ -74,11 +77,13 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
         /** @var ErpBookingSupplierMaster $erpBookingSupplierMaster */
         $erpBookingSupplierMaster = $this->erpBookingSupplierMasterRepository->find($id);
 
-        if (empty($erpBookingSupplierMaster)) {
-            return $this->sendError('Erp Booking Supplier Master not found');
+        if (empty($erpBookingSupplierMaster))
+        {
+            return $this->sendError($this->errorMessage);
         }
 
-        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster), 'Erp Booking Supplier Master retrieved successfully');
+        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster),
+            'Erp Booking Supplier Master retrieved successfully');
     }
 
     /**
@@ -97,13 +102,15 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
         /** @var ErpBookingSupplierMaster $erpBookingSupplierMaster */
         $erpBookingSupplierMaster = $this->erpBookingSupplierMasterRepository->find($id);
 
-        if (empty($erpBookingSupplierMaster)) {
-            return $this->sendError('Erp Booking Supplier Master not found');
+        if (empty($erpBookingSupplierMaster))
+        {
+            return $this->sendError($this->errorMessage);
         }
 
         $erpBookingSupplierMaster = $this->erpBookingSupplierMasterRepository->update($input, $id);
 
-        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster), 'ErpBookingSupplierMaster updated successfully');
+        return $this->sendResponse(new ErpBookingSupplierMasterResource($erpBookingSupplierMaster),
+            'ErpBookingSupplierMaster updated successfully');
     }
 
     /**
@@ -121,8 +128,9 @@ class ErpBookingSupplierMasterAPIController extends AppBaseController
         /** @var ErpBookingSupplierMaster $erpBookingSupplierMaster */
         $erpBookingSupplierMaster = $this->erpBookingSupplierMasterRepository->find($id);
 
-        if (empty($erpBookingSupplierMaster)) {
-            return $this->sendError('Erp Booking Supplier Master not found');
+        if (empty($erpBookingSupplierMaster))
+        {
+            return $this->sendError($this->errorMessage);
         }
 
         $erpBookingSupplierMaster->delete();

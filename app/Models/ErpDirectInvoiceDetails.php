@@ -167,6 +167,15 @@ class ErpDirectInvoiceDetails extends Model
 
     ];
 
+    public function segment()
+    {
+        return $this->belongsTo(SegmentMaster::class, 'serviceLineSystemID', 'serviceLineSystemID');
+    }
+    public function project()
+    {
+        return $this->belongsTo(ProjectMaster::class, 'detail_project_id', 'id');
+    }
+
     public function getContractLinkedWithErp($contractUuid, $companySystemID)
     {
         $directInvoiceAutoIDs = ErpDirectInvoiceDetails::where('contractID', $contractUuid)
