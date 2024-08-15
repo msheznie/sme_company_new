@@ -352,11 +352,11 @@
         <table class="table table-bordered" style="width: 100%;">
             <thead>
             <tr class="theme-tr-head">
-                <th>#</th>
-                <th class="text-center">Document Code</th>
-                <th class="text-center">Amount</th>
-                <th class="text-center">Document Status</th>
-                <th class="text-center">Created Date</th>
+                <th style="width: 1%;">#</th>
+                <th class="text-center" style="width: 25%;">Document Code</th>
+                <th class="text-center" style="width: 24%;">Amount</th>
+                <th class="text-center" style="width: 25%;">Document Status</th>
+                <th class="text-center" style="width: 25%;">Created Date</th>
             </tr>
             </thead>
             <tbody>
@@ -403,22 +403,22 @@
                 <th class="text-left" colspan="5">Invoice</th>
             </tr>
             <tr class="theme-tr-head">
-                <th>#</th>
-                <th class="text-center">Amount</th>
-                <th class="text-center">Document Code</th>
-                <th class="text-center">Document Status</th>
-                <th class="text-center">Created Date</th>
+                <th style="width: 1%;">#</th>
+                <th class="text-center" style="width: 25%;">Document Code</th>
+                <th class="text-center" style="width: 24%;">Amount</th>
+                <th class="text-center" style="width: 25%;">Document Status</th>
+                <th class="text-center" style="width: 25%;">Created Date</th>
             </tr>
             </thead>
             <tbody>
             @foreach ($retentionSI as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
+                    <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
                     <td class="text-center">{{$item->invoiceMaster->currency->CurrencyCode}}
                         {{number_format($item->invoiceMaster->bookingAmountTrans,
                         $item->invoiceMaster->currency->DecimalPlaces)}}
                     </td>
-                    <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
                     <td class="text-center">
                         @if($item->invoiceMaster->confirmedYN == 0 && $item->invoiceMaster->approved == 0)
                             <span>Not Confirmed</span>
@@ -459,21 +459,64 @@
                 <th class="text-left" colspan="5">Payment Voucher</th>
             </tr>
             <tr class="theme-tr-head">
-                <th>#</th>
-                <th class="text-center">Amount</th>
-                <th class="text-center">Document Code</th>
-                <th class="text-center">Document Status</th>
-                <th class="text-center">Created Date</th>
+                <th style="width: 1%;">#</th>
+                <th class="text-center" style="width: 25%;">Document Code</th>
+                <th class="text-center" style="width: 24%;">Amount</th>
+                <th class="text-center" style="width: 25%;">Document Status</th>
+                <th class="text-center" style="width: 25%;">Created Date</th>
             </tr>
             </thead>
             <tbody>
             @foreach ($retentionPV as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
-                    <td class="text-center">{{$item->paymentVoucherMaster->currency->CurrencyCode}}
-                        {{number_format($item->paymentVoucherMaster->payAmountSuppTrans,
- $item->paymentVoucherMaster->currency->DecimalPlaces)}}</td>
                     <td class="text-center">{{$item->paymentVoucherMaster->BPVcode}}</td>
+                    <td class="text-center">
+                        <span>{{$item->paymentVoucherMaster->supplierCurrency->CurrencyCode}}</span>
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 1)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->VATAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 0
+                        && $item->paymentVoucherMaster->payAmountSuppTrans == 0)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 0
+                        && $item->paymentVoucherMaster->payAmountSuppTrans != 0)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->VATAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if($item->paymentVoucherMaster->invoiceType != 3)
+                            <span>
+                                {{number_format
+            ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->retentionVatAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+                    </td>
                     <td class="text-center">
                         @if($item->paymentVoucherMaster->confirmedYN == 0 && $item->paymentVoucherMaster->approved == 0)
                             <span>Not Confirmed</span>
@@ -517,22 +560,22 @@
                 <th class="text-left" colspan="5">Invoice</th>
             </tr>
             <tr class="theme-tr-head">
-                <th>#</th>
-                <th class="text-center">Amount</th>
-                <th class="text-center">Document Code</th>
-                <th class="text-center">Document Status</th>
-                <th class="text-center">Created Date</th>
+                <th style="width: 1%;">#</th>
+                <th class="text-center" style="width: 25%;">Document Code</th>
+                <th class="text-center" style="width: 24%;">Amount</th>
+                <th class="text-center" style="width: 25%;">Document Status</th>
+                <th class="text-center" style="width: 25%;">Created Date</th>
             </tr>
             </thead>
             <tbody>
             @foreach ($milestoneSI as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
+                    <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
                     <td class="text-center">{{$item->invoiceMaster->currency->CurrencyCode}}
                         {{number_format($item->invoiceMaster->bookingAmountTrans,
                         $item->invoiceMaster->currency->DecimalPlaces)}}
                     </td>
-                    <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
                     <td class="text-center">
                         @if($item->invoiceMaster->confirmedYN == 0 && $item->invoiceMaster->approved == 0)
                             <span>Not Confirmed</span>
@@ -557,9 +600,6 @@
                     <td class="text-center">
                         {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
                     </td>
-                    <td class="text-center">
-                        {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
-                    </td>
                 </tr>
             @endforeach
             @if(count($milestoneSI) == 0)
@@ -576,21 +616,64 @@
                 <th class="text-left" colspan="5">Payment Voucher</th>
             </tr>
             <tr class="theme-tr-head">
-                <th>#</th>
-                <th class="text-center">Amount</th>
-                <th class="text-center">Document Code</th>
-                <th class="text-center">Document Status</th>
-                <th class="text-center">Created Date</th>
+                <th style="width: 1%;">#</th>
+                <th class="text-center" style="width: 25%;">Document Code</th>
+                <th class="text-center" style="width: 24%;">Amount</th>
+                <th class="text-center" style="width: 25%;">Document Status</th>
+                <th class="text-center" style="width: 25%;">Created Date</th>
             </tr>
             </thead>
             <tbody>
             @foreach ($milestonePV as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
-                    <td class="text-center">{{$item->paymentVoucherMaster->currency->CurrencyCode}}
-                        {{number_format($item->paymentVoucherMaster->payAmountSuppTrans,
- $item->paymentVoucherMaster->currency->DecimalPlaces)}}</td>
                     <td class="text-center">{{$item->paymentVoucherMaster->BPVcode}}</td>
+                    <td class="text-center">
+                        <span>{{$item->paymentVoucherMaster->supplierCurrency->CurrencyCode}}</span>
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 1)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->VATAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 0
+                        && $item->paymentVoucherMaster->payAmountSuppTrans == 0)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if(
+                     $item->paymentVoucherMaster->invoiceType == 3 && $item->paymentVoucherMaster->confirmedYN == 0
+                        && $item->paymentVoucherMaster->payAmountSuppTrans != 0)
+                            <span>
+                                {{number_format
+                     ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->VATAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+
+
+                        @if($item->paymentVoucherMaster->invoiceType != 3)
+                            <span>
+                                {{number_format
+            ($item->paymentVoucherMaster->payAmountSuppTrans * 1 + $item->paymentVoucherMaster->retentionVatAmount * 1,
+                     $item->paymentVoucherMaster->supplierCurrency->DecimalPlaces)
+                     }}
+                            </span>
+                        @endif
+                    </td>
                     <td class="text-center">
                         @if($item->paymentVoucherMaster->confirmedYN == 0 && $item->paymentVoucherMaster->approved == 0)
                             <span>Not Confirmed</span>
