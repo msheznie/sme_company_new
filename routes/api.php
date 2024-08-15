@@ -91,6 +91,14 @@ Route::group(['middleware' => ['tenant']], function ()
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'printFinancialSummary'
     ]);
+    Route::get('/print-invoice', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinanceDocumentInvoice'
+    ]);
+    Route::get('/print-payment-voucher', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinanceDocumentPayment'
+    ]);
 });
 
 Route::get('/activate-contract', function ()

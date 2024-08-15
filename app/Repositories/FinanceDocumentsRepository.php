@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Models\CompanyPolicyMaster;
 use App\Models\DirectPaymentDetails;
 use App\Models\ErpBookingSupplierMaster;
 use App\Models\Employees;
@@ -249,5 +250,93 @@ class FinanceDocumentsRepository extends BaseRepository
         {
             return PaySpplierInvoiceMaster::paymentVoucherMaster($finance['document_system_id']);
         }
+    }
+    public function printPaymentVoucher($data)
+    {
+        $transDecimal = 2;
+        $localDecimal = 3;
+        $rptDecimal = 2;
+        if ($data->transactioncurrency)
+        {
+            $transDecimal = $data->currency->DecimalPlaces;
+        }
+
+        if ($data->localcurrency)
+        {
+            $localDecimal = $data->currency->DecimalPlaces;
+        }
+
+        if ($data->rptcurrency)
+        {
+            $rptDecimal = $data->currency->DecimalPlaces;
+        }
+        $order = array(
+            'masterdata' => $data,
+            'transDecimal' => $transDecimal,
+            'localDecimal' => $localDecimal,
+            'rptDecimal' => $rptDecimal
+        );
+
+        $fileName = 'payment_voucher.pdf';
+        $html = view('payment_voucher_print', $order);
+        $htmlFooter = view('payment_voucher_print_footer', $order);
+
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('tmp'), 'mode' => 'utf-8', 'format' => 'A4-P',
+            'setAutoTopMargin' => 'stretch', 'autoMarginPadding' => -10]);
+        $mpdf->AddPage('P');
+        $mpdf->setAutoBottomMargin = 'stretch';
+        $mpdf->SetHTMLFooter($htmlFooter);
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output($fileName, 'I');
+    }
+    public function printInvoice($supplierInvoice, $companySystemID)
+    {
+        $transDecimal = 2;
+        $localDecimal = 3;
+        $rptDecimal = 2;
+
+        if ($supplierInvoice->transactioncurrency)
+        {
+            $transDecimal = $supplierInvoice->currecny->DecimalPlaces;
+        }
+
+        if ($supplierInvoice->localcurrency)
+        {
+            $localDecimal = $supplierInvoice->localcurrency->DecimalPlaces;
+        }
+
+        if ($supplierInvoice->rptcurrency)
+        {
+            $rptDecimal = $supplierInvoice->rptcurrency->DecimalPlaces;
+        }
+        $directTotTra = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'DIAmount');
+        $directTotVAT = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'VATAmount');
+        $directTotNet = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'netAmount');
+        $directTotLoc = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'localAmount');
+
+        $isProjectBase = CompanyPolicyMaster::checkActiveCompanyPolicy($companySystemID, 56);
+
+        $order = array(
+            'masterdata' => $supplierInvoice,
+            'transDecimal' => $transDecimal,
+            'localDecimal' => $localDecimal,
+            'rptDecimal' => $rptDecimal,
+            'directTotTra' => $directTotTra,
+            'directTotVAT' => $directTotVAT,
+            'directTotNet' => $directTotNet,
+            'directTotLoc' => $directTotLoc,
+            'isProjectBase' => $isProjectBase
+        );
+
+        $fileName = 'invoice.pdf';
+        $html = view('invoice_print', $order);
+        $htmlFooter = view('invoice_print_footer', $order);
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('tmp'), 'mode' => 'utf-8', 'format' => 'A4-P',
+            'setAutoTopMargin' => 'stretch', 'autoMarginPadding' => -10]);
+        $mpdf->AddPage('P');
+        $mpdf->setAutoBottomMargin = 'stretch';
+        $mpdf->SetHTMLFooter($htmlFooter);
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output($fileName, 'I');
     }
 }

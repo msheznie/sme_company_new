@@ -360,6 +360,21 @@ class ErpBookingSupplierMaster extends Model
     public function getInvoiceMasterDetails($invoiceID)
     {
         return ErpBookingSupplierMaster::where('bookingSuppMasInvAutoID', $invoiceID)
+            ->select('bookingSuppMasInvAutoID', 'documentSystemID', 'documentID', 'projectID', 'companyFinanceYearID',
+                'companyFinancePeriodID', 'bookingInvCode', 'bookingDate', 'comments', 'secondaryRefNo', 'supplierID',
+                'supplierGLCodeSystemID', 'supplierGLCode', 'supplierTransactionCurrencyID', 'supplierInvoiceNo',
+                'companyReportingCurrencyID', 'localCurrencyID', 'bookingAmountTrans', 'supplierInvoiceDate',
+                'bookingAmountLocal', 'bookingAmountRpt', 'confirmedYN', 'confirmedDate', 'approved', 'approvedDate',
+                'approvedByUserID', 'approvedByUserSystemID', 'documentType', 'refferedBackYN',
+                'timesReferred', 'RollLevForApp_curr', 'interCompanyTransferYN', 'createdUserGroup',
+                'createdUserSystemID', 'createdDateTime', 'cancelYN', 'cancelComment', 'cancelDate',
+                'canceledByEmpSystemID', 'canceledByEmpID', 'canceledByEmpName', 'rcmActivated', 'vatRegisteredYN',
+                'isLocalSupplier', 'VATAmount', 'VATAmountLocal', 'VATAmountRpt', 'retentionVatAmount',
+                'retentionDueDate', 'retentionAmount', 'retentionPercentage', 'netAmount', 'netAmountLocal',
+                'netAmountRpt', 'VATPercentage', 'serviceLineSystemID', 'wareHouseSystemCode', 'supplierVATEligible',
+                'employeeID', 'employeeControlAcID', 'createMonthlyDeduction', 'deliveryAppoinmentID',
+                'whtApplicableYN', 'whtType', 'whtApplicable', 'whtAmount', 'whtEdited', 'whtPercentage',
+                'isWHTApplicableVat', 'companySystemID')
             ->with([
                 'directDetail' => function ($q)
                 {
@@ -369,16 +384,28 @@ class ErpBookingSupplierMaster extends Model
                     ]);
                 },
                 'company',
-                'supplier',
-                'currency',
+                'supplier' => function ($q)
+                {
+                    $q->select('supplierCodeSystem', 'primarySupplierCode', 'supplierName');
+                },
+                'currency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
                 'approvedBy' => function ($q)
                 {
                     $q->with([
-                        'employee'
+                        'employee' => function ($q)
+                        {
+                            $q->select('employeeSystemID', 'empName');
+                        }
                     ])
                     ->where('documentSystemID', 11);
                 },
-                'confirmedBy'
+                'confirmedBy' => function ($q)
+                {
+                    $q->select('employeeSystemID', 'empName');
+                }
             ])
             ->first();
     }

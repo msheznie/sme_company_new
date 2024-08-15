@@ -184,4 +184,9 @@ class ErpDirectInvoiceDetails extends Model
             ->get(['directInvoiceAutoID']);
         return !empty($directInvoiceAutoIDs) ? collect($directInvoiceAutoIDs)->pluck('directInvoiceAutoID') : [];
     }
+    public function getSum($id, $field)
+    {
+        return ErpDirectInvoiceDetails::where('directInvoiceAutoID', $id)
+            ->sum($field);
+    }
 }
