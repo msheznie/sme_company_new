@@ -566,14 +566,14 @@ class PaySpplierInvoiceMaster extends Model
                     $q->with([
                         'employee' => function ($q)
                         {
-                            $q->select('employeeSystemID', 'empName');
+                            $q->select('employeeSystemID', 'empName', 'empFullName');
                         }
                     ])
                         ->where('documentSystemID', 4);
                 },
                 'confirmedBy' => function ($q)
                 {
-                    $q->select('employeeSystemID', 'empName');
+                    $q->select('employeeSystemID', 'empName', 'empFullName');
                 }
             ])
             ->first();

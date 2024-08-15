@@ -374,7 +374,7 @@ class ErpBookingSupplierMaster extends Model
                 'netAmountRpt', 'VATPercentage', 'serviceLineSystemID', 'wareHouseSystemCode', 'supplierVATEligible',
                 'employeeID', 'employeeControlAcID', 'createMonthlyDeduction', 'deliveryAppoinmentID',
                 'whtApplicableYN', 'whtType', 'whtApplicable', 'whtAmount', 'whtEdited', 'whtPercentage',
-                'isWHTApplicableVat', 'companySystemID')
+                'isWHTApplicableVat', 'companySystemID', 'confirmedByEmpSystemID')
             ->with([
                 'directDetail' => function ($q)
                 {
@@ -397,14 +397,14 @@ class ErpBookingSupplierMaster extends Model
                     $q->with([
                         'employee' => function ($q)
                         {
-                            $q->select('employeeSystemID', 'empName');
+                            $q->select('employeeSystemID', 'empName', 'empFullName');
                         }
                     ])
                     ->where('documentSystemID', 11);
                 },
                 'confirmedBy' => function ($q)
                 {
-                    $q->select('employeeSystemID', 'empName');
+                    $q->select('employeeSystemID', 'empName', 'empFullName');
                 }
             ])
             ->first();
