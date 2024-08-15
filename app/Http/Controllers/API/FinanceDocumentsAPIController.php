@@ -9,8 +9,10 @@ use App\Helpers\General;
 use App\Http\Requests\API\CreateFinanceDocumentsAPIRequest;
 use App\Http\Requests\API\UpdateFinanceDocumentsAPIRequest;
 use App\Models\Company;
+use App\Models\CompanyPolicyMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Employees;
+use App\Models\ErpDirectInvoiceDetails;
 use App\Models\FinanceDocuments;
 use App\Models\PurchaseOrderMaster;
 use App\Repositories\FinanceDocumentsRepository;
@@ -227,10 +229,12 @@ class FinanceDocumentsAPIController extends AppBaseController
         );
         $fileName = 'financial_summary.pdf';
         $html = view('financial_summary', $order);
+        $htmlFooter = view('finance_summary_footer', $order);
         $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('tmp'), 'mode' => 'utf-8', 'format' => 'A4-P',
             'setAutoTopMargin' => 'stretch', 'autoMarginPadding' => -10]);
         $mpdf->AddPage('P');
         $mpdf->setAutoBottomMargin = 'stretch';
+        $mpdf->SetHTMLFooter($htmlFooter);
         $mpdf->WriteHTML($html);
         return $mpdf->Output($fileName, 'I');
     }
@@ -282,6 +286,40 @@ class FinanceDocumentsAPIController extends AppBaseController
             $data = $this->financeDocumentsRepository->showFinanceDocument($financeUuid,
                 $documentID, $selectedCompanyID);
             return $this->sendResponse($data, trans('common.data_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch(\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+    }
+    public function printFinanceDocumentInvoice(Request $request)
+    {
+        $financeUuid = $request->get('financeUuid');
+        $companySystemID = $request->get('selectedCompanyID');
+        try
+        {
+            $supplierInvoice = $this->financeDocumentsRepository->showFinanceDocument($financeUuid,
+                11, $companySystemID);
+            return $this->financeDocumentsRepository->printInvoice($supplierInvoice, $companySystemID);
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        } catch(\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
+        }
+    }
+    public function printFinanceDocumentPayment(Request $request)
+    {
+        $financeUuid = $request->get('financeUuid');
+        $companySystemID = $request->get('selectedCompanyID');
+        try
+        {
+            $data = $this->financeDocumentsRepository->showFinanceDocument($financeUuid,
+                4, $companySystemID);
+            return $this->financeDocumentsRepository->printPaymentVoucher($data);
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());

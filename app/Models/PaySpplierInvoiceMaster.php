@@ -532,11 +532,17 @@ class PaySpplierInvoiceMaster extends Model
             ->with([
                 'company',
                 'paymentMode',
-                'supplier',
+                'supplier' => function ($q)
+                {
+                    $q->select('supplierCodeSystem', 'primarySupplierCode', 'supplierName');
+                },
                 'bankAccount' => function ($q)
                 {
                     $q->with([
-                        'currency'
+                        'currency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        }
                     ]);
                 },
                 'currency',
@@ -547,16 +553,28 @@ class PaySpplierInvoiceMaster extends Model
                         'segment'
                     ]);
                 },
-                'localCurrency',
-                'rptCurrency',
+                'localCurrency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
+                'rptCurrency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
                 'approvedBy' => function ($q)
                 {
                     $q->with([
-                        'employee'
+                        'employee' => function ($q)
+                        {
+                            $q->select('employeeSystemID', 'empName');
+                        }
                     ])
                         ->where('documentSystemID', 4);
                 },
-                'confirmedBy'
+                'confirmedBy' => function ($q)
+                {
+                    $q->select('employeeSystemID', 'empName');
+                }
             ])
             ->first();
     }

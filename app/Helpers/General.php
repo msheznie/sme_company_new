@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\CompanyPolicyMaster;
 use App\Models\Employees;
 use App\Models\Users;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
@@ -148,6 +149,21 @@ class General
             ->where('isYesNO', 1)
             ->exists();
     }
-
+    public static function convertDateWithTime($date)
+    {
+        if ($date)
+        {
+            return self::dateOnlyFormat($date) ." ". date("g:i A", strtotime($date));
+        }
+        return null;
+    }
+    public static function dateOnlyFormat($date)
+    {
+        if ($date)
+        {
+            return (new Carbon($date))->format('Y-m-d');
+        }
+        return '';
+    }
 
 }
