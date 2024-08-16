@@ -549,4 +549,35 @@ Route::group(['prefix' => 'contract'], function (){
     Route::post('/export-contract-status-history',
         [\App\Http\Controllers\API\contractStatusHistoryAPIController::class, 'exportContractStatusHistory'])
         ->name('Export Contract Status History');
+
+    Route::post('/finance-document-filters',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getFinanceDocumentFilters'])
+        ->name('Get finance document filters');
+
+    Route::post('/pull-finance-document-from-erp',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'store'])
+        ->name('Pull finance document from erp');
+
+    Route::post('/get-contract-invoices',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getContractInvoices'])
+        ->name('Get contract invoices');
+
+    Route::post('/get-contract-payment-voucher',
+        [\App\Http\Controllers\API\FinanceDocumentsAPIController::class, 'getContractPaymentVoucher'])
+        ->name('Get contract payment voucher');
+
+    Route::post('finance-summary-data', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'getFinanceSummaryData'
+    ])->name('Finance Summary Data');
+
+    Route::post('show-erp-finance-document', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'showErpFinanceDocument'
+    ])->name('Show erp finance document');
+
+    Route::delete('delete-finance-document/{id}', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'destroy'
+    ])->name('Delete finance document');
 });

@@ -34,6 +34,7 @@ Route::group(['middleware' => ['tenant']], function ()
     Route::resource('c_m_contract_type_sections', App\Http\Controllers\API\CMContractTypeSectionsAPIController::class);
 
 
+
     Route::group(['middleware' => ['third_party_integration']], function ()
     {
         Route::get('get_contract_data', 'ContractMasterAPIController@getContractData');
@@ -44,6 +45,7 @@ Route::group(['middleware' => ['tenant']], function ()
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
         Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
+
 
         Route::group(['middleware' => ['company']], function ()
         {
@@ -85,6 +87,18 @@ Route::group(['middleware' => ['tenant']], function ()
             App\Http\Controllers\API\CMContractSectionsMasterAPIController::class);
         Route::resource('employees_details', App\Http\Controllers\API\EmployeesDetailsAPIController::class);
     });
+    Route::get('/print-financial-summary', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinancialSummary'
+    ]);
+    Route::get('/print-invoice', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinanceDocumentInvoice'
+    ]);
+    Route::get('/print-payment-voucher', [
+        \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
+        'printFinanceDocumentPayment'
+    ]);
 });
 
 Route::get('/activate-contract', function ()

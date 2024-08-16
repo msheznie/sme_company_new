@@ -138,6 +138,17 @@ class ContractMasterRepository extends BaseRepository
         $input = $request->all();
         $search = false;
         $companyId = $input['selectedCompanyID'];
+        $statusMappings = [
+            0 => 'In Active',
+            -1 => 'Active',
+            1 => 'Active',
+            2 => 'Active',
+            3 => 'Renewed',
+            4 => 'Active',
+            5 => 'Revised',
+            6 => 'Terminated',
+            7 => 'Ended',
+        ];
 
         $lotData = $this->model->contractMaster($search, $companyId, $input)->get();
         $data[0]['Contract Code'] = "Contract Code";
@@ -162,7 +173,7 @@ class ContractMasterRepository extends BaseRepository
                 $data[$count]['Reference Code'] = isset($value['referenceCode']) ? preg_replace('/^=/', '-', $value['referenceCode']) : '-';
                 $data[$count]['Start Date'] = Carbon::parse($value['startDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['startDate'])) : '-';
                 $data[$count]['End Date'] = Carbon::parse($value['endDate']) ? preg_replace('/^=/', '-', Carbon::parse($value['endDate'])) : '-';
-                $data[$count]['Status'] = $value['status'] == -1 ? 'Active' : 'In-active';
+                $data[$count]['Status'] = $statusMappings[$value['status']] ?? '-';
                 $count++;
             }
         }
@@ -1127,6 +1138,9 @@ class ContractMasterRepository extends BaseRepository
 
     private function checkMandatoryDetails($contractId, $companySystemID, $contractUuid)
     {
+        $activeSections = ContractSettingDetail::getActiveSections($contractId);
+        $containsRetention = $activeSections->contains('sectionDetailId', 5);
+
         $totalRecords = ContractMilestoneRetention::where('contractId', $contractId)
             ->where('companySystemId', $companySystemID)->count();
         $recordsWithMilestoneId = ContractMilestoneRetention::whereNotNull('milestoneId')
@@ -1152,15 +1166,15 @@ class ContractMasterRepository extends BaseRepository
         {
             return trans('common.milestone_title_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithRetentionPercentage)
+        if($containsRetention && ($totalRecords != $recordsWithRetentionPercentage))
         {
             return trans('common.retention_percentage_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithStartDate)
+        if( $containsRetention && ($totalRecords != $recordsWithStartDate))
         {
             return trans('common.start_date_is_a_mandatory_field');
         }
-        if($totalRecords != $recordsWithDueDate)
+        if($containsRetention && ($totalRecords != $recordsWithDueDate))
         {
             return trans('common.due_date_is_a_mandatory_field');
         }

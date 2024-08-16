@@ -212,6 +212,18 @@ class ContractManagementUtils
                 {
                     $q->select('employeeSystemID', 'empName');
                 },
+                'counterParties' => function ($q)
+                {
+                    $q->select('cmCounterParty_id', 'cmCounterParty_name');
+                },
+                'contractOwners' => function ($q)
+                {
+                    $q->select('id', 'contractUserName');
+                },
+                'contractUsers' => function ($q)
+                {
+                    $q->select('id', 'contractUserName');
+                }
             ])
             ->first();
     }

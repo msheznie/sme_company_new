@@ -310,7 +310,7 @@ class ContractMaster extends Model
             }
             if (isset($filter['is_status']))
             {
-                $query->where('status', $filter['is_status']);
+                $query->whereIn('status', $filter['is_status'] == -1 ? [-1, 1, 2, 4] : [$filter['is_status']]);
             }
             if (isset($filter['contractTypeID']))
             {
