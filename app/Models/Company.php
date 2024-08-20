@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\helper\Helper;
+use App\Helpers\General;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -121,6 +123,7 @@ class Company extends Model
     const UPDATED_AT = 'updated_at';
 
     protected $primaryKey = 'companySystemID';
+    protected $appends = ['logo_url'];
 
     public $fillable = [
         'CompanyID',
@@ -442,6 +445,13 @@ class Company extends Model
         'holding_updated_date' => 'nullable'
     ];
 
+    public function getLogoUrlAttribute()
+    {
+        return General::checkPolicy($this->masterCompanySystemIDReorting, 50)
+            ? General::getFileUrlFromS3($this->logoPath)
+            : $this->logoPath;
+    }
+
     public static function getLocalCurrencyID($companySystemID)
     {
         $company = Company::find($companySystemID);
@@ -455,6 +465,14 @@ class Company extends Model
             ['companySystemID', '=', $id],
             ['isActive', '=', 1]
         ])->exists();
+    }
+
+    public static function getCompanyData($id)
+    {
+        return self::where([
+            ['companySystemID', '=', $id],
+            ['isActive', '=', 1]
+        ])->first();
     }
 
 }

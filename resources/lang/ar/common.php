@@ -236,4 +236,5 @@ return [
     "due_in" => "Due In AR",
     "due_penalty_amount" => "Due Penalty Amount AR",
     "status" => "Status AR",
+    "data_retrieved_successfully" => "Data retrieved successfully"
 ];

@@ -287,7 +287,8 @@ class MilestonePaymentSchedules extends Model
                 {
                     $q1->select('id', 'contractCode', 'title');
                 }
-            ]);
+            ])
+            ->orderBy('id', 'desc');
 
         if ($filter)
         {

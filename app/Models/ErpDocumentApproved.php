@@ -227,4 +227,8 @@ class ErpDocumentApproved extends Model
             ->where("rollLevelOrder", $rollLevelOrder)
             ->first();
     }
+    public function employee()
+    {
+        return $this->HasOne(Employees::class, 'employeeSystemID', 'employeeSystemID');
+    }
 }

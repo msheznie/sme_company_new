@@ -3,8 +3,10 @@
 namespace App\Helpers;
 
 use App\Models\Company;
+use App\Models\CompanyPolicyMaster;
 use App\Models\Employees;
 use App\Models\Users;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
@@ -127,4 +129,41 @@ class General
         }
         return $number . '<sup>' .$suffix. '</sup>';
     }
+
+    public static function dateFormat($date)
+    {
+        if ($date)
+        {
+            return date("d/m/Y", strtotime($date));
+        } else
+        {
+            return '';
+        }
+    }
+
+    public static function checkPolicy($companySystemID = 0, $policyId = 0)
+    {
+
+        return CompanyPolicyMaster::where('companySystemID', $companySystemID)
+            ->where('companyPolicyCategoryID', $policyId)
+            ->where('isYesNO', 1)
+            ->exists();
+    }
+    public static function convertDateWithTime($date)
+    {
+        if ($date)
+        {
+            return self::dateOnlyFormat($date) ." ". date("g:i A", strtotime($date));
+        }
+        return null;
+    }
+    public static function dateOnlyFormat($date)
+    {
+        if ($date)
+        {
+            return (new Carbon($date))->format('Y-m-d');
+        }
+        return '';
+    }
+
 }
