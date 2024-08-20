@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.1.0...v1.2.0) (2024-08-20)
+
+
+### Features
+
+* **contract:** finance document integration file creation [CM-325] ([#232](https://github.com/pbsgears/Contract_Management_Backend/issues/232)) ([2985ee9](https://github.com/pbsgears/Contract_Management_Backend/commit/2985ee947d4becce9f9556947c1cd3dab44e469d))
+* **contract:** milestone and payment schedule finance document print [CM-326] ([#246](https://github.com/pbsgears/Contract_Management_Backend/issues/246)) ([11e43a7](https://github.com/pbsgears/Contract_Management_Backend/commit/11e43a7b1e23e085fa2e54076e38cdd7e056bcdb))
+* **contracts:** Finance Summary Tab [CM-332] ([#240](https://github.com/pbsgears/Contract_Management_Backend/issues/240)) ([425878f](https://github.com/pbsgears/Contract_Management_Backend/commit/425878feeb6ee1a5628263a80b7be46186d55319))
+
+
+### Bug Fixes
+
+* **contracts:** Document Status not available for 'Rejected' Invoices and Payment Vouchers in 'Retention' page [CM-398] ([#247](https://github.com/pbsgears/Contract_Management_Backend/issues/247)) ([522eba2](https://github.com/pbsgears/Contract_Management_Backend/commit/522eba2aeaa08e12b3c5d36e1f2c57df784c5421))
+
 ## [1.1.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.0.0...v1.1.0) (2024-08-12)
 
 
