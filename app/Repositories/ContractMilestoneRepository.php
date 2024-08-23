@@ -345,10 +345,17 @@ class ContractMilestoneRepository extends BaseRepository
         if ($deliverables) {
             foreach ($deliverables as $key => $deliverable) {
                 $status = 'Pending';
-                if ($deliverable['status'] == 1) {
+                if ($deliverable['status'] == 1)
+                {
                     $status = 'In Progress';
-                } elseif ($deliverable['status'] == 2) {
+                }
+                if ($deliverable['status'] == 2)
+                {
                     $status = 'Completed';
+                }
+                if ($deliverable['status'] == -1)
+                {
+                    $status = 'Not Started';
                 }
                 $data[$key + 1]['Milestone Title'] = $deliverable['title'] ?? '-';
                 $data[$key + 1]['Milestone Description'] = $deliverable['description'] ?? '-';
