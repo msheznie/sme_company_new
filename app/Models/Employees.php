@@ -246,6 +246,17 @@ class Employees extends Model
 
     ];
 
+    public function employeeDepartment()
+    {
+        //here employeeSystemID get as 'id'
+        return $this->belongsTo(EmployeeDepartments::class, 'id', 'EmpID');
+    }
+
+    public function employeeDepartments()
+    {
+        return $this->belongsTo(EmployeeDepartments::class, 'employeeSystemID', 'EmpID');
+    }
+
     public function pulledContractUser()
     {
         return $this->belongsTo(ContractUsers::class, 'employeeSystemID', 'contractUserId');
