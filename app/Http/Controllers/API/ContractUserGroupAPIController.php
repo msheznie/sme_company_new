@@ -193,8 +193,11 @@ class ContractUserGroupAPIController extends AppBaseController
         return $this->contractUserGroupRepository->getContractUserListToAssign($request);
     }
 
-    public function contractUserListForUserGroup(Request $request) {
-        return $this->contractUserGroupRepository->getContractUserListForUserGroup($request);
+    public function contractUserListForUserGroup(Request $request)
+    {
+        $userList =  $this->contractUserGroupRepository->getContractUserListForUserGroup($request);
+        return $this->sendResponse($userList, trans('common.user_list_retrieved_successfully')
+        );
     }
 
     public function contractUserGroupList(Request $request) {
