@@ -661,4 +661,10 @@ class ContractMasterAPIController extends AppBaseController
     {
         return $this->contractMasterRepository->getContractMasterForGraph($request);
     }
+
+    public function getSupplierContactDetails(Request $request)
+    {
+        $response = $this->contractMasterService->getSupplierContactDetails($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
+    }
 }

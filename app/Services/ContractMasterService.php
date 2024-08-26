@@ -10,6 +10,7 @@ use App\Models\ContractHistory;
 use App\Exceptions\CommonException;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
+use App\Models\ContractUsers;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\ContractMasterRepository;
 use App\Models\ContractMaster;
@@ -212,5 +213,11 @@ class ContractMasterService
 
         return ['contractCode' => $contractCode, 'lastSerialNumber' => $lastSerialNumber];
 
+    }
+
+    public function getSupplierContactDetails($request)
+    {
+        $uuid = $request->input('supUuid');
+        return ContractUsers::getSupplierContactDetails($uuid);
     }
 }

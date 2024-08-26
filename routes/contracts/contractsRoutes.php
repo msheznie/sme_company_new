@@ -580,6 +580,10 @@ Route::
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'destroy'
     ])->name('Delete finance document');
+
+    Route::post('/get-supplier-contact-details',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSupplierContactDetails'])
+        ->name('Get supplier contact details');
 });
 
 
