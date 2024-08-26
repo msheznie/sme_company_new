@@ -242,4 +242,24 @@ class ContractUsers extends Model
             ->first();
     }
 
+    public function getSupplierContactDetails($uuid)
+    {
+        return ContractUsers::with([
+            'contractSupplierUser' => function ($q)
+                {
+                    $q->with([
+                        'supplierContactDetails' => function ($q)
+                        {
+                         $q->select('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonTelephone');
+                        }
+                    ]);
+                    $q->select('supplierCodeSystem');
+                }
+            ])
+            ->select('uuid', 'contractUserId')
+            ->where('uuid', $uuid)
+            ->get();
+
+    }
+
 }
