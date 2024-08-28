@@ -218,6 +218,29 @@ class ContractMasterService
     public function getSupplierContactDetails($request)
     {
         $uuid = $request->input('supUuid');
-        return ContractUsers::getSupplierContactDetails($uuid);
+
+        $contactDetails = ContractUsers::getSupplierContactDetails($uuid);
+        $contactDetailsList = $contactDetails->contractSupplierUser->supplierContactDetails ?? [];
+        $isDefaultDetail = $contactDetailsList->firstWhere('isDefault', -1);
+
+        $primaryDetail = $isDefaultDetail ?? $contactDetailsList->first() ?? null;
+        $secondaryDetail = $contactDetailsList[1] ?? null;
+
+        if ($isDefaultDetail)
+        {
+            if (count($contactDetailsList) === 1)
+            {
+                $secondaryDetail = null;
+            }
+            if (count($contactDetailsList) > 1)
+            {
+                $secondaryDetail = $contactDetailsList[0];
+            }
+        }
+
+        return [
+            'primaryDetails' => $primaryDetail ?? null,
+            'secondaryDetails' => $secondaryDetail ?? null,
+        ];
     }
 }

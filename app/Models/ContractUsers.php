@@ -250,7 +250,9 @@ class ContractUsers extends Model
                     $q->with([
                         'supplierContactDetails' => function ($q)
                         {
-                         $q->select('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonTelephone');
+                         $q->select
+                         ('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonFax', 'isDefault');
+                         $q->orderBy('supplierContactID', 'desc');
                         }
                     ]);
                     $q->select('supplierCodeSystem');
@@ -258,7 +260,7 @@ class ContractUsers extends Model
             ])
             ->select('uuid', 'contractUserId')
             ->where('uuid', $uuid)
-            ->get();
+            ->first();
 
     }
 
