@@ -85,6 +85,7 @@ class ContractMilestoneRepository extends BaseRepository
 
         $response['contractMilestones'] = $contractMilestones;
         $response['decimalPlaces'] = $decimalPlaces;
+        $response['contractMaster'] = $contractMaster;
 
         return [
             'status' => true,
@@ -100,6 +101,7 @@ class ContractMilestoneRepository extends BaseRepository
         $formData = $request->input('formData');
         $title = $formData['title'];
         $description = $formData['description'];
+        $dueDate = $request->input('formattedDueDate');
         $status = $formData['status'];
         $uuid = bin2hex(random_bytes(16));
         $amendment = $request->input('amendment');
@@ -156,6 +158,7 @@ class ContractMilestoneRepository extends BaseRepository
                 'contractID' => $contractId,
                 'title' => $title,
                 'description' => $description,
+                'due_date' => $dueDate ? Carbon::parse($dueDate) : null,
                 'status' => $status,
                 'companySystemID' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
@@ -186,6 +189,7 @@ class ContractMilestoneRepository extends BaseRepository
         $contractUuid = $input['contractUuid'] ?? null;
         $title = $formData['title'];
         $description = $formData['description'];
+        $dueDate = $input['formattedDueDate'];
         $status = $formData['status'];
         $statusYN = $input['statusYN'];
         $id = $amendment ? $contractMilestone['amd_id'] :$contractMilestone['id'];
@@ -235,6 +239,7 @@ class ContractMilestoneRepository extends BaseRepository
             $insertMilestone = [
                 'title' => $title,
                 'description' => $description,
+                'due_date' => $dueDate ? Carbon::parse($dueDate) : null,
                 'status' => $status,
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
@@ -372,5 +377,11 @@ class ContractMilestoneRepository extends BaseRepository
     public function getMileStone($contractId)
     {
         return $this->model->getMileStone($contractId);
+    }
+
+    public function getMilestoneDueDate($request)
+    {
+        $uuid = $request->input('uuid');
+        return  ContractMilestone::getMilestoneDueDate($uuid);
     }
 }

@@ -75,6 +75,7 @@ class ContractDeliverablesRepository extends BaseRepository
                 $deliverablesArray[$key]['description'] = $value['description'];
                 $deliverablesArray[$key]['dueDate'] = $value['dueDate'];
                 $deliverablesArray[$key]['milestoneUuid'] = $value['milestone']['uuid'] ?? null;
+                $deliverablesArray[$key]['milestoneDueDate'] = $value['milestone']['due_date'] ?? null;
             }
         }
         return $deliverablesArray;

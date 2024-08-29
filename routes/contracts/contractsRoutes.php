@@ -584,6 +584,10 @@ Route::
     Route::post('/get-supplier-contact-details',
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSupplierContactDetails'])
         ->name('Get supplier contact details');
+
+    Route::post('/get-milestone-due-date',
+        [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'getMilestoneDueDate'])
+        ->name('Get Milestone Due Date');
 });
 
 
