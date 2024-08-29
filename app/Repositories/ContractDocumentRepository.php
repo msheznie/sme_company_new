@@ -116,6 +116,8 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
                     'documentName' => $input['documentName'],
                     'companySystemID' => $companyId,
                     'followingRequest' => $input['followingRequest'],
+                    'attach_after_approval' => $input['attach_after_approval'] ?? 0,
+                    'is_editable' => $input['is_editable'],
                 ];
 
 
@@ -649,6 +651,8 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
                     'followingRequest' => $input['followingRequest'],
                     'documentDescription' => $input['documentDescription'],
                     'documentVersionNumber' => $input['documentVersionNumber'],
+                    'attach_after_approval' => $input['attach_after_approval'] ?? 0,
+                    'is_editable' => $input['is_editable'],
                 ]);
 
 

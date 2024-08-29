@@ -46,7 +46,8 @@ class ContractAdditionalDocumentAmd extends Model
         'companySystemID',
         'created_by',
         'updated_by',
-        'contract_history_id'
+        'contract_history_id',
+        'is_editable'
     ];
 
     /**
@@ -67,7 +68,8 @@ class ContractAdditionalDocumentAmd extends Model
         'expiryDate' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'is_editable' => 'integer'
     ];
 
     /**
