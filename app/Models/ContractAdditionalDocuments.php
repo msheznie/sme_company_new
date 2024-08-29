@@ -49,7 +49,8 @@ class ContractAdditionalDocuments extends Model
         'expiryDate',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'is_editable'
     ];
 
     /**
@@ -68,7 +69,8 @@ class ContractAdditionalDocuments extends Model
         'expiryDate' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'is_editable' => 'integer'
     ];
 
     /**
@@ -90,7 +92,7 @@ class ContractAdditionalDocuments extends Model
     {
         $additionalDocumentsQuery = ContractAdditionalDocuments::select(
             'id', 'documentMasterID', 'uuid', 'documentType', 'documentName',
-            'documentDescription', 'expiryDate')
+            'documentDescription', 'expiryDate', 'is_editable')
             ->with([
                 'documentMaster' => function ($query)
                 {
@@ -105,7 +107,7 @@ class ContractAdditionalDocuments extends Model
 
         $contractDocumentsQuery = ContractDocument::select(
             'id','documentMasterID','uuid', 'documentType', 'documentName',
-            'documentDescription','documentExpiryDate as expiryDate')
+            'documentDescription','documentExpiryDate as expiryDate', 'is_editable')
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
