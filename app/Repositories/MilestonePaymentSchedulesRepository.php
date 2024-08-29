@@ -209,6 +209,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
         $data[0][trans('common.contract_type')] = trans('common.contract_type');
         $data[0][trans('common.contract_amount')] = trans('common.contract_amount');
         $data[0][trans('common.milestone')] = trans('common.milestone');
+        $data[0][trans('common.milestone_due_date')] = trans('common.milestone_due_date');
         $data[0][trans('common.milestone_amount')] = trans('common.milestone_amount');
         $data[0][trans('common.milestone_status')] = trans('common.milestone_status');
         if ($milestones)
@@ -244,6 +245,8 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                         ? number_format($contractMaster['contractAmount'], $decimalPlaces, '.', ',')
                         : '-',
                     trans('common.milestone') => $value['milestoneDetail']['title'] ?? '-',
+                    trans('common.milestone_due_date') => isset($value['milestoneDetail']['due_date']) ?
+                        preg_replace('/^=/', '-', Carbon::parse($value['milestoneDetail']['due_date'])->toDateString()) : '-',
                     trans('common.milestone_amount') => isset($value['amount'])
                         ? number_format($value['amount'], $decimalPlaces, '.', ',')
                         : '-',

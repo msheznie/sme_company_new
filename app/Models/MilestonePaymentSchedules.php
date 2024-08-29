@@ -219,7 +219,7 @@ class MilestonePaymentSchedules extends Model
                 ->where('approved_yn', 1);
             }, 'milestoneDetail' => function ($query)
             {
-                $query->select('id', 'uuid', 'title');
+                $query->select('id', 'uuid', 'title', 'due_date');
             }
         ])
         ->where(function ($query) use($contractTypeID)

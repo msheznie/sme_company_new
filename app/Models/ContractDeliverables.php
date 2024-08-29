@@ -108,7 +108,7 @@ class ContractDeliverables extends Model
             ->with([
                 'milestone' => function ($q)
                 {
-                    $q->select('id', 'uuid', 'title');
+                    $q->select('id', 'uuid', 'title', 'due_date');
                 }
             ])
             ->where('contractID', $contractID)

@@ -223,4 +223,10 @@ class ContractMilestoneAPIController extends AppBaseController
             return $this->sendResponse($basePath, trans('success_export'));
         }
     }
+
+    public function getMilestoneDueDate(Request $request)
+    {
+        $response = $this->contractMilestoneRepository->getMilestoneDueDate($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
+    }
 }

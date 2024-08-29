@@ -242,4 +242,5 @@
      "due_penalty_amount" => "Due Penalty Amount",
      "status" => "Status",
      'user_list_retrieved_successfully' => 'User list retrieved successfully',
+     'milestone_due_date' => 'Milestone Due Date'
  ];
