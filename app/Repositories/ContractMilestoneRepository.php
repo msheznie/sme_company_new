@@ -345,6 +345,7 @@ class ContractMilestoneRepository extends BaseRepository
 
         $data[0]['Milestone Title'] = "Milestone Title";
         $data[0]['Milestone Description'] = "Milestone Description";
+        $data[0]['Milestone Due Date'] = "Milestone Due Date";
         $data[0]['Status'] = "Status";
 
         if ($deliverables) {
@@ -364,6 +365,8 @@ class ContractMilestoneRepository extends BaseRepository
                 }
                 $data[$key + 1]['Milestone Title'] = $deliverable['title'] ?? '-';
                 $data[$key + 1]['Milestone Description'] = $deliverable['description'] ?? '-';
+                $data[$key + 1]['Milestone Due Date'] = $deliverable['due_date'] ?
+                    Carbon::parse($deliverable['due_date'])->format('Y-m-d') : '-';
                 $data[$key + 1]['Status'] = $status;
             }
         }
