@@ -231,11 +231,13 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     }
                 }
                 $statusMap = [
+                    -1 => 'Not Started',
+                    0 => 'Pending',
                     1 => 'In Progress',
                     2 => 'Completed',
                 ];
 
-                $status = $statusMap[$value['milestone_status']] ?? 'Pending';
+                $status = $statusMap[$value['milestoneDetail']['status']] ?? '-';
                 $data[$count] = [
                     trans('common.contract_code') => $contractMaster['contractCode'] ?? '-',
                     trans('common.title') => $contractMaster['title'] ?? '-',

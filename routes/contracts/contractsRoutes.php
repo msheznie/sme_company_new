@@ -588,6 +588,9 @@ Route::
     Route::post('/get-milestone-due-date',
         [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'getMilestoneDueDate'])
         ->name('Get Milestone Due Date');
+    Route::get('/milestone/{id}',
+        [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'show'])
+        ->name('get Contract Milestone');
 });
 
 
