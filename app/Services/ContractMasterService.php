@@ -17,6 +17,7 @@ use App\Models\ContractMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Company;
 use App\Utilities\ContractManagementUtils;
+use AWS\CRT\Log;
 use Carbon\Carbon;
 use Yajra\DataTables\DataTables;
 
@@ -220,21 +221,25 @@ class ContractMasterService
         $uuid = $request->input('supUuid');
 
         $contactDetails = ContractUsers::getSupplierContactDetails($uuid);
-        $contactDetailsList = $contactDetails->contractSupplierUser->supplierContactDetails ?? [];
+        $contactDetailsList = $contactDetails->contractSupplierUser->supplierContactDetails ?? collect([]);
         $isDefaultDetail = $contactDetailsList->firstWhere('isDefault', -1);
+        $notDefaultDetails = $contactDetailsList->filter(function ($detail)
+        {
+            return $detail->isDefault === 0;
+        });
 
-        $primaryDetail = $isDefaultDetail ?? $contactDetailsList->first() ?? null;
-        $secondaryDetail = $contactDetailsList[1] ?? null;
+        $primaryDetail = $isDefaultDetail ?? $notDefaultDetails->first() ?? null;
+        $secondaryDetail = $notDefaultDetails->skip(1)->first() ?? null;
 
         if ($isDefaultDetail)
         {
-            if (count($contactDetailsList) === 1)
+            if ($notDefaultDetails->count() === 0)
             {
                 $secondaryDetail = null;
             }
-            if (count($contactDetailsList) > 1)
+            if ($notDefaultDetails->count() > 0)
             {
-                $secondaryDetail = $contactDetailsList[0];
+                $secondaryDetail = $notDefaultDetails->first();
             }
         }
 
