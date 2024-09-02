@@ -379,6 +379,20 @@ class ContractMasterRepository extends BaseRepository
             throw new CommonException('Agreement Sign Date cannot be greater than the Contract Start Date');
         }
 
+        $contractMilestones = ContractMilestone::getContractMilestone($id, $selectedCompanyID);
+        foreach ($contractMilestones as $contractMilestone)
+        {
+            $milestoneDueDate = (new \DateTime($contractMilestone->due_date))->format('Y-m-d');
+            $startDate = (new \DateTime($formData['formatStartDate']))->format('Y-m-d');
+            $endDate = (new \DateTime($formData['formatEndDate']))->format('Y-m-d');
+
+            if($startDate > $milestoneDueDate || $endDate < $milestoneDueDate)
+            {
+                throw new CommonException('Contract start date should be less than milestone due date and
+                Contract end date should be greater than milestone due date');
+            }
+        }
+
         // $this->checkValidation($formData, $id, $selectedCompanyID);
 
         return DB::transaction(function () use (
@@ -926,7 +940,7 @@ class ContractMasterRepository extends BaseRepository
                 throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
             }
 
-            $message = $this->checkActiveMasters($contractMaster['id'], $companySystemID);
+            $message = $this->checkActiveMasters($contractMaster['id'], $companySystemID, $contractMaster['startDate'], $contractMaster['endDate']);
             if ($message)
             {
                 throw new CommonException($message);
@@ -959,7 +973,7 @@ class ContractMasterRepository extends BaseRepository
         });
     }
 
-    private function checkActiveMasters($contractId, $companySystemID)
+    private function checkActiveMasters($contractId, $companySystemID, $startDate, $endDate)
     {
         $activeMasters = ContractSettingMaster::where('contractId', $contractId)
             ->where('isActive', 1)
@@ -1010,6 +1024,21 @@ class ContractMasterRepository extends BaseRepository
                 if(empty($existMilestone))
                 {
                     return trans('common.at_least_one_milestone_should_be_available');
+                }
+
+                $deliverables = ContractDeliverables::getDeliverables($contractId, $companySystemID);
+                foreach ($deliverables as $deliverable)
+                {
+                    $milestoneDueDate = $deliverable->milestone->due_date ?? $endDate;
+                    $formatMilestoneDueDate = (new \DateTime($milestoneDueDate))->format('Y-m-d');
+                    $formatStartDate = (new \DateTime($startDate))->format('Y-m-d');
+                    $deliverableDueDate = (new \DateTime($deliverable->dueDate))->format('Y-m-d');
+
+                    if($formatStartDate > $deliverableDueDate || $formatMilestoneDueDate < $deliverableDueDate)
+                    {
+                        throw new CommonException('Contract start date should be less than deliverable due date and
+                milestone due date should be greater than deliverable due date');
+                    }
                 }
             }
             if(($activeMaster['contractTypeSection']['cmSection_id'] == 4 && !in_array(4, $existRetention) &&
@@ -1182,7 +1211,7 @@ class ContractMasterRepository extends BaseRepository
         {
             return trans('common.contract_amount_is_a_mandatory_field');
         }
-
+        
         return null;
     }
 
