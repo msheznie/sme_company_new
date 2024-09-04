@@ -39,6 +39,7 @@ use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Services\ContractMasterService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -1036,8 +1037,8 @@ class ContractMasterRepository extends BaseRepository
 
                     if($formatStartDate > $deliverableDueDate || $formatMilestoneDueDate < $deliverableDueDate)
                     {
-                        throw new CommonException('Contract start date should be less than deliverable due date and
-                milestone due date should be greater than deliverable due date');
+                        GeneralService::sendException('Due dates of the deliverables that are linked with
+                         milestones should be within the contract start date and the linked milestone\'s due date');
                     }
                 }
             }
@@ -1211,7 +1212,7 @@ class ContractMasterRepository extends BaseRepository
         {
             return trans('common.contract_amount_is_a_mandatory_field');
         }
-        
+
         return null;
     }
 

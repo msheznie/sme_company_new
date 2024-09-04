@@ -214,6 +214,15 @@ class ContractMaster extends Model
         return $this->hasMany(ErpDocumentApproved::class, 'documentSystemCode', 'id');
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(ContractMaster::class, 'parent_id', 'id');
+    }
+
+    public function history()
+    {
+        return $this->belongsTo(ContractHistory::class, 'id', 'contract_id');
+    }
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;

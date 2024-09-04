@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
+use Illuminate\Support\Facades\Log;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -804,4 +805,16 @@ class ContractHistoryService
         return contractStatusHistory::where('contract_id', $contractID)->where('status', -1)->exists();
     }
 
+    public function getContractStatusData($masterRecord)
+    {
+        return ContractMaster::select('uuid', 'id', 'companySystemID', 'parent_id')
+            ->with(['parent:id,uuid', 'history' => function ($query) use ($masterRecord)
+            {
+                $query->select('uuid', 'category', 'cloning_contract_id', 'company_id', 'contract_id')
+                    ->where('cloning_contract_id', $masterRecord['parent_id'])
+                    ->where('company_id', $masterRecord['companySystemID']);
+            }])
+            ->where('uuid', $masterRecord['uuid'])
+            ->first();
+    }
 }
