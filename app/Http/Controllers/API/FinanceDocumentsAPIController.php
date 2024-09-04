@@ -13,6 +13,7 @@ use App\Models\CompanyPolicyMaster;
 use App\Models\CurrencyMaster;
 use App\Models\Employees;
 use App\Models\ErpDirectInvoiceDetails;
+use App\Models\ContractSettingDetail;
 use App\Models\FinanceDocuments;
 use App\Models\PurchaseOrderMaster;
 use App\Repositories\FinanceDocumentsRepository;
@@ -214,8 +215,13 @@ class FinanceDocumentsAPIController extends AppBaseController
         $retentionPV = FinanceDocuments::getPaymentVoucher($contract['id'], $companySystemID,2,4);
         $milestoneSI = FinanceDocuments::getSupplierInvoice($contract['id'], $companySystemID,1,11);
         $milestonePV = FinanceDocuments::getPaymentVoucher($contract['id'], $companySystemID,1,4);
-
-
+        $activeMilestone = ContractSettingDetail::getActiveContractPaymentSchedule($contract['id']);
+        $activeMilestoneVal = $activeMilestone['sectionDetailId'] ?? 0;
+        if($activeMilestoneVal == 1)
+        {
+            $milestoneSI = $this->financeDocumentsRepository->generateSummaries($milestoneSI);
+            $milestonePV = $this->financeDocumentsRepository->generateSummaries($milestonePV);
+        }
         $order = array(
             'contract' => $contract,
             'createdAt' => $createdAt,
@@ -226,6 +232,7 @@ class FinanceDocumentsAPIController extends AppBaseController
             'retentionPV' => $retentionPV,
             'milestoneSI' => $milestoneSI,
             'milestonePV' => $milestonePV,
+            'activeMilestonePS' => $activeMilestoneVal,
         );
         $fileName = 'financial_summary.pdf';
         $html = view('financial_summary', $order);

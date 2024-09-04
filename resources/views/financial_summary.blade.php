@@ -534,21 +534,47 @@
         <table class="table table-bordered" style="width: 100%;">
             <thead>
             <tr class="theme-tr-head">
-                <th class="text-left" colspan="5">Invoice</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-left" colspan="6">Invoice</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                        <th class="text-left" colspan="5">Invoice</th>
+                @endif
             </tr>
             <tr class="theme-tr-head">
-                <th style="width: 1%;">#</th>
-                <th class="text-center" style="width: 25%;">Document Code</th>
-                <th class="text-center" style="width: 24%;">Amount</th>
-                <th class="text-center" style="width: 25%;">Document Status</th>
-                <th class="text-center" style="width: 25%;">Created Date</th>
+                <th style="width: 3%;">#</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-center" style="width: 30%;">Document Details</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                    <th class="text-center" style="width: 23%;">Document Code</th>
+                @endif
+                <th class="text-center">Amount</th>
+                <th class="text-center">Document Status</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-center">Milestone</th>
+                    <th class="text-center">Deliverable</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                    <th class="text-center">Created Date</th>
+                @endif
             </tr>
             </thead>
             <tbody>
             @foreach ($milestoneSI as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
-                    <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
+                    @if ($activeMilestonePS == 1)
+                        <td>
+                            <strong>Code: </strong>{{$item->invoiceMaster->bookingInvCode}}<br>
+                            <strong>Created Date: </strong>
+                                 {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
+
+                        </td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                        <td class="text-center">{{$item->invoiceMaster->bookingInvCode}}</td>
+                    @endif
                     <td class="text-center">{{$item->invoiceMaster->currency->CurrencyCode}}
                         {{number_format($item->invoiceMaster->bookingAmountTrans,
                         $item->invoiceMaster->currency->DecimalPlaces)}}
@@ -574,14 +600,25 @@
                             <span>Referred Back</span>
                         @endif
                     </td>
-                    <td class="text-center">
-                        {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
-                    </td>
+                    @if ($activeMilestonePS == 1)
+                        <td class="text-center">{{$item->milestoneSummary}}</td>
+                        <td>{{$item->deliverableSummary}}</td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                        <td class="text-center">
+                            {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
+                        </td>
+                    @endif
                 </tr>
             @endforeach
             @if(count($milestoneSI) == 0)
                 <tr>
-                    <td colspan="5" class="text-center">No records found !</td>
+                    @if ($activeMilestonePS == 1)
+                        <td colspan="6" class="text-center">No records found !</td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                            <td colspan="5" class="text-center">No records found !</td>
+                    @endif
                 </tr>
             @endif
             </tbody>
@@ -590,21 +627,46 @@
         <table class="table table-bordered" style="width: 100%;">
             <thead>
             <tr class="theme-tr-head">
-                <th class="text-left" colspan="5">Payment Voucher</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-left" colspan="6">Payment Voucher</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                    <th class="text-left" colspan="5">Payment Voucher</th>
+                @endif
             </tr>
             <tr class="theme-tr-head">
-                <th style="width: 1%;">#</th>
-                <th class="text-center" style="width: 25%;">Document Code</th>
-                <th class="text-center" style="width: 24%;">Amount</th>
-                <th class="text-center" style="width: 25%;">Document Status</th>
-                <th class="text-center" style="width: 25%;">Created Date</th>
+                <th style="width: 3%;">#</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-center" style="width: 30%;">Document Details</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                    <th class="text-center" style="width: 23%;">Document Code</th>
+                @endif
+                <th class="text-center">Amount</th>
+                <th class="text-center">Document Status</th>
+                @if ($activeMilestonePS == 1)
+                    <th class="text-center">Milestone</th>
+                    <th class="text-center">Deliverable</th>
+                @endif
+                @if ($activeMilestonePS != 1)
+                    <th class="text-center">Created Date</th>
+                @endif
             </tr>
             </thead>
             <tbody>
             @foreach ($milestonePV as $item)
                 <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
                     <td class="text-center">{{$loop->iteration}}</td>
-                    <td class="text-center">{{$item->paymentVoucherMaster->BPVcode}}</td>
+                    @if ($activeMilestonePS == 1)
+                        <td>
+                            <strong>Code: </strong>{{$item->paymentVoucherMaster->BPVcode}}<br>
+                            <strong>Created Date: </strong>
+                            {{ \App\helpers\General::dateFormat($item->paymentVoucherMaster->createdDateTime)}}
+                        </td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                        <td class="text-center">{{$item->paymentVoucherMaster->BPVcode}}</td>
+                    @endif
                     <td class="text-center">
                         <span>{{$item->paymentVoucherMaster->supplierCurrency->CurrencyCode}}</span>
                         @if(
@@ -673,14 +735,25 @@
                             <span>Referred Back</span>
                         @endif
                     </td>
-                    <td class="text-center">
-                        {{ \App\helpers\General::dateFormat($item->paymentVoucherMaster->createdDateTime)}}
-                    </td>
+                    @if ($activeMilestonePS == 1)
+                        <td class="text-center">{{$item->milestoneSummary}}</td>
+                        <td>{{$item->deliverableSummary}}</td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                        <td class="text-center">
+                            {{ \App\helpers\General::dateFormat($item->paymentVoucherMaster->createdDateTime)}}
+                        </td>
+                    @endif
                 </tr>
             @endforeach
             @if(count($milestonePV) == 0)
                 <tr>
-                    <td colspan="5" class="text-center">No records found !</td>
+                    @if ($activeMilestonePS == 1)
+                        <td colspan="6" class="text-center">No records found !</td>
+                    @endif
+                    @if ($activeMilestonePS != 1)
+                        <td colspan="5" class="text-center">No records found !</td>
+                    @endif
                 </tr>
             @endif
             </tbody>

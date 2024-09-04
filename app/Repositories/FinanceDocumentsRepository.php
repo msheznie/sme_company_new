@@ -11,6 +11,7 @@ use App\Models\Employees;
 use App\Models\FinanceDocuments;
 use App\Models\ErpDirectInvoiceDetails;
 use App\Models\PaySpplierInvoiceMaster;
+use App\Models\ContractDeliverables;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
@@ -195,8 +196,13 @@ class FinanceDocumentsRepository extends BaseRepository
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
-        return FinanceDocuments::getSupplierInvoice($contractMaster['id'], $selectedCompanyID, $documentType,
-            $documentID);
+        $financeDocuments = FinanceDocuments::getSupplierInvoice($contractMaster['id'], $selectedCompanyID,
+            $documentType, $documentID);
+        return [
+            'finance_document' => $financeDocuments,
+            'milestones' => ContractManagementUtils::getContractMilestones($contractMaster['id'], $selectedCompanyID),
+            'deliverables' => ContractDeliverables::getDeliverablesForFinance($contractMaster['id'], $selectedCompanyID)
+        ];
     }
     public function getContractPaymentVoucher($contractUuid, $selectedCompanyID, $documentType, $documentID)
     {
@@ -205,8 +211,13 @@ class FinanceDocumentsRepository extends BaseRepository
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
-        return FinanceDocuments::getPaymentVoucher($contractMaster['id'], $selectedCompanyID, $documentType,
-            $documentID);
+        $financeDocuments = FinanceDocuments::getPaymentVoucher($contractMaster['id'], $selectedCompanyID,
+            $documentType, $documentID);
+        return [
+            'finance_document' => $financeDocuments,
+            'milestones' => ContractManagementUtils::getContractMilestones($contractMaster['id'], $selectedCompanyID),
+            'deliverables' => ContractDeliverables::getDeliverablesForFinance($contractMaster['id'], $selectedCompanyID)
+        ];
     }
 
     public function getFinanceSummaryData($uuid, $companySystemID)
@@ -338,5 +349,29 @@ class FinanceDocumentsRepository extends BaseRepository
         $mpdf->SetHTMLFooter($htmlFooter);
         $mpdf->WriteHTML($html);
         return $mpdf->Output($fileName, 'I');
+    }
+    public function generateSummaries($documents)
+    {
+        foreach ($documents as $document)
+        {
+            $milestoneSummary = collect($document->milestoneList)
+                ->pluck('milestone.title')
+                ->filter()
+                ->implode(', ');
+            $deliverableSummary = collect($document->deliverableList)
+                ->map(function ($d)
+                {
+                    $milestoneTitle = $d->deliverable->milestone->title ?? '';
+                    $deliverableTitle = $d->deliverable->title;
+                    return trim("$milestoneTitle | $deliverableTitle", '| ');
+                })
+                ->filter()
+                ->implode(', ');
+
+            $document->milestoneSummary = $milestoneSummary;
+            $document->deliverableSummary = $deliverableSummary;
+        }
+
+        return $documents;
     }
 }
