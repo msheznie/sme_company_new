@@ -591,6 +591,9 @@ Route::
     Route::get('/milestone/{id}',
         [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'show'])
         ->name('get Contract Milestone');
+    Route::post('/finance-milestone-deliverable',
+        [\App\Http\Controllers\API\FinanceMilestoneDeliverableAPIController::class, 'store'])
+        ->name('store finance milestone deliverable');
 });
 
 
