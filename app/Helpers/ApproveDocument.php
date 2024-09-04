@@ -4,10 +4,12 @@ namespace App\Helpers;
 
 use App\Helpers\General;
 use App\Models\CompanyDocumentAttachment;
+use App\Models\ContractMaster;
 use App\Models\ErpApprovalLevel;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpEmployeesDepartments;
 use App\Services\ContractHistoryService;
+use App\Utilities\ContractManagementUtils;
 use App\Utilities\EmailUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -94,11 +96,27 @@ class ApproveDocument
             $masterRecord->approved_by = $employeeSystemID;
             $masterRecord->approved_date = now();
 
-            if($formData['documentSystemID'] == 123 && $masterRecord['parent_id'] == 0)
+            if($formData['documentSystemID'] == 123)
             {
+                if($masterRecord['parent_id'] == 0)
+                {
                     self::updateContractStatus($masterRecord);
-            }
 
+                } else
+                {
+                    $result = ContractHistoryService::getContractStatusData($masterRecord);
+
+                    $input = [
+                        'contractId' => $result->parent->uuid ?? null,
+                        'cloneContractId' => $masterRecord['uuid'],
+                        'category' => $result->history->category ?? null,
+                        'contractHistoryId' => $result->history->uuid ?? null,
+                        'selectedCompanyID' => $masterRecord['companySystemID'],
+                    ];
+
+                    ContractHistoryService::updateContractStatus($input);
+                }
+            }
             $update = $masterRecord->save();
 
             if(!$update)
