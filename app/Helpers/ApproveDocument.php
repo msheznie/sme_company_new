@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
 use App\Models\CompanyDocumentAttachment;
 use App\Models\ContractMaster;
@@ -9,6 +10,7 @@ use App\Models\ErpApprovalLevel;
 use App\Models\ErpDocumentApproved;
 use App\Models\ErpEmployeesDepartments;
 use App\Services\ContractHistoryService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use App\Utilities\EmailUtils;
 use Carbon\Carbon;
@@ -96,29 +98,19 @@ class ApproveDocument
             $masterRecord->approved_by = $employeeSystemID;
             $masterRecord->approved_date = now();
 
-            if($formData['documentSystemID'] == 123)
+            switch ($formData['documentSystemID'])
             {
-                if($masterRecord['parent_id'] == 0)
-                {
-                    self::updateContractStatus($masterRecord);
-
-                } else
-                {
-                    $result = ContractHistoryService::getContractStatusData($masterRecord);
-
-                    $input = [
-                        'contractId' => $result->parent->uuid ?? null,
-                        'cloneContractId' => $masterRecord['uuid'],
-                        'category' => $result->history->category ?? null,
-                        'contractHistoryId' => $result->history->uuid ?? null,
-                        'selectedCompanyID' => $masterRecord['companySystemID'],
-                    ];
-
-                    ContractHistoryService::updateContractStatus($input);
-                }
+                case 123:
+                    self::documentWiseDataUpdate($masterRecord);
+                    break;
+                case 124:
+                    ContractHistoryService::setContractStatusData($masterRecord);
+                    break;
+                default:
+                    break;
             }
-            $update = $masterRecord->save();
 
+            $update = $masterRecord->save();
             if(!$update)
             {
                 throw new CommonException(trans('common.failed_to_approve_document'));
@@ -210,5 +202,29 @@ class ApproveDocument
         (
             $masterRecord->id, $status, $masterRecord->companySystemID
         );
+    }
+
+    public static function documentWiseDataUpdate($masterRecord)
+    {
+        try
+        {
+            if($masterRecord['parent_id'] == 0)
+            {
+                self::updateContractStatus($masterRecord);
+            } else
+            {
+                $result = ContractHistoryService::getContractStatusData($masterRecord);
+                if(!$result)
+                {
+                    GeneralService::sendException(trans('common.failed_to_approve_document'));
+                }
+
+                ContractHistoryService::setContractStatusData($masterRecord, $result);
+
+            }
+        } catch (\Exception $e)
+        {
+            GeneralService::sendException(trans('common.failed_to_approve_document'));
+        }
     }
 }

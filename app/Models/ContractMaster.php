@@ -538,7 +538,7 @@ class ContractMaster extends Model
 
     public static function getExistingContractType($companyId, $contractId)
     {
-        return ContractMaster::select('contractType')
+        return ContractMaster::select('contractType', 'uuid')
             ->where('companySystemID', $companyId)
             ->where('id', $contractId)
             ->first();
