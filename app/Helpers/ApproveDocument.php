@@ -106,6 +106,9 @@ class ApproveDocument
                 case 124:
                     ContractHistoryService::setContractStatusData($masterRecord);
                     break;
+                case 126:
+                    ContractHistoryService::setContractStatusData($masterRecord);
+                    break;
                 default:
                     break;
             }

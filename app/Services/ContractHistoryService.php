@@ -838,6 +838,10 @@ class ContractHistoryService
         {
             ContractHistoryService::updateContractStatus($input);
         }
+        if($input['category'] == 1)
+        {
+            ContractAmendmentService::updateContractStatusAmendment($input);
+        }
 
     }
 }
