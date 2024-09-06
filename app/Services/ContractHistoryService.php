@@ -814,7 +814,30 @@ class ContractHistoryService
                     ->where('cloning_contract_id', $masterRecord['parent_id'])
                     ->where('company_id', $masterRecord['companySystemID']);
             }])
+            ->whereHas('history', function ($query) use ($masterRecord)
+            {
+                $query->where('cloning_contract_id', $masterRecord['parent_id'])
+                    ->where('company_id', $masterRecord['companySystemID']);
+            })
             ->where('uuid', $masterRecord['uuid'])
             ->first();
+    }
+
+    public function setContractStatusData($masterRecord, $result = null)
+    {
+        $contract = ContractMaster::getExistingContractType($masterRecord['company_id'], $masterRecord['contract_id']);
+        $input = [
+                'contractId' => $result->parent->uuid ?? $contract['uuid'],
+                'cloneContractId' => $result ? $masterRecord['uuid'] : $contract['uuid'],
+                'category' => $result->history->category ?? $masterRecord['category'],
+                'contractHistoryId' => $result->history->uuid ?? $masterRecord['uuid'],
+                'selectedCompanyID' => $result ? $masterRecord['companySystemID'] : $masterRecord['company_id'],
+        ];
+
+        if(in_array($input['category'], [2, 3, 5, 6]))
+        {
+            ContractHistoryService::updateContractStatus($input);
+        }
+
     }
 }
