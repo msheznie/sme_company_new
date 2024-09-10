@@ -296,6 +296,9 @@
                     <td>
                         <div>
                             <span style="font-size: 18px">
+                                @if($masterdata->documentType == 0)
+                                    Booking Invoice
+                                @endif
                                 @if($masterdata->documentType == 1)
                                     Direct Invoice Voucher
                                 @endif
@@ -390,106 +393,220 @@
                     </td>
                 </tr>
             </table>
-            <div style="margin-top: 30px">
-                <table class="table table-bordered" style="width: 100%;">
-                    <thead>
-                    <tr class="theme-tr-head">
-                        <th></th>
-                        <th class="text-center">GL Code</th>
-                        <th class="text-center">GL Code Description</th>
-                        <th colspan="3" class="text-center">Project</th>
-                        <th class="text-center">Segment</th>
-                        <th class="text-center">Amount</th>
-                        <th class="text-center">VAT Amount</th>
-                        <th class="text-center">Net Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($masterdata->directdetail as $item)
-                        <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
-                            <td>{{$loop->iteration}}</td>
-                            <td>{{$item->glCode}}</td>
-                            <td>{{$item->glCodeDes}}</td>
-                            <td colspan="3">
-                                @if($item->project)
-                                    {{$item->project->projectCode}} - {{$item->project->description}}
+            @if($masterdata->documentType == 0)
+                <div style="margin-top: 30px;">
+                    <table class="table table-bordered" style="width: 100%;">
+                        <thead>
+                        <tr class="theme-tr-head">
+                            <th></th>
+                            <th class="text-center">GL Code</th>
+                            <th class="text-center">GL Type</th>
+                            <th class="text-center">GL Code Description</th>
+                            <th class="text-center">Local Currency (
+                                @if($masterdata->localcurrency)
+                                    {{$masterdata->localCurrency->CurrencyCode}}
                                 @endif
-                            </td>
-                            <td>
-                                @if($item->segment)
-                                    {{$item->segment->ServiceLineDes}}
+                                )
+                            </th>
+                            <th class="text-center">Supplier Currency (
+                                @if($masterdata->currency)
+                                    {{$masterdata->currency->CurrencyCode}}
                                 @endif
-                            </td>
-                            <td class="text-right">{{number_format($item->DIAmount, $transDecimal)}}</td>
-                            <td class="text-right">{{number_format($item->VATAmount, $transDecimal)}}</td>
-                            <td class="text-right">{{number_format($item->netAmount, $transDecimal)}}</td>
+                                )
+                            </th>
                         </tr>
-                    @endforeach
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">Total</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">
-                            {{number_format($directTotTra, $transDecimal)}}
-                        </td>
-                    </tr>
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">VAT</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">
-                            {{number_format($directTotVAT, $transDecimal)}}
-                        </td>
-                    </tr>
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">Net Total</td>
-                        @if($masterdata->rcmActivated)
+                        <tr class="theme-tr-head">
+                            <th colspan="4"></th>
+                            <th class="text-center">Amount</th>
+                            <th class="text-center">Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach ($masterdata->detail as $item)
+                            <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
+                                <td>{{$loop->iteration}}</td>
+                                <td>
+                                    @if($masterdata->supplierGrv)
+                                        {{$masterdata->supplierGrv->AccountCode}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($masterdata->supplierGrv)
+                                        {{$masterdata->supplierGrv->catogaryBLorPL}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($masterdata->supplierGrv)
+                                        {{$masterdata->supplierGrv->AccountDescription}}
+                                    @endif
+                                </td>
+                                <td class="text-right">{{number_format($item->totLocalAmount, $localDecimal)}}</td>
+                                <td class="text-right">{{number_format($item->totTransactionAmount, $transDecimal)}}</td>
+                            </tr>
+                        @endforeach
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="4" class="text-right border-bottom-remov"></td>
+                            <td class="text-right ">{{number_format($grvTotLoc, $localDecimal)}}</td>
+                            <td class="text-right ">{{number_format($grvTotTra, $transDecimal)}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 20px;">
+                    <table class="table table-bordered" style="width: 100%;">
+                        <thead>
+                        <tr class="border-bottom-remov">
+                            <th colspan="5" class="theme-tr-head text-left">GRV Details</th>
+                        </tr>
+                        <tr class="theme-tr-head">
+                            <th class="text-center">GRV Code</th>
+                            <th class="text-center">GRV Date</th>
+                            <th class="text-center">Document Narration</th>
+                            <th class="text-center">Local Currency (
+                                @if($masterdata->localCurrency)
+                                    {{$masterdata->localCurrency->CurrencyCode}}
+                                @endif
+                                )</th>
+                            <th class="text-center">Rpt Currency (
+                                @if($masterdata->rptCurrency)
+                                    {{$masterdata->rptCurrency->CurrencyCode}}
+                                @endif
+                                )</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach ($masterdata->grvDetail as $item)
+                            <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
+                                <td>
+                                    @if($item->grvMaster)
+                                        {{$item->grvMaster->grvPrimaryCode}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($item->grvMaster)
+                                        {{ \App\Helpers\General::dateFormat($item->grvMaster->grvDate)}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($item->grvMaster)
+                                        {{$item->grvMaster->grvNarration}}
+                                    @endif
+                                </td>
+                                <td class="text-right">{{number_format($item->totLocalAmount, $localDecimal)}}</td>
+                                <td class="text-right">{{number_format($item->totRptAmount, $rptDecimal)}}</td>
+                            </tr>
+                        @endforeach
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="3" class="text-right border-bottom-remov"></td>
+                            <td class="text-right">{{number_format($grvTotLoc, $localDecimal )}}</td>
+                            <td class="text-right">{{number_format($grvTotRpt, $rptDecimal)}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+            @if($masterdata->documentType == 1)
+                <div style="margin-top: 30px">
+                    <table class="table table-bordered" style="width: 100%;">
+                        <thead>
+                        <tr class="theme-tr-head">
+                            <th></th>
+                            <th class="text-center">GL Code</th>
+                            <th class="text-center">GL Code Description</th>
+                            <th colspan="3" class="text-center">Project</th>
+                            <th class="text-center">Segment</th>
+                            <th class="text-center">Amount</th>
+                            <th class="text-center">VAT Amount</th>
+                            <th class="text-center">Net Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach ($masterdata->directdetail as $item)
+                            <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$item->glCode}}</td>
+                                <td>{{$item->glCodeDes}}</td>
+                                <td colspan="3">
+                                    @if($item->project)
+                                        {{$item->project->projectCode}} - {{$item->project->description}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($item->segment)
+                                        {{$item->segment->ServiceLineDes}}
+                                    @endif
+                                </td>
+                                <td class="text-right">{{number_format($item->DIAmount, $transDecimal)}}</td>
+                                <td class="text-right">{{number_format($item->VATAmount, $transDecimal)}}</td>
+                                <td class="text-right">{{number_format($item->netAmount, $transDecimal)}}</td>
+                            </tr>
+                        @endforeach
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td class="text-right" style="background-color: rgb(215,215,215)">Total</td>
                             <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format($directTotNet, $transDecimal)}}
+                                {{number_format($directTotTra, $transDecimal)}}
                             </td>
-                        @else
+                        </tr>
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td class="text-right" style="background-color: rgb(215,215,215)">VAT</td>
                             <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format(($directTotNet + $directTotVAT), $transDecimal)}}
+                                {{number_format($directTotVAT, $transDecimal)}}
                             </td>
-                        @endif
-                    </tr>
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">Retention Amount</td>
-                        @if($masterdata->rcmActivated)
-                            <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format($directTotNet * ($masterdata->retentionPercentage/100), $transDecimal)}}
-                            </td>
-                        @else
-                            <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format(($directTotNet + $directTotVAT) *
-                                    ($masterdata->retentionPercentage/100), $transDecimal)}}
-                            </td>
-                        @endif
-                    </tr>
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
-                        <td class="text-right" style="background-color: rgb(215,215,215)">Net Amount</td>
-                        @if($masterdata->rcmActivated)
-                            <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format($directTotNet -
-                                    ($directTotNet * ($masterdata->retentionPercentage/100)), $transDecimal)}}
-                            </td>
-                        @else
-                            <td class="text-right" style="background-color: rgb(215,215,215)">
-                                {{number_format(($directTotNet + $directTotVAT) -
-                                    (($directTotNet + $directTotVAT) * ($masterdata->retentionPercentage/100)),
-                                     $transDecimal)}}
-                            </td>
-                        @endif
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                        </tr>
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td class="text-right" style="background-color: rgb(215,215,215)">Net Total</td>
+                            @if($masterdata->rcmActivated)
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format($directTotNet, $transDecimal)}}
+                                </td>
+                            @else
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format(($directTotNet + $directTotVAT), $transDecimal)}}
+                                </td>
+                            @endif
+                        </tr>
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td class="text-right" style="background-color: rgb(215,215,215)">Retention Amount</td>
+                            @if($masterdata->rcmActivated)
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format($directTotNet * ($masterdata->retentionPercentage/100), $transDecimal)}}
+                                </td>
+                            @else
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format(($directTotNet + $directTotVAT) *
+                                        ($masterdata->retentionPercentage/100), $transDecimal)}}
+                                </td>
+                            @endif
+                        </tr>
+                        <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                            <td colspan="5" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td colspan="3" class="text-right border-bottom-remov">&nbsp;</td>
+                            <td class="text-right" style="background-color: rgb(215,215,215)">Net Amount</td>
+                            @if($masterdata->rcmActivated)
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format($directTotNet -
+                                        ($directTotNet * ($masterdata->retentionPercentage/100)), $transDecimal)}}
+                                </td>
+                            @else
+                                <td class="text-right" style="background-color: rgb(215,215,215)">
+                                    {{number_format(($directTotNet + $directTotVAT) -
+                                        (($directTotNet + $directTotVAT) * ($masterdata->retentionPercentage/100)),
+                                         $transDecimal)}}
+                                </td>
+                            @endif
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </body>
 </html>

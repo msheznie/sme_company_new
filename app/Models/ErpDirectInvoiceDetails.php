@@ -176,7 +176,7 @@ class ErpDirectInvoiceDetails extends Model
         return $this->belongsTo(ProjectMaster::class, 'detail_project_id', 'id');
     }
 
-    public function getContractLinkedWithErp($contractUuid, $companySystemID)
+    public static function getContractLinkedWithErp($contractUuid, $companySystemID)
     {
         $directInvoiceAutoIDs = ErpDirectInvoiceDetails::where('contractID', $contractUuid)
             ->where('companySystemID', $companySystemID)
@@ -184,7 +184,7 @@ class ErpDirectInvoiceDetails extends Model
             ->get(['directInvoiceAutoID']);
         return !empty($directInvoiceAutoIDs) ? collect($directInvoiceAutoIDs)->pluck('directInvoiceAutoID') : [];
     }
-    public function getSum($id, $field)
+    public static function getSum($id, $field)
     {
         return ErpDirectInvoiceDetails::where('directInvoiceAutoID', $id)
             ->sum($field);

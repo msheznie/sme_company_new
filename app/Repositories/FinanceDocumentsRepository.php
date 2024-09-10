@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Models\BookInvSuppDet;
 use App\Models\CompanyPolicyMaster;
 use App\Models\DirectPaymentDetails;
 use App\Models\ErpBookingSupplierMaster;
@@ -12,6 +13,8 @@ use App\Models\FinanceDocuments;
 use App\Models\ErpDirectInvoiceDetails;
 use App\Models\PaySpplierInvoiceMaster;
 use App\Models\ContractDeliverables;
+use App\Models\PaySupplierInvoiceDetail;
+use App\Models\PurchaseOrderDetail;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
@@ -77,10 +80,19 @@ class FinanceDocumentsRepository extends BaseRepository
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
+
+        $contractPurchaseOrder = PurchaseOrderDetail::getContractPurchaseOrderMasterID($contractUuid);
+        $linkedSupplierInv = BookInvSuppDet::getPurchaseOrdersLikedWithSi($contractPurchaseOrder);
+        $linkedSupplierInvPV = PaySupplierInvoiceDetail::getPaySupplierInvoice($linkedSupplierInv);
+
         $directInvoiceIds = ErpDirectInvoiceDetails::getContractLinkedWithErp($contractUuid, $selectedCompanyID);
-        $invoices = ErpBookingSupplierMaster::getInvoicesForFilters($directInvoiceIds, $selectedCompanyID);
+        $mergedSupplierInvoiceID = $linkedSupplierInv->merge($directInvoiceIds)->unique()->values();
+        $invoices = ErpBookingSupplierMaster::getInvoicesForFilters($mergedSupplierInvoiceID, $selectedCompanyID);
+
         $directPVInvoices = DirectPaymentDetails::getContractLinkedWithErp($contractUuid, $selectedCompanyID);
-        $paymentVoucher = PaySpplierInvoiceMaster::getPaymentVoucherForFilters($directPVInvoices, $selectedCompanyID);
+        $mergedPaymentVoucherIDs = $linkedSupplierInvPV->merge($directPVInvoices)->unique()->values();
+        $paymentVoucher = PaySpplierInvoiceMaster::getPaymentVoucherForFilters($mergedPaymentVoucherIDs,
+            $selectedCompanyID);
         return [
             'invoices' => $invoices,
             'payment_voucher' => $paymentVoucher,
@@ -264,28 +276,20 @@ class FinanceDocumentsRepository extends BaseRepository
     }
     public function printPaymentVoucher($data)
     {
-        $transDecimal = 2;
-        $localDecimal = 3;
-        $rptDecimal = 2;
-        if ($data->transactioncurrency)
-        {
-            $transDecimal = $data->currency->DecimalPlaces;
-        }
+        $transDecimal = $data->transactioncurrency ? $data->currency->DecimalPlaces ?? 2 : 2;
+        $localDecimal = $data->localCurrency ? $data->localCurrency->DecimalPlaces ?? 3 : 3;
+        $rptDecimal = $data->rptCurrency ? $data->rptCurrency->DecimalPlaces ?? 2 : 2;
 
-        if ($data->localcurrency)
-        {
-            $localDecimal = $data->currency->DecimalPlaces;
-        }
+        $supplierDetailTotTra = PaySupplierInvoiceDetail::getSum($data['PayMasterAutoId'], 'supplierPaymentAmount');
+        $directDetailTotTra = DirectPaymentDetails::getSum($data['PayMasterAutoId'], 'DPAmount');
 
-        if ($data->rptcurrency)
-        {
-            $rptDecimal = $data->currency->DecimalPlaces;
-        }
         $order = array(
             'masterdata' => $data,
             'transDecimal' => $transDecimal,
             'localDecimal' => $localDecimal,
-            'rptDecimal' => $rptDecimal
+            'rptDecimal' => $rptDecimal,
+            'supplierDetailTotTra' => $supplierDetailTotTra,
+            'directDetailTotTra' => $directDetailTotTra
         );
 
         $fileName = 'payment_voucher.pdf';
@@ -302,28 +306,18 @@ class FinanceDocumentsRepository extends BaseRepository
     }
     public function printInvoice($supplierInvoice, $companySystemID)
     {
-        $transDecimal = 2;
-        $localDecimal = 3;
-        $rptDecimal = 2;
+        $transDecimal = $supplierInvoice->currecny ? $supplierInvoice->currecny->DecimalPlaces ?? 0 : 2;
+        $localDecimal = $supplierInvoice->localCurrency ? $supplierInvoice->localCurrency->DecimalPlaces ?? 0 : 3;
+        $rptDecimal = $supplierInvoice->rptCurrency ? $supplierInvoice->rptCurrency->DecimalPlaces ?? 0 : 2;
+        $id = $supplierInvoice['bookingSuppMasInvAutoID'] ?? 0;
 
-        if ($supplierInvoice->transactioncurrency)
-        {
-            $transDecimal = $supplierInvoice->currecny->DecimalPlaces;
-        }
-
-        if ($supplierInvoice->localcurrency)
-        {
-            $localDecimal = $supplierInvoice->localcurrency->DecimalPlaces;
-        }
-
-        if ($supplierInvoice->rptcurrency)
-        {
-            $rptDecimal = $supplierInvoice->rptcurrency->DecimalPlaces;
-        }
-        $directTotTra = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'DIAmount');
-        $directTotVAT = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'VATAmount');
-        $directTotNet = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'netAmount');
-        $directTotLoc = ErpDirectInvoiceDetails::getSum($supplierInvoice['bookingSuppMasInvAutoID'], 'localAmount');
+        $directTotTra = ErpDirectInvoiceDetails::getSum($id, 'DIAmount');
+        $directTotVAT = ErpDirectInvoiceDetails::getSum($id, 'VATAmount');
+        $directTotNet = ErpDirectInvoiceDetails::getSum($id, 'netAmount');
+        $directTotLoc = ErpDirectInvoiceDetails::getSum($id, 'localAmount');
+        $grvTotTra = BookInvSuppDet::getSum($id, 'totTransactionAmount');
+        $grvTotLoc = BookInvSuppDet::getSum($id, 'totLocalAmount');
+        $grvTotRpt = BookInvSuppDet::getSum($id, 'totRptAmount');
 
         $isProjectBase = CompanyPolicyMaster::checkActiveCompanyPolicy($companySystemID, 56);
 
@@ -336,7 +330,10 @@ class FinanceDocumentsRepository extends BaseRepository
             'directTotVAT' => $directTotVAT,
             'directTotNet' => $directTotNet,
             'directTotLoc' => $directTotLoc,
-            'isProjectBase' => $isProjectBase
+            'isProjectBase' => $isProjectBase,
+            'grvTotRpt' => $grvTotRpt,
+            'grvTotTra' => $grvTotTra,
+            'grvTotLoc' => $grvTotLoc
         );
 
         $fileName = 'invoice.pdf';

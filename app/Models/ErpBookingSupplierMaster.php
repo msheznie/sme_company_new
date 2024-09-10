@@ -342,7 +342,33 @@ class ErpBookingSupplierMaster extends Model
     {
         return $this->belongsTo(Employees::class, 'confirmedByEmpSystemID', 'employeeSystemID');
     }
+    public function transactionCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'supplierTransactionCurrencyID', 'currencyID');
+    }
 
+    public function localCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'localCurrencyID', 'currencyID');
+    }
+
+    public function rptCurrency()
+    {
+        return $this->belongsTo(CurrencyMaster::class, 'companyReportingCurrencyID', 'currencyID');
+    }
+
+    public function grvDetail()
+    {
+        return $this->hasMany(BookInvSuppDet::class, 'bookingSuppMasInvAutoID', 'bookingSuppMasInvAutoID');
+    }
+    public function detail()
+    {
+        return $this->hasMany(BookInvSuppDet::class, 'bookingSuppMasInvAutoID', 'bookingSuppMasInvAutoID');
+    }
+    public function supplierGrv()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'supplierGLCodeSystemID', 'chartOfAccountSystemID');
+    }
     public function checkSupplierInvoiceMasterExists($id, $selectedCompanyId)
     {
         return ErpBookingSupplierMaster::select('bookingSuppMasInvAutoID', 'documentSystemID', 'bookingInvCode')
@@ -350,7 +376,7 @@ class ErpBookingSupplierMaster extends Model
             ->where('companySystemID', $selectedCompanyId)
             ->first();
     }
-    public function getInvoicesForFilters($directInvoiceIds, $selectedCompanyID)
+    public static function getInvoicesForFilters($directInvoiceIds, $selectedCompanyID)
     {
         return ErpBookingSupplierMaster::whereIn('bookingSuppMasInvAutoID', $directInvoiceIds)
             ->where('companySystemID', $selectedCompanyID)
@@ -376,6 +402,24 @@ class ErpBookingSupplierMaster extends Model
                 'whtApplicableYN', 'whtType', 'whtApplicable', 'whtAmount', 'whtEdited', 'whtPercentage',
                 'isWHTApplicableVat', 'companySystemID', 'confirmedByEmpSystemID')
             ->with([
+                'detail' => function ($q)
+                {
+                    $q->select('bookingSuppMasInvAutoID', 'totTransactionAmount', 'totLocalAmount');
+                },
+                'grvDetail' => function ($q)
+                {
+                    $q->select('bookingSuppMasInvAutoID', 'totRptAmount', 'totLocalAmount', 'grvAutoID')
+                        ->with([
+                            'grvMaster' => function ($q)
+                            {
+                                $q->select('grvAutoID', 'grvPrimaryCode', 'grvDate', 'grvNarration');
+                            }
+                        ]);
+                },
+                'supplierGrv' => function ($q)
+                {
+                    $q->select('chartOfAccountSystemID', 'AccountCode', 'catogaryBLorPL', 'AccountDescription');
+                },
                 'directDetail' => function ($q)
                 {
                     $q->with([
@@ -389,6 +433,14 @@ class ErpBookingSupplierMaster extends Model
                     $q->select('supplierCodeSystem', 'primarySupplierCode', 'supplierName');
                 },
                 'currency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
+                'localCurrency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
+                'rptCurrency' => function ($q)
                 {
                     $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
                 },
