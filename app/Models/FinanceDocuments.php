@@ -107,7 +107,7 @@ class FinanceDocuments extends Model
             ->where('company_id', $selectedCompanyID)
             ->delete();
     }
-    public function getContractFinanceDocument($contractID, $documentType, $documentID)
+    public static function getContractFinanceDocument($contractID, $documentType, $documentID)
     {
         $financeDocument = FinanceDocuments::select('uuid', 'contract_id', 'document_type', 'document_id',
             'document_system_id')

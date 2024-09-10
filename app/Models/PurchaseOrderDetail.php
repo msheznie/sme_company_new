@@ -357,4 +357,12 @@ class PurchaseOrderDetail extends Model
     {
         return $this->belongsTo(\App\Models\ErpPurchaseordermaster::class, 'purchaseOrderMasterID');
     }
+
+    public static function getContractPurchaseOrderMasterID($contractUuid)
+    {
+        $purchaseOrderMasterIDs = PurchaseOrderDetail::where('contractID', $contractUuid)
+            ->groupBy('purchaseOrderMasterID')
+            ->get(['purchaseOrderMasterID']);
+        return !empty($purchaseOrderMasterIDs) ? collect($purchaseOrderMasterIDs)->pluck('purchaseOrderMasterID') : [];
+    }
 }
