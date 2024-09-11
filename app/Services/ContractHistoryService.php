@@ -484,10 +484,7 @@ class ContractHistoryService
             {
                 $contractId = $input['contractId'];
                 $contractHistoryUuid = $input['contractHistoryId'];
-                $contractEndDate = $input['contractEndDate'];
                 $companyId = $input['selectedCompanyID'];
-                $categoryId = $input['category'];
-                $newContractTermPeriod = $input['newContractTermPeriod'];
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
                 $checkHistoryExists = ContractHistory::getContractHistory($contractHistoryUuid, $companyId);
                 if(empty($checkHistoryExists))
@@ -501,8 +498,7 @@ class ContractHistoryService
 
                 $contractId = $getContractId->id;
                 self::updateContractMasterEndDate
-                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid,
-                    $checkHistoryExists['id']);
+                ($contractId, $input, $checkHistoryExists['id'],$getContractId['endDate']);
             });
         }catch (\Exception $e)
         {
@@ -511,10 +507,15 @@ class ContractHistoryService
     }
 
     public function updateContractMasterEndDate
-    ($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid, $id)
+    ($contractId, $input, $id, $endDate)
     {
         try
         {
+            $contractHistoryUuid = $input['contractHistoryId'];
+            $contractEndDate = $input['contractEndDate'];
+            $companyId = $input['selectedCompanyID'];
+            $status = $input['category'];
+            $newContractTermPeriod = $input['newContractTermPeriod'];
             $data = [
                 'endDate'  => ContractManagementUtils::convertDate($contractEndDate),
                 'status'  => $status,
@@ -528,6 +529,7 @@ class ContractHistoryService
 
             $status = [
                 'status'  => 4,
+                'end_date'  => $endDate,
             ];
 
             ContractHistory::where('uuid', $contractHistoryUuid)
@@ -843,5 +845,58 @@ class ContractHistoryService
             ContractAmendmentService::updateContractStatusAmendment($input);
         }
 
+    }
+
+    public function setExtendContractData($masterRecord)
+    {
+        $contract = ContractMaster::getExistingContractType($masterRecord['company_id'], $masterRecord['contract_id']);
+        $getContractId = ContractManagementUtils::checkContractExist($contract['uuid'], $masterRecord['company_id']);
+
+        $startDate = Carbon::parse($getContractId['startDate']);
+        $endDate = Carbon::parse($masterRecord['date']);
+
+        $diff = $startDate->diff($endDate);
+        $newContractTermPeriod = ContractHistoryService::formatContractTermPeriod($diff);
+
+        $input = [
+            'contractId' => $contract['uuid'],
+            'contractHistoryId' => $masterRecord['uuid'],
+            'contractEndDate' => Carbon::parse($masterRecord['date'])->format('d-m-Y'),
+            'selectedCompanyID' => $masterRecord['company_id'],
+            'category' => $masterRecord['category'],
+            'newContractTermPeriod' => $newContractTermPeriod,
+        ];
+
+        ContractHistoryService::updateExtendStatus($input);
+    }
+
+    public function getExtensionApprovalData($contractId, $companyId)
+    {
+        return ContractHistory::where('contract_id', $contractId)
+            ->where('company_id', $companyId)
+            ->where('cloning_contract_id', $contractId)
+            ->where('status', 4)
+            ->where('approved_yn', 1)
+            ->count();
+    }
+
+    private function formatContractTermPeriod($diff)
+    {
+        $termPeriod = [];
+
+        if ($diff->y)
+        {
+            $termPeriod[] = "{$diff->y} Years";
+        }
+        if ($diff->m)
+        {
+            $termPeriod[] = "{$diff->m} Months";
+        }
+        if ($diff->d)
+        {
+            $termPeriod[] = "{$diff->d} Days";
+        }
+
+        return implode(', ', $termPeriod);
     }
 }

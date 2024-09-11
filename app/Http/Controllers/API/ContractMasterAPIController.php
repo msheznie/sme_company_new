@@ -171,6 +171,9 @@ class ContractMasterAPIController extends AppBaseController
             $comapnyId,
             $contractMaster['id']
         );
+        $response['extensionHistoryCount'] = ContractHistoryService::getExtensionApprovalData(
+            $contractMaster['id'], $comapnyId
+        );
 
 
         return $this->sendResponse($response, trans('common.contract_retrieved_successfully'));
