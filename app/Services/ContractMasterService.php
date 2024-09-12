@@ -247,4 +247,8 @@ class ContractMasterService
             'secondaryDetails' => $secondaryDetail ?? null,
         ];
     }
+    public static function updateContractMaster($id, $field)
+    {
+        return ContractMaster::where('id', $id)->update($field);
+    }
 }

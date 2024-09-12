@@ -639,21 +639,19 @@ class ContractMasterRepository extends BaseRepository
         $contractUuid = $request->input('contractId') ?? 0;
         $formData = $request->input('formData') ?? null;
         $settingMasters = $formData['settingMasters'] ?? [];
-
-        $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
-        if(empty($contractID))
+        $effectiveDateType = $formData['effectiveDateType'] ?? 1;
+        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType )
         {
-            return ['status' => false, 'message' => trans('common.contract_not_found'), 'line' => __LINE__];
-        }
+            $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
+            if(empty($contractID))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
 
-        if(empty($settingMasters))
-        {
-            return ['status' => false, 'message' => 'Cannot update, no record found', 'line' => __LINE__];
-        }
-
-        try
-        {
-            DB::beginTransaction();
+            if(empty($settingMasters))
+            {
+                GeneralService::sendException('Cannot update, no record found');
+            }
 
             foreach ($settingMasters as $master)
             {
@@ -661,11 +659,7 @@ class ContractMasterRepository extends BaseRepository
 
                 if (!$settingMaster)
                 {
-                    return [
-                        'status' => false,
-                        'message' => 'Contract setting master not found for UUID: ' . $master['id'],
-                        'line' => __LINE__
-                    ];
+                    GeneralService::sendException('Contract setting master not found for UUID: ' . $master['id']);
                 }
 
                 $masterActive = $master['isActive'] ?? 0;
@@ -679,11 +673,8 @@ class ContractMasterRepository extends BaseRepository
 
                         if (!$settingDetail)
                         {
-                            return [
-                                'status' => false,
-                                'message' => 'Contract setting detail not found for UUID: ' . $details['settingDetailUuid'],
-                                'line' => __LINE__
-                            ];
+                            GeneralService::sendException('Contract setting detail not found for UUID: ' .
+                                $details['settingDetailUuid']);
                         }
 
                         $isActive = $details['isActive'] ?? 0;
@@ -691,14 +682,9 @@ class ContractMasterRepository extends BaseRepository
                     }
                 }
             }
-
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.contract_updated_successfully')];
-        } catch(\Exception $ex)
-        {
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
-        }
+            ContractMasterService::updateContractMaster($contractID, ['effective_date' => $effectiveDateType]);
+            return true;
+        });
     }
 
     public function getActiveContractSectionDetails(Request $request)
