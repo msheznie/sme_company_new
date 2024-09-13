@@ -116,3 +116,9 @@ Route::get('/contract-expiry-reminder', function ()
     \Artisan::call('reminderContractExpiry');
     return 'Contracts Reminder Expiry Send Successfully!';
 });
+
+Route::get('/terminate-contract', function ()
+{
+    \Artisan::call('terminateContract');
+    return 'Contracts Terminated Successfully!';
+});

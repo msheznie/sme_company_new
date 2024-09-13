@@ -236,6 +236,7 @@ class ContractHistoryService
                 $categoryId = $input['category'];
                 $contractHistoryUuid = $input['contractHistoryId'];
                 $contractCloneUuid = $input['cloneContractId'];
+                $isSystemUser = $input['systemUser'] ?? false;
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
                 $getContractCloneData = ContractManagementUtils::checkContractExist($contractCloneUuid, $companyId);
                 $getContractHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
@@ -274,7 +275,7 @@ class ContractHistoryService
 
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
-                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId);
+                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId, $isSystemUser);
 
                 if($categoryId === 6)
                 {
@@ -834,6 +835,7 @@ class ContractHistoryService
                 'category' => $result->history->category ?? $masterRecord['category'],
                 'contractHistoryId' => $result->history->uuid ?? $masterRecord['uuid'],
                 'selectedCompanyID' => $result ? $masterRecord['companySystemID'] : $masterRecord['company_id'],
+                'systemUser' => $masterRecord['systemUser'] ?? false,
         ];
 
         if(in_array($input['category'], [2, 3, 5, 6]))
@@ -898,5 +900,25 @@ class ContractHistoryService
         }
 
         return implode(', ', $termPeriod);
+    }
+
+    public static function getInactiveTerminateContracts()
+    {
+        return ContractMaster::select('id', 'companySystemID')
+        ->with(['history' => function ($query)
+            {
+                $query->select('uuid', 'company_id','contract_id')
+                    ->where('category', 6)
+                    ->where('approved_yn', 1);
+            }])
+            ->whereHas('history', function ($query)
+            {
+                $query->where('category', 6)
+                    ->where('approved_yn', 1);
+            })
+            ->where('status', -1)
+            ->where('parent_id', 0)
+            ->where('approved_yn', 1)
+            ->get();
     }
 }

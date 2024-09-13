@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('activateContract')->daily('00:00')->withoutOverlapping();
         $schedule->command('reminderContractExpiry')->daily('00:00')->withoutOverlapping();
+        $schedule->command('terminateContract')->daily('00:00')->withoutOverlapping();
     }
 
     /**
