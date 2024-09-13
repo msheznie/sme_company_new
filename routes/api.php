@@ -99,6 +99,10 @@ Route::group(['middleware' => ['tenant']], function ()
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'printFinanceDocumentPayment'
     ]);
+    Route::post('/get-portal-redirect-url', [
+        \App\Http\Controllers\API\FcmTokenAPIController::class,
+        'getPortalRedirectUrl'
+    ]);
 });
 
 Route::get('/activate-contract', function ()

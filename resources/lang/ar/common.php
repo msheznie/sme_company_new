@@ -238,4 +238,5 @@ return [
     "status" => "Status AR",
     "data_retrieved_successfully" => "Data retrieved successfully",
     'user_list_retrieved_successfully' => 'User list retrieved successfully',
+    'fcm_token_not_found' => 'Fcm Token not found AR',
 ];
