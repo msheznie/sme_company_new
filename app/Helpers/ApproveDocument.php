@@ -104,7 +104,15 @@ class ApproveDocument
                     self::documentWiseDataUpdate($masterRecord);
                     break;
                 case 124:
-                    ContractHistoryService::setContractStatusData($masterRecord);
+
+                    $terminateDate = Carbon::parse($masterRecord['date']);
+                    $currentDate = Carbon::now();
+
+                    if ($terminateDate->isSameDay($currentDate))
+                    {
+                        ContractHistoryService::setContractStatusData($masterRecord);
+                    }
+
                     break;
                 case 125:
                     ContractHistoryService::setExtendContractData($masterRecord);
