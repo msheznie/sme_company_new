@@ -196,7 +196,7 @@ class CMContractMasterAmd extends Model
     public static function getContractMasterData($id)
     {
         return CMContractMasterAmd::select('uuid', 'contractCode', 'title', 'contractType',
-        'counterParty', 'counterPartyName', 'referenceCode',
+        'counterParty', 'counterPartyName', 'referenceCode', 'effective_date',
         'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
         'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
         'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',

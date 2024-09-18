@@ -349,27 +349,27 @@ class ContractMasterRepository extends BaseRepository
             ->where('companySystemID', $selectedCompanyID)->first();
         if(empty($checkContractTypeID))
         {
-            throw new CommonException(trans('common.contract_type_not_found'));
+            GeneralService::sendException(trans('common.contract_type_not_found'));
         }
         $checkOwnerID = ($contractOwner != '') ? ContractUsers::where('uuid', $formData['contractOwner'])
             ->where('companySystemId', $selectedCompanyID)->pluck('id')->first() : null;
         if($contractOwner != '' && empty($checkOwnerID))
         {
-            throw new CommonException(trans('common.contract_owner_not_found'));
+            GeneralService::sendException(trans('common.contract_owner_not_found'));
         }
         $checkContractPartyNameID = ContractUsers::where('uuid', $formData['counterPartyName'])
             ->where('companySystemId', $selectedCompanyID)->pluck('id')->first();
         if(empty($checkContractPartyNameID))
         {
-            throw new CommonException(trans('common.counter_party_name_not_found'));
+            GeneralService::sendException(trans('common.counter_party_name_not_found'));
         }
         if(empty($formData['formatStartDate']))
         {
-            throw new CommonException(trans('common.start_date_not_found'));
+            GeneralService::sendException(trans('common.commencement_date_not_found'));
         }
         if(empty($formData['formatEndDate']))
         {
-            throw new CommonException(trans('common.end_date_not_found'));
+            GeneralService::sendException(trans('common.end_date_not_found'));
         }
 
         $agreementSignDate = \DateTime::createFromFormat('d-m-Y', $formData['formatAgreementSignDate']);
@@ -377,7 +377,7 @@ class ContractMasterRepository extends BaseRepository
 
         if ($agreementSignDate > $contractStartDate)
         {
-            throw new CommonException('Agreement Sign Date cannot be greater than the Contract Start Date');
+            GeneralService::sendException(trans('Agreement sign date cannot be greater than the commencement date'));
         }
 
         $contractMilestones = ContractMilestone::getContractMilestone($id, $selectedCompanyID);
@@ -389,8 +389,8 @@ class ContractMasterRepository extends BaseRepository
 
             if($startDate > $milestoneDueDate || $endDate < $milestoneDueDate)
             {
-                throw new CommonException('Contract start date should be less than milestone due date and
-                Contract end date should be greater than milestone due date');
+                GeneralService::sendException(trans('Commencement date should be less than milestone due date and
+                contract end date should be greater than milestone due date'));
             }
         }
 
@@ -455,10 +455,10 @@ class ContractMasterRepository extends BaseRepository
                 }
                 catch (CommonException $ex)
                 {
-                    throw new CommonException('Overall penalty not found.');
+                    GeneralService::sendException(trans('Overall penalty not found.'));
                 } catch (\Exception $ex)
                 {
-                    throw new CommonException('Overall penalty not found.');
+                    GeneralService::sendException(trans('Overall penalty not found.'));
                 }
             }
 
