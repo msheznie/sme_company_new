@@ -244,5 +244,6 @@
      'user_list_retrieved_successfully' => 'User list retrieved successfully',
      'milestone_due_date' => 'Milestone Due Date',
      'fcm_token_not_found' => 'Fcm Token not found',
-     'commencement_date_not_found' => 'Commencement date not found'
+     'commencement_date_not_found' => 'Commencement date not found',
+     'record_retrieved_successfully' => 'Record retrieved successfully'
  ];

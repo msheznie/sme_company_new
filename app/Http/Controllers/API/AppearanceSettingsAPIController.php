@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateAppearanceSettingsAPIRequest;
 use App\Http\Requests\API\UpdateAppearanceSettingsAPIRequest;
 use App\Models\AppearanceSettings;
@@ -136,5 +138,28 @@ class AppearanceSettingsAPIController extends AppBaseController
         $appearanceSettings->delete();
 
         return $this->sendSuccess('Appearance Settings deleted successfully');
+    }
+
+    public function getBranding(Request $request)
+    {
+        try
+        {
+            $appearanceSystemID = $request->get('appearance_system_id');
+
+            $data = $this->appearanceSettingsRepository->getBrandingData($appearanceSystemID);
+            $elementIdsToTransform = [2, 9];
+            foreach ($data as $dt)
+            {
+                if (in_array($dt->appearance_element_id, $elementIdsToTransform))
+                {
+                    $dt->value = General::getFileUrlFromS3($dt->value);
+                }
+            }
+
+            return $this->sendResponse($data, trans('common.record_retrieved_successfully'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), '500');
+        }
     }
 }

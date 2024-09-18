@@ -71,4 +71,12 @@ class AppearanceSettings extends Model
 
         return $appearanceElementId == 1 ? '#C23C32' : 'GEARS';
     }
+
+    public static function getBrandingData($appearanceSystemID)
+    {
+        return AppearanceSettings::select('appearance_system_id', 'appearance_element_id', 'value')
+        ->with(['elements'])
+            ->where('appearance_system_id', $appearanceSystemID)
+            ->get();
+    }
 }
