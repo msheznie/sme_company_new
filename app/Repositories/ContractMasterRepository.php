@@ -642,8 +642,8 @@ class ContractMasterRepository extends BaseRepository
         $effectiveDateType = $formData['effectiveDateType'] ?? 1;
         return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType )
         {
-            $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
-            if(empty($contractID))
+            $contractMaster = self::findByUuid($contractUuid, ['id', 'startDate']);
+            if(empty($contractMaster))
             {
                 GeneralService::sendException(trans('common.contract_not_found'));
             }
@@ -682,7 +682,15 @@ class ContractMasterRepository extends BaseRepository
                     }
                 }
             }
-            ContractMasterService::updateContractMaster($contractID, ['effective_date' => $effectiveDateType]);
+            $updateCMData = [
+                'effective_date' => $effectiveDateType
+            ];
+
+            if ($effectiveDateType == 1)
+            {
+                $updateCMData['agreementSignDate'] = $contractMaster['startDate'] ?? null;
+            }
+            ContractMasterService::updateContractMaster($contractMaster['id'], $updateCMData);
             return true;
         });
     }
