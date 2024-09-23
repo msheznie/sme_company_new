@@ -79,7 +79,7 @@ class contractStatusHistory extends Model
         return $this->hasOne(Employees::class, 'employeeSystemID', 'created_by');
     }
 
-    public static function updateTerminatedAddendum($contractId, $companyId, $status)
+    public static function updateTerminatedAddendum($contractId, $companyId, $status, $isSystemUser=0)
     {
         $data = [
             'status'  => $status
@@ -90,7 +90,7 @@ class contractStatusHistory extends Model
 
         foreach ($updatedIdList as $i)
         {
-            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId);
+            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId, null, $isSystemUser);
         }
     }
 

@@ -279,7 +279,7 @@ class ContractHistoryService
 
                 if($categoryId === 6)
                 {
-                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
+                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId, $isSystemUser);
                 }
 
             });
