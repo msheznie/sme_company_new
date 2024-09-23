@@ -43,12 +43,23 @@ class FcmTokenRepository extends BaseRepository
     public function getPortalRedirectUrl(Request $request)
     {
         $scheme = request()->secure() ? 'https' : 'http';
-        $host = $request->getHttpHost();
-        $subDomain = explode('.', $host)[0] === 'www' ? explode('.', $host)[1] : explode('.', $host)[0];
-        $tenantDomain = explode('-', $subDomain)[0] ?? '';
+        $url = $request->fullUrl();
+        $host = explode('/', $url);
+        $subDomain = count($host) > 3 ? $host[3] : '';
 
-        return ($tenantDomain !== 'localhost:8000')
-            ? "{$scheme}://{$tenantDomain}" . env('APP_DOMAIN') . "/#/home"
-            : null;
+        if ($subDomain === 'www')
+        {
+            $subDomain = explode('.', $host)[1];
+        }
+
+        if ($subDomain !== 'localhost')
+        {
+            $tenantDomain = explode('-', $subDomain);
+            $domain = $tenantDomain[0] ?? null;
+
+            return "{$scheme}://{$domain}." . env('APP_DOMAIN') . "/#/home";
+        }
+
+        return null;
     }
 }
