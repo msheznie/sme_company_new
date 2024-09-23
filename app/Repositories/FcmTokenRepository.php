@@ -57,7 +57,7 @@ class FcmTokenRepository extends BaseRepository
             $tenantDomain = explode('-', $subDomain);
             $domain = $tenantDomain[0] ?? null;
 
-            return "{$scheme}://{$domain}." . env('APP_DOMAIN') . "/#/home";
+            return "{$scheme}://{$domain}" . env('APP_DOMAIN') . "/#/home";
         }
 
         return null;
