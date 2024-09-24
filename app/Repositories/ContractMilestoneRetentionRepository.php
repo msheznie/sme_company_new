@@ -21,7 +21,7 @@ use Yajra\DataTables\DataTables;
  * Class ContractMilestoneRetentionRepository
  * @package App\Repositories
  * @version April 29, 2024, 11:28 pm +04
-*/
+ */
 
 class ContractMilestoneRetentionRepository extends BaseRepository
 {
@@ -104,7 +104,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             ];
         }
         $recordsWithMilestoneId = ContractMilestoneRetention::
-            where('contractId', $contract['id'])
+        where('contractId', $contract['id'])
             ->where('companySystemId', $companySystemID)
             ->count();
 
@@ -327,7 +327,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                         (float)preg_replace('/^=/', '-', $value['milestone']['milestonePaymentSchedules']['amount']),
                         $decimalPlaces, '.', '') : '-';
                 $data[$count]['Retention Percentage'] =
-                isset($value['retentionPercentage']) ? preg_replace('/^=/', '-', $value['retentionPercentage']) : '-';
+                    isset($value['retentionPercentage']) ? preg_replace('/^=/', '-', $value['retentionPercentage']) : '-';
                 $data[$count]['Retention Amount'] =
                     isset($value['retentionAmount']) ? number_format(
                         (float)preg_replace('/^=/', '-', $value['retentionAmount']), $decimalPlaces, '.', '') : '-';

@@ -261,10 +261,10 @@ class ContractHistoryService
 
                 if($categoryId == 2 || $categoryId == 3 || $categoryId == 5)
                 {
-                     ContractHistoryService::updateOrInsertStatus
+                    ContractHistoryService::updateOrInsertStatus
                     (
-                         $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
-                         $contractHistoryId
+                        $getContractCloneData->id, $cloneStatus, $getContractCloneData->companySystemID,
+                        $contractHistoryId
                     );
                 }
                 else
@@ -760,7 +760,7 @@ class ContractHistoryService
             {
                 $data = ['updated_at' => Carbon::now()];
                 contractStatusHistory::where('id', $id)
-                ->update($data);
+                    ->update($data);
             });
         } catch (\Exception $e)
         {
@@ -830,12 +830,12 @@ class ContractHistoryService
     {
         $contract = ContractMaster::getExistingContractType($masterRecord['company_id'], $masterRecord['contract_id']);
         $input = [
-                'contractId' => $result->parent->uuid ?? $contract['uuid'],
-                'cloneContractId' => $result ? $masterRecord['uuid'] : $contract['uuid'],
-                'category' => $result->history->category ?? $masterRecord['category'],
-                'contractHistoryId' => $result->history->uuid ?? $masterRecord['uuid'],
-                'selectedCompanyID' => $result ? $masterRecord['companySystemID'] : $masterRecord['company_id'],
-                'systemUser' => $masterRecord['systemUser'] ?? false,
+            'contractId' => $result->parent->uuid ?? $contract['uuid'],
+            'cloneContractId' => $result ? $masterRecord['uuid'] : $contract['uuid'],
+            'category' => $result->history->category ?? $masterRecord['category'],
+            'contractHistoryId' => $result->history->uuid ?? $masterRecord['uuid'],
+            'selectedCompanyID' => $result ? $masterRecord['companySystemID'] : $masterRecord['company_id'],
+            'systemUser' => $masterRecord['systemUser'] ?? false,
         ];
 
         if(in_array($input['category'], [2, 3, 5, 6]))
@@ -905,7 +905,7 @@ class ContractHistoryService
     public static function getInactiveTerminateContracts()
     {
         return ContractMaster::select('id', 'companySystemID')
-        ->with(['history' => function ($query)
+            ->with(['history' => function ($query)
             {
                 $query->select('uuid', 'company_id','contract_id')
                     ->where('category', 6)

@@ -434,14 +434,14 @@ class ContractMasterRepository extends BaseRepository
                 'updated_at' => Carbon::now(),
                 'tender_id' => $formData['tenderId'] ?? null
             ];
-          /*  $status = 0;
+            /*  $status = 0;
 
-            if($checkStatus == 0)
-            {
-                $status = ContractHistoryService::checkContractDateBetween($formData['formatStartDate'],
-                    $formData['formatEndDate']);
-                $updateData['status'] = $status;
-            }*/
+              if($checkStatus == 0)
+              {
+                  $status = ContractHistoryService::checkContractDateBetween($formData['formatStartDate'],
+                      $formData['formatEndDate']);
+                  $updateData['status'] = $status;
+              }*/
             if ($formData['contractAmount'])
             {
                 try
@@ -470,47 +470,47 @@ class ContractMasterRepository extends BaseRepository
 
             if(!$fromAmendment && $contractType != $checkContractTypeID['contract_typeId'])
             {
-            $contractTypeSections = CMContractTypeSections::getContractTypeSections(
-                $checkContractTypeID['contract_typeId'],
-                $selectedCompanyID
-            );
+                $contractTypeSections = CMContractTypeSections::getContractTypeSections(
+                    $checkContractTypeID['contract_typeId'],
+                    $selectedCompanyID
+                );
 
-            ContractSettingMaster::where('contractId', $id)->delete();
-            ContractSettingDetail::where('contractId', $id)->delete();
+                ContractSettingMaster::where('contractId', $id)->delete();
+                ContractSettingDetail::where('contractId', $id)->delete();
 
-            foreach ($contractTypeSections as $contractTypeSection)
-            {
-                $contractSettingMasterArray = [
-                    'uuid' => bin2hex(random_bytes(16)),
-                    'contractId' => $id,
-                    'contractTypeSectionId' => $contractTypeSection['ct_sectionId'],
-                    'isActive' => 0
-                ];
-
-                ContractSettingMaster::create($contractSettingMasterArray);
-            }
-
-            $contractTypeSectionDetail = ContractSettingMaster::getContractTypeSectionDetail($id);
-            $detailArray = [];
-            $i = 0;
-            foreach ($contractTypeSectionDetail as $detail)
-            {
-                $sDetails = $detail['contractTypeSection']['contractSectionWithTypes']['sectionDetail'];
-                foreach ($sDetails as $s)
+                foreach ($contractTypeSections as $contractTypeSection)
                 {
-                    $sectionDetailId = $s['id'];
-                    $detailArray[$i] = [
+                    $contractSettingMasterArray = [
                         'uuid' => bin2hex(random_bytes(16)),
-                        'settingMasterId' => $detail['id'],
-                        'sectionDetailId' => $sectionDetailId,
-                        'isActive' => 0,
                         'contractId' => $id,
-                        'created_at' => Carbon::now(),
+                        'contractTypeSectionId' => $contractTypeSection['ct_sectionId'],
+                        'isActive' => 0
                     ];
-                    $i++;
+
+                    ContractSettingMaster::create($contractSettingMasterArray);
                 }
-            }
-            ContractSettingDetail::insert($detailArray);
+
+                $contractTypeSectionDetail = ContractSettingMaster::getContractTypeSectionDetail($id);
+                $detailArray = [];
+                $i = 0;
+                foreach ($contractTypeSectionDetail as $detail)
+                {
+                    $sDetails = $detail['contractTypeSection']['contractSectionWithTypes']['sectionDetail'];
+                    foreach ($sDetails as $s)
+                    {
+                        $sectionDetailId = $s['id'];
+                        $detailArray[$i] = [
+                            'uuid' => bin2hex(random_bytes(16)),
+                            'settingMasterId' => $detail['id'],
+                            'sectionDetailId' => $sectionDetailId,
+                            'isActive' => 0,
+                            'contractId' => $id,
+                            'created_at' => Carbon::now(),
+                        ];
+                        $i++;
+                    }
+                }
+                ContractSettingDetail::insert($detailArray);
             }
 
             return $model::where($colName, $id)->update($updateData);
@@ -719,10 +719,10 @@ class ContractMasterRepository extends BaseRepository
             if ($isDrop)
             {
                 $pluckedData = [];
-               /* $pluckedData[] = [
-                    'id' => $setting->contractTypeSection->cmSection_id,
-                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
-                ];*/
+                /* $pluckedData[] = [
+                     'id' => $setting->contractTypeSection->cmSection_id,
+                     'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
+                 ];*/
             } else
             {
                 $pluckedData[] = $setting->contractTypeSection->cmSection_id;
@@ -735,10 +735,10 @@ class ContractMasterRepository extends BaseRepository
                 'id' => 12,
                 'description' => 'Contract Info',
             ];
-           /* $pluckedData[] = [
-                'id' => 13,
-                'description' => 'User & User Group',
-            ];*/
+            /* $pluckedData[] = [
+                 'id' => 13,
+                 'description' => 'User & User Group',
+             ];*/
         }
 
 
@@ -1037,7 +1037,7 @@ class ContractMasterRepository extends BaseRepository
                 }
             }
             if(($activeMaster['contractTypeSection']['cmSection_id'] == 4 && !in_array(4, $existRetention) &&
-                !in_array(5, $existRetention)) || ($activeMaster['contractTypeSectionId'] == 4 &&
+                    !in_array(5, $existRetention)) || ($activeMaster['contractTypeSectionId'] == 4 &&
                     $existRetention == null))
             {
                 return trans('common.at_least_one_retention_should_be_available');
@@ -1363,4 +1363,3 @@ class ContractMasterRepository extends BaseRepository
             ->make(true);
     }
 }
-

@@ -167,13 +167,13 @@ class FinanceDocuments extends Model
                 'invoiceMaster' => function ($q)
                 {
                     $q->select('bookingSuppMasInvAutoID', 'bookingAmountTrans', 'supplierTransactionCurrencyID',
-                    'bookingInvCode', 'confirmedYN', 'approved', 'refferedBackYN', 'createdDateAndTime')
-                    ->with([
-                        'currency' => function ($q)
-                        {
-                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                        }
-                    ]);
+                        'bookingInvCode', 'confirmedYN', 'approved', 'refferedBackYN', 'createdDateAndTime')
+                        ->with([
+                            'currency' => function ($q)
+                            {
+                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                            }
+                        ]);
                 },
                 'milestoneList' => function ($q)
                 {
@@ -221,19 +221,19 @@ class FinanceDocuments extends Model
                 'paymentVoucherMaster' => function ($q)
                 {
                     $q->with([
-                            'currency' => function ($q)
-                            {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                            },
-                            'bankCurrency' => function ($q)
-                            {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                            },
-                            'supplierCurrency'=> function ($q)
-                            {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                            }
-                        ]);
+                        'currency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        },
+                        'bankCurrency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        },
+                        'supplierCurrency'=> function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        }
+                    ]);
                 },
                 'milestoneList' => function ($q)
                 {
@@ -276,10 +276,3 @@ class FinanceDocuments extends Model
         return FinanceDocuments::select('id')->where('uuid', $financeUuid)->first();
     }
 }
-
-
-
-
-
-
-

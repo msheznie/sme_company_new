@@ -25,7 +25,7 @@ use Exception;
  * Class ContractAdditionalDocumentsRepository
  * @package App\Repositories
  * @version May 15, 2024, 5:23 am +04
-*/
+ */
 
 class ContractAdditionalDocumentsRepository extends BaseRepository implements AdditionalDocumentRepositoryInterface
 {

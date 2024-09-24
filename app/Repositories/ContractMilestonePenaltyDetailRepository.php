@@ -26,7 +26,7 @@ use Yajra\DataTables\DataTables;
  * Class ContractMilestonePenaltyDetailRepository
  * @package App\Repositories
  * @version July 28, 2024, 10:45 am +04
-*/
+ */
 
 class ContractMilestonePenaltyDetailRepository extends BaseRepository
 {

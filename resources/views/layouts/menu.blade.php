@@ -308,26 +308,26 @@
         </a>
     </li>
 
-<li class="nav-item {{ Request::is('contractStatusHistories*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractStatusHistories.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Status Histories</span>
-    </a>
-</li>
+    <li class="nav-item {{ Request::is('contractStatusHistories*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractStatusHistories.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Status Histories</span>
+        </a>
+    </li>
 
-<li class="nav-item {{ Request::is('timeMaterialConsumptions*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('timeMaterialConsumptions.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Time Material Consumptions</span>
-    </a>
-</li>
+    <li class="nav-item {{ Request::is('timeMaterialConsumptions*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('timeMaterialConsumptions.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Time Material Consumptions</span>
+        </a>
+    </li>
 
-<li class="nav-item {{ Request::is('cMContractReminderScenarios*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractReminderScenarios.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Reminder Scenarios</span>
-    </a>
-</li>
+    <li class="nav-item {{ Request::is('cMContractReminderScenarios*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractReminderScenarios.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Reminder Scenarios</span>
+        </a>
+    </li>
     <li class="nav-item {{ Request::is('contractPaymentTerms*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('contractPaymentTerms.index') }}">
             <i class="nav-icon icon-cursor"></i>
@@ -335,121 +335,121 @@
         </a>
     </li>
 
-<li class="nav-item {{ Request::is('cMContractMasterAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractMasterAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Master Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractUserAssignAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractUserAssignAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract User Assign Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractBoqItemsAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractBoqItemsAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Boq Items Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractMileStoneAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractMileStoneAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Mile Stone Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractStatusHistoryAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractStatusHistoryAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Status History Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractDeliverableAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractDeliverableAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Deliverable Amds</span>
-    </a>
-</li>
+    <li class="nav-item {{ Request::is('cMContractMasterAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractMasterAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Master Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractUserAssignAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractUserAssignAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract User Assign Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractBoqItemsAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractBoqItemsAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Boq Items Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractMileStoneAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractMileStoneAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Mile Stone Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractStatusHistoryAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractStatusHistoryAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Status History Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractDeliverableAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractDeliverableAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Deliverable Amds</span>
+        </a>
+    </li>
 
-<li class="nav-item {{ Request::is('cMContractOverallRetentionAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractOverallRetentionAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Overall Retention Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('cMContractDocumentAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('cMContractDocumentAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>C M Contract Document Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('erpDocumentAttachmentsAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('erpDocumentAttachmentsAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Erp Document Attachments Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractAmendmentAreas*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractAmendmentAreas.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Amendment Areas</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('appearanceSettings*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('appearanceSettings.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Appearance Settings</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('appearanceElements*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('appearanceElements.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Appearance Elements</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('systemConfigurationAttributes*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('systemConfigurationAttributes.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>System Configuration Attributes</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('systemConfigurationDetails*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('systemConfigurationDetails.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>System Configuration Details</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractAdditionalDocumentAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractAdditionalDocumentAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Additional Document Amds</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('thirdPartySystems*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('thirdPartySystems.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Third Party Systems</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('thirdPartyIntegrationKeys*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('thirdPartyIntegrationKeys.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Third Party Integration Keys</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractOverallPenalties*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenalties.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalties</span>
-    </a>
-</li>
-<li class="nav-item {{ Request::is('contractOverallPenaltyAmds*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('contractOverallPenaltyAmds.index') }}">
-        <i class="nav-icon icon-cursor"></i>
-        <span>Contract Overall Penalty Amds</span>
-    </a>
-</li>
+    <li class="nav-item {{ Request::is('cMContractOverallRetentionAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractOverallRetentionAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Overall Retention Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('cMContractDocumentAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('cMContractDocumentAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>C M Contract Document Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('erpDocumentAttachmentsAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('erpDocumentAttachmentsAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Erp Document Attachments Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('contractAmendmentAreas*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractAmendmentAreas.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Amendment Areas</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('appearanceSettings*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('appearanceSettings.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Appearance Settings</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('appearanceElements*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('appearanceElements.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Appearance Elements</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('systemConfigurationAttributes*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('systemConfigurationAttributes.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>System Configuration Attributes</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('systemConfigurationDetails*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('systemConfigurationDetails.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>System Configuration Details</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('contractAdditionalDocumentAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractAdditionalDocumentAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Additional Document Amds</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('thirdPartySystems*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('thirdPartySystems.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Third Party Systems</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('thirdPartyIntegrationKeys*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('thirdPartyIntegrationKeys.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Third Party Integration Keys</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('contractOverallPenalties*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractOverallPenalties.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Overall Penalties</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('contractOverallPenaltyAmds*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('contractOverallPenaltyAmds.index') }}">
+            <i class="nav-icon icon-cursor"></i>
+            <span>Contract Overall Penalty Amds</span>
+        </a>
+    </li>
 </ul>
 <li class="nav-item {{ Request::is('contractMilestonePenaltyDetails*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('contractMilestonePenaltyDetails.index') }}">

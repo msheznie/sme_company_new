@@ -32,11 +32,11 @@ class ContractMasterService
     public function getContractViewData($contractUUid, $selectedCompanyID, $historyUuid)
     {
         $contractMaster = ContractMaster::select('id', 'uuid', 'contractCode', 'title', 'description', 'contractType',
-                'counterParty', 'counterPartyName', 'referenceCode', 'contractOwner', 'contractAmount', 'startDate',
-                'endDate', 'agreementSignDate', 'contractTermPeriod', 'contractRenewalDate',
-                'contractExtensionDate', 'contractTerminateDate', 'contractRevisionDate', 'primaryCounterParty',
-                'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber'
-            )
+            'counterParty', 'counterPartyName', 'referenceCode', 'contractOwner', 'contractAmount', 'startDate',
+            'endDate', 'agreementSignDate', 'contractTermPeriod', 'contractRenewalDate',
+            'contractExtensionDate', 'contractTerminateDate', 'contractRevisionDate', 'primaryCounterParty',
+            'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty', 'secondaryEmail', 'secondaryPhoneNumber'
+        )
             ->with([
                 'contractTypes' => function ($q)
                 {
