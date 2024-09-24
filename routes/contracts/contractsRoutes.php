@@ -580,4 +580,20 @@ Route::group(['prefix' => 'contract'], function (){
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'destroy'
     ])->name('Delete finance document');
+
+    Route::post('/get-supplier-contact-details',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getSupplierContactDetails'])
+        ->name('Get supplier contact details');
+
+    Route::post('/get-milestone-due-date',
+        [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'getMilestoneDueDate'])
+        ->name('Get Milestone Due Date');
+    Route::get('/milestone/{id}',
+        [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'show'])
+        ->name('get Contract Milestone');
+    Route::post('/finance-milestone-deliverable',
+        [\App\Http\Controllers\API\FinanceMilestoneDeliverableAPIController::class, 'store'])
+        ->name('store finance milestone deliverable');
 });
+
+

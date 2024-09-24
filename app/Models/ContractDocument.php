@@ -69,7 +69,9 @@ class ContractDocument extends Model
         'returnedTo',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'attach_after_approval',
+        'is_editable'
     ];
 
     /**
@@ -99,7 +101,9 @@ class ContractDocument extends Model
         'returnedTo' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'attach_after_approval' => 'integer',
+        'is_editable' => 'integer'
     ];
 
     /**
@@ -122,7 +126,8 @@ class ContractDocument extends Model
     public function contractDocuments($selectedCompanyID, $contractID)
     {
         return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
-            'followingRequest', 'attachedDate', 'status','documentExpiryDate')
+            'followingRequest', 'attachedDate', 'status','documentExpiryDate', 'attach_after_approval',
+            'is_editable')
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
@@ -136,7 +141,7 @@ class ContractDocument extends Model
 
     public static function getContractDocuments($contractId, $selectedCompanyID)
     {
-            return self::where('companySystemID',$selectedCompanyID)
+        return self::where('companySystemID',$selectedCompanyID)
             ->where('contractID',$contractId)
             ->get();
     }

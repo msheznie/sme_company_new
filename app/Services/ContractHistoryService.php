@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
+use Illuminate\Support\Facades\Log;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -235,6 +236,7 @@ class ContractHistoryService
                 $categoryId = $input['category'];
                 $contractHistoryUuid = $input['contractHistoryId'];
                 $contractCloneUuid = $input['cloneContractId'];
+                $isSystemUser = $input['systemUser'] ?? false;
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
                 $getContractCloneData = ContractManagementUtils::checkContractExist($contractCloneUuid, $companyId);
                 $getContractHistoryData = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
@@ -273,11 +275,11 @@ class ContractHistoryService
 
                 self::updateContractMaster($getContractCloneData['id'], $companyId,$cloneStatus);
                 self::updateContractHistory($contractHistoryId, $companyId, $categoryId);
-                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId);
+                self::insertHistoryStatus($contractId,$categoryId,$companyId, $contractHistoryId, $isSystemUser);
 
                 if($categoryId === 6)
                 {
-                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId);
+                    contractStatusHistory::updateTerminatedAddendum($contractId, $companyId,$categoryId, $isSystemUser);
                 }
 
             });
@@ -483,10 +485,7 @@ class ContractHistoryService
             {
                 $contractId = $input['contractId'];
                 $contractHistoryUuid = $input['contractHistoryId'];
-                $contractEndDate = $input['contractEndDate'];
                 $companyId = $input['selectedCompanyID'];
-                $categoryId = $input['category'];
-                $newContractTermPeriod = $input['newContractTermPeriod'];
                 $getContractId = ContractManagementUtils::checkContractExist($contractId, $companyId);
                 $checkHistoryExists = ContractHistory::getContractHistory($contractHistoryUuid, $companyId);
                 if(empty($checkHistoryExists))
@@ -500,8 +499,7 @@ class ContractHistoryService
 
                 $contractId = $getContractId->id;
                 self::updateContractMasterEndDate
-                ($contractId, $companyId,$categoryId,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid,
-                    $checkHistoryExists['id']);
+                ($contractId, $input, $checkHistoryExists['id'],$getContractId['endDate']);
             });
         }catch (\Exception $e)
         {
@@ -510,10 +508,15 @@ class ContractHistoryService
     }
 
     public function updateContractMasterEndDate
-    ($contractId, $companyId,$status,$contractEndDate,$newContractTermPeriod,$contractHistoryUuid, $id)
+    ($contractId, $input, $id, $endDate)
     {
         try
         {
+            $contractHistoryUuid = $input['contractHistoryId'];
+            $contractEndDate = $input['contractEndDate'];
+            $companyId = $input['selectedCompanyID'];
+            $status = $input['category'];
+            $newContractTermPeriod = $input['newContractTermPeriod'];
             $data = [
                 'endDate'  => ContractManagementUtils::convertDate($contractEndDate),
                 'status'  => $status,
@@ -527,6 +530,7 @@ class ContractHistoryService
 
             $status = [
                 'status'  => 4,
+                'end_date'  => $endDate,
             ];
 
             ContractHistory::where('uuid', $contractHistoryUuid)
@@ -804,4 +808,117 @@ class ContractHistoryService
         return contractStatusHistory::where('contract_id', $contractID)->where('status', -1)->exists();
     }
 
+    public function getContractStatusData($masterRecord)
+    {
+        return ContractMaster::select('uuid', 'id', 'companySystemID', 'parent_id')
+            ->with(['parent:id,uuid', 'history' => function ($query) use ($masterRecord)
+            {
+                $query->select('uuid', 'category', 'cloning_contract_id', 'company_id', 'contract_id')
+                    ->where('cloning_contract_id', $masterRecord['parent_id'])
+                    ->where('company_id', $masterRecord['companySystemID']);
+            }])
+            ->whereHas('history', function ($query) use ($masterRecord)
+            {
+                $query->where('cloning_contract_id', $masterRecord['parent_id'])
+                    ->where('company_id', $masterRecord['companySystemID']);
+            })
+            ->where('uuid', $masterRecord['uuid'])
+            ->first();
+    }
+
+    public function setContractStatusData($masterRecord, $result = null)
+    {
+        $contract = ContractMaster::getExistingContractType($masterRecord['company_id'], $masterRecord['contract_id']);
+        $input = [
+            'contractId' => $result->parent->uuid ?? $contract['uuid'],
+            'cloneContractId' => $result ? $masterRecord['uuid'] : $contract['uuid'],
+            'category' => $result->history->category ?? $masterRecord['category'],
+            'contractHistoryId' => $result->history->uuid ?? $masterRecord['uuid'],
+            'selectedCompanyID' => $result ? $masterRecord['companySystemID'] : $masterRecord['company_id'],
+            'systemUser' => $masterRecord['systemUser'] ?? false,
+        ];
+
+        if(in_array($input['category'], [2, 3, 5, 6]))
+        {
+            ContractHistoryService::updateContractStatus($input);
+        }
+        if($input['category'] == 1)
+        {
+            ContractAmendmentService::updateContractStatusAmendment($input);
+        }
+
+    }
+
+    public function setExtendContractData($masterRecord)
+    {
+        $contract = ContractMaster::getExistingContractType($masterRecord['company_id'], $masterRecord['contract_id']);
+        $getContractId = ContractManagementUtils::checkContractExist($contract['uuid'], $masterRecord['company_id']);
+
+        $startDate = Carbon::parse($getContractId['startDate']);
+        $endDate = Carbon::parse($masterRecord['date']);
+
+        $diff = $startDate->diff($endDate);
+        $newContractTermPeriod = ContractHistoryService::formatContractTermPeriod($diff);
+
+        $input = [
+            'contractId' => $contract['uuid'],
+            'contractHistoryId' => $masterRecord['uuid'],
+            'contractEndDate' => Carbon::parse($masterRecord['date'])->format('d-m-Y'),
+            'selectedCompanyID' => $masterRecord['company_id'],
+            'category' => $masterRecord['category'],
+            'newContractTermPeriod' => $newContractTermPeriod,
+        ];
+
+        ContractHistoryService::updateExtendStatus($input);
+    }
+
+    public function getExtensionApprovalData($contractId, $companyId)
+    {
+        return ContractHistory::where('contract_id', $contractId)
+            ->where('company_id', $companyId)
+            ->where('cloning_contract_id', $contractId)
+            ->where('status', 4)
+            ->where('approved_yn', 1)
+            ->count();
+    }
+
+    private function formatContractTermPeriod($diff)
+    {
+        $termPeriod = [];
+
+        if ($diff->y)
+        {
+            $termPeriod[] = "{$diff->y} Years";
+        }
+        if ($diff->m)
+        {
+            $termPeriod[] = "{$diff->m} Months";
+        }
+        if ($diff->d)
+        {
+            $termPeriod[] = "{$diff->d} Days";
+        }
+
+        return implode(', ', $termPeriod);
+    }
+
+    public static function getInactiveTerminateContracts()
+    {
+        return ContractMaster::select('id', 'companySystemID')
+            ->with(['history' => function ($query)
+            {
+                $query->select('uuid', 'company_id','contract_id')
+                    ->where('category', 6)
+                    ->where('approved_yn', 1);
+            }])
+            ->whereHas('history', function ($query)
+            {
+                $query->where('category', 6)
+                    ->where('approved_yn', 1);
+            })
+            ->where('status', -1)
+            ->where('parent_id', 0)
+            ->where('approved_yn', 1)
+            ->get();
+    }
 }

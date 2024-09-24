@@ -25,7 +25,7 @@ use Exception;
  * Class ContractAdditionalDocumentsRepository
  * @package App\Repositories
  * @version May 15, 2024, 5:23 am +04
-*/
+ */
 
 class ContractAdditionalDocumentsRepository extends BaseRepository implements AdditionalDocumentRepositoryInterface
 {
@@ -131,6 +131,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
                     'documentType' => $documentTypeByUuid->id,
                     'documentName' => $input['documentName'],
                     'companySystemID' => $companyId,
+                    'is_editable' => $input['is_editable'] ?? 0
                 ];
 
                 if (isset($input['documentExpiryDate']) && $input['documentExpiryDate'])

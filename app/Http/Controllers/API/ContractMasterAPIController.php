@@ -122,7 +122,7 @@ class ContractMasterAPIController extends AppBaseController
                 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
                 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
                 'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',
-                'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension',
+                'contractTermPeriod','is_amendment','is_addendum','is_renewal','is_extension', 'effective_date',
                 'is_revision','is_termination','parent_id', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'tender_id'
             ],
             [
@@ -170,6 +170,9 @@ class ContractMasterAPIController extends AppBaseController
         $response['disableTenderReferenceField'] = $this->contractMasterService->disableTenderReferenceField(
             $comapnyId,
             $contractMaster['id']
+        );
+        $response['extensionHistoryCount'] = ContractHistoryService::getExtensionApprovalData(
+            $contractMaster['id'], $comapnyId
         );
 
 
@@ -350,16 +353,18 @@ class ContractMasterAPIController extends AppBaseController
 
     public function updateContractSettingDetails(Request $request)
     {
-        $updateContractSetting = $this->contractMasterRepository->updateContractSettingDetails($request);
-
-        if($updateContractSetting['status'])
+        try
         {
-            return $this->sendResponse([], $updateContractSetting['message']);
-        } else
+            $this->contractMasterRepository->updateContractSettingDetails($request);
+            return $this->sendResponse([], trans('common.contract_updated_successfully'));
+        } catch (CommonException $ex)
         {
-            $statusCode = $updateContractSetting['code'] ?? 404;
-            return $this->sendError($updateContractSetting['message'], $statusCode);
+            return $this->sendError($ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage());
         }
+
     }
 
     public function getActiveContractSectionDetails(Request $request)
@@ -660,5 +665,11 @@ class ContractMasterAPIController extends AppBaseController
     public function getContractMasterResultsForGraph(Request $request)
     {
         return $this->contractMasterRepository->getContractMasterForGraph($request);
+    }
+
+    public function getSupplierContactDetails(Request $request)
+    {
+        $response = $this->contractMasterService->getSupplierContactDetails($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
     }
 }

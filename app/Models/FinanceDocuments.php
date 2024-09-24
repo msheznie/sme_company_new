@@ -77,7 +77,14 @@ class FinanceDocuments extends Model
     {
         return $this->belongsTo(PaySpplierInvoiceMaster::class, 'document_system_id', 'PayMasterAutoId');
     }
-
+    public function milestoneList()
+    {
+        return $this->hasMany(FinanceMilestoneDeliverable::class, 'finance_document_id', 'id');
+    }
+    public function deliverableList()
+    {
+        return $this->hasMany(FinanceMilestoneDeliverable::class, 'finance_document_id', 'id');
+    }
     public function getExistingRecords($contractID, $documentType, $selectedCompanyID, $documentID)
     {
         return FinanceDocuments::where('contract_id', $contractID)
@@ -100,7 +107,7 @@ class FinanceDocuments extends Model
             ->where('company_id', $selectedCompanyID)
             ->delete();
     }
-    public function getContractFinanceDocument($contractID, $documentType, $documentID)
+    public static function getContractFinanceDocument($contractID, $documentType, $documentID)
     {
         $financeDocument = FinanceDocuments::select('uuid', 'contract_id', 'document_type', 'document_id',
             'document_system_id')
@@ -155,18 +162,46 @@ class FinanceDocuments extends Model
     }
     public static function getSupplierInvoice($contractID, $companyId, $documentType, $documentId)
     {
-        return FinanceDocuments::select('uuid', 'contract_id', 'document_system_id')
+        return FinanceDocuments::select('id', 'uuid', 'contract_id', 'document_system_id')
             ->with([
                 'invoiceMaster' => function ($q)
                 {
                     $q->select('bookingSuppMasInvAutoID', 'bookingAmountTrans', 'supplierTransactionCurrencyID',
-                    'bookingInvCode', 'confirmedYN', 'approved', 'refferedBackYN', 'createdDateAndTime')
-                    ->with([
-                        'currency' => function ($q)
-                        {
-                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                        }
-                    ]);
+                        'bookingInvCode', 'confirmedYN', 'approved', 'refferedBackYN', 'createdDateAndTime')
+                        ->with([
+                            'currency' => function ($q)
+                            {
+                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                            }
+                        ]);
+                },
+                'milestoneList' => function ($q)
+                {
+                    $q->where('document', 1)
+                        ->select('finance_document_id', 'master_id')
+                        ->with([
+                            'milestone' => function ($q)
+                            {
+                                $q->select('id', 'uuid', 'title');
+                            }
+                        ]);
+                },
+                'deliverableList' => function ($q)
+                {
+                    $q->where('document', 2)
+                        ->select('finance_document_id', 'master_id')
+                        ->with([
+                            'deliverable' => function ($q)
+                            {
+                                $q->select('id', 'uuid', 'title', 'milestoneID')
+                                    ->with([
+                                        'milestone' => function ($q)
+                                        {
+                                            $q->select('id', 'title');
+                                        }
+                                    ]);
+                            }
+                        ]);
                 }
             ])
 
@@ -181,22 +216,50 @@ class FinanceDocuments extends Model
 
     public static function getPaymentVoucher($contractID, $companyId, $documentType, $documentId)
     {
-        return FinanceDocuments::select('uuid', 'contract_id', 'document_system_id')
+        return FinanceDocuments::select('id', 'uuid', 'contract_id', 'document_system_id')
             ->with([
                 'paymentVoucherMaster' => function ($q)
                 {
                     $q->with([
-                            'currency' => function ($q)
+                        'currency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        },
+                        'bankCurrency' => function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        },
+                        'supplierCurrency'=> function ($q)
+                        {
+                            $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                        }
+                    ]);
+                },
+                'milestoneList' => function ($q)
+                {
+                    $q->where('document', 1)
+                        ->select('finance_document_id', 'master_id')
+                        ->with([
+                            'milestone' => function ($q)
                             {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                            },
-                            'bankCurrency' => function ($q)
+                                $q->select('id', 'uuid', 'title');
+                            }
+                        ]);
+                },
+                'deliverableList' => function ($q)
+                {
+                    $q->where('document', 2)
+                        ->select('finance_document_id', 'master_id')
+                        ->with([
+                            'deliverable' => function ($q)
                             {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
-                            },
-                            'supplierCurrency'=> function ($q)
-                            {
-                                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                                $q->select('id', 'uuid', 'title', 'milestoneID')
+                                    ->with([
+                                        'milestone' => function ($q)
+                                        {
+                                            $q->select('id', 'title');
+                                        }
+                                    ]);
                             }
                         ]);
                 }
@@ -208,11 +271,8 @@ class FinanceDocuments extends Model
             ->orderBy('document_system_id', 'desc')
             ->get();
     }
+    public static function checkFinanceDocumentExists($financeUuid)
+    {
+        return FinanceDocuments::select('id')->where('uuid', $financeUuid)->first();
+    }
 }
-
-
-
-
-
-
-

@@ -64,7 +64,7 @@ class ContractDeliverablesRepository extends BaseRepository
 
     public function getDeliverables($contractID, $companySystemID): array
     {
-        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
+        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID, 0);
         $deliverablesArray = [];
         if ($deliverables)
         {
@@ -75,6 +75,7 @@ class ContractDeliverablesRepository extends BaseRepository
                 $deliverablesArray[$key]['description'] = $value['description'];
                 $deliverablesArray[$key]['dueDate'] = $value['dueDate'];
                 $deliverablesArray[$key]['milestoneUuid'] = $value['milestone']['uuid'] ?? null;
+                $deliverablesArray[$key]['milestoneDueDate'] = $value['milestone']['due_date'] ?? null;
             }
         }
         return $deliverablesArray;
@@ -263,7 +264,7 @@ class ContractDeliverablesRepository extends BaseRepository
             ];
         }
         $contractID = $contractMaster['id'];
-        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID);
+        $deliverables = ContractDeliverables::getDeliverables($contractID, $companySystemID, 0);
 
         $data[0]['Deliverable Title'] = "Deliverable Title";
         $data[0]['Deliverable Description'] = "Deliverable Description";

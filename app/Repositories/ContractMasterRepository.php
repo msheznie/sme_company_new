@@ -39,6 +39,7 @@ use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Services\ContractMasterService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -348,27 +349,27 @@ class ContractMasterRepository extends BaseRepository
             ->where('companySystemID', $selectedCompanyID)->first();
         if(empty($checkContractTypeID))
         {
-            throw new CommonException(trans('common.contract_type_not_found'));
+            GeneralService::sendException(trans('common.contract_type_not_found'));
         }
         $checkOwnerID = ($contractOwner != '') ? ContractUsers::where('uuid', $formData['contractOwner'])
             ->where('companySystemId', $selectedCompanyID)->pluck('id')->first() : null;
         if($contractOwner != '' && empty($checkOwnerID))
         {
-            throw new CommonException(trans('common.contract_owner_not_found'));
+            GeneralService::sendException(trans('common.contract_owner_not_found'));
         }
         $checkContractPartyNameID = ContractUsers::where('uuid', $formData['counterPartyName'])
             ->where('companySystemId', $selectedCompanyID)->pluck('id')->first();
         if(empty($checkContractPartyNameID))
         {
-            throw new CommonException(trans('common.counter_party_name_not_found'));
+            GeneralService::sendException(trans('common.counter_party_name_not_found'));
         }
         if(empty($formData['formatStartDate']))
         {
-            throw new CommonException(trans('common.start_date_not_found'));
+            GeneralService::sendException(trans('common.commencement_date_not_found'));
         }
         if(empty($formData['formatEndDate']))
         {
-            throw new CommonException(trans('common.end_date_not_found'));
+            GeneralService::sendException(trans('common.end_date_not_found'));
         }
 
         $agreementSignDate = \DateTime::createFromFormat('d-m-Y', $formData['formatAgreementSignDate']);
@@ -376,7 +377,21 @@ class ContractMasterRepository extends BaseRepository
 
         if ($agreementSignDate > $contractStartDate)
         {
-            throw new CommonException('Agreement Sign Date cannot be greater than the Contract Start Date');
+            GeneralService::sendException(trans('Agreement sign date cannot be greater than the commencement date'));
+        }
+
+        $contractMilestones = ContractMilestone::getContractMilestone($id, $selectedCompanyID);
+        foreach ($contractMilestones as $contractMilestone)
+        {
+            $milestoneDueDate = (new \DateTime($contractMilestone->due_date))->format('Y-m-d');
+            $startDate = (new \DateTime($formData['formatStartDate']))->format('Y-m-d');
+            $endDate = (new \DateTime($formData['formatEndDate']))->format('Y-m-d');
+
+            if($startDate > $milestoneDueDate || $endDate < $milestoneDueDate)
+            {
+                GeneralService::sendException(trans('Commencement date should be less than milestone due date and
+                contract end date should be greater than milestone due date'));
+            }
         }
 
         // $this->checkValidation($formData, $id, $selectedCompanyID);
@@ -440,10 +455,10 @@ class ContractMasterRepository extends BaseRepository
                 }
                 catch (CommonException $ex)
                 {
-                    throw new CommonException('Overall penalty not found.');
+                    GeneralService::sendException(trans('Overall penalty not found.'));
                 } catch (\Exception $ex)
                 {
-                    throw new CommonException('Overall penalty not found.');
+                    GeneralService::sendException(trans('Overall penalty not found.'));
                 }
             }
 
@@ -624,21 +639,19 @@ class ContractMasterRepository extends BaseRepository
         $contractUuid = $request->input('contractId') ?? 0;
         $formData = $request->input('formData') ?? null;
         $settingMasters = $formData['settingMasters'] ?? [];
-
-        $contractID = ContractMaster::select('id')->where('uuid', $contractUuid)->pluck('id')->first();
-        if(empty($contractID))
+        $effectiveDateType = $formData['effectiveDateType'] ?? 1;
+        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType )
         {
-            return ['status' => false, 'message' => trans('common.contract_not_found'), 'line' => __LINE__];
-        }
+            $contractMaster = self::findByUuid($contractUuid, ['id', 'startDate']);
+            if(empty($contractMaster))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
 
-        if(empty($settingMasters))
-        {
-            return ['status' => false, 'message' => 'Cannot update, no record found', 'line' => __LINE__];
-        }
-
-        try
-        {
-            DB::beginTransaction();
+            if(empty($settingMasters))
+            {
+                GeneralService::sendException('Cannot update, no record found');
+            }
 
             foreach ($settingMasters as $master)
             {
@@ -646,11 +659,7 @@ class ContractMasterRepository extends BaseRepository
 
                 if (!$settingMaster)
                 {
-                    return [
-                        'status' => false,
-                        'message' => 'Contract setting master not found for UUID: ' . $master['id'],
-                        'line' => __LINE__
-                    ];
+                    GeneralService::sendException('Contract setting master not found for UUID: ' . $master['id']);
                 }
 
                 $masterActive = $master['isActive'] ?? 0;
@@ -664,11 +673,8 @@ class ContractMasterRepository extends BaseRepository
 
                         if (!$settingDetail)
                         {
-                            return [
-                                'status' => false,
-                                'message' => 'Contract setting detail not found for UUID: ' . $details['settingDetailUuid'],
-                                'line' => __LINE__
-                            ];
+                            GeneralService::sendException('Contract setting detail not found for UUID: ' .
+                                $details['settingDetailUuid']);
                         }
 
                         $isActive = $details['isActive'] ?? 0;
@@ -676,14 +682,17 @@ class ContractMasterRepository extends BaseRepository
                     }
                 }
             }
+            $updateCMData = [
+                'effective_date' => $effectiveDateType
+            ];
 
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.contract_updated_successfully')];
-        } catch(\Exception $ex)
-        {
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
-        }
+            if ($effectiveDateType == 1)
+            {
+                $updateCMData['agreementSignDate'] = $contractMaster['startDate'] ?? null;
+            }
+            ContractMasterService::updateContractMaster($contractMaster['id'], $updateCMData);
+            return true;
+        });
     }
 
     public function getActiveContractSectionDetails(Request $request)
@@ -926,7 +935,7 @@ class ContractMasterRepository extends BaseRepository
                 throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
             }
 
-            $message = $this->checkActiveMasters($contractMaster['id'], $companySystemID);
+            $message = $this->checkActiveMasters($contractMaster['id'], $companySystemID, $contractMaster['startDate'], $contractMaster['endDate']);
             if ($message)
             {
                 throw new CommonException($message);
@@ -959,7 +968,7 @@ class ContractMasterRepository extends BaseRepository
         });
     }
 
-    private function checkActiveMasters($contractId, $companySystemID)
+    private function checkActiveMasters($contractId, $companySystemID, $startDate, $endDate)
     {
         $activeMasters = ContractSettingMaster::where('contractId', $contractId)
             ->where('isActive', 1)
@@ -1010,6 +1019,21 @@ class ContractMasterRepository extends BaseRepository
                 if(empty($existMilestone))
                 {
                     return trans('common.at_least_one_milestone_should_be_available');
+                }
+
+                $deliverables = ContractDeliverables::getDeliverables($contractId, $companySystemID);
+                foreach ($deliverables as $deliverable)
+                {
+                    $milestoneDueDate = $deliverable->milestone->due_date ?? $endDate;
+                    $formatMilestoneDueDate = (new \DateTime($milestoneDueDate))->format('Y-m-d');
+                    $formatStartDate = (new \DateTime($startDate))->format('Y-m-d');
+                    $deliverableDueDate = (new \DateTime($deliverable->dueDate))->format('Y-m-d');
+
+                    if($formatStartDate > $deliverableDueDate || $formatMilestoneDueDate < $deliverableDueDate)
+                    {
+                        GeneralService::sendException('Due dates of the deliverables that are linked with
+                         milestones should be within the contract start date and the linked milestone\'s due date');
+                    }
                 }
             }
             if(($activeMaster['contractTypeSection']['cmSection_id'] == 4 && !in_array(4, $existRetention) &&

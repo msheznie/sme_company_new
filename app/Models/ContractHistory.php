@@ -140,6 +140,11 @@ class ContractHistory extends Model
         return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
     }
 
+    public function approvedUser()
+    {
+        return $this->belongsTo(Employees::class, 'approved_by', 'employeeSystemID');
+    }
+
     public static function contractHistory
     (
         $contractId, $categoryId, $companySystemID,$contractColumnName = 'contract_id'
@@ -150,6 +155,9 @@ class ContractHistory extends Model
             {
                 $q->select('title', 'id', 'status', 'uuid');
             }, 'createdUser' => function ($q1)
+            {
+                $q1->select('employeeSystemID', 'empName');
+            }, 'approvedUser' => function ($q1)
             {
                 $q1->select('employeeSystemID', 'empName');
             }

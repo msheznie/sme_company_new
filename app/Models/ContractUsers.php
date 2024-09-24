@@ -98,14 +98,37 @@ class ContractUsers extends Model
         $contractUsers = ContractUsers::select
         ('uuid', 'contractUserId', 'contractUserType', 'contractUserCode', 'contractUserName', 'isActive')
             ->where('companySystemId', $companySystemId)
-            ->when($contractUserType > 0, function ($q) use ($contractUserType) {
+            ->when($contractUserType > 0, function ($q) use ($contractUserType)
+            {
                 $q->where('contractUserType', $contractUserType);
             })
+            ->with([
+                'contractInternalUser' => function ($q)
+                {
+                    $q->with([
+                        'employeeDepartments' => function ($q)
+                        {
+                            $q->with([
+                                'department' => function ($q)
+                                {
+                                    $q->select('DepartmentMasterID', 'DepartmentDes');
+                                }
+                            ]);
+                            $q->select('EmpID', 'DepartmentMasterID', 'isPrimary', 'isActive');
+                            $q->where('isPrimary', 1);
+                            $q->where('isActive', 1);
+                        }
+                    ]);
+                    $q->select('employeeSystemID');
+                }
+            ])
             ->orderBy('id', 'desc');
 
-        if($search){
+        if($search)
+        {
             $search = str_replace("\\", "\\\\", $search);
-            $contractUsers = $contractUsers->where(function ($query) use ($search) {
+            $contractUsers = $contractUsers->where(function ($query) use ($search)
+            {
                 $query->where('contractUserCode', 'LIKE', "%{$search}%");
                 $query->orWhere('contractUserName', 'LIKE', "%{$search}%");
             });
@@ -114,19 +137,37 @@ class ContractUsers extends Model
         return $contractUsers;
     }
 
-    public function getInternalUserList($companySystemId, $searchKeyword){
+    public function getInternalUserList($companySystemId, $searchKeyword)
+    {
         $employees = Employees::selectRaw('employeeSystemID as id, empName as name, empID as code')
             ->where('empCompanySystemID', $companySystemId)
             ->where('discharegedYN', 0)
             ->where('empActive', 1)
-            ->where(function ($q) {
+            ->where(function ($q)
+            {
                 $q->whereDoesntHave('pulledContractUser');
             })
+            ->with([
+                'employeeDepartment' => function ($q)
+                {
+                    $q->with([
+                        'department' => function ($q)
+                        {
+                            $q->select('DepartmentMasterID', 'DepartmentDes');
+                        }
+                    ]);
+                    $q->select('EmpID', 'DepartmentMasterID', 'isPrimary', 'isActive');
+                    $q->where('isPrimary', 1);
+                    $q->where('isActive', 1);
+                }
+            ])
             ->orderBy('id', 'desc');
 
-        if ($searchKeyword) {
+        if ($searchKeyword)
+        {
             $search = str_replace("\\", "\\\\", $searchKeyword);
-            $employees = $employees->where(function ($query) use ($search) {
+            $employees = $employees->where(function ($query) use ($search)
+            {
                 $query->where('empName', 'LIKE', "%{$search}%");
                 $query->orWhere('empID', 'LIKE', "%{$search}%");
             });
@@ -199,6 +240,28 @@ class ContractUsers extends Model
         return ContractUsers::select('id')
             ->where('contractUserId',$currentEmployeeId)
             ->first();
+    }
+
+    public function getSupplierContactDetails($uuid)
+    {
+        return ContractUsers::with([
+            'contractSupplierUser' => function ($q)
+            {
+                $q->with([
+                    'supplierContactDetails' => function ($q)
+                    {
+                        $q->select
+                        ('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonFax', 'isDefault');
+                        $q->orderBy('supplierContactID', 'desc');
+                    }
+                ]);
+                $q->select('supplierCodeSystem');
+            }
+        ])
+            ->select('uuid', 'contractUserId')
+            ->where('uuid', $uuid)
+            ->first();
+
     }
 
 }

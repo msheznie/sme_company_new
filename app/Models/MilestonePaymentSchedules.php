@@ -217,12 +217,16 @@ class MilestonePaymentSchedules extends Model
                             $q->where('contractType', $contractTypeID);
                         })
                         ->where('approved_yn', 1);
-                }, 'milestoneDetail' => function ($query)
+                }, 'milestoneDetail' => function ($query) use ($milestoneStatus)
                 {
-                    $query->select('id', 'uuid', 'title');
+                    $query->select('id', 'uuid', 'title', 'due_date', 'status');
+                    $query->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
+                    {
+                        $q->where('status', $milestoneStatus);
+                    });
                 }
             ])
-            ->where(function ($query) use($contractTypeID)
+            ->where(function ($query) use($contractTypeID, $milestoneStatus)
             {
                 $query->whereHas('contractMaster', function ($q) use ($contractTypeID)
                 {
@@ -233,10 +237,13 @@ class MilestonePaymentSchedules extends Model
                         $q->whereHas('contractTypes');
                     });
                 });
-            })
-            ->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
-            {
-                $q->where('milestone_status', $milestoneStatus);
+                $query->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
+                {
+                    $q->whereHas('milestoneDetail', function ($q) use ($milestoneStatus)
+                    {
+                        $q->where('status', $milestoneStatus);
+                    });
+                });
             });
 
         if ($search)
