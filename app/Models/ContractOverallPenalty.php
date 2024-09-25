@@ -58,6 +58,7 @@ class ContractOverallPenalty extends Model
         'penalty_circulation_frequency',
         'due_in',
         'due_penalty_amount',
+        'actual_due_penalty_amount',
         'status',
         'company_id',
         'created_by',
@@ -84,6 +85,7 @@ class ContractOverallPenalty extends Model
         'penalty_circulation_frequency' => 'integer',
         'due_in' => 'integer',
         'due_penalty_amount' => 'float',
+        'actual_due_penalty_amount' => 'float',
         'status' => 'integer',
         'company_id' => 'integer',
         'created_by' => 'integer',
@@ -102,7 +104,7 @@ class ContractOverallPenalty extends Model
         return ContractOverallPenalty::select('uuid', 'minimum_penalty_percentage', 'minimum_penalty_amount',
             'maximum_penalty_percentage', 'maximum_penalty_amount', 'actual_percentage', 'actual_penalty_amount',
             'penalty_circulation_start_date', 'actual_penalty_start_date', 'penalty_circulation_frequency', 'due_in',
-            'due_penalty_amount', 'status')
+            'due_penalty_amount', 'actual_due_penalty_amount', 'status')
             ->where('contract_id', $contractID)
             ->where('company_id', $companyId)
             ->first();
