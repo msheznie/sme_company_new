@@ -62,6 +62,7 @@ class ContractOverallPenaltyAmd extends Model
         'penalty_circulation_frequency',
         'due_in',
         'due_penalty_amount',
+        'actual_due_penalty_amount',
         'company_id',
         'created_by',
         'updated_by'
@@ -89,6 +90,7 @@ class ContractOverallPenaltyAmd extends Model
         'penalty_circulation_frequency' => 'boolean',
         'due_in' => 'integer',
         'due_penalty_amount' => 'float',
+        'actual_due_penalty_amount' => 'float',
         'company_id' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'

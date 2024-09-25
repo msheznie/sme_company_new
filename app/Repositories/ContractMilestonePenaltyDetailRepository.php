@@ -132,6 +132,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                         Carbon::parse($input['penalty_start_date']) : null,
                     'penalty_frequency' => $input['penalty_frequency'],
                     'due_in' => $input['due_in'] ?? 0,
+                    'actual_due_penalty_amount' => $input['actual_due_penalty_amount'] ?? 0,
                     'status' => 0,
                     'company_id' => $companyId,
                     'created_by' => General::currentEmployeeId(),
@@ -365,6 +366,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                         Carbon::parse($input['penalty_start_date']) : null,
                     'penalty_frequency' => $input['penalty_frequency'],
                     'due_in' => $input['due_in'] ?? 0,
+                    'actual_due_penalty_amount' => $input['actual_due_penalty_amount'] ?? 0,
                     'status' => 0,
                     'updated_by' => General::currentEmployeeId(),
                     'updated_at' => Carbon::now()
