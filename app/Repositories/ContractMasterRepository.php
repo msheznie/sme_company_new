@@ -640,7 +640,9 @@ class ContractMasterRepository extends BaseRepository
         $formData = $request->input('formData') ?? null;
         $settingMasters = $formData['settingMasters'] ?? [];
         $effectiveDateType = $formData['effectiveDateType'] ?? 1;
-        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType )
+        $companySystemID = $request->input('selectedCompanyID');
+
+        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType, $companySystemID )
         {
             $contractMaster = self::findByUuid($contractUuid, ['id', 'startDate']);
             if(empty($contractMaster))
@@ -675,6 +677,12 @@ class ContractMasterRepository extends BaseRepository
                         {
                             GeneralService::sendException('Contract setting detail not found for UUID: ' .
                                 $details['settingDetailUuid']);
+                        }
+
+                        if(in_array($details['description'], ['Time and Material', 'Periodic Billing']) &&
+                            ($details['isActive'] ?? false))
+                        {
+                            $this->existMilestonePayment($contractUuid, $companySystemID);
                         }
 
                         $isActive = $details['isActive'] ?? 0;
@@ -1361,6 +1369,28 @@ class ContractMasterRepository extends BaseRepository
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
             ->make(true);
+    }
+
+    private function existMilestonePayment($contractUuid, $companySystemID)
+    {
+        try
+        {
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+            $existMilestonePayment = MilestonePaymentSchedules::
+            existMilestonePayment($contract['id'], $companySystemID);
+
+            if($existMilestonePayment)
+            {
+                MilestonePaymentSchedules::where('contract_id', $contract['id'])
+                    ->where('company_id', $companySystemID)
+                    ->delete();
+            }
+        }
+        catch (\Exception $ex)
+        {
+            GeneralService::sendException('Failed to delete payment schedule', $ex);
+        }
+
     }
 }
 
