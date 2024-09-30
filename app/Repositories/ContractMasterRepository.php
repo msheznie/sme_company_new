@@ -718,36 +718,36 @@ class ContractMasterRepository extends BaseRepository
                         ->with(['contractSectionWithTypes']);
                 }
             ])
+            ->when($isDrop, function ($q)
+            {
+                $q->whereIn('contractTypeSectionId', [6]);
+            })
             ->get();
         $pluckedData = [];
-        foreach ($activeSetting as $setting)
-        {
-            if ($isDrop)
-            {
-                $pluckedData = [];
-               /* $pluckedData[] = [
-                    'id' => $setting->contractTypeSection->cmSection_id,
-                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
-                ];*/
-            } else
-            {
-                $pluckedData[] = $setting->contractTypeSection->cmSection_id;
-            }
-        }
-
         if ($isDrop)
         {
             $pluckedData[] = [
                 'id' => 12,
                 'description' => 'Contract Info',
             ];
-           /* $pluckedData[] = [
-                'id' => 13,
-                'description' => 'User & User Group',
-            ];*/
+            /* $pluckedData[] = [
+                 'id' => 13,
+                 'description' => 'User & User Group',
+             ];*/
         }
-
-
+        foreach ($activeSetting as $setting)
+        {
+            if ($isDrop)
+            {
+                $pluckedData[] = [
+                    'id' => $setting->contractTypeSection->cmSection_id,
+                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
+                ];
+            } else
+            {
+                $pluckedData[] = $setting->contractTypeSection->cmSection_id;
+            }
+        }
 
         return [
             'status' => true ,
