@@ -477,6 +477,24 @@ class ContractHistoryService
         });
     }
 
+    public function referbackContract(Request $request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ($input)
+        {
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+            $companySystemID = $input['selectedCompanyID'] ?? null;
+            $contractHistoryMaster = ContractHistory::getContractHistory($contractHistoryUuid, $companySystemID);
+            if (empty($contractHistoryMaster))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
+
+            return ReferbackContractService::referbackContract($input, $contractHistoryMaster);
+        });
+    }
+
     public function updateExtendStatus($input)
     {
         try

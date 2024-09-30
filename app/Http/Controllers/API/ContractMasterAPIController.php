@@ -8,6 +8,7 @@ use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Helpers\inventory;
 use App\Http\Requests\API\CreateContractMasterAPIRequest;
+use App\Http\Requests\API\ReferbackDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractMasterAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\ApproveDocumentRequest;
@@ -557,6 +558,23 @@ class ContractMasterAPIController extends AppBaseController
         {
             $this->contractMasterRepository->rejectContract($request);
             return $this->sendResponse([], trans('common.document_successfully_rejected'));
+        }
+        catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
+    public function referbackContract(ReferbackDocumentAPIRequest $request)
+    {
+        try
+        {
+            $this->contractMasterRepository->referbackContract($request);
+            return $this->sendResponse([], trans('common.document_successfully_referedback'));
         }
         catch (CommonException $ex)
         {

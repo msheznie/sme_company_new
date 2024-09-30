@@ -40,6 +40,7 @@ use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Services\ContractMasterService;
 use App\Services\GeneralService;
+use App\Services\ReferbackContractService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -453,12 +454,9 @@ class ContractMasterRepository extends BaseRepository
                         $this->updatePenaltyAmounts($overallPenalty, $formData['contractAmount']);
                     }
                 }
-                catch (CommonException $ex)
+               catch (\Exception $ex)
                 {
-                    GeneralService::sendException(trans('Overall penalty not found.'));
-                } catch (\Exception $ex)
-                {
-                    GeneralService::sendException(trans('Overall penalty not found.'));
+                    GeneralService::sendException($ex->getMessage());
                 }
             }
 
@@ -1313,6 +1311,23 @@ class ContractMasterRepository extends BaseRepository
             }
 
             return RejectDocument::rejectDocument($input, $contractMaster);
+        });
+    }
+
+    public function referbackContract(Request $request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ($input)
+        {
+            $contractUuid = $input['contractUuid'] ?? null;
+            $contractMaster = $this->findByUuid($contractUuid);
+            if(empty($contractMaster))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
+
+            return ReferbackContractService::referbackContract($input, $contractMaster);
         });
     }
 
