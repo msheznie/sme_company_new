@@ -755,6 +755,7 @@ class ContractHistoryService
                 'App\\Models\\CMContractOverallRetentionAmd',
                 'App\\Models\\ContractAmendmentArea',
                 'App\\Models\\ContractAdditionalDocumentAmd',
+                'App\\Models\\ContractPaymentTermsAmd',
             ];
         }
 
