@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Exports\ContractManagmentExport;
 use App\Helpers\CreateExcel;
 use App\Helpers\General;
@@ -10,6 +11,7 @@ use App\Http\Requests\API\UpdateContractMilestoneRetentionAPIRequest;
 use App\Models\Company;
 use App\Models\ContractMilestoneRetention;
 use App\Repositories\ContractMilestoneRetentionRepository;
+use App\Services\ContractAmendmentOtherService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractMilestoneRetentionResource;
@@ -58,12 +60,16 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
      */
     public function store(CreateContractMilestoneRetentionAPIRequest $request)
     {
-        $contractMilestoneRetention = $this->contractMilestoneRetentionRepository->createMilestoneRetention($request);
-
-        if (!$contractMilestoneRetention['status']) {
-            return $this->sendError($contractMilestoneRetention['message']);
-        } else {
-            $this->sendResponse([], 'Contract Milestone Retention created successfully.');
+        try
+        {
+            $this->contractMilestoneRetentionRepository->createMilestoneRetention($request);
+            return $this->sendResponse([], 'Contract Milestone Retention created successfully.');
+        } catch (CommonException $ex)
+        {
+            return $this->sendError('Failed to create milestone retention: ' . $ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError('Failed to create milestone retention: ' . $ex->getMessage());
         }
     }
 
@@ -122,15 +128,24 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        $milestoneRetention = ContractMilestoneRetention::select('id')->where('uuid', $id)->first();
-        $contractMilestoneRetention = $this->contractMilestoneRetentionRepository->find($milestoneRetention->id);
+        $input = $request->all();
+        $amendment = $input['amendment'] ?? false;
+        $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
 
-        if (empty($contractMilestoneRetention)) {
+        $contractMilestoneRetention = $amendment ? ContractAmendmentOtherService::getMilestoneRetentionAmd(
+            $contractHistoryUuid, $id) : $this->contractMilestoneRetentionRepository->findByUuid($id);
+
+        if (empty($contractMilestoneRetention))
+        {
             return $this->sendError('Contract Milestone Retention not found');
         }
-
+        if($amendment)
+        {
+            $contractMilestoneRetention->deleted_by = General::currentEmployeeId();
+            $contractMilestoneRetention->save();
+        }
         $contractMilestoneRetention->delete();
 
         return $this->sendSuccess(trans('common.milestone_retention_deleted_successfully'));
@@ -143,20 +158,33 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
 
     public function updateMilestoneRetention(Request $request)
     {
-        $milestoneRetention = $this->contractMilestoneRetentionRepository->updateMilestoneRetention($request);
-        if($milestoneRetention['status'])
+        try
         {
-            return $this->sendResponse([], $milestoneRetention['message']);
-        } else
+            $this->contractMilestoneRetentionRepository->updateMilestoneRetention($request);
+            return $this->sendResponse([], 'Milestone retention updated successfully');
+        } catch (CommonException $ex)
         {
-            $statusCode = $milestoneRetention['code'] ?? 404;
-            return $this->sendError($milestoneRetention['message'], $statusCode);
+            return $this->sendError('Failed to update milestone retention: ' . $ex->getMessage());
+        } catch(\Exception $ex)
+        {
+            return $this->sendError('Failed to update milestone retention: ' . $ex->getMessage());
         }
     }
 
-    public function updateRetentionPercentage(Request $request){
-        $retentionPercentage = $this->contractMilestoneRetentionRepository->updateRetentionPercentage($request);
-        return $this->sendResponse($retentionPercentage, trans('common.retention_percentage_updated_successfully'));
+    public function updateRetentionPercentage(Request $request)
+    {
+        try
+        {
+            $retentionPercentage = $this->contractMilestoneRetentionRepository->updateRetentionPercentage($request);
+            return $this->sendResponse($retentionPercentage, trans('common.retention_percentage_updated_successfully'));
+        } catch(CommonException $ex)
+        {
+            return $this->sendError('Failed to update milestone retention percentage: ' . $ex->getMessage());
+        } catch (\Exception $ex)
+        {
+            return $this->sendError('Failed to update milestone retention percentage: ' . $ex->getMessage());
+        }
+
     }
 
     public function exportMilestoneRetention(Request $request)

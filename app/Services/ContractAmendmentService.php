@@ -53,6 +53,8 @@ class ContractAmendmentService
                 ContractHistoryService::updateContractHistory($contractHistoryId,$companyId,1);
                 self::updateAdditionalDocument($contractHistoryId);
                 ContractAmendmentOtherService::updateContractPaymentTerms($contractHistoryId,$contractId);
+                ContractAmendmentOtherService::updateContractMilestoneRetention($contractHistoryId, $contractId,
+                    $companyId);
             });
 
         } catch (\Exception $e)
