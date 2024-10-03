@@ -760,6 +760,7 @@ class ContractHistoryService
                 'App\\Models\\ContractAmendmentArea',
                 'App\\Models\\ContractAdditionalDocumentAmd',
                 'App\\Models\\ContractPaymentTermsAmd',
+                'App\\Models\\ContractMilestoneRetentionAmd',
             ];
         }
 
