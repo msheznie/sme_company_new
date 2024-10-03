@@ -106,4 +106,11 @@ class TimeMaterialConsumption extends Model
             })
             ->exists();
     }
+
+    public static function existTimeMaterialConsumption($contractId, $companySystemID)
+    {
+        return TimeMaterialConsumption::where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->first();
+    }
 }
