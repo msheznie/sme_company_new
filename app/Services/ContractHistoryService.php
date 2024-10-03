@@ -8,6 +8,7 @@ use App\Helpers\General;
 use App\Helpers\RejectDocument;
 use App\Models\CMContractMasterAmd;
 use App\Models\ContractAdditionalDocuments;
+use App\Models\ContractAmendmentArea;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
@@ -22,7 +23,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\ContractCreationException;
-use Illuminate\Support\Facades\Log;
 class ContractHistoryService
 {
     protected $contractHistoryRepository;
@@ -367,18 +367,22 @@ class ContractHistoryService
 
             if(!$contractMaster)
             {
-                throw new CommonException(trans('common.contract_not_found'));
+                GeneralService::sendException(trans('common.contract_not_found'));
             }
 
             if(!$historyMaster)
             {
-                throw new CommonException(trans('common.contract_history_not_found'));
+                GeneralService::sendException(trans('common.contract_history_not_found'));
             }
 
             if($contractMaster['contractAmount'] == 0)
             {
-                throw new CommonException(trans('common.contract_amount_is_a_mandatory_field'));
+                GeneralService::sendException(trans('common.contract_amount_is_a_mandatory_field'));
             }
+            $activeSectionIDs = ContractAmendmentArea::getContractAmendAreas($contractId, $historyId);
+            ContractAmendmentOtherService::milestoneAndOverallRetentionValidation($historyId, $contractMaster,
+                $contractId, $activeSectionIDs, $companySystemId);
+            ContractAmendmentOtherService::paymentTermsAmdValidation($historyId, $activeSectionIDs);
 
             $insertData = [
                 'autoID' => $historyId,

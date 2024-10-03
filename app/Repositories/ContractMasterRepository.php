@@ -721,7 +721,7 @@ class ContractMasterRepository extends BaseRepository
             ])
             ->when($isDrop, function ($q)
             {
-                $q->whereIn('contractTypeSectionId', [6]);
+                $q->whereIn('contractTypeSectionId', [4, 6]);
             })
             ->get();
         $pluckedData = [];
@@ -801,6 +801,10 @@ class ContractMasterRepository extends BaseRepository
                     }
                 }
             ])
+            ->when($amendment, function ($q) use ($historyId)
+            {
+                $q->where('contract_history_id', $historyId);
+            })
             ->first();
 
 
@@ -898,8 +902,17 @@ class ContractMasterRepository extends BaseRepository
 
                 $data = array_merge($data, $additionalData);
 
-                $contractOverallModel::updateOrCreate(
-                    ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
+                $condition = [
+                    'contractId' => $contract['id'],
+                    'companySystemId' => $companySystemID,
+                ];
+
+                if ($amendment)
+                {
+                    $condition['contract_history_id'] = $historyId;
+                }
+
+                $contractOverallModel::updateOrCreate($condition,$data);
 
                 DB::commit();
                 return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];

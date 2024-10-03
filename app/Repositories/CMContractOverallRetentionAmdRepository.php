@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
+use App\Helpers\General;
 use App\Models\CMContractOverallRetentionAmd;
 use App\Repositories\BaseRepository;
+use App\Services\GeneralService;
 use Illuminate\Contracts\Foundation\Application;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -75,7 +77,9 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
            $getOverall = $this->contractOverallRepo()->getContractOverall($contractId, $input['selectedCompanyID']);
             if($getOverall)
             {
+                $levelNo = $this->model->getLevelNo($getOverall['id'], $contractId);
                 $recordData = $getOverall->toArray();
+                $recordData['level_no'] = $levelNo;
                 $recordData['contract_history_id'] = $historyId;
                 $recordData['retention_id'] = $getOverall['id'];
                 $this->model->create($recordData);
@@ -83,7 +87,29 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
         } catch
         (Exception $e)
         {
-            throw new ContractCreationException("Contract Retention failed :" . $e->getMessage());
+            GeneralService::sendException("Contract Retention failed :" . $e->getMessage());
+        }
+    }
+    public function saveInitialRecord($contractId, $selectedCompanyID)
+    {
+        try
+        {
+            $getOverall = $this->contractOverallRepo()->getContractOverall($contractId, $selectedCompanyID);
+            if($getOverall)
+            {
+                $levelNo = $this->model->getLevelNo($getOverall['id'], $contractId);
+                $recordData = $getOverall->toArray();
+                $recordData['level_no'] = $levelNo;
+                $recordData['contract_history_id'] = null;
+                $recordData['retention_id'] = $getOverall['id'];
+                $recordData['created_by'] = General::currentEmployeeId();
+                $this->model->create($recordData);
+            }
+        }
+        catch
+        (Exception $e)
+        {
+            GeneralService::sendException("Contract Retention failed :" . $e->getMessage());
         }
     }
 }

@@ -62,6 +62,7 @@ class ContractHistoryRepository extends BaseRepository
     private $contractAmendmentAreaRepository;
     private $contractAdditionalDocumentAmd;
     private $contractPaymentTermsAmd;
+    private $contractMilestoneRetentionAmd;
 
     public function __construct
     (
@@ -76,7 +77,8 @@ class ContractHistoryRepository extends BaseRepository
         ContractAmendmentAreaRepository $contractAmendmentAreaRepository,
         ContractAdditionalDocumentAmdRepository $contractAdditionalDocumentAmd,
         Application $app,
-        ContractPaymentTermsAmdRepository $contractPaymentTermsAmd
+        ContractPaymentTermsAmdRepository $contractPaymentTermsAmd,
+        ContractMilestoneRetentionAmdRepository $contractMilestoneRetentionAmd
     )
     {
         parent::__construct($app);
@@ -91,6 +93,7 @@ class ContractHistoryRepository extends BaseRepository
         $this->contractAmendmentAreaRepository = $contractAmendmentAreaRepository;
         $this->contractAdditionalDocumentAmd = $contractAdditionalDocumentAmd;
         $this->contractPaymentTermsAmd = $contractPaymentTermsAmd;
+        $this->contractMilestoneRetentionAmd = $contractMilestoneRetentionAmd;
     }
 
     /**
@@ -642,11 +645,16 @@ class ContractHistoryRepository extends BaseRepository
         $contractId = $currentContractDetails['id'];
         try
         {
-            $contractExists = ContractAmendmentService::getContractAmendment($currentContractDetails['uuid'],null,true);
+            $contractExists = ContractAmendmentService::getContractAmendment(
+                $currentContractDetails['uuid'],null,true
+            );
+            $selectedCompanyID = $input['selectedCompanyID'];
             if(empty($contractExists))
             {
                 $this->cmContractMasterAmdRepository->saveInitialRecord($currentContractDetails);
                 $this->contractPaymentTermsAmd->saveInitialRecord($contractId);
+                $this->cmContractOverallRetentionAmdRepository->saveInitialRecord($contractId, $selectedCompanyID);
+                $this->contractMilestoneRetentionAmd->saveInitialRecord($contractId);
             }
             $historyData = $this->createHistory($input,$contractId,$contractId);
             $historyId = $historyData['historyId'];
@@ -660,6 +668,7 @@ class ContractHistoryRepository extends BaseRepository
             $this->contractAmendmentAreaRepository->save($input,$contractId,$historyId);
             $this->contractAdditionalDocumentAmd->save($input,$contractId,$historyId);
             $this->contractPaymentTermsAmd->save($historyId,$contractId);
+            $this->contractMilestoneRetentionAmd->save($historyId,$contractId);
         }
         catch (Exception $e)
         {

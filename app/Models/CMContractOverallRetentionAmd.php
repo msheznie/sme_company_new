@@ -3,6 +3,8 @@
 namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 /**
  * Class CMContractOverallRetentionAmd
  * @package App\Models
@@ -23,6 +25,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class CMContractOverallRetentionAmd extends Model
 {
+    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_overall_retention_amd';
@@ -30,9 +33,11 @@ class CMContractOverallRetentionAmd extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    protected $dates = ['deleted_at'];
 
     public $fillable = [
         'retention_id',
+        'level_no',
         'contract_history_id',
         'uuid',
         'contractId',
@@ -56,6 +61,7 @@ class CMContractOverallRetentionAmd extends Model
         'id' => 'integer',
         'retention_id' => 'integer',
         'contract_history_id' => 'integer',
+        'level_no' => 'integer',
         'uuid' => 'string',
         'contractId' => 'integer',
         'contractAmount' => 'float',
@@ -66,7 +72,8 @@ class CMContractOverallRetentionAmd extends Model
         'retentionWithholdPeriod' => 'string',
         'companySystemId' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'deleted_by' => 'integer'
     ];
 
     /**
@@ -81,4 +88,24 @@ class CMContractOverallRetentionAmd extends Model
         return $this->belongsTo(CMContractMasterAmd::class, 'contractId', 'id');
     }
 
+    public function getLevelNo($overallId, $contractId)
+    {
+        $levelNo = self::where('retention_id',$overallId)
+                ->where('contractId', $contractId)
+                ->max('level_no') + 1;
+
+        return  max(1, $levelNo);
+    }
+    public static function checkValidDate($contractHistoryID, $isStartDate, $date)
+    {
+        return self::where('contract_history_id', $contractHistoryID)
+            ->when($isStartDate, function ($q) use ($date)
+            {
+                $q->whereDate('startDate', '<', $date);
+            })
+            ->when(!$isStartDate, function ($q) use ($date)
+            {
+                $q->whereDate('dueDate', '>', $date);
+            })->exists();
+    }
 }
