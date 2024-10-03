@@ -35,6 +35,7 @@ use App\Models\Employees;
 use App\Models\MilestonePaymentSchedules;
 use App\Models\PeriodicBillings;
 use App\Models\TenderFinalBids;
+use App\Models\TimeMaterialConsumption;
 use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
@@ -677,10 +678,10 @@ class ContractMasterRepository extends BaseRepository
                                 $details['settingDetailUuid']);
                         }
 
-                        if(in_array($details['description'], ['Time and Material', 'Periodic Billing']) &&
-                            ($details['isActive'] ?? false))
+                        if(in_array($details['description'], ['Milestone Payment', 'Time and Material',
+                                'Periodic Billing']) && ($details['isActive'] ?? false))
                         {
-                            $this->existMilestonePayment($contractUuid, $companySystemID);
+                            $this->existMilestonePayment($contractUuid, $companySystemID, $details['description']);
                         }
 
                         $isActive = $details['isActive'] ?? 0;
@@ -1386,24 +1387,46 @@ class ContractMasterRepository extends BaseRepository
             ->make(true);
     }
 
-    private function existMilestonePayment($contractUuid, $companySystemID)
+    private function existMilestonePayment($contractUuid, $companySystemID, $description)
     {
         try
         {
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
-            $existMilestonePayment = MilestonePaymentSchedules::
-            existMilestonePayment($contract['id'], $companySystemID);
+            $contractId = $contract['id'];
+            $existMilestonePayment = MilestonePaymentSchedules::existMilestonePayment($contractId, $companySystemID);
+            $existPeriodicBilling = PeriodicBillings::existPeriodicBilling($contractId, $companySystemID);
+            $existTimeMaterialConsumption = TimeMaterialConsumption::existTimeMaterialConsumption(
+                $contractId, $companySystemID);
 
-            if($existMilestonePayment)
+            $deletionMappings = [
+                'Milestone Payment' => [
+                    'condition' => $existPeriodicBilling || $existTimeMaterialConsumption,
+                    'deleteFirst' =>
+                        $existPeriodicBilling ? 'App\\Models\\PeriodicBillings' : 'App\\Models\\TimeMaterialConsumption'
+                ],
+                'Periodic Billing' => [
+                    'condition' => $existMilestonePayment || $existTimeMaterialConsumption,
+                    'deleteFirst' => $existMilestonePayment ?
+                        'App\\Models\\MilestonePaymentSchedules' : 'App\\Models\\TimeMaterialConsumption'
+                ],
+                'Time and Material' => [
+                    'condition' => $existMilestonePayment || $existPeriodicBilling,
+                    'deleteFirst' => $existMilestonePayment ?
+                        'App\\Models\\MilestonePaymentSchedules' : 'App\\Models\\PeriodicBillings'
+                ]
+            ];
+
+            if (isset($deletionMappings[$description]) && $deletionMappings[$description]['condition'])
             {
-                MilestonePaymentSchedules::where('contract_id', $contract['id'])
+                $model = $deletionMappings[$description]['deleteFirst'];
+                $model::where('contract_id', $contractId)
                     ->where('company_id', $companySystemID)
                     ->delete();
             }
         }
         catch (\Exception $ex)
         {
-            GeneralService::sendException('Failed to delete payment schedule', $ex);
+            GeneralService::sendException('Failed to delete milestone and payment schedule', $ex);
         }
 
     }
