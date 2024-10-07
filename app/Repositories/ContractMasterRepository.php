@@ -577,10 +577,8 @@ class ContractMasterRepository extends BaseRepository
         return $contract;
     }
 
-    public function getContractTypeSectionData(Request $request)
+    public function getContractTypeSectionData($contractuuid)
     {
-        $input = $request->all();
-        $contractuuid = $input['contractId'];
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
 
@@ -925,10 +923,8 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
-    public function getContractConfirmationData(Request $request)
+    public function getContractConfirmationData($contractUuid)
     {
-        $input = $request->all();
-        $contractUuid = $input['contractUuid'];
 
         $contractConfirmation = ContractMaster::select('confirmed_yn', 'confirmed_date', 'confirm_by')
             ->with(['confirmedBy'])

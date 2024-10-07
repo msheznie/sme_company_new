@@ -86,10 +86,21 @@ class TimeMaterialConsumption extends Model
 
     ];
 
+    public function units()
+    {
+        return $this->belongsTo(Unit::class, 'uom_id', 'UnitID');
+    }
+
     public function getAllTimeMaterialConsumption($contractID)
     {
         return TimeMaterialConsumption::select('uuid', 'item', 'description', 'min_quantity', 'max_quantity', 'price',
                 'amount', 'quantity', 'uom_id')
+            ->with([
+                "units" => function ($q)
+                {
+                    $q->select('UnitID', 'UnitDes');
+                },
+            ])
             ->where('contract_id', $contractID)
             ->get();
     }

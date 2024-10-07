@@ -143,12 +143,8 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         });
     }
 
-    public function getMilestonePenaltyDetails(Request $request)
+    public function getMilestonePenaltyDetails($search, $contractUuid, $companySystemID)
     {
-        $input = $request->all();
-        $search = $request->input('search.value');
-        $contractUuid = $input['contractUuid'];
-        $companySystemID = $input['selectedCompanyID'];
 
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
         if(empty($contract))

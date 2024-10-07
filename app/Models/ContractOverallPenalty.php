@@ -99,12 +99,23 @@ class ContractOverallPenalty extends Model
      */
     public static $rules = [];
 
+    public function billingFrequency()
+    {
+        return $this->belongsTo(BillingFrequencies::class, 'penalty_circulation_frequency', 'id');
+    }
+
     public static function getOverallPenalty($contractID, $companyId)
     {
         return ContractOverallPenalty::select('uuid', 'minimum_penalty_percentage', 'minimum_penalty_amount',
             'maximum_penalty_percentage', 'maximum_penalty_amount', 'actual_percentage', 'actual_penalty_amount',
             'penalty_circulation_start_date', 'actual_penalty_start_date', 'penalty_circulation_frequency', 'due_in',
             'due_penalty_amount', 'actual_due_penalty_amount', 'status')
+            ->with([
+                'billingFrequency' => function ($q)
+                {
+                    $q->select('id', 'description');
+                }
+            ])
             ->where('contract_id', $contractID)
             ->where('company_id', $companyId)
             ->first();

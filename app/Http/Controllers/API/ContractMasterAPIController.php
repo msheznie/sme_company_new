@@ -348,8 +348,10 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getContractTypeSectionData(Request $request)
     {
-        $contractSecs = $this->contractMasterRepository->getContractTypeSectionData($request);
-        return $this->sendResponse($contractSecs, 'Retrieved successfully');
+        $input = $request->all();
+        $contractUuid = $input['contractId'];
+        $contractSectionData = $this->contractMasterRepository->getContractTypeSectionData($contractUuid);
+        return $this->sendResponse($contractSectionData, 'Retrieved successfully');
     }
 
     public function updateContractSettingDetails(Request $request)
@@ -517,7 +519,9 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getContractConfirmationData(Request $request)
     {
-        return $this->contractMasterRepository->getContractConfirmationData($request);
+        $input = $request->all();
+        $contractUuid = $input['contractUuid'];
+        return $this->contractMasterRepository->getContractConfirmationData($contractUuid);
     }
 
     public function confirmContract(ContractConfirmRequest $request)

@@ -153,7 +153,11 @@ class ContractBoqItemsAPIController extends AppBaseController
 
     public function getBoqItemsByCompany(Request $request)
     {
-        return $this->contractBoqItemsRepository->getBoqItems($request);
+        $input = $request->all();
+        $companyId = $input['companyId'];
+        $uuid = $input['uuid'];
+        $amedment = $input['amendment'];
+        return $this->contractBoqItemsRepository->getBoqItems($companyId,$uuid,$amedment);
     }
 
     public function updateBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)
