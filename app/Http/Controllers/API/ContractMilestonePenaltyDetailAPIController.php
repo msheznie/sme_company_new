@@ -161,7 +161,12 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
     {
         try
         {
-            return $this->contractMilestonePenaltyDetailRepository->getMilestonePenaltyDetails($request);
+            $input = $request->all();
+            $search = $request->input('search.value');
+            $contractUuid = $input['contractUuid'];
+            $companySystemID = $input['selectedCompanyID'];
+            return $this->contractMilestonePenaltyDetailRepository->getMilestonePenaltyDetails(
+                $search, $contractUuid, $companySystemID);
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), 500);

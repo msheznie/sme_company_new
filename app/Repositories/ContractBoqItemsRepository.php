@@ -10,6 +10,7 @@ use App\Models\ContractMaster;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 /**
@@ -54,14 +55,13 @@ class ContractBoqItemsRepository extends BaseRepository
         return ContractBoqItems::class;
     }
 
-    public function getBoqItems(Request $request): \Illuminate\Http\JsonResponse
+    public function getBoqItems($companyId,$uuid,$amedment): \Illuminate\Http\JsonResponse
     {
-        $input = $request->all();
-        $companyId = $input['companyId'];
-        $uuid = $input['uuid'];
+
+
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
-        $amedment = $input['amendment'];
+
         $model = $amedment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
         $colName = $amedment ? 'contract_history_id' : 'contractId';
         $col =  $amedment ? 'amd_id' : 'id';

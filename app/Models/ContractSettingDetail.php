@@ -113,4 +113,13 @@ class ContractSettingDetail extends Model
             ->where('isActive', 1)
             ->get();
     }
+
+    public function getActiveContractRetention($contractID)
+    {
+        return ContractSettingDetail::select('sectionDetailId')
+            ->where('contractId', $contractID)
+            ->whereIn('sectionDetailId', [4,5])
+            ->where('isActive', 1)
+            ->first();
+    }
 }
