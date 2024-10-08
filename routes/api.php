@@ -122,3 +122,9 @@ Route::get('/terminate-contract', function ()
     \Artisan::call('terminateContract');
     return 'Contracts Terminated Successfully!';
 });
+
+Route::get('/milestone-due-date-reminder', function ()
+{
+    \Artisan::call('reminderMilestoneDueDate');
+    return 'Milestone Due Date Reminder Expiry Send Successfully!';
+});

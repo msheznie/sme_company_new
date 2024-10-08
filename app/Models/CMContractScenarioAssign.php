@@ -64,11 +64,12 @@ class CMContractScenarioAssign extends Model
         return $this->hasMany(CMContractScenarioSetting::class, 'scenario_assign_id', 'id');
     }
 
-    public static function getContractScenarioIsActive($contractId, $companyId)
+    public static function getContractScenarioIsActive($contractId, $companyId, $scenarioTypeId)
     {
         $record = self::select('is_active')
             ->where('contract_id', $contractId)
             ->where('company_id', $companyId)
+            ->where('scenario_id', $scenarioTypeId)
             ->first();
 
         if ($record)
@@ -77,11 +78,12 @@ class CMContractScenarioAssign extends Model
         }
         return false;
     }
-    public static function getContractScenarioId($contractId, $companyId)
+    public static function getContractScenarioId($contractId, $companyId, $scenarioTypeId)
     {
         $record = self::select('id')
             ->where('contract_id', $contractId)
             ->where('company_id', $companyId)
+            ->where('scenario_id', $scenarioTypeId)
             ->first();
 
         if ($record)
@@ -94,6 +96,7 @@ class CMContractScenarioAssign extends Model
     public static function  getReminderContractExpiryBefore()
     {
         return self::where('is_active', 1)
+            ->where('scenario_id', 1)
             ->whereHas('contractScenarioSettings', function ($query)
             {
                 $query->where('scenario_type', 1);
@@ -127,6 +130,7 @@ class CMContractScenarioAssign extends Model
     public static function getReminderContractExpiryAfter()
     {
         return self::where('is_active', 1)
+            ->where('scenario_id', 1)
             ->whereHas('contractScenarioSettings', function ($query)
             {
                 $query->where('scenario_type', 2);
@@ -172,6 +176,36 @@ class CMContractScenarioAssign extends Model
                 {
                     $query->select('id', 'title', 'endDate', 'contractCode',
                         'contractOwner', 'counterPartyName', 'companySystemID');
+                }
+            ])
+            ->get();
+    }
+
+    public static function  getReminderMilestoneDueDate($scenarioType)
+    {
+        return self::where('is_active', 1)
+            ->where('scenario_id', 2)
+            ->whereHas('contractScenarioSettings', function ($query)  use ($scenarioType)
+            {
+                $query->where('scenario_type', $scenarioType);
+            })
+            ->whereHas('contractMaster', function ($query)
+            {
+                $query->with(['contractMilestone'])
+                    ->whereHas('contractMilestone');
+            })
+            ->with([
+                'contractScenarioSettings' => function ($query)  use ($scenarioType)
+                {
+                    $query->where('scenario_type', $scenarioType);
+                },
+                'contractMaster' => function ($query)
+                {
+                    $query->select
+                    (
+                        'id', 'title', 'contractOwner', 'counterPartyName', 'companySystemID',
+                        'contractCode'
+                    );
                 }
             ])
             ->get();
