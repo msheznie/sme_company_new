@@ -63,6 +63,7 @@ class ContractHistoryRepository extends BaseRepository
     private $contractAdditionalDocumentAmd;
     private $contractPaymentTermsAmd;
     private $contractMilestoneRetentionAmd;
+    private $timeMaterialConsumptionAmdRepo;
 
     public function __construct
     (
@@ -78,7 +79,8 @@ class ContractHistoryRepository extends BaseRepository
         ContractAdditionalDocumentAmdRepository $contractAdditionalDocumentAmd,
         Application $app,
         ContractPaymentTermsAmdRepository $contractPaymentTermsAmd,
-        ContractMilestoneRetentionAmdRepository $contractMilestoneRetentionAmd
+        ContractMilestoneRetentionAmdRepository $contractMilestoneRetentionAmd,
+        TimeMaterialConsumptionAmdRepository $timeMaterialConsumptionAmd
     )
     {
         parent::__construct($app);
@@ -94,6 +96,7 @@ class ContractHistoryRepository extends BaseRepository
         $this->contractAdditionalDocumentAmd = $contractAdditionalDocumentAmd;
         $this->contractPaymentTermsAmd = $contractPaymentTermsAmd;
         $this->contractMilestoneRetentionAmd = $contractMilestoneRetentionAmd;
+        $this->timeMaterialConsumptionAmdRepo = $timeMaterialConsumptionAmd;
     }
 
     /**
@@ -651,6 +654,8 @@ class ContractHistoryRepository extends BaseRepository
             $selectedCompanyID = $input['selectedCompanyID'];
             if(empty($contractExists))
             {
+                $this->cmContractBoqItemsAmdRepository->saveInitialRecord($contractId);
+                $this->timeMaterialConsumptionAmdRepo->saveInitialRecord($contractId);
                 $this->cmContractMasterAmdRepository->saveInitialRecord($currentContractDetails);
                 $this->contractPaymentTermsAmd->saveInitialRecord($contractId);
                 $this->cmContractOverallRetentionAmdRepository->saveInitialRecord($contractId, $selectedCompanyID);
@@ -661,6 +666,7 @@ class ContractHistoryRepository extends BaseRepository
             $this->cmContractMasterAmdRepository->save($historyId,$currentContractDetails);
             $this->cmContractUserAmdRepository->save($historyId,$contractId);
             $this->cmContractBoqItemsAmdRepository->save($historyId,$contractId);
+            $this->timeMaterialConsumptionAmdRepo->save($historyId,$contractId);
             $this->cmContractMileStoneAmdRepository->save($historyId,$contractId);
             $this->cmContractDeliverableAmdRepository->save($historyId,$contractId);
             $this->cmContractOverallRetentionAmdRepository->save($historyId,$contractId,$input);

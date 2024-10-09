@@ -4,10 +4,13 @@ namespace App\Repositories;
 
 use App\Exceptions\CommonException;
 use App\Helpers\General;
+use App\Models\CMContractBoqItemsAmd;
+use App\Services\GeneralService;
 use App\Models\Company;
 use App\Models\ContractBoqItems;
 use App\Models\CurrencyMaster;
 use App\Models\TimeMaterialConsumption;
+use App\Models\TimeMaterialConsumptionAmd;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
@@ -75,45 +78,69 @@ class TimeMaterialConsumptionRepository extends BaseRepository
             'decimalPlace' => $decimalPlaces
         ];
     }
-    public function createTimeMaterialConsumption($contractUuid, $selectedCompanyID)
+    public function createTimeMaterialConsumption($contractUuid, $selectedCompanyID, $historyUuid, $amendment)
     {
-        return DB::transaction(function () use ($contractUuid, $selectedCompanyID)
+        return DB::transaction(function () use ($contractUuid, $selectedCompanyID, $historyUuid, $amendment)
         {
-            $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
-            if(empty($contract))
-            {
-                throw new CommonException(trans('common.contract_id_not_found'));
-            }
-            $checkPreviousEmptyValues = TimeMaterialConsumption::checkExistRecordEmpty($contract['id']);
+            $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
+
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
+                ?? GeneralService::sendException(trans('common.contract_id_not_found'));
+
+            $historyID = $amendment
+                ? ContractManagementUtils::getContractHistoryData($historyUuid)['id']
+                ?? GeneralService::sendException('Contract history not found.')
+                : 0;
+
+            $checkPreviousEmptyValues = $amendment ? $model::checkExistRecordEmpty($contract['id'],
+                $historyID) : $model::checkExistRecordEmpty($contract['id']);
+
             if($checkPreviousEmptyValues)
             {
-                throw new CommonException('Please fill all required fields.');
+                GeneralService::sendException('Please fill all required fields.');
             }
-            $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
+
             $postData = [
                 'uuid' => ContractManagementUtils::generateUuid(),
                 'contract_id' => $contract['id'],
-                'currency_id' => $currencyId,
+                'currency_id' => Company::getLocalCurrencyID($selectedCompanyID),
                 'company_id' => $selectedCompanyID,
                 'created_by' => General::currentEmployeeId(),
-                'created_at' => Carbon::now()
+                'created_at' => Carbon::now(),
             ];
-            TimeMaterialConsumption::insert($postData);
+            if ($amendment) {
+                $postData += [
+                    'contract_history_id' => $historyID,
+                    'level_no' => 1,
+                ];
+            }
+            $model::insert($postData);
         });
     }
-    public function getAllTimeMaterialConsumption($contractUuid, $selectedCompanyID)
+    public function getAllTimeMaterialConsumption($contractUuid, $selectedCompanyID, $historyUuid, $amendment)
     {
-        $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
-        if(empty($contract))
+        $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
+            ?? GeneralService::sendException(trans('common.contract_id_not_found'));
+
+        $contractID = $contract['id'];
+
+        if ($amendment)
         {
-            throw new CommonException(trans('common.contract_id_not_found'));
+            $contractHistory = ContractManagementUtils::getContractHistoryData($historyUuid)
+                ?? GeneralService::sendException(trans('common.contract_history_not_found'));
+
+            return TimeMaterialConsumptionAmd::getAllTimeMaterialConsumptionAmd($contractHistory['id'], $contractID);
         }
-        return TimeMaterialConsumption::getAllTimeMaterialConsumption($contract['id']);
+
+        return TimeMaterialConsumption::getAllTimeMaterialConsumption($contractID);
     }
     public function updateTimeMaterialConsumption($input, $consumptionID)
     {
         return DB::transaction(function () use ($input, $consumptionID)
         {
+            $amendment = $input['amendment'] ?? false;
+            $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
+
             $postData = [
                 'item' => $input['item'] ?? null,
                 'description' => $input['description'] ?? null,
@@ -126,50 +153,89 @@ class TimeMaterialConsumptionRepository extends BaseRepository
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];
-            TimeMaterialConsumption::where('id', $consumptionID)->update($postData);
+            $model::when($amendment, function ($q) use ($consumptionID)
+            {
+                $q->where('amd_id', $consumptionID);
+            })->when(!$amendment, function ($q) use ($consumptionID)
+            {
+                $q->where('id', $consumptionID);
+            })->update($postData);
         });
 
     }
-    public function pullItemsFromBOQ($selectedCompanyID, $contractUuid, $formData)
+    public function pullItemsFromBOQ($selectedCompanyID, $contractUuid, $formData, $amendment, $historyUuid)
     {
-        return DB::transaction(function () use ($selectedCompanyID, $contractUuid, $formData)
+        return DB::transaction(function () use ($selectedCompanyID, $contractUuid, $formData, $amendment, $historyUuid)
         {
-            $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
-            if(empty($contract))
-            {
-                throw new CommonException('Contract ID not found.');
-            }
-            $postData = [];
+            $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
+
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
+                ?? GeneralService::sendException('Contract ID not found.');
+
+            $historyID = $amendment
+                ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
+                    ?? GeneralService::sendException('Contract history not found.'))
+                : 0;
+
             $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
-            foreach($formData as $data)
+
+            foreach ($formData as $data)
             {
-                $uuid = $data['uuid'];
-                $boq = ContractBoqItems::getBoqItemDetails($uuid);
-                if(empty($boq))
+                $boq = $amendment
+                    ? CMContractBoqItemsAmd::getBoqItemData($historyID, $data['uuid'])
+                    : ContractBoqItems::getBoqItemDetails($data['uuid']);
+
+                if (empty($boq))
                 {
-                    throw new CommonException('BOQ not found.');
+                    GeneralService::sendException('BOQ not found.');
                 }
-                $qty = $boq['qty'] ?? 0;
-                $price = $boq['price'] ?? 0;
-                $amount = $qty * $price;
-                $postData[] = [
-                    'uuid' => ContractManagementUtils::generateUuid(),
+
+                $amount = ($boq['qty'] ?? 0) * ($boq['price'] ?? 0);
+                $uuid = ContractManagementUtils::generateUuid();
+
+                if ($model::checkUuidExists($uuid))
+                {
+                    GeneralService::sendException('Uuid already exists.');
+                }
+
+                $postData = [
+                    'uuid' => $uuid,
                     'contract_id' => $contract['id'],
-                    'item' => ($boq['origin'] == 1) ? $boq['itemMaster']['primaryCode'] ?? null : $boq['boqItem']['item_name'],
-                    'description' => ($boq['origin'] == 1) ? $boq['description'] ?? null : $boq['boqItem']['description'],
+                    'item' => $boq['origin'] == 1
+                        ? $boq['itemMaster']['primaryCode'] ?? null
+                        : $boq['boqItem']['item_name'],
+                    'description' => $boq['origin'] == 1
+                        ? $boq['description'] ?? null
+                        : $boq['boqItem']['description'],
                     'min_quantity' => $boq['minQty'] ?? 0,
                     'max_quantity' => $boq['maxQty'] ?? 0,
-                    'price' => $price,
-                    'quantity' => $qty,
-                    'uom_id' => ($boq['origin'] == 1) ? $boq['itemMaster']['unit'] ?? null : $boq['boqItem']['Unit']['UnitID'],
+                    'price' => $boq['price'] ?? 0,
+                    'quantity' => $boq['qty'] ?? 0,
+                    'uom_id' => $boq['origin'] == 1
+                        ? $boq['itemMaster']['unit'] ?? null
+                        : $boq['boqItem']['Unit']['UnitID'],
                     'amount' => $amount,
-                    'boq_id' => $boq['id'],
+                    'boq_id' => $amendment ? $boq['amd_id'] : $boq['id'],
                     'currency_id' => $currencyId ?? null,
-                    'updated_by' => General::currentEmployeeId(),
-                    'updated_at' => Carbon::now()
+                    'company_id' => $selectedCompanyID,
+                    'created_by' => General::currentEmployeeId(),
+                    'created_at' => Carbon::now(),
                 ];
+
+                if ($amendment)
+                {
+                    $postData += [
+                        'id' => null,
+                        'contract_history_id' => $historyID,
+                        'level_no' => 1,
+                    ];
+                }
+                $model::insert($postData);
             }
-            TimeMaterialConsumption::insert($postData);
         });
+    }
+    public function getTimeMaterialConsumptionToAmd($contractID)
+    {
+        return $this->model->getTimeMaterialConsumptionToAmd($contractID);
     }
 }

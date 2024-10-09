@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\Exceptions\ContractCreationException;
+use App\Helpers\General;
 use App\Models\CMContractBoqItemsAmd;
 use App\Models\CMContractDeliverableAmd;
 use App\Models\CMContractDocumentAmd;
@@ -54,6 +55,8 @@ class ContractAmendmentService
                 self::updateAdditionalDocument($contractHistoryId);
                 ContractAmendmentOtherService::updateContractPaymentTerms($contractHistoryId,$contractId);
                 ContractAmendmentOtherService::updateContractMilestoneRetention($contractHistoryId, $contractId,
+                    $companyId);
+                ContractAmendmentOtherService::updateTimeMaterialConsumption($contractHistoryId, $contractId,
                     $companyId);
             });
 
@@ -139,13 +142,18 @@ class ContractAmendmentService
         try
         {
             $getContractHistoryData = ContractManagementUtils::getContractHistoryData($data['contractHistoryId']);
-            CMContractBoqItemsAmd::where('uuid',$data['uuid'])
-                ->where('contract_history_id',$getContractHistoryData->id)
-                ->delete();
+            $boqAmd = CMContractBoqItemsAmd::getBoqItemData($getContractHistoryData->id, $data['uuid']);
+            if(empty($boqAmd))
+            {
+                GeneralService::sendException('Boq item not found');
+            }
+            $boqAmd->deleted_by = General::currentEmployeeId();
+            $boqAmd->save();
+            $boqAmd->delete();
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete contract boq items: " . $e->getMessage());
+            GeneralService::sendException("Failed to delete contract boq items: " . $e->getMessage());
         }
     }
 
@@ -184,7 +192,7 @@ class ContractAmendmentService
                 $newRecord = new ContractBoqItems();
                 foreach ($record->toArray() as $column => $value)
                 {
-                    if (!in_array($column, ['amd_id', 'id', 'contract_history_id']))
+                    if (!in_array($column, ['amd_id', 'id', 'contract_history_id', 'level_no']))
                     {
                         $newRecord->{$column} = $value;
                     }

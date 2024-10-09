@@ -4,51 +4,56 @@ namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
-use App\Models\CMContractBoqItemsAmd;
-use App\Models\CMContractUserAssignAmd;
+use App\Models\TimeMaterialConsumptionAmd;
 use App\Repositories\BaseRepository;
 use App\Services\GeneralService;
 use Illuminate\Contracts\Foundation\Application;
 use Exception;
+
 /**
- * Class CMContractBoqItemsAmdRepository
+ * Class TimeMaterialConsumptionAmdRepository
  * @package App\Repositories
- * @version July 2, 2024, 12:20 pm +04
- */
-class CMContractBoqItemsAmdRepository extends BaseRepository
+ * @version October 7, 2024, 1:36 pm +04
+*/
+
+class TimeMaterialConsumptionAmdRepository extends BaseRepository
 {
     /**
      * @var array
      */
-
-    protected $contractBoqItemRepo;
-
+    protected $timeMaterialConsumptionRepo;
     public function __construct(Application $app)
     {
         parent::__construct($app);
         $this->app = $app;
     }
 
-    public function getContractBoqItemRepo()
+    public function getTimeMaterialConsumptionRepo()
     {
-        if (!$this->contractBoqItemRepo)
+        if (!$this->timeMaterialConsumptionRepo)
         {
-            $this->contractBoqItemRepo = $this->app->make(ContractBoqItemsRepository::class);
+            $this->timeMaterialConsumptionRepo = $this->app->make(TimeMaterialConsumptionRepository::class);
         }
-        return $this->contractBoqItemRepo;
+        return $this->timeMaterialConsumptionRepo;
     }
 
     protected $fieldSearchable = [
         'id',
         'contract_history_id',
+        'level_no',
         'uuid',
-        'contractId',
-        'companyId',
-        'itemId',
+        'contract_id',
+        'item',
         'description',
-        'minQty',
-        'maxQty',
-        'qty',
+        'min_quantity',
+        'max_quantity',
+        'price',
+        'quantity',
+        'uom_id',
+        'amount',
+        'boq_id',
+        'currency_id',
+        'company_id',
         'created_by',
         'updated_by'
     ];
@@ -68,18 +73,17 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
      **/
     public function model()
     {
-        return CMContractBoqItemsAmd::class;
+        return TimeMaterialConsumptionAmd::class;
     }
-
     public function save($historyId, $contractId)
     {
         try
         {
-            $boqData = $this->getContractBoqItemRepo()->getBoqData($contractId);
+            $consumptions = $this->getTimeMaterialConsumptionRepo()->getTimeMaterialConsumptionToAmd($contractId);
 
-            foreach ($boqData as $record)
+            foreach ($consumptions as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['id'] = $record['id'];
                 $recordData['level_no'] = $levelNo;
@@ -89,18 +93,18 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
         } catch
         (Exception $e)
         {
-            throw new ContractCreationException("BOQ data saving failed " . $e->getMessage());
+            GeneralService::sendException("Time and material consumption data saving failed " . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId)
     {
         try
         {
-            $boqData = $this->getContractBoqItemRepo()->getBoqData($contractId);
+            $consumptions = $this->getTimeMaterialConsumptionRepo()->getTimeMaterialConsumptionToAmd($contractId);
 
-            foreach ($boqData as $record)
+            foreach ($consumptions as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['id'] = $record['id'];
@@ -113,8 +117,7 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("BOQ data saving failed " . $e->getMessage());
+            GeneralService::sendException("Time and material consumption data saving failed " . $e->getMessage());
         }
     }
-
 }

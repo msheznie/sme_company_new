@@ -138,8 +138,7 @@ class ContractBoqItemsAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        $contractResult = ContractBoqItems::select('id')->where('uuid', $id)->first();
-        $contractBoqItems = $this->contractBoqItemsRepository->find($contractResult->id);
+        $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($id);
 
         if (empty($contractBoqItems))
         {
@@ -156,8 +155,9 @@ class ContractBoqItemsAPIController extends AppBaseController
         $input = $request->all();
         $companyId = $input['companyId'];
         $uuid = $input['uuid'];
-        $amedment = $input['amendment'];
-        return $this->contractBoqItemsRepository->getBoqItems($companyId,$uuid,$amedment);
+        $amendment = $input['amendment'];
+        $origin = $input['origin'] ?? 1;
+        return $this->contractBoqItemsRepository->getBoqItems($companyId,$uuid,$amendment, $origin);
     }
 
     public function updateBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)

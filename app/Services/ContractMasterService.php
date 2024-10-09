@@ -98,7 +98,7 @@ class ContractMasterService
             null, $selectedCompanyID, $contractUUid)->get();
         $timeAndMaterial = TimeMaterialConsumption::getAllTimeMaterialConsumption($contractMaster['id']);
         $periodicBilling = PeriodicBillings::getContractPeriodicBilling($contractMaster['id']);
-        $boqItems = $this->ContractBoqItemsRepository->getBoqItems($selectedCompanyID, $contractUUid, false);
+        $boqItems = $this->ContractBoqItemsRepository->getBoqItems($selectedCompanyID, $contractUUid, false, 0);
         $overallRetention = ContractOverallRetention::getContractOverall($contractMaster['id'],$selectedCompanyID);
         $milestoneRetention = ContractMilestoneRetention::ContractMilestoneRetention(
             $selectedCompanyID, $contractMaster['id'])->get();
