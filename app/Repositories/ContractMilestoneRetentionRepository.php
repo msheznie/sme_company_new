@@ -226,17 +226,17 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             {
                 GeneralService::sendException(trans('common.milestone_not_found'));
             }
-            $milestoneId = $milestone['id'];
-            $contractId = $milestoneId['contractID'] ?? 0;
+            $milestoneId = $milestone->id;
+            $contractId = $milestone->contractID ?? 0;
             $retentionAmount = $milestoneId
                 ? $milestone['milestonePaymentSchedules']['amount'] * ($retentionPercentage / 100)
                 : 0;
 
             if($input['value'] == 0)
             {
-                $duplicateMilestone = $amendment ? $model::checkForDuplicateMilestoneRetentionAmd($milestoneId,
-                    $contractHistoryID, $companySystemID) : $model::checkForDuplicateMilestoneRetention($milestoneId,
-                    $contractId, $companySystemID);
+                $duplicateMilestone = $amendment
+                    ? $model::checkForDuplicateMilestoneRetentionAmd($milestoneId, $contractHistoryID, $companySystemID)
+                    : $model::checkForDuplicateMilestoneRetention($milestoneId, $contractId, $companySystemID);
 
                 if ($duplicateMilestone)
                 {

@@ -209,4 +209,8 @@ class ContractMilestoneRetentionAmd extends Model
             ->whereNull('id')
             ->get();
     }
+    public static function checkMilestoneRetentionExists($historyID)
+    {
+        return self::where('contract_history_id', $historyID)->exists();
+    }
 }
