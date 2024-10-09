@@ -83,7 +83,7 @@ class ContractBoqItemsRepository extends BaseRepository
             }])
             ->where('companyId', $companyId)
             ->where($colName, $id)
-            ->when($origin > 1, function ($q) use ($origin)
+            ->when($origin > 0, function ($q) use ($origin)
             {
                 $q->where('origin', $origin);
             })
