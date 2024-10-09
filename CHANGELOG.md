@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.3.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.2.0...v1.3.0) (2024-10-09)
+
+
+### Features
+
+* **contract:** contract effective date settings [CM-456] ([#273](https://github.com/pbsgears/Contract_Management_Backend/issues/273)) ([1e37ffc](https://github.com/pbsgears/Contract_Management_Backend/commit/1e37ffc89af9992e2723b86ff3e785c370c53531))
+* **contract:** Enhancement | attach document [CM-307] ([#262](https://github.com/pbsgears/Contract_Management_Backend/issues/262)) ([5c9cce1](https://github.com/pbsgears/Contract_Management_Backend/commit/5c9cce134d405ffcf00f8908e7319a563c4271b7))
+* **contract:** finance document enhancement [CM-410] ([#271](https://github.com/pbsgears/Contract_Management_Backend/issues/271)) ([395dddf](https://github.com/pbsgears/Contract_Management_Backend/commit/395dddf55e142888436516c09e131102dd5248b6))
+* **contract:** milestone & payment schedule finance integration enhancement [CM-415] ([#267](https://github.com/pbsgears/Contract_Management_Backend/issues/267)) ([70567e4](https://github.com/pbsgears/Contract_Management_Backend/commit/70567e4463e802b0b0269d185f0f825baeda869f))
+* **contract:** Milestone Deliverable Status [CM-420] ([#264](https://github.com/pbsgears/Contract_Management_Backend/issues/264)) ([f0bbfec](https://github.com/pbsgears/Contract_Management_Backend/commit/f0bbfececd88fb6ccc39373afa03518ca9e09999))
+* **contracts:** Capturing Milestone Due Date [CM-413] ([#261](https://github.com/pbsgears/Contract_Management_Backend/issues/261)) ([aab9a5d](https://github.com/pbsgears/Contract_Management_Backend/commit/aab9a5d6bd1e55a2a9ab269bd0b19544506da24f))
+* **contracts:** Contract Termination Chrone Job [CM-510] ([#275](https://github.com/pbsgears/Contract_Management_Backend/issues/275)) ([072d7b2](https://github.com/pbsgears/Contract_Management_Backend/commit/072d7b2498fbfe49e6b5cc7472d17c8870bd5b33))
+* **contracts:** EEnhancement | Milestone Status [CM-419] ([#257](https://github.com/pbsgears/Contract_Management_Backend/issues/257)) ([6cd97b1](https://github.com/pbsgears/Contract_Management_Backend/commit/6cd97b1081971073a4c9068808854b727389d62b))
+* **contracts:** Enhancement | Contract Info | Supplier Details [CM-418] ([#259](https://github.com/pbsgears/Contract_Management_Backend/issues/259)) ([4b9f06e](https://github.com/pbsgears/Contract_Management_Backend/commit/4b9f06ec18e5e5a9d6aec9ba646495d579197212))
+* **contracts:** Enhancement | Contract Users | Department [CM-416] ([#256](https://github.com/pbsgears/Contract_Management_Backend/issues/256)) ([b915736](https://github.com/pbsgears/Contract_Management_Backend/commit/b915736ab74a33623fa6405535879fa060e5064b))
+* **contracts:** Enhancement | Users & User Group | Department [CM-417] ([#258](https://github.com/pbsgears/Contract_Management_Backend/issues/258)) ([43fab40](https://github.com/pbsgears/Contract_Management_Backend/commit/43fab40555a792809ea1e7c4a166c975698bf3c8))
+* **contracts:** Enhancement to the Contract History Workflow - Amendment [CM-444] ([#270](https://github.com/pbsgears/Contract_Management_Backend/issues/270)) ([790d35d](https://github.com/pbsgears/Contract_Management_Backend/commit/790d35d8d1d369732494bfe1a1626b0c9f50eeee))
+* **contracts:** Enhancement to the Contract History Workflow - Extension [CM-447] ([#272](https://github.com/pbsgears/Contract_Management_Backend/issues/272)) ([1ce1781](https://github.com/pbsgears/Contract_Management_Backend/commit/1ce1781e77dad865f4210224cd0c777a74cac858))
+* **contracts:** Enhancement to the Contract History Workflow - Renew… ([#268](https://github.com/pbsgears/Contract_Management_Backend/issues/268)) ([954b4da](https://github.com/pbsgears/Contract_Management_Backend/commit/954b4da4924b78916f707452dfe93fcd7ac2b1a0))
+* **contracts:** Enhancement to the Contract History Workflow - Termi… ([#269](https://github.com/pbsgears/Contract_Management_Backend/issues/269)) ([829949b](https://github.com/pbsgears/Contract_Management_Backend/commit/829949b377f922fe2d85140e876287b2bc316730))
+* **contracts:** Milestone Due Date Validation - RC [CM-471] ([#265](https://github.com/pbsgears/Contract_Management_Backend/issues/265)) ([645908f](https://github.com/pbsgears/Contract_Management_Backend/commit/645908fef229c8946cb1355abe4514e284cbfd54))
+* **contract:** SSO issue and remove the logging page when logging via the portal [CM-515] ([#274](https://github.com/pbsgears/Contract_Management_Backend/issues/274)) ([3f99676](https://github.com/pbsgears/Contract_Management_Backend/commit/3f996766224848679e825da4e141533005146876))
+
 ## [1.2.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.1.0...v1.2.0) (2024-08-20)
 
 
