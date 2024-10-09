@@ -74,7 +74,6 @@ class ApproveDocument
         {
             throw new CommonException(trans('common.approval_level_not_found'));
         }
-        Log::info($checkEmployeeAccess);
 
         self::updateApproveDocument(
             $formData,

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
 use App\Models\ContractAmendmentArea;
+use App\Models\ContractSettingDetail;
 use App\Repositories\BaseRepository;
 use App\Utilities\ContractManagementUtils;
 use Exception;
@@ -83,8 +84,16 @@ class ContractAmendmentAreaRepository extends BaseRepository
             $contractData = ContractManagementUtils::checkContractExist($contractUuid,$companyId);
             $historyData = ContractManagementUtils::getContractHistoryData($historyUuid);
 
-            return $this->model->getContractAmendAreas($contractData->id,$historyData->id);
-
+            $activeAreas = $this->model->getContractAmendAreas($contractData->id,$historyData->id);
+            if(in_array(1, $activeAreas))
+            {
+                $checkActiveSchedule = ContractSettingDetail::getActiveContractPaymentSchedule($contractData->id);
+                if(!empty($checkActiveSchedule) && $checkActiveSchedule['sectionDetailId'] == 2)
+                {
+                    array_push($activeAreas, 3);
+                }
+            }
+            return $activeAreas;
         }
         catch(Exception $e)
         {

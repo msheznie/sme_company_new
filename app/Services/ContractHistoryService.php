@@ -380,6 +380,7 @@ class ContractHistoryService
                 GeneralService::sendException(trans('common.contract_amount_is_a_mandatory_field'));
             }
             $activeSectionIDs = ContractAmendmentArea::getContractAmendAreas($contractId, $historyId);
+            ContractAmendmentOtherService::boqValidation($historyId, $activeSectionIDs, $companySystemId);
             ContractAmendmentOtherService::milestoneAndOverallRetentionValidation($historyId, $contractMaster,
                 $contractId, $activeSectionIDs, $companySystemId);
             ContractAmendmentOtherService::paymentTermsAmdValidation($historyId, $activeSectionIDs);
@@ -761,6 +762,7 @@ class ContractHistoryService
                 'App\\Models\\ContractAdditionalDocumentAmd',
                 'App\\Models\\ContractPaymentTermsAmd',
                 'App\\Models\\ContractMilestoneRetentionAmd',
+                'App\\Models\\TimeMaterialConsumptionAmd',
             ];
         }
 

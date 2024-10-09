@@ -708,21 +708,32 @@ class ContractMasterRepository extends BaseRepository
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
 
-        $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
+         $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
             ->where('isActive', 1)
             ->with([
-                'contractTypeSection' => function ($q)
+                'contractTypeSection' => function ($q) use ($isDrop)
                 {
                     $q->select('ct_sectionId', 'cmSection_id')
-                        ->with(['contractSectionWithTypes']);
+                        ->with(['contractSectionWithTypes'])
+                        ->when($isDrop, function ($q)
+                        {
+                            $q->whereIn('cmSection_id', [1, 4, 6]);
+                        });
                 }
             ])
-            ->when($isDrop, function ($q)
-            {
-                $q->whereIn('contractTypeSectionId', [4, 6]);
-            })
+             ->where(function($q) use ($isDrop)
+             {
+                 $q->when($isDrop, function ($q)
+                 {
+                     $q->whereHas('contractTypeSection', function($q)
+                     {
+                         $q->whereIn('cmSection_id', [1, 4, 6]);
+                     });
+                 });
+             })
             ->get();
         $pluckedData = [];
+
         if ($isDrop)
         {
             $pluckedData[] = [
