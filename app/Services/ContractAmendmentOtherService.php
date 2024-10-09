@@ -126,10 +126,9 @@ class ContractAmendmentOtherService
             }
             else
             {
-                $checkMilestoneExists = ContractMilestoneRetentionAmd::getContractMilestoneRetentionAmdData(
-                    $contractHistoryID, $companySystemID
-                );
-                if(empty($checkMilestoneExists))
+                $checkMilestoneExists = ContractMilestoneRetentionAmd::checkMilestoneRetentionExists(
+                    $contractHistoryID);
+                if(!$checkMilestoneExists)
                 {
                     GeneralService::sendException(trans('common.at_least_one_milestone_retention_should_be_available'));
                 }
