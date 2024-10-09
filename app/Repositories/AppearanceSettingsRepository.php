@@ -39,4 +39,9 @@ class AppearanceSettingsRepository extends BaseRepository
     {
         return AppearanceSettings::class;
     }
+
+    public static function getBrandingData($appearanceSystemID)
+    {
+        return AppearanceSettings::getBrandingData($appearanceSystemID);
+    }
 }

@@ -84,6 +84,7 @@ class CMContractMasterAmd extends Model
         'referenceCode',
         'contractOwner',
         'contractAmount',
+        'effective_date',
         'startDate',
         'endDate',
         'agreementSignDate',
@@ -144,6 +145,7 @@ class CMContractMasterAmd extends Model
         'referenceCode' => 'string',
         'contractOwner' => 'integer',
         'contractAmount' => 'float',
+        'effective_date' => 'integer',
         'startDate' => 'string',
         'endDate' => 'string',
         'agreementSignDate' => 'string',
@@ -194,7 +196,7 @@ class CMContractMasterAmd extends Model
     public static function getContractMasterData($id)
     {
         return CMContractMasterAmd::select('uuid', 'contractCode', 'title', 'contractType',
-        'counterParty', 'counterPartyName', 'referenceCode',
+        'counterParty', 'counterPartyName', 'referenceCode', 'effective_date',
         'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
         'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber', 'secondaryCounterParty',
         'secondaryEmail', 'secondaryPhoneNumber', 'agreementSignDate', 'startDate', 'endDate',

@@ -70,6 +70,7 @@ class ContractMaster extends Model
         'referenceCode',
         'contractOwner',
         'contractAmount',
+        'effective_date',
         'startDate',
         'endDate',
         'agreementSignDate',
@@ -128,6 +129,7 @@ class ContractMaster extends Model
         'referenceCode' => 'string',
         'contractOwner' => 'integer',
         'contractAmount' => 'double',
+        'effective_date' => 'integer',
         'startDate' => 'string',
         'endDate' => 'string',
         'agreementSignDate' => 'string',
@@ -214,6 +216,15 @@ class ContractMaster extends Model
         return $this->hasMany(ErpDocumentApproved::class, 'documentSystemCode', 'id');
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(ContractMaster::class, 'parent_id', 'id');
+    }
+
+    public function history()
+    {
+        return $this->belongsTo(ContractHistory::class, 'id', 'contract_id');
+    }
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;
@@ -529,7 +540,7 @@ class ContractMaster extends Model
 
     public static function getExistingContractType($companyId, $contractId)
     {
-        return ContractMaster::select('contractType')
+        return ContractMaster::select('contractType', 'uuid')
             ->where('companySystemID', $companyId)
             ->where('id', $contractId)
             ->first();

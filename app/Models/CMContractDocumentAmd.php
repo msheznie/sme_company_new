@@ -68,7 +68,9 @@ class CMContractDocumentAmd extends Model
         'returnedTo',
         'companySystemID',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'attach_after_approval',
+        'is_editable'
     ];
 
     /**
@@ -100,7 +102,9 @@ class CMContractDocumentAmd extends Model
         'returnedTo' => 'string',
         'companySystemID' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'attach_after_approval' => 'integer',
+        'is_editable' => 'integer'
     ];
 
     /**
@@ -139,7 +143,8 @@ class CMContractDocumentAmd extends Model
 
         return CMContractDocumentAmd::select('uuid', 'documentMasterID','contract_doc_id',
             'receivedBy', 'receivedDate', 'receivedFormat', 'documentVersionNumber', 'documentResponsiblePerson',
-            'documentExpiryDate', 'documentName', 'documentDescription', 'returnedBy', 'returnedDate', 'returnedTo')
+            'documentExpiryDate', 'documentName', 'documentDescription', 'returnedBy', 'returnedDate', 'returnedTo',
+            'attach_after_approval', 'is_editable')
             ->with([
                 'attachment' => function ($q) use ($id)
                 {

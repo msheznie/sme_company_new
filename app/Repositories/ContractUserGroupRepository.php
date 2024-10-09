@@ -74,26 +74,33 @@ class ContractUserGroupRepository extends BaseRepository
             ->make(true);
     }
 
-    public function getContractUserListForUserGroup(Request $request) {
+    public function getContractUserListForUserGroup(Request $request)
+    {
         $input  = $request->all();
         $companyId =  $input['selectedCompanyID'];
         $uuid =  $input['uuid'];
         $contractId = 0;
         $isActive =  isset($input['isActive']) ? 1 : 0;
-        if(isset($uuid) && $uuid !== '0'){
+        if(isset($uuid) && $uuid !== '0')
+        {
             $result = ContractUserGroup::select('id')->where('uuid', $uuid)->first();
             $contractId = $result->id;
         }
-        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId, $isActive);
-        return DataTables::eloquent($contractUserList)
-            ->addColumn('Actions', 'Actions', "Actions")
-            ->order(function ($query) use ($input) {
-                if (request()->has('order') && $input['order'][0]['column'] == 0) {
-                    $query->orderBy('id', $input['order'][0]['dir']);
-                }
-            })
-            ->addIndexColumn()
-            ->make(true);
+        $contractUserList =  $this->model->getContractUserListForUserGroup($companyId, $contractId, $isActive)->get();
+
+        $contractUserList->map(function ($item)
+        {
+            $department = $item->contractInternalUser->employeeDepartments->department->DepartmentDes ?? null;
+            $item->nameWithDepartment = $item->itemName;
+            if( $department != null)
+            {
+                $item->nameWithDepartment = $item->itemName . ' | ' .$department;
+            }
+            return $item;
+        });
+
+        return $contractUserList;
+
     }
 
     public function contractUserGroupList(Request $request){

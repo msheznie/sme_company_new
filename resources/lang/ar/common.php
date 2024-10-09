@@ -236,5 +236,8 @@ return [
     "due_in" => "Due In AR",
     "due_penalty_amount" => "Due Penalty Amount AR",
     "status" => "Status AR",
-    "data_retrieved_successfully" => "Data retrieved successfully"
+    "data_retrieved_successfully" => "Data retrieved successfully",
+    'user_list_retrieved_successfully' => 'User list retrieved successfully',
+    'fcm_token_not_found' => 'Fcm Token not found AR',
+    'commencement_date_not_found' => 'Commencement date not found AR'
 ];

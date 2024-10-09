@@ -87,14 +87,14 @@ class ContractMilestoneAPIController extends AppBaseController
     public function show($id)
     {
         /** @var ContractMilestone $contractMilestone */
-        $contractMilestone = $this->contractMilestoneRepository->find($id);
+        $contractMilestone = $this->contractMilestoneRepository->findByUuid($id);
 
         if (empty($contractMilestone))
         {
             return $this->sendError(trans('common.milestone_not_found'));
         }
 
-        return $this->sendResponse(new ContractMilestoneResource($contractMilestone),
+        return $this->sendResponse($contractMilestone,
             trans('common.milestone_retrieved_successfully'));
     }
 
@@ -222,5 +222,11 @@ class ContractMilestoneAPIController extends AppBaseController
         {
             return $this->sendResponse($basePath, trans('success_export'));
         }
+    }
+
+    public function getMilestoneDueDate(Request $request)
+    {
+        $response = $this->contractMilestoneRepository->getMilestoneDueDate($request);
+        return $this->sendResponse($response, trans('common.retrieved_successfully'));
     }
 }

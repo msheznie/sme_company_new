@@ -34,7 +34,6 @@ Route::group(['middleware' => ['tenant']], function ()
     Route::resource('c_m_contract_type_sections', App\Http\Controllers\API\CMContractTypeSectionsAPIController::class);
 
 
-
     Route::group(['middleware' => ['third_party_integration']], function ()
     {
         Route::get('get_contract_data', 'ContractMasterAPIController@getContractData');
@@ -45,7 +44,7 @@ Route::group(['middleware' => ['tenant']], function ()
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
         Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
-
+        Route::post('/get-branding', 'AppearanceSettingsAPIController@getBranding');
 
         Route::group(['middleware' => ['company']], function ()
         {
@@ -99,6 +98,10 @@ Route::group(['middleware' => ['tenant']], function ()
         \App\Http\Controllers\API\FinanceDocumentsAPIController::class,
         'printFinanceDocumentPayment'
     ]);
+    Route::post('/get-portal-redirect-url', [
+        \App\Http\Controllers\API\FcmTokenAPIController::class,
+        'getPortalRedirectUrl'
+    ]);
 });
 
 Route::get('/activate-contract', function ()
@@ -111,4 +114,10 @@ Route::get('/contract-expiry-reminder', function ()
 {
     \Artisan::call('reminderContractExpiry');
     return 'Contracts Reminder Expiry Send Successfully!';
+});
+
+Route::get('/terminate-contract', function ()
+{
+    \Artisan::call('terminateContract');
+    return 'Contracts Terminated Successfully!';
 });

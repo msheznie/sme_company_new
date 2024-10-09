@@ -10,6 +10,7 @@ use App\Models\ContractHistory;
 use App\Exceptions\CommonException;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
+use App\Models\ContractUsers;
 use App\Models\MilestonePaymentSchedules;
 use App\Repositories\ContractMasterRepository;
 use App\Models\ContractMaster;
@@ -212,5 +213,42 @@ class ContractMasterService
 
         return ['contractCode' => $contractCode, 'lastSerialNumber' => $lastSerialNumber];
 
+    }
+
+    public function getSupplierContactDetails($request)
+    {
+        $uuid = $request->input('supUuid');
+
+        $contactDetails = ContractUsers::getSupplierContactDetails($uuid);
+        $contactDetailsList = $contactDetails->contractSupplierUser->supplierContactDetails ?? collect([]);
+        $isDefaultDetail = $contactDetailsList->firstWhere('isDefault', -1);
+        $notDefaultDetails = $contactDetailsList->filter(function ($detail)
+        {
+            return $detail->isDefault === 0;
+        });
+
+        $primaryDetail = $isDefaultDetail ?? $notDefaultDetails->first() ?? null;
+        $secondaryDetail = $notDefaultDetails->skip(1)->first() ?? null;
+
+        if ($isDefaultDetail)
+        {
+            if ($notDefaultDetails->count() === 0)
+            {
+                $secondaryDetail = null;
+            }
+            if ($notDefaultDetails->count() > 0)
+            {
+                $secondaryDetail = $notDefaultDetails->first();
+            }
+        }
+
+        return [
+            'primaryDetails' => $primaryDetail ?? null,
+            'secondaryDetails' => $secondaryDetail ?? null,
+        ];
+    }
+    public static function updateContractMaster($id, $field)
+    {
+        return ContractMaster::where('id', $id)->update($field);
     }
 }

@@ -222,7 +222,7 @@ class DirectPaymentDetails extends Model
 
     ];
 
-    public function getContractLinkedWithErp($contractUuid, $companySystemID)
+    public static  function getContractLinkedWithErp($contractUuid, $companySystemID)
     {
         $directPaymentAutoIDs = DirectPaymentDetails::where('contractID', $contractUuid)
             ->where('companySystemID', $companySystemID)
@@ -238,5 +238,10 @@ class DirectPaymentDetails extends Model
     public function project()
     {
         return $this->belongsTo(ProjectMaster::class, 'detail_project_id', 'id');
+    }
+    public static function getSum($id, $field)
+    {
+        return DirectPaymentDetails::where('directPaymentAutoID', $id)
+            ->sum($field);
     }
 }

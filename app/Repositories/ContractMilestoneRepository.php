@@ -85,6 +85,7 @@ class ContractMilestoneRepository extends BaseRepository
 
         $response['contractMilestones'] = $contractMilestones;
         $response['decimalPlaces'] = $decimalPlaces;
+        $response['contractMaster'] = $contractMaster;
 
         return [
             'status' => true,
@@ -100,6 +101,7 @@ class ContractMilestoneRepository extends BaseRepository
         $formData = $request->input('formData');
         $title = $formData['title'];
         $description = $formData['description'];
+        $dueDate = $request->input('formattedDueDate');
         $status = $formData['status'];
         $uuid = bin2hex(random_bytes(16));
         $amendment = $request->input('amendment');
@@ -156,6 +158,7 @@ class ContractMilestoneRepository extends BaseRepository
                 'contractID' => $contractId,
                 'title' => $title,
                 'description' => $description,
+                'due_date' => $dueDate ? Carbon::parse($dueDate) : null,
                 'status' => $status,
                 'companySystemID' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
@@ -186,6 +189,7 @@ class ContractMilestoneRepository extends BaseRepository
         $contractUuid = $input['contractUuid'] ?? null;
         $title = $formData['title'];
         $description = $formData['description'];
+        $dueDate = $input['formattedDueDate'];
         $status = $formData['status'];
         $statusYN = $input['statusYN'];
         $id = $amendment ? $contractMilestone['amd_id'] :$contractMilestone['id'];
@@ -235,6 +239,7 @@ class ContractMilestoneRepository extends BaseRepository
             $insertMilestone = [
                 'title' => $title,
                 'description' => $description,
+                'due_date' => $dueDate ? Carbon::parse($dueDate) : null,
                 'status' => $status,
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
@@ -340,18 +345,28 @@ class ContractMilestoneRepository extends BaseRepository
 
         $data[0]['Milestone Title'] = "Milestone Title";
         $data[0]['Milestone Description'] = "Milestone Description";
+        $data[0]['Milestone Due Date'] = "Milestone Due Date";
         $data[0]['Status'] = "Status";
 
         if ($deliverables) {
             foreach ($deliverables as $key => $deliverable) {
                 $status = 'Pending';
-                if ($deliverable['status'] == 1) {
+                if ($deliverable['status'] == 1)
+                {
                     $status = 'In Progress';
-                } elseif ($deliverable['status'] == 2) {
+                }
+                if ($deliverable['status'] == 2)
+                {
                     $status = 'Completed';
+                }
+                if ($deliverable['status'] == -1)
+                {
+                    $status = 'Not Started';
                 }
                 $data[$key + 1]['Milestone Title'] = $deliverable['title'] ?? '-';
                 $data[$key + 1]['Milestone Description'] = $deliverable['description'] ?? '-';
+                $data[$key + 1]['Milestone Due Date'] = $deliverable['due_date'] ?
+                    Carbon::parse($deliverable['due_date'])->format('Y-m-d') : '-';
                 $data[$key + 1]['Status'] = $status;
             }
         }
@@ -365,5 +380,11 @@ class ContractMilestoneRepository extends BaseRepository
     public function getMileStone($contractId)
     {
         return $this->model->getMileStone($contractId);
+    }
+
+    public function getMilestoneDueDate($request)
+    {
+        $uuid = $request->input('uuid');
+        return  ContractMilestone::getMilestoneDueDate($uuid);
     }
 }

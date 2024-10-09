@@ -237,7 +237,12 @@
             <hr style="color: #d3d9df border-top: 2px solid black; height: 2px; color: black">
             <div>
                 <span style="font-size: 18px">
-                    Direct Payment
+                    @if($masterdata->invoiceType == 2)
+                        Supplier Payment
+                    @endif
+                    @if($masterdata->invoiceType == 3)
+                        Direct Payment
+                    @endif
                 </span>
             </div>
             <br>
@@ -365,81 +370,141 @@
                     </td>
                 </tr>
             </table>
-            <div style="margin-top: 30px">
-                <table class="table table-bordered" style="width: 100%;">
-                    <thead>
-                    <tr class="theme-tr-head">
-                        <th>#</th>
-                        <th style="text-align: center">GL Code</th>
-                        <th style="text-align: center">GL Code Description</th>
-                        <th colspan="4" style="text-align: center">Project</th>
-                        <th style="text-align: center">Segment</th>
-                        <th style="text-align: center">Amount</th>
-                        <th style="text-align: center">VAT</th>
-                        <th style="text-align: center">Payment Amount</th>
-                        <th style="text-align: center">Local Amt (
-                            @if($masterdata->localCurrency)
-                                {{$masterdata->localCurrency->CurrencyCode}}
-                            @endif
-                            )
-                        </th>
-                        <th style="text-align: center">Rpt Amt (
-                            @if($masterdata->rptCurrency)
-                                {{$masterdata->rptCurrency->CurrencyCode}}
-                            @endif
-                            )
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @php
-                        $tot= 0;
-                        $totLocal= 0;
-                        $totRpt = 0;
-                    @endphp
-                    @foreach ($masterdata->directDetail as $item)
-                        <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
-                            <td>{{$loop->iteration}}</td>
-                            <td>{{$item->glCode}}</td>
-                            <td>{{$item->glCodeDes}}</td>
-                            <td colspan="4">
-                                @if($item->project)
-                                    {{$item->project->projectCode}} - {{$item->project->description}}
-                                @endif
-                            </td>
-                            <td>@if($item->segment)
-                                    {{$item->segment->ServiceLineDes}}
-                                @endif
-                            </td>
-                            <td style="text-align: right">{{number_format($item->DPAmount, $transDecimal)}}</td>
-                            <td style="text-align: right">{{number_format($item->vatAmount, $transDecimal)}}</td>
-                            <td style="text-align: right">{{number_format($item->DPAmount + $item->vatAmount, $transDecimal)}}</td>
-                            <td style="text-align: right">{{number_format($item->localAmount + $item->VATAmountLocal, $localDecimal)}}</td>
-                            <td style="text-align: right">{{number_format($item->comRptAmount + $item->VATAmountRpt, $rptDecimal)}}</td>
-                            @php
-                                $tot += $item->DPAmount + $item->vatAmount;
-                                $totLocal += $item->localAmount + $item->VATAmountLocal;
-                                $totRpt += $item->comRptAmount + $item->VATAmountRpt;
-                            @endphp
+            @if($masterdata->invoiceType == 2)
+                <div style="margin-top: 30px">
+                    <table class="table table-bordered" style="width: 100%;">
+                        <thead>
+                        <tr class="theme-tr-head">
+                            <th>#</th>
+                            <th style="text-align: center">Booking Inv Code</th>
+                            <th style="text-align: center">PO Number</th>
+                            <th style="text-align: center">Supplier Invoice No </th>
+                            <th style="text-align: center">Invoice Date</th>
+                            <th style="text-align: center">Invoice Amount</th>
+                            <th style="text-align: center">Amount Paid</th>
+                            <th style="text-align: center">Balance</th>
                         </tr>
-                    @endforeach
-                    <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
-                        <td colspan="4" style="border-bottom: 1px solid #ffffffff; background-color:#ffffff;
-                         border-right: 1px solid #ffffffff; border-left: 1px solid #ffffffff">&nbsp;</td>
-                        <td colspan="5" style="border-bottom: 1px solid #ffffffff; background-color:#ffffff;
-                         border-right: 1px solid #ffffffff; border-left: 1px solid #ffffffff">&nbsp;</td>
-                        <td style="text-align: right" style="background-color: rgb(215,215,215)">Total Payment</td>
-                        <td style="text-align: right"
-                            style="background-color: rgb(215,215,215)">{{number_format($tot, $transDecimal)}}</td>
-                        <td style="text-align: right"
-                            style="background-color: rgb(215,215,215)">{{number_format($totLocal, $localDecimal)}}</td>
-                        <td style="text-align: right"
-                            style="background-color: rgb(215,215,215)">{{number_format($totRpt, $rptDecimal)}}</td>
+                        </thead>
+                        <tbody>
+                        @foreach ($masterdata->supplierDetail as $ddet)
+                            {{$suppliPayment = 0}}
+                            {{$suppliPayment = ($ddet->supplierInvoiceAmount - $ddet->supplierPaymentAmount) }}
+                            <tr style="border-top: 1px solid #ffffff !important;
+                                border-bottom: 1px solid #ffffff !important;">
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$ddet->bookingInvDocCode}}</td>
+                                @if($ddet->poMaster == null)
+                                    <td>-</td>
+                                @else
+                                    <td>{{$ddet->poMaster->purchaseOrderCode}}</td>
+                                @endif
+                                <td>{{$ddet->supplierInvoiceNo}}</td>
+                                <td>{{ \App\helpers\General::dateFormat($ddet->supplierInvoiceDate)}}</td>
+                                <td style="text-align: right">
+                                    {{number_format($ddet->supplierInvoiceAmount, $transDecimal)}}
+                                </td>
+                                <td style="text-align: right">
+                                    {{number_format($ddet->supplierPaymentAmount, $transDecimal)}}
+                                </td>
+                                <td style="text-align: right">
+                                    {{number_format($ddet->paymentBalancedAmount, $transDecimal)}}
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 1px solid #333 !important;border-bottom: 1px solid #333 !important;">
+                                <td colspan="5">&nbsp;</td>
+                                <td style="background-color: rgb(215,215,215); text-align: right">Total Payment</td>
+                                <td style="background-color: rgb(215,215,215); text-align: right;">
+                                    {{number_format($supplierDetailTotTra, $transDecimal)}}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            @endif
+            @if($masterdata->invoiceType == 3)
+                <div style="margin-top: 30px">
+                    <table class="table table-bordered" style="width: 100%;">
+                        <thead>
+                        <tr class="theme-tr-head">
+                            <th>#</th>
+                            <th style="text-align: center">GL Code</th>
+                            <th style="text-align: center">GL Code Description</th>
+                            <th colspan="4" style="text-align: center">Project</th>
+                            <th style="text-align: center">Segment</th>
+                            <th style="text-align: center">Amount</th>
+                            <th style="text-align: center">VAT</th>
+                            <th style="text-align: center">Payment Amount</th>
+                            <th style="text-align: center">Local Amt (
+                                @if($masterdata->localCurrency)
+                                    {{$masterdata->localCurrency->CurrencyCode}}
+                                @endif
+                                )
+                            </th>
+                            <th style="text-align: center">Rpt Amt (
+                                @if($masterdata->rptCurrency)
+                                    {{$masterdata->rptCurrency->CurrencyCode}}
+                                @endif
+                                )
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @php
+                            $tot= 0;
+                            $totLocal= 0;
+                            $totRpt = 0;
+                        @endphp
+                        @foreach ($masterdata->directDetail as $item)
+                            <tr style="border-top: 1px solid #ffffff !important;border-bottom: 1px solid #ffffff !important;">
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$item->glCode}}</td>
+                                <td>{{$item->glCodeDes}}</td>
+                                <td colspan="4">
+                                    @if($item->project)
+                                        {{$item->project->projectCode}} - {{$item->project->description}}
+                                    @endif
+                                </td>
+                                <td>@if($item->segment)
+                                        {{$item->segment->ServiceLineDes}}
+                                    @endif
+                                </td>
+                                <td style="text-align: right">{{number_format($item->DPAmount, $transDecimal)}}</td>
+                                <td style="text-align: right">{{number_format($item->vatAmount, $transDecimal)}}</td>
+                                <td style="text-align: right">{{number_format($item->DPAmount + $item->vatAmount, $transDecimal)}}</td>
+                                <td style="text-align: right">{{number_format($item->localAmount + $item->VATAmountLocal, $localDecimal)}}</td>
+                                <td style="text-align: right">{{number_format($item->comRptAmount + $item->VATAmountRpt, $rptDecimal)}}</td>
+                                @php
+                                    $tot += $item->DPAmount + $item->vatAmount;
+                                    $totLocal += $item->localAmount + $item->VATAmountLocal;
+                                    $totRpt += $item->comRptAmount + $item->VATAmountRpt;
+                                @endphp
+                            </tr>
+                        @endforeach
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="4">&nbsp;</td>
+                            <td colspan="5">&nbsp;</td>
+                            <td style="background-color: rgb(215,215,215); text-align: right">Total Payment</td>
+                            <td style="background-color: rgb(215,215,215); text-align: right">
+                                {{number_format($tot, $transDecimal)}}
+                            </td>
+                            <td style="background-color: rgb(215,215,215); text-align: right">
+                                {{number_format($totLocal, $localDecimal)}}
+                            </td>
+                            <td style="background-color: rgb(215,215,215); text-align: right">
+                                {{number_format($totRpt, $rptDecimal)}}
+                            </td>
 
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            @endif
             <div style="padding-bottom: 20px!important; padding-top: 35px!important;
              page-break-inside: avoid; !important;">
                 <table style="width:100%;">

@@ -75,11 +75,36 @@ class ContractUserGroup extends Model
     {
         $result = ContractUserGroup::select('id')->where('uuid', $selectUserGroup)->first();
         $userGroupId = 0;
-        if(isset($result)){
+        if(isset($result))
+        {
             $userGroupId = $result->id;
         }
        return ContractUserGroupAssignedUser::select('uuid', 'contractUserId', 'status', 'created_at', 'created_by')
-           ->with(['assignedUser' ,'employee'])
+           ->with([
+               'assignedUser' => function ($q)
+               {
+                   $q->with([
+                       'contractInternalUser' => function ($q)
+                       {
+                           $q->with([
+                               'employeeDepartments' => function ($q)
+                               {
+                                   $q->with([
+                                       'department' => function ($q)
+                                       {
+                                           $q->select('DepartmentMasterID', 'DepartmentDes');
+                                       }
+                                   ]);
+                                   $q->select('EmpID', 'DepartmentMasterID', 'isPrimary', 'isActive');
+                                   $q->where('isPrimary', 1);
+                                   $q->where('isActive', 1);
+                               }
+                           ]);
+                           $q->select('employeeSystemID');
+                       }
+                   ]);
+               }, 'employee'
+           ])
             ->where('userGroupId', $userGroupId)
             ->where('companySystemID', $companySystemId)
            ->orderBy('id', 'desc');
@@ -92,6 +117,26 @@ class ContractUserGroup extends Model
             {
                 $query->where('userGroupId', $groupId);
             })
+            ->with([
+                'contractInternalUser' => function ($q)
+                {
+                    $q->with([
+                        'employeeDepartments' => function ($q)
+                        {
+                            $q->with([
+                                'department' => function ($q)
+                                {
+                                    $q->select('DepartmentMasterID', 'DepartmentDes');
+                                }
+                            ]);
+                            $q->select('EmpID', 'DepartmentMasterID', 'isPrimary', 'isActive');
+                            $q->where('isPrimary', 1);
+                            $q->where('isActive', 1);
+                        }
+                    ]);
+                    $q->select('employeeSystemID');
+                }
+            ])
             ->where('companySystemId', $companySystemId);
 
         if ($isActive == 1)

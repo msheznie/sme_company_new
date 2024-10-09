@@ -469,7 +469,7 @@ class PaySpplierInvoiceMaster extends Model
             ->where('companySystemID', $selectedCompanyId)
             ->first();
     }
-    public function getPaymentVoucherForFilters($directPVIds, $selectedCompanyID)
+    public static function getPaymentVoucherForFilters($directPVIds, $selectedCompanyID)
     {
         return PaySpplierInvoiceMaster::whereIn('PayMasterAutoId', $directPVIds)
             ->where('companySystemID', $selectedCompanyID)
@@ -526,12 +526,27 @@ class PaySpplierInvoiceMaster extends Model
     {
         return $this->belongsTo(CurrencyMaster::class, 'supplierTransCurrencyID', 'currencyID');
     }
+    public function supplierDetail()
+    {
+        return $this->hasMany(PaySupplierInvoiceDetail::class, 'PayMasterAutoId', 'PayMasterAutoId');
+    }
     public function paymentVoucherMaster($paymentVoucherID)
     {
         return PaySpplierInvoiceMaster::where('PayMasterAutoId', $paymentVoucherID)
             ->with([
                 'company',
                 'paymentMode',
+                'supplierDetail' => function ($q)
+                {
+                    $q->select('PayMasterAutoId', 'bookingInvDocCode', 'purchaseOrderID', 'supplierInvoiceNo',
+                    'supplierInvoiceDate', 'supplierInvoiceAmount', 'supplierPaymentAmount', 'paymentBalancedAmount');
+                    $q->with([
+                        'poMaster' => function ($q)
+                        {
+                            $q->select('purchaseOrderID', 'purchaseOrderCode');
+                        }
+                    ]);
+                },
                 'supplier' => function ($q)
                 {
                     $q->select('supplierCodeSystem', 'primarySupplierCode', 'supplierName');

@@ -46,7 +46,8 @@ class ContractMilestone extends Model
         'companySystemID',
         'created_by',
         'updated_by',
-        'description'
+        'description',
+        'due_date'
     ];
 
     /**
@@ -63,7 +64,8 @@ class ContractMilestone extends Model
         'companySystemID' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer',
-        'description' => 'string'
+        'description' => 'string',
+        'due_date' => 'string'
     ];
 
     /**
@@ -110,7 +112,7 @@ class ContractMilestone extends Model
 
     public static function getContractMilestone($contractID, $companySystemID)
     {
-        return ContractMilestone::select('uuid', 'title', 'description', 'status')
+        return ContractMilestone::select('uuid', 'title', 'description', 'due_date', 'status')
             ->where('contractID', $contractID)
             ->where('companySystemID', $companySystemID)
             ->get();
@@ -153,5 +155,12 @@ class ContractMilestone extends Model
         return ContractMilestone::where('contractId', $contractId)
             ->where('companySystemID', $companySystemID)
             ->exists();
+    }
+
+    public static function getMilestoneDueDate($uuid)
+    {
+        return ContractMilestone::select('due_date')
+            ->where('uuid', $uuid)
+            ->first();
     }
 }

@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class GRVMasterResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        return [
+            'grvAutoID' => $this->grvAutoID,
+            'grvTypeID' => $this->grvTypeID,
+            'grvType' => $this->grvType,
+            'companySystemID' => $this->companySystemID,
+            'companyID' => $this->companyID,
+            'serviceLineSystemID' => $this->serviceLineSystemID,
+            'serviceLineCode' => $this->serviceLineCode,
+            'companyAddress' => $this->companyAddress,
+            'companyFinanceYearID' => $this->companyFinanceYearID,
+            'companyFinancePeriodID' => $this->companyFinancePeriodID,
+            'FYBiggin' => $this->FYBiggin,
+            'FYEnd' => $this->FYEnd,
+            'documentSystemID' => $this->documentSystemID,
+            'documentID' => $this->documentID,
+            'projectID' => $this->projectID,
+            'grvDate' => $this->grvDate,
+            'stampDate' => $this->stampDate,
+            'grvSerialNo' => $this->grvSerialNo,
+            'grvPrimaryCode' => $this->grvPrimaryCode,
+            'grvDoRefNo' => $this->grvDoRefNo,
+            'grvNarration' => $this->grvNarration,
+            'grvLocation' => $this->grvLocation,
+            'grvDOpersonName' => $this->grvDOpersonName,
+            'grvDOpersonResID' => $this->grvDOpersonResID,
+            'grvDOpersonTelNo' => $this->grvDOpersonTelNo,
+            'grvDOpersonVehicleNo' => $this->grvDOpersonVehicleNo,
+            'supplierID' => $this->supplierID,
+            'supplierPrimaryCode' => $this->supplierPrimaryCode,
+            'supplierName' => $this->supplierName,
+            'supplierAddress' => $this->supplierAddress,
+            'supplierTelephone' => $this->supplierTelephone,
+            'supplierFax' => $this->supplierFax,
+            'supplierEmail' => $this->supplierEmail,
+            'liabilityAccountSysemID' => $this->liabilityAccountSysemID,
+            'liabilityAccount' => $this->liabilityAccount,
+            'UnbilledGRVAccountSystemID' => $this->UnbilledGRVAccountSystemID,
+            'UnbilledGRVAccount' => $this->UnbilledGRVAccount,
+            'localCurrencyID' => $this->localCurrencyID,
+            'localCurrencyER' => $this->localCurrencyER,
+            'companyReportingCurrencyID' => $this->companyReportingCurrencyID,
+            'companyReportingER' => $this->companyReportingER,
+            'supplierDefaultCurrencyID' => $this->supplierDefaultCurrencyID,
+            'supplierDefaultER' => $this->supplierDefaultER,
+            'supplierTransactionCurrencyID' => $this->supplierTransactionCurrencyID,
+            'supplierTransactionER' => $this->supplierTransactionER,
+            'grvConfirmedYN' => $this->grvConfirmedYN,
+            'grvConfirmedByEmpSystemID' => $this->grvConfirmedByEmpSystemID,
+            'grvConfirmedByEmpID' => $this->grvConfirmedByEmpID,
+            'grvConfirmedByName' => $this->grvConfirmedByName,
+            'grvConfirmedDate' => $this->grvConfirmedDate,
+            'grvCancelledYN' => $this->grvCancelledYN,
+            'grvCancelledBySystemID' => $this->grvCancelledBySystemID,
+            'grvCancelledBy' => $this->grvCancelledBy,
+            'grvCancelledByName' => $this->grvCancelledByName,
+            'grvCancelledDate' => $this->grvCancelledDate,
+            'grvCancelledComment' => $this->grvCancelledComment,
+            'grvTotalComRptCurrency' => $this->grvTotalComRptCurrency,
+            'grvTotalLocalCurrency' => $this->grvTotalLocalCurrency,
+            'grvTotalSupplierDefaultCurrency' => $this->grvTotalSupplierDefaultCurrency,
+            'grvTotalSupplierTransactionCurrency' => $this->grvTotalSupplierTransactionCurrency,
+            'grvDiscountPercentage' => $this->grvDiscountPercentage,
+            'grvDiscountAmount' => $this->grvDiscountAmount,
+            'approved' => $this->approved,
+            'approvedDate' => $this->approvedDate,
+            'approvedByUserID' => $this->approvedByUserID,
+            'approvedByUserSystemID' => $this->approvedByUserSystemID,
+            'postedDate' => $this->postedDate,
+            'refferedBackYN' => $this->refferedBackYN,
+            'timesReferred' => $this->timesReferred,
+            'RollLevForApp_curr' => $this->RollLevForApp_curr,
+            'invoiceBeforeGRVYN' => $this->invoiceBeforeGRVYN,
+            'deliveryConfirmedYN' => $this->deliveryConfirmedYN,
+            'interCompanyTransferYN' => $this->interCompanyTransferYN,
+            'FromCompanySystemID' => $this->FromCompanySystemID,
+            'FromCompanyID' => $this->FromCompanyID,
+            'capitalizedYN' => $this->capitalizedYN,
+            'isMarkupUpdated' => $this->isMarkupUpdated,
+            'createdUserGroup' => $this->createdUserGroup,
+            'createdPcID' => $this->createdPcID,
+            'createdUserSystemID' => $this->createdUserSystemID,
+            'createdUserID' => $this->createdUserID,
+            'modifiedPc' => $this->modifiedPc,
+            'modifiedUserSystemID' => $this->modifiedUserSystemID,
+            'modifiedUser' => $this->modifiedUser,
+            'createdDateTime' => $this->createdDateTime,
+            'timeStamp' => $this->timeStamp,
+            'pullType' => $this->pullType,
+            'mfqJobID' => $this->mfqJobID,
+            'vatRegisteredYN' => $this->vatRegisteredYN,
+            'deliveryAppoinmentID' => $this->deliveryAppoinmentID
+        ];
+    }
+}

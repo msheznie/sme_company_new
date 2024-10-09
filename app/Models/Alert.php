@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Eloquent as Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -34,19 +33,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Alert extends Model
 {
-    use SoftDeletes;
-
     use HasFactory;
 
     public $table = 'erp_alert';
 
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    const CREATED_AT = 'alertDateTime';
+    const UPDATED_AT = 'timeStamp';
 
+    protected $primaryKey = 'alertID';
 
     protected $dates = ['deleted_at'];
-
-
 
     public $fillable = [
         'companySystemID',

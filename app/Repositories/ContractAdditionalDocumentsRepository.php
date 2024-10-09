@@ -131,6 +131,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
                     'documentType' => $documentTypeByUuid->id,
                     'documentName' => $input['documentName'],
                     'companySystemID' => $companyId,
+                    'is_editable' => $input['is_editable'] ?? 0
                 ];
 
                 if (isset($input['documentExpiryDate']) && $input['documentExpiryDate'])

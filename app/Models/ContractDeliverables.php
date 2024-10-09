@@ -34,9 +34,6 @@ class ContractDeliverables extends Model
     const UPDATED_AT = 'updated_at';
 
 
-
-
-
     public $fillable = [
         'uuid',
         'contractID',
@@ -73,18 +70,7 @@ class ContractDeliverables extends Model
      * @var array
      */
     public static $rules = [
-        'uuid' => 'required|string|max:200',
-        'contractID' => 'required|integer',
-        'milestoneID' => 'required|integer',
-        'title' => 'required|string|max:255',
-        'description' => 'required|string|max:255',
-        'companySystemID' => 'required|integer',
-        'created_by' => 'required|integer',
-        'updated_by' => 'required|integer',
-        'deleted_at' => 'required',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable',
-        'dueDate' => 'string'
+
     ];
 
     public function milestone()
@@ -102,30 +88,40 @@ class ContractDeliverables extends Model
         return 'companySystemID';
     }
 
-    public static function getDeliverables($contractID, $companySystemID)
+    public static function getDeliverables($contractID, $companySystemID, $financeYN=0)
     {
         return ContractDeliverables::select('uuid', 'milestoneID', 'title', 'description', 'dueDate')
             ->with([
                 'milestone' => function ($q)
                 {
-                    $q->select('id', 'uuid', 'title');
+                    $q->select('id', 'uuid', 'title', 'due_date');
                 }
             ])
+            ->when($financeYN == 1, function ($q)
+            {
+                $q->where(function ($q)
+                {
+                    $q->whereHas('milestone');
+                });
+            })
             ->where('contractID', $contractID)
             ->where('companySystemID', $companySystemID)
             ->get();
     }
     public static function checkDeliverableExist($title, $description, $id, $companySystemID, $contractID)
     {
-        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID) {
+        return ContractDeliverables::where(function ($query) use ($title, $description, $contractID, $companySystemID)
+        {
             $query->where('contractID', $contractID)
                 ->where('companySystemID', $companySystemID)
-                ->where(function ($q) use ($title, $description) {
+                ->where(function ($q) use ($title, $description)
+                {
                     $q->where('description', $description)
                         ->orWhere('title', $title);
                 });
         })
-            ->when($id > 0, function ($q) use ($id) {
+            ->when($id > 0, function ($q) use ($id)
+            {
                 $q->where('id', '!=', $id);
             })
             ->exists();
@@ -141,5 +137,27 @@ class ContractDeliverables extends Model
         return ContractDeliverables::where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->exists();
+    }
+    public static function getDeliverablesForFinance($contractID, $selectedCompanyID)
+    {
+        $deliverables = self::getDeliverables($contractID, $selectedCompanyID, 1);
+        $deliverableArray = [];
+        if($deliverables)
+        {
+            foreach($deliverables as $key => $deliverable)
+            {
+                $deliverableArray[$key] = [
+                    'uuid' =>  $deliverable['uuid'],
+                    'title' =>  $deliverable['title'],
+                    'milestoneUuid' => $deliverable['milestone']['uuid'],
+                    'milestone' => $deliverable['milestone']['title']
+                ];
+            }
+        }
+        return $deliverableArray;
+    }
+    public static function checkExists($deliverableUuid)
+    {
+        return ContractDeliverables::select('id')->where('uuid', $deliverableUuid)->first();
     }
 }
