@@ -235,6 +235,16 @@ class ContractMaster extends Model
     {
         return $this->hasMany(ContractMilestone::class, 'contractID', 'id');
     }
+
+    public function ContractDocument()
+    {
+        return $this->hasMany(ContractDocument::class, 'contractID', 'id');
+    }
+
+    public function ContractAdditionalDocuments()
+    {
+        return $this->hasMany(ContractAdditionalDocuments::class, 'contractID', 'id');
+    }
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;

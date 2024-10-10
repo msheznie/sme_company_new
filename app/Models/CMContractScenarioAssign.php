@@ -181,18 +181,29 @@ class CMContractScenarioAssign extends Model
             ->get();
     }
 
-    public static function  getReminderMilestoneDueDate($scenarioType)
+    public static function  getReminderData($scenarioType, $scenario)
     {
         return self::where('is_active', 1)
-            ->where('scenario_id', 2)
+            ->where('scenario_id', $scenario)
             ->whereHas('contractScenarioSettings', function ($query)  use ($scenarioType)
             {
                 $query->where('scenario_type', $scenarioType);
             })
-            ->whereHas('contractMaster', function ($query)
+            ->whereHas('contractMaster', function ($query) use ($scenario)
             {
-                $query->with(['contractMilestone'])
-                    ->whereHas('contractMilestone');
+                if($scenario == 2)
+                {
+                    $query->whereHas('contractMilestone');
+                }
+                if ($scenario == 4)
+                {
+                    $query->where(function ($query)
+                    {
+                        $query->whereHas('ContractDocument')
+                            ->orWhereHas('ContractAdditionalDocuments');
+                    });
+                }
+
             })
             ->with([
                 'contractScenarioSettings' => function ($query)  use ($scenarioType)

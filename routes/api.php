@@ -128,3 +128,9 @@ Route::get('/milestone-due-date-reminder', function ()
     \Artisan::call('reminderMilestoneDueDate');
     return 'Milestone Due Date Reminder Expiry Send Successfully!';
 });
+
+Route::get('/document-expiry-reminder', function ()
+{
+    \Artisan::call('ReminderDocumentExpiry');
+    return 'Document Expiry Reminder Send Successfully!';
+});
