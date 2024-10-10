@@ -97,6 +97,11 @@ class ContractAdditionalDocuments extends Model
                 'documentMaster' => function ($query)
                 {
                     $query->select('id', 'uuid', 'documentType');
+                },
+                'attachment' => function ($query)
+                {
+                    $query->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
                 }
             ])
             ->where([
@@ -111,7 +116,13 @@ class ContractAdditionalDocuments extends Model
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
-            }])
+            },
+                'attachment' => function ($query)
+                {
+                    $query->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
+                }
+            ])
             ->where([
                 'contractID' => $contractID,
                 'companySystemID' => $selectedCompanyID,

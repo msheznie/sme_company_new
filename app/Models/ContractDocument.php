@@ -125,13 +125,19 @@ class ContractDocument extends Model
     }
     public function contractDocuments($selectedCompanyID, $contractID)
     {
-        return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
+        return ContractDocument::select('id', 'uuid', 'documentType', 'documentName', 'documentDescription',
             'followingRequest', 'attachedDate', 'status','documentExpiryDate', 'attach_after_approval',
-            'is_editable')
+            'is_editable', 'documentMasterID')
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
-            }])
+            },
+                'attachment' => function ($query)
+                {
+                    $query->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
+                }
+            ])
             ->where([
                 'contractID' => $contractID,
                 'companySystemID' => $selectedCompanyID
