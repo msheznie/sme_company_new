@@ -2,19 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Services\ActivateContractService;
 use App\Services\CommonJobService;
 use App\Services\ContractReminderService;
-use AWS\CRT\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ReminderMilestoneDueDateJob implements ShouldQueue
+class ReminderDocumentExpiryJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     protected $dispatchDB;
 
     public function __construct($dispatchDB)
@@ -33,7 +32,8 @@ class ReminderMilestoneDueDateJob implements ShouldQueue
     {
         $db = $this->dispatchDB;
         CommonJobService::dbSwitch($db);
-        ContractReminderService::reminderBefore(2);
-        ContractReminderService::reminderAfter(2);
+        ContractReminderService::reminderBefore(4);
+        ContractReminderService::reminderAfter(4);
     }
+
 }

@@ -161,4 +161,27 @@ class ContractAdditionalDocuments extends Model
             ])
             ->first();
     }
+
+    public static function getReminderDocumentExpiryData($type, $contractId, $settingValue)
+    {
+        $query = ContractAdditionalDocuments::select
+        ('id', 'documentType', 'contractID', 'documentName', 'expiryDate')
+            ->where('contractID', $contractId)
+            ->with(['documentMaster' => function ($q)
+            {
+                $q->select('id', 'uuid', 'documentType');
+            }]);
+
+        if ($type == 1)
+        {
+            $query->whereRaw('DATEDIFF(expiryDate, CURDATE()) > 0')
+                ->whereRaw('DATEDIFF(expiryDate, CURDATE()) < ?', [$settingValue]);
+        } else
+        {
+            $query->whereRaw('DATEDIFF(CURDATE(), expiryDate) % ? = 0', [$settingValue])
+                ->whereRaw('DATEDIFF(CURDATE(), expiryDate) >= ?', [$settingValue]);
+        }
+
+        return $query->get();
+    }
 }
