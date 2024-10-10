@@ -56,7 +56,7 @@ class CMContractScenarioSetting extends Model
 
     public function dropValue()
     {
-        return $this->belongsTo(CMContractDropValue::class, 'scenario_type', 'scenario_type_id');
+        return $this->belongsTo(CMContractDropValue::class, 'value', 'id');
     }
 
     public static function getValue($id, $scenarioType)
