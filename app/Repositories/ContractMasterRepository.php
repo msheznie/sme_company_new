@@ -855,7 +855,9 @@ class ContractMasterRepository extends BaseRepository
             :
             ContractManagementUtils::checkContractExist($contractUuid,$companySystemID);
 
-        $overallRetention = $contractOverallModel::where($contractCol, $contract['id'])
+        $contractID = $amendment ? $contract['contract_history_id'] : $contract['id'];
+
+        $overallRetention = $contractOverallModel::where($contractCol, $contractID)
             ->where('companySystemId', $companySystemID)
             ->first();
 

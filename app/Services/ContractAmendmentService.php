@@ -20,7 +20,10 @@ use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
+use App\Models\ContractMilestoneRetentionAmd;
 use App\Models\ContractOverallRetention;
+use App\Models\ContractPaymentTermsAmd;
+use App\Models\TimeMaterialConsumptionAmd;
 use App\Models\ContractUserAssign;
 use App\Models\ErpDocumentAttachments;
 use App\Models\ErpDocumentAttachmentsAmd;
@@ -479,7 +482,8 @@ class ContractAmendmentService
 
     public function getHistoryData($input)
     {
-        $getContractData = ContractManagementUtils::checkContractExist($input['contractUuid'], $input['selectedCompanyID']);
+        $getContractData = ContractManagementUtils::checkContractExist($input['contractUuid'],
+            $input['selectedCompanyID']);
         $getHistoryData = ContractManagementUtils::getContractHistoryData($input['historyUuid']);
         $contractId = $getContractData->id;
         $historyId = $getHistoryData->id;
@@ -489,15 +493,20 @@ class ContractAmendmentService
 
         foreach ($getSectionConfigs as $sectionName => $config)
         {
+            $sectionId = $config['sectionId'];
             $modelName = $config['modelName'];
             $skippedFields = $config['skippedFields'] ?? [];
             $fieldDescriptions = $config['fieldDescriptions'] ?? [];
             $fieldMappings = $config['fieldMappings'] ?? [];
+            $section = [
+                'sectionId' => $sectionId,
+                'sectionName' => $sectionName
+            ];
 
             $currentChanges = self::compareSection(
                 $contractId,
                 $historyId,
-                $sectionName,
+                $section,
                 $modelName,
                 $skippedFields,
                 $fieldDescriptions,
@@ -511,75 +520,99 @@ class ContractAmendmentService
     }
 
     private function compareSection(
-        $contractId, $historyId, $sectionName, $modelName, $skippedFields, $fieldDescriptions, $fieldMappings
+        $contractId, $historyId, $section, $modelName, $skippedFields, $fieldDescriptions, $fieldMappings
     )
     {
         $changes = [];
+        $sectionName = $section['sectionName'];
+        $sectionId = $section['sectionId'];
+        $currentRecords = self::getCurrentData($modelName, $historyId, $contractId, $sectionId);
 
-        $currentRecord = self::getCurrentData($modelName, $historyId, $contractId);
-
-        if ($currentRecord)
+        if ($currentRecords)
         {
-            $previousRecord = self::getPreviousRecords($modelName, $contractId, $currentRecord);
-
-            $fillableFields = (new $modelName())->getFillable();
-
-            $comparisonFunctions = [
-                'startDate' => function($previous, $current)
-                {
-                    return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
-                },
-                'endDate' => function($previous, $current)
-                {
-                    return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
-                },
-                'agreementSignDate' => function($previous, $current)
-                {
-                    return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
-                },
-            ];
-
-            foreach ($fillableFields as $field)
+            foreach ($currentRecords as $currentRecord)
             {
-                if (in_array($field, $skippedFields))
+                $previousRecord = self::getPreviousRecords($modelName, $contractId, $currentRecord, $sectionId);
+                $fillableFields = (new $modelName())->getFillable();
+
+                $comparisonFunctions = [
+                    'startDate' => function ($previous, $current)
+                    {
+                        if (!empty($previous) && !empty($current))
+                        {
+                            return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
+                        }
+                        return $previous !== $current;
+                    },
+                    'endDate' => function ($previous, $current)
+                    {
+                        if (!empty($previous) && !empty($current))
+                        {
+                            return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
+                        }
+                        return $previous !== $current;
+                    },
+                    'agreementSignDate' => function ($previous, $current)
+                    {
+                        if (!empty($previous) && !empty($current))
+                        {
+                            return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
+                        }
+                        return $previous !== $current;
+                    },
+                    'dueDate' => function ($previous, $current)
+                    {
+                        if (!empty($previous) && !empty($current))
+                        {
+                            return Carbon::parse($previous)->toDateString() !== Carbon::parse($current)->toDateString();
+                        }
+                        return $previous !== $current;
+                    },
+                ];
+
+                foreach ($fillableFields as $field)
                 {
-                    continue;
-                }
+                    if (in_array($field, $skippedFields))
+                    {
+                        continue;
+                    }
 
-                $description = $fieldDescriptions[$field] ?? $field;
+                    $description = $fieldDescriptions[$field] ?? $field;
 
-                $oldValue = $previousRecord->$field;
-                $newValue = $currentRecord->$field;
+                    $oldValue = $previousRecord && is_object($previousRecord) ? $previousRecord->$field : null;
+                    $newValue = $currentRecord && is_object($currentRecord) ? $currentRecord->$field : null;
 
-                if (isset($fieldMappings[$field]))
-                {
-                    $model = $fieldMappings[$field]['model'];
-                    $attribute = $fieldMappings[$field]['attribute'] ?? 'id';
-                    $colName = $fieldMappings[$field]['colName'] ?? 'id';
+                    if (isset($fieldMappings[$field]))
+                    {
+                        $model = $fieldMappings[$field]['model'];
+                        $attribute = $fieldMappings[$field]['attribute'] ?? 'id';
+                        $colName = $fieldMappings[$field]['colName'] ?? 'id';
 
-                    $oldValue = $model::where($colName, $previousRecord->$field)->value($attribute);
-                    $newValue = $model::where($colName, $currentRecord->$field)->value($attribute);
-                }
+                        $oldValue = $previousRecord && is_object($previousRecord)
+                            ? $model::where($colName, $previousRecord->$field)->value($attribute)
+                            : null;
+                        $newValue = $model::where($colName, $currentRecord->$field)->value($attribute);
+                    }
 
-                if (in_array($field, ['startDate', 'endDate', 'agreementSignDate']))
-                {
-                    $oldValue = Carbon::parse($oldValue)->toDateString();
-                    $newValue = Carbon::parse($newValue)->toDateString();
-                }
+                    if (in_array($field, ['startDate', 'endDate', 'agreementSignDate', 'dueDate']))
+                    {
+                        $oldValue = $oldValue ? Carbon::parse($oldValue)->toDateString() : null;
+                        $newValue = $newValue ? Carbon::parse($newValue)->toDateString() : null;
+                    }
 
+                    $isDifferent = array_key_exists($field, $comparisonFunctions)
+                        ? $comparisonFunctions[$field]($oldValue, $newValue)
+                        : $oldValue != $newValue;
 
-                $isDifferent = array_key_exists($field, $comparisonFunctions)
-                    ? $comparisonFunctions[$field]($previousRecord->$field, $currentRecord->$field)
-                    : $oldValue != $newValue;
-
-                if ($isDifferent)
-                {
-                    $changes[] = [
-                        'section' => $sectionName,
-                        'field' => $description,
-                        'old_value' => $oldValue,
-                        'new_value' => $newValue,
-                    ];
+                    if ($isDifferent)
+                    {
+                        $changes[] = [
+                            'section' => $sectionName,
+                            'field' => $description,
+                            'old_value' => $oldValue,
+                            'new_value' => $newValue,
+                        ];
+                    }
                 }
             }
         }
@@ -591,6 +624,7 @@ class ContractAmendmentService
     {
         return [
             'Contract Info' => [
+                'sectionId' => '12',
                 'modelName' => CMContractMasterAmd::class,
                 'skippedFields' => ['level_no', 'contract_history_id','status'],
                 'fieldDescriptions' => [
@@ -644,19 +678,139 @@ class ContractAmendmentService
 
 
             ],
+            'BOQ' => [
+                'sectionId' => '1',
+                'modelName' => CMContractBoqItemsAmd::class,
+                'skippedFields' => ['id', 'amd_id', 'contract_history_id', 'level_no', 'updated_by', 'created_by',
+                    'deleted_at', 'deleted_by', 'uuid', 'origin', 'contractId', 'companyId'],
+                'fieldDescriptions' => [
+                    'itemId' => 'Item',
+                    'description' => 'Description',
+                    'minQty' => 'Min Quantity',
+                    'maxQty' => 'Max Quantity',
+                    'qty' => 'Quantity',
+                    'price' => 'Price',
+                ],
+                'fieldMappings' => [
+                    'itemId' => [
+                        'model' => \App\Models\ItemMaster::class,
+                        'attribute' => 'primaryCode',
+                        'colName'=> 'itemCodeSystem',
+                    ]
+                ]
+            ],
+            'Time and Material' => [
+                'sectionId' => '3.2',
+                'modelName' => TimeMaterialConsumptionAmd::class,
+                'skippedFields' => ['id', 'amd_id', 'contract_history_id', 'level_no', 'updated_by', 'created_by',
+                    'deleted_at', 'deleted_by', 'uuid', 'contract_id', 'currency_id', 'company_id', 'boq_id'],
+                'fieldDescriptions' => [
+                    'item' => 'Item',
+                    'description' => 'Description',
+                    'min_quantity' => 'Min Quantity',
+                    'max_quantity' => 'Max Quantity',
+                    'quantity' => 'Quantity',
+                    'price' => 'Price',
+                    'uom_id' => 'UOM',
+                    'amount' => 'Amount'
+                ],
+                'fieldMappings' => [
+                    'itemId' => [
+                        'model' => \App\Models\Unit::class,
+                        'attribute' => 'UnitShortCode',
+                        'colName'=> 'UnitID',
+                    ]
+                ]
+            ],
+            'Overall Retention' => [
+                'sectionId' => '4.4',
+                'modelName' => CMContractOverallRetentionAmd::class,
+                'skippedFields' => ['id', 'retention_id', 'contract_history_id', 'level_no', 'updated_by', 'created_by',
+                    'deleted_at', 'deleted_by', 'uuid', 'contractId', 'companySystemId'],
+                'fieldDescriptions' => [
+                    'contractAmount' => 'Contract Amount',
+                    'retentionPercentage' => 'Retention Percentage',
+                    'retentionAmount' => 'Retention Amount',
+                    'startDate' => 'Start Date',
+                    'dueDate' => 'Due Date',
+                    'retentionWithholdPeriod' => 'Retention Withhold Period'
+                ],
+                'fieldMappings' => []
+            ],
+            'Milestone Retention' => [
+                'sectionId' => '4.5',
+                'modelName' => ContractMilestoneRetentionAmd::class,
+                'skippedFields' => ['id', 'amd_id', 'contract_history_id', 'level_no', 'updated_by', 'created_by',
+                    'deleted_at', 'deleted_by', 'uuid', 'contractId', 'companySystemId', 'paymentStatus'],
+                'fieldDescriptions' => [
+                    'milestoneId' => 'Milestone Title',
+                    'retentionPercentage' => 'Retention Percentage',
+                    'retentionAmount' => 'Retention Amount',
+                    'startDate' => 'Start Date',
+                    'dueDate' => 'Due Date',
+                    'withholdPeriod' => 'Withhold Period'
+                ],
+                'fieldMappings' => [
+                    'milestoneId' => [
+                        'model' => \App\Models\ContractMilestone::class,
+                        'attribute' => 'title',
+                        'colName'=> 'id',
+                    ],
+                ]
+            ],
+            'Payment Terms' => [
+                'sectionId' => '6',
+                'modelName' => ContractPaymentTermsAmd::class,
+                'skippedFields' => ['id', 'amd_id', 'contract_history_id', 'level_no', 'updated_by', 'created_by',
+                    'deleted_at', 'deleted_by', 'uuid', 'contract_id', 'company_id'],
+                'fieldDescriptions' => [
+                    'title' => 'Title',
+                    'description' => 'Description'
+                ],
+                'fieldMappings' => []
+            ]
         ];
     }
 
-    public function getCurrentData($modelName, $historyId, $contractId)
+    public function getCurrentData($modelName, $historyId, $contractId, $sectionId)
     {
         return $modelName::where('contract_history_id', $historyId)
-            ->where('id', $contractId)
-            ->first();
+            ->where(function ($q) use ($sectionId, $contractId)
+            {
+                $q->when($sectionId == '12', function ($q) use ($contractId)
+                {
+                    $q->where('id', $contractId);
+                })->when($sectionId == '1' || $sectionId == '4.4' || $sectionId == '4.5',
+                    function ($q) use ($contractId)
+                {
+                    $q->where('contractId', $contractId);
+                })->when($sectionId == '6' || $sectionId == '3.2', function ($q) use ($contractId)
+                {
+                    $q->where('contract_id', $contractId);
+                });
+            })
+            ->get();
     }
 
-    public function getPreviousRecords($modelName, $contractId, $currentRecord)
+    public function getPreviousRecords($modelName, $contractId, $currentRecord, $sectionId)
     {
-        return $modelName::where('id', $contractId)
+        $uuid = $currentRecord['uuid'] ?? '';
+        return $modelName::where(function ($q) use ($sectionId, $contractId, $uuid)
+        {
+            $q->when($sectionId == '12', function ($q) use ($contractId)
+            {
+                $q->where('id', $contractId);
+            })->when($sectionId == '1' || $sectionId == '4.4' || $sectionId == '4.5',
+                function ($q) use ($contractId, $uuid)
+            {
+                $q->where('contractId', $contractId);
+                $q->where('uuid', $uuid);
+            })->when($sectionId == '6' || $sectionId == '3.2', function ($q) use ($contractId, $uuid)
+            {
+                $q->where('contract_id', $contractId);
+                $q->where('uuid', $uuid);
+            });
+        })
             ->where('level_no', '<', $currentRecord->level_no)
             ->orderBy('level_no', 'desc')
             ->first();

@@ -42,7 +42,8 @@ class ContractPaymentTerms extends Model
         'description',
         'company_id',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
@@ -58,7 +59,8 @@ class ContractPaymentTerms extends Model
         'description' => 'string',
         'company_id' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'deleted_by' => 'integer'
     ];
 
     /**
