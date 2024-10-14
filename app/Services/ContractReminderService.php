@@ -264,11 +264,11 @@ class ContractReminderService
             $emailBody = "<p>
             This is a reminder that the project milestone " . $text . " its due date. Please review the deliverables
             and tasks and ensure timely completion.</p>
-            <p>Contract Title  : " . $title . "</p>
-            <p>Contract ID : " . $contractCode . "</p>
-            <p>Milestone Title : " . $milestoneTitle . "</p>
-            <p>Milestone Description : " . $milestoneDescription . "</p>
-            <p>Milestone Due Date : " . $endDate . "</p>
+            <p><li>Contract Title  : " . $title . "</li></p>
+            <p><li>Contract ID : " . $contractCode . "</li></p>
+            <p><li>Milestone Title : " . $milestoneTitle . "</li></p>
+            <p><li>Milestone Description : " . $milestoneDescription . "</li></p>
+            <p><li>Milestone Due Date : " . $endDate . "</li></p>
             <p>If you need any assistance, feel free to contact us.</p>
             <p>Best regards,</p>
         <p>Thank you</p>";
@@ -276,20 +276,20 @@ class ContractReminderService
 
         if($scenario === 4)
         {
-            $text = ($type == 1) ? 'have reached their expiration date' : 'have expired';
+            $text = ($type == 1) ? 'has reached their expiration date' : 'has expired';
             $documentType = $details['documentType'] ?? "-";
             $documentName = $details['documentName'] ?? "-";
             $endDate = $details['expiryDate'] ?
                 (new DateTime($details['expiryDate']))->format('Y-m-d') : "-";
 
             $emailBody = "<p>
-            This is to inform you that below attached documents in the system " . $text . " . Please upload the updated
+            This is to inform you that below attached document in the system " . $text . ". Please upload the updated
              versions at your earliest convenience to maintain the compliance.</p>
-            <p>Contract Title  : " . $title . "</p>
-            <p>Contract ID : " . $contractCode . "</p>
-            <p>Document Type : " . $documentType . "</p>
-            <p>Document Name : " . $documentName . "</p>
-            <p>Expiry Date : " . $endDate . "</p>
+            <p><li>Contract Title  : " . $title . "</li></p>
+            <p><li>Contract ID : " . $contractCode . "</li></p>
+            <p><li>Document Type : " . $documentType . "</li></p>
+            <p><li>Document Name : " . $documentName . "</li></p>
+            <p><li>Expiry Date : " . $endDate . "</li></p>
             <p>If you need any assistance, feel free to contact us.</p>
             <p>Best regards,</p>
         <p>Thank you</p>";
