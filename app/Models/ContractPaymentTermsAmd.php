@@ -110,4 +110,8 @@ class ContractPaymentTermsAmd extends Model
     {
         return self::where('uuid', $uuid)->exists();
     }
+    public static function checkPaymentTermsExists($historyId)
+    {
+        return self::where('contract_history_id', $historyId)->exists();
+    }
 }

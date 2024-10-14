@@ -631,7 +631,8 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getHistoryId($id)
     {
-        return ContractManagementUtils::getContractHistoryData($id);
+        $history = ContractManagementUtils::getContractHistoryData($id);
+        return $history->id;
     }
 
     public function getContractData(Request $request)

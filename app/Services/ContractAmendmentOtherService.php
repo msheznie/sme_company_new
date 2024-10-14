@@ -87,11 +87,11 @@ class ContractAmendmentOtherService
     {
         if (in_array(6, $activeSectionIDs))
         {
-            $paymentTerms = ContractPaymentTermsAmd::getContractPaymentTermsAmd($contractHistoryID, false);
-            if(empty($paymentTerms))
+            $paymentTerms = ContractPaymentTermsAmd::checkPaymentTermsExists($contractHistoryID);
+            if(!$paymentTerms)
             {
-                GeneralService::sendException('At least one milestone payment schedule should be available to send the
-                 contract history for approval');
+                GeneralService::sendException('At least one payment term should be available to send contract history
+                 for approval.');
             }
         }
     }
