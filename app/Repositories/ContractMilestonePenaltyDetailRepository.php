@@ -221,19 +221,6 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         {
             throw new CommonException(trans('common.contract_not_found'));
         }
-
-        if($milestone)
-        {
-            $duplicateMilestone = ContractMilestoneRetention::where('milestoneId', $milestone['id'])
-                ->where('contractId', $contract['id'])
-                ->where('companySystemId', $companyID)
-                ->first();
-
-            if ($duplicateMilestone)
-            {
-                return ['status' => false, 'message' => trans('common.milestone_titles_cannot_be_duplicated')];
-            }
-        }
         return  $milestone['milestonePaymentSchedules']['amount'];
 
     }
