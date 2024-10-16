@@ -79,7 +79,7 @@ class ContractMilestoneRetentionAmdRepository extends BaseRepository
 
             foreach ($milestoneRetentions as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['id'] = $record['id'];
@@ -103,7 +103,7 @@ class ContractMilestoneRetentionAmdRepository extends BaseRepository
 
             foreach ($milestoneRetentions as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['id'] = $record['id'];

@@ -88,9 +88,9 @@ class CMContractOverallRetentionAmd extends Model
         return $this->belongsTo(CMContractMasterAmd::class, 'contractId', 'id');
     }
 
-    public function getLevelNo($overallId, $contractId)
+    public function getLevelNo($uuid, $contractId)
     {
-        $levelNo = self::where('retention_id',$overallId)
+        $levelNo = self::where('uuid',$uuid)
                 ->where('contractId', $contractId)
                 ->max('level_no') + 1;
 

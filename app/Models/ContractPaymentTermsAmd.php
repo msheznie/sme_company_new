@@ -88,9 +88,9 @@ class ContractPaymentTermsAmd extends Model
             })
             ->get();
     }
-    public function getLevelNo($termId, $contractId)
+    public function getLevelNo($uuid, $contractId)
     {
-        $levelNo = self::where('id',$termId)
+        $levelNo = self::where('uuid',$uuid)
                 ->where('contract_id', $contractId)
                 ->max('level_no') + 1;
 

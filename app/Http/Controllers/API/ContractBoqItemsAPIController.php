@@ -246,9 +246,10 @@ class ContractBoqItemsAPIController extends AppBaseController
         $id = ContractManagementUtils::getId($input['amendment'],$input['uuid'],$input['selectedCompanyID']);
         $modelClass = $input['amendment'] ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
         $model = new $modelClass;
+        $uuid = ContractManagementUtils::generateUuid(16);
 
         $insertArray = [
-            'uuid' => bin2hex(random_bytes(16)),
+            'uuid' => $uuid,
             'itemId' => $input['itemId'],
             'description' => $input['description'],
             'origin' => ($input['isTender'] == 0) ? 1 : 2,
@@ -260,8 +261,10 @@ class ContractBoqItemsAPIController extends AppBaseController
         ];
         if($input['amendment'])
         {
+            $levelNo = $model->getLevelNo($uuid, $id->contract_id);
             $insertArray['contractId'] = $id->contract_id;
             $insertArray['contract_history_id'] = $id->id;
+            $insertArray['level_no'] = $levelNo;
         }else
         {
             $insertArray['contractId'] = $id;
