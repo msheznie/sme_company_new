@@ -532,6 +532,10 @@ class ContractAmendmentService
         {
             foreach ($currentRecords as $currentRecord)
             {
+                $createdAt = $currentRecord->created_at;
+                $updatedAt = $currentRecord->updated_at;
+                $date = $updatedAt ?? $createdAt ? Carbon::parse($updatedAt ?? $createdAt) : null;
+
                 $previousRecord = self::getPreviousRecords($modelName, $contractId, $currentRecord, $sectionId);
                 $fillableFields = (new $modelName())->getFillable();
 
@@ -611,6 +615,7 @@ class ContractAmendmentService
                             'field' => $description,
                             'old_value' => $oldValue,
                             'new_value' => $newValue,
+                            'dateTime' => $date
                         ];
                     }
                 }
@@ -629,7 +634,7 @@ class ContractAmendmentService
                 'skippedFields' => ['level_no', 'contract_history_id','status'],
                 'fieldDescriptions' => [
                     'title' => 'Title',
-                    'startDate' => 'Contract Start Date',
+                    'startDate' => 'Commencement Date',
                     'endDate' => 'Contract End Date',
                     'contractType' => 'Contract Type',
                     'contractAmount' => 'Contract Amount',
@@ -715,9 +720,9 @@ class ContractAmendmentService
                     'amount' => 'Amount'
                 ],
                 'fieldMappings' => [
-                    'itemId' => [
+                    'uom_id' => [
                         'model' => \App\Models\Unit::class,
-                        'attribute' => 'UnitShortCode',
+                        'attribute' => 'UnitDes',
                         'colName'=> 'UnitID',
                     ]
                 ]

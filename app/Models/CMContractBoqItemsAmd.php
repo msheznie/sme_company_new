@@ -115,9 +115,9 @@ class CMContractBoqItemsAmd extends Model
             ->pluck('amd_id')
             ->toArray();
     }
-    public function getLevelNo($boqId, $contractId)
+    public function getLevelNo($uuid, $contractId)
     {
-        $levelNo = self::where('id',$boqId)
+        $levelNo = self::where('uuid',$uuid)
                 ->where('contractId', $contractId)
                 ->max('level_no') + 1;
 

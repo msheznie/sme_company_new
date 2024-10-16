@@ -77,7 +77,7 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
            $getOverall = $this->contractOverallRepo()->getContractOverall($contractId, $input['selectedCompanyID']);
             if($getOverall)
             {
-                $levelNo = $this->model->getLevelNo($getOverall['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($getOverall['uuid'], $contractId);
                 $recordData = $getOverall->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['contract_history_id'] = $historyId;
@@ -97,7 +97,7 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
             $getOverall = $this->contractOverallRepo()->getContractOverall($contractId, $selectedCompanyID);
             if($getOverall)
             {
-                $levelNo = $this->model->getLevelNo($getOverall['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($getOverall['uuid'], $contractId);
                 $recordData = $getOverall->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['contract_history_id'] = null;

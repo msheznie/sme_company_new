@@ -79,7 +79,7 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
 
             foreach ($boqData as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['id'] = $record['id'];
                 $recordData['level_no'] = $levelNo;
@@ -100,7 +100,7 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
 
             foreach ($boqData as $record)
             {
-                $levelNo = $this->model->getLevelNo($record['id'], $contractId);
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['level_no'] = $levelNo;
                 $recordData['id'] = $record['id'];
