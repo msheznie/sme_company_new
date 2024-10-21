@@ -208,6 +208,7 @@ class ContractOverallPenaltyRepository extends BaseRepository
                 'actual_penalty_start_date' => Carbon::parse($input['actual_penalty_start_date']),
                 'penalty_circulation_frequency' => $input['penalty_circulation_frequency'],
                 'due_in' => ($input['penalty_circulation_frequency'] == 7) ? ($input['due_in'] ?? null) : null,
+                'actual_due_penalty_amount' => (float) $input['actual_due_penalty_amount'],
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];

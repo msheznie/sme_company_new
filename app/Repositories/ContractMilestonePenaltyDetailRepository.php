@@ -132,6 +132,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                         Carbon::parse($input['penalty_start_date']) : null,
                     'penalty_frequency' => $input['penalty_frequency'],
                     'due_in' => $input['due_in'] ?? 0,
+                    'actual_due_penalty_amount' => $input['actual_due_penalty_amount'] ?? 0,
                     'status' => 0,
                     'company_id' => $companyId,
                     'created_by' => General::currentEmployeeId(),
@@ -142,12 +143,8 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         });
     }
 
-    public function getMilestonePenaltyDetails(Request $request)
+    public function getMilestonePenaltyDetails($search, $contractUuid, $companySystemID)
     {
-        $input = $request->all();
-        $search = $request->input('search.value');
-        $contractUuid = $input['contractUuid'];
-        $companySystemID = $input['selectedCompanyID'];
 
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
         if(empty($contract))
@@ -223,19 +220,6 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
         if(empty($milestone))
         {
             throw new CommonException(trans('common.contract_not_found'));
-        }
-
-        if($milestone)
-        {
-            $duplicateMilestone = ContractMilestoneRetention::where('milestoneId', $milestone['id'])
-                ->where('contractId', $contract['id'])
-                ->where('companySystemId', $companyID)
-                ->first();
-
-            if ($duplicateMilestone)
-            {
-                return ['status' => false, 'message' => trans('common.milestone_titles_cannot_be_duplicated')];
-            }
         }
         return  $milestone['milestonePaymentSchedules']['amount'];
 
@@ -365,6 +349,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
                         Carbon::parse($input['penalty_start_date']) : null,
                     'penalty_frequency' => $input['penalty_frequency'],
                     'due_in' => $input['due_in'] ?? 0,
+                    'actual_due_penalty_amount' => $input['actual_due_penalty_amount'] ?? 0,
                     'status' => 0,
                     'updated_by' => General::currentEmployeeId(),
                     'updated_at' => Carbon::now()

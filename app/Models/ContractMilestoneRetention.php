@@ -141,4 +141,59 @@ class ContractMilestoneRetention extends Model
             ->whereNotNull('milestoneId')
             ->exists();
     }
+    public static function getMilestoneRetention($contractID)
+    {
+        return self::where('contractID', $contractID)->get();
+    }
+    public static function getContractMilestoneRetentionData($contractID, $companySystemID)
+    {
+        return self::with([
+            'milestone'=> function ($q)
+            {
+                $q->select('id', 'uuid')
+                    ->with([
+                        'milestonePaymentSchedules' => function ($q1)
+                        {
+                            $q1->select('amount', 'id', 'uuid','milestone_id');
+                        }
+                    ]);
+            }
+        ])
+            ->where('contractId', $contractID)
+            ->where('companySystemId', $companySystemID)
+            ->get();
+    }
+    public static function getMilestoneRetentionForUpdate($milestoneRetentionUuid)
+    {
+        return self::where('uuid', $milestoneRetentionUuid)->first();
+    }
+    public static function updateMilestoneRetention($contractID, $companySystemID, $updateData)
+    {
+        return self::where('contractId', $contractID)
+            ->where('companySystemId', $companySystemID)
+            ->update($updateData);
+    }
+    public static function checkForDuplicateMilestoneRetention($milestoneID, $contractID, $companySystemID)
+    {
+        return self::where('milestoneId', $milestoneID)
+            ->where('contractId', $contractID)
+            ->where('companySystemId', $companySystemID)
+            ->exists();
+    }
+    public static function getContractMilestoneRetentionCount($contractID, $companySystemID)
+    {
+        return self::where('contractId', $contractID)
+            ->where('companySystemId', $companySystemID)
+            ->count();
+    }
+    public static function checkUuidExists($uuid)
+    {
+        return self::where('uuid', $uuid)->exists();
+    }
+    public static function deleteMilestoneRetention($amdRecordIds, $contractId)
+    {
+        self::whereNotIn('id', $amdRecordIds)
+            ->where('contractId',$contractId)
+            ->delete();
+    }
 }

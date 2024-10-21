@@ -53,6 +53,7 @@ Route::group(['middleware' => ['tenant']], function ()
             require_once __DIR__.'/../routes/master/masterRoutes.php';
             require_once __DIR__.'/../routes/common/commonRoutes.php';
             require_once __DIR__.'/../routes/reports/reportRoutes.php';
+            require_once __DIR__.'/../routes/amendment/amendmentRoutes.php';
 
 
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])
@@ -120,4 +121,16 @@ Route::get('/terminate-contract', function ()
 {
     \Artisan::call('terminateContract');
     return 'Contracts Terminated Successfully!';
+});
+
+Route::get('/milestone-due-date-reminder', function ()
+{
+    \Artisan::call('reminderMilestoneDueDate');
+    return 'Milestone Due Date Reminder Expiry Send Successfully!';
+});
+
+Route::get('/document-expiry-reminder', function ()
+{
+    \Artisan::call('ReminderDocumentExpiry');
+    return 'Document Expiry Reminder Send Successfully!';
 });

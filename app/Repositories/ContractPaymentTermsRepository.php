@@ -5,7 +5,9 @@ namespace App\Repositories;
 use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Models\ContractPaymentTerms;
+use App\Models\ContractPaymentTermsAmd;
 use App\Repositories\BaseRepository;
+use App\Services\GeneralService;
 use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
@@ -80,13 +82,32 @@ class ContractPaymentTermsRepository extends BaseRepository
     {
         return DB::transaction(function () use ($input, $companySystemID)
         {
+            $amendment = $input['amendment'] ?? false;
+            $model = $amendment ? ContractPaymentTermsAmd::class : ContractPaymentTerms::class;
+            $uuid = ContractManagementUtils::generateUuid();
+
             $contract = ContractManagementUtils::checkContractExist($input['contract_id'], $companySystemID);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                GeneralService::sendException('Contract ID not found.');
             }
+            $uuidExists = $model::checkUuidExists($uuid);
+            if ($uuidExists)
+            {
+                GeneralService::sendException(trans('common.contract_document_uuid_already_exists'));
+            }
+            $contractHistory = null;
+            if($amendment)
+            {
+                $contractHistory = ContractManagementUtils::getContractHistoryData($input['contract_history_uuid']);
+                if(empty($contractHistory))
+                {
+                    GeneralService::sendException('Contract history not found');
+                }
+            }
+
             $postData = [
-                'uuid' => ContractManagementUtils::generateUuid(),
+                'uuid' => $uuid,
                 'contract_id' => $contract['id'],
                 'title' => $input['title'],
                 'description' => $input['description'],
@@ -94,16 +115,24 @@ class ContractPaymentTermsRepository extends BaseRepository
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
             ];
+            if($amendment)
+            {
+                $postData['id'] = null;
+                $postData['contract_history_id'] = $contractHistory['id'];
+                $postData['level_no'] = 1;
+            }
 
-            ContractPaymentTerms::insert($postData);
+            $model::insert($postData);
 
         });
     }
 
-    public function updatePaymentTerms($input, $id)
+    public function updatePaymentTerms($input, $contractTerm)
     {
-        return DB::transaction(function () use ($input, $id)
+        $id = $contractTerm['id'];
+        return DB::transaction(function () use ($input, $id, $contractTerm)
         {
+            $amendment = $input['amendment'];
             $postData = [
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
@@ -125,8 +154,12 @@ class ContractPaymentTermsRepository extends BaseRepository
                 $postData = array_merge($postData, $data);
             }
 
-
-            ContractPaymentTerms::where('id', $id)->update($postData);
+            $amendment ? ContractPaymentTermsAmd::where('amd_id', $contractTerm['amd_id'])->update($postData)
+                : ContractPaymentTerms::where('id', $id)->update($postData);
         });
+    }
+    public function getPaymentTerms($contractId)
+    {
+        return $this->model->getPaymentTerms($contractId);
     }
 }

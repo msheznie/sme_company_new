@@ -3,9 +3,11 @@
 namespace App\Repositories;
 
 use App\Exceptions\ContractCreationException;
+use App\Helpers\General;
 use App\Models\CMContractBoqItemsAmd;
 use App\Models\CMContractUserAssignAmd;
 use App\Repositories\BaseRepository;
+use App\Services\GeneralService;
 use Illuminate\Contracts\Foundation\Application;
 use Exception;
 /**
@@ -77,15 +79,41 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
 
             foreach ($boqData as $record)
             {
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
                 $recordData = $record->toArray();
                 $recordData['id'] = $record['id'];
+                $recordData['level_no'] = $levelNo;
                 $recordData['contract_history_id'] = $historyId;
                 $this->model->create($recordData);
             }
         } catch
         (Exception $e)
         {
-            throw new ContractCreationException("User assign data saving failed " . $e->getMessage());
+            throw new ContractCreationException("BOQ data saving failed " . $e->getMessage());
+        }
+    }
+    public function saveInitialRecord($contractId)
+    {
+        try
+        {
+            $boqData = $this->getContractBoqItemRepo()->getBoqData($contractId);
+
+            foreach ($boqData as $record)
+            {
+                $levelNo = $this->model->getLevelNo($record['uuid'], $contractId);
+                $recordData = $record->toArray();
+                $recordData['level_no'] = $levelNo;
+                $recordData['id'] = $record['id'];
+                $recordData['contract_history_id'] = null;
+                $recordData['contractId'] = $contractId;
+                $recordData['created_by'] = General::currentEmployeeId();
+                $this->model->create($recordData);
+            }
+        }
+        catch
+        (Exception $e)
+        {
+            GeneralService::sendException("BOQ data saving failed " . $e->getMessage());
         }
     }
 

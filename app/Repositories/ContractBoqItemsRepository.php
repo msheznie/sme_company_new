@@ -7,9 +7,11 @@ use App\Models\CMContractBoqItemsAmd;
 use App\Models\CMContractMasterAmd;
 use App\Models\ContractBoqItems;
 use App\Models\ContractMaster;
+use App\Traits\CrudOperations;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 /**
@@ -23,6 +25,7 @@ class ContractBoqItemsRepository extends BaseRepository
     /**
      * @var array
      */
+    use CrudOperations;
     protected $fieldSearchable = [
         'uuid',
         'contractId',
@@ -53,19 +56,22 @@ class ContractBoqItemsRepository extends BaseRepository
     {
         return ContractBoqItems::class;
     }
-
-    public function getBoqItems(Request $request): \Illuminate\Http\JsonResponse
+    protected function getModel()
     {
-        $input = $request->all();
-        $companyId = $input['companyId'];
-        $uuid = $input['uuid'];
+        return new ContractBoqItems();
+    }
+
+    public function getBoqItems($companyId,$uuid,$amendment, $origin = 1): \Illuminate\Http\JsonResponse
+    {
+
+
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
 
-        $amedment = $input['amendment'];
-        $model = $amedment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
-        $colName = $amedment ? 'contract_history_id' : 'contractId';
-        $col =  $amedment ? 'amd_id' : 'id';
-        $id = $amedment ? self::getHistoryId($uuid) : $contractId->id;
+
+        $model = $amendment ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
+        $colName = $amendment ? 'contract_history_id' : 'contractId';
+        $col =  $amendment ? 'amd_id' : 'id';
+        $id = $amendment ? self::getHistoryId($uuid) : $contractId->id;
 
         $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price', 'origin')
             ->with(['itemMaster.unit' => function ($query)
@@ -77,6 +83,10 @@ class ContractBoqItemsRepository extends BaseRepository
             }])
             ->where('companyId', $companyId)
             ->where($colName, $id)
+            ->when($origin > 0, function ($q) use ($origin)
+            {
+                $q->where('origin', $origin);
+            })
             ->orderBy($col, 'desc');
 
         return DataTables::eloquent($query)

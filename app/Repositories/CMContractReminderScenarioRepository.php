@@ -63,15 +63,19 @@ class CMContractReminderScenarioRepository extends BaseRepository
     {
         $contractUuid = $input['contractUuid'];
         $companyId = $input['selectedCompanyID'];
+        $scenarioTypeId = $input['typeId'];
         $currentContractDetails = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
-        return CMContractScenarioAssign::getContractScenarioIsActive($currentContractDetails->id, $companyId);
+        return CMContractScenarioAssign::getContractScenarioIsActive(
+            $currentContractDetails->id, $companyId, $scenarioTypeId);
     }
     public function showRemindersSettingValue($input, $type)
     {
         $contractUuid = $input['contractUuid'];
         $companyId = $input['selectedCompanyID'];
+        $scenarioTypeId = $input['typeId'];
         $currentContractDetails = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
-        $scenarioId =  CMContractScenarioAssign::getContractScenarioId($currentContractDetails->id, $companyId);
+        $scenarioId =  CMContractScenarioAssign::getContractScenarioId(
+            $currentContractDetails->id, $companyId, $scenarioTypeId);
         return CMContractScenarioSetting::getValue($scenarioId, $type);
     }
 

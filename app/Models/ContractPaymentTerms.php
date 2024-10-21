@@ -42,7 +42,8 @@ class ContractPaymentTerms extends Model
         'description',
         'company_id',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
@@ -58,7 +59,8 @@ class ContractPaymentTerms extends Model
         'description' => 'string',
         'company_id' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'deleted_by' => 'integer'
     ];
 
     /**
@@ -67,16 +69,7 @@ class ContractPaymentTerms extends Model
      * @var array
      */
     public static $rules = [
-        'uuid' => 'required|string|max:255',
-        'contract_id' => 'required|integer',
-        'title' => 'required|string|max:255',
-        'description' => 'required|string|max:255',
-        'company_id' => 'required|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+
     ];
 
     public static function getContractPaymentTerms($contractID, $companySystemID)
@@ -95,5 +88,18 @@ class ContractPaymentTerms extends Model
             ->first();
     }
 
-
+    public function getPaymentTerms($contractId)
+    {
+        return self::where('contract_id', $contractId)->get();
+    }
+    public static function deletePaymentTermsFromAmd($amdRecordIds, $contractId)
+    {
+        ContractPaymentTerms::whereNotIn('id', $amdRecordIds)
+            ->where('contract_id',$contractId)
+            ->delete();
+    }
+    public static function checkUuidExists($uuid)
+    {
+        return self::where('uuid', $uuid)->exists();
+    }
 }

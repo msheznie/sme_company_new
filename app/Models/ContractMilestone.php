@@ -163,4 +163,22 @@ class ContractMilestone extends Model
             ->where('uuid', $uuid)
             ->first();
     }
+
+    public static function getReminderMilestoneDueDate($type, $contractId, $settingValue)
+    {
+        $query = ContractMilestone::select('id', 'title', 'contractID', 'description', 'due_date')
+        ->where('contractID', $contractId);
+
+        if ($type == 1)
+        {
+            $query->whereRaw('DATEDIFF(due_date, CURDATE()) > 0')
+                ->whereRaw('DATEDIFF(due_date, CURDATE()) < ?', [$settingValue]);
+        } else
+        {
+            $query->whereRaw('DATEDIFF(CURDATE(), due_date) % ? = 0', [$settingValue])
+                ->whereRaw('DATEDIFF(CURDATE(), due_date) >= ?', [$settingValue]);
+        }
+
+        return $query->get();
+    }
 }
