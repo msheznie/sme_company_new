@@ -115,14 +115,6 @@ class ContractAmendmentOtherService
                     GeneralService::sendException('Overall retention start date should be equal to or after the
                      contract commencement date');
                 }
-                $checkValidRetentionDueDate = CMContractOverallRetentionAmd::checkValidDate(
-                    $contractHistoryID, false, $contractEndDate
-                );
-                if($checkValidRetentionDueDate)
-                {
-                    GeneralService::sendException('Overall retention due date should be below or equal to the
-                     contract end date');
-                }
             }
             else
             {
@@ -146,14 +138,6 @@ class ContractAmendmentOtherService
                 {
                     GeneralService::sendException('Milestone retention start date should be equal to or after the
                      contract commencement date');
-                }
-                $checkValidRetentionDueDate = ContractMilestoneRetentionAmd::checkValidDate(
-                    $contractHistoryID, false, $contractEndDate
-                );
-                if($checkValidRetentionDueDate)
-                {
-                    GeneralService::sendException('Milestone retention due date should be below or equal to the
-                     contract end date');
                 }
             }
         }
