@@ -297,13 +297,13 @@ class ContractMaster extends Model
                 ->where('userId', $contractUserId->id)
                 ->where('status', 1);
         },'contractHistoryStatus' => function ($q5) use ($companyId)
-            {
-                $q5->select(DB::raw('MIN(id) as id'), 'contract_id', 'status')
-                    ->where('company_id', $companyId)
-                    ->groupBy('contract_id', 'status')
-                    ->orderBy('id', 'asc');
+        {
+            $q5->select(DB::raw('MIN(id) as id'), 'contract_id', 'status')
+                ->where('company_id', $companyId)
+                ->groupBy('contract_id', 'status')
+                ->orderBy('id', 'asc');
 
-            },'contractAssignedUsers.contractUserGroupAssignedUser'
+        },'contractAssignedUsers.contractUserGroupAssignedUser'
         ])->where('companySystemID', $companyId);
 
         if(isset($filter['status']) && $categoryId != 0)
@@ -374,7 +374,7 @@ class ContractMaster extends Model
                 });
                 $query->orWhereHas('contractUsers.contractCustomerUser', function ($query4) use ($search)
                 {
-                        $query4->where('customerName', 'LIKE', "%{$search}%");
+                    $query4->where('customerName', 'LIKE', "%{$search}%");
                 });
             });
         }
@@ -413,18 +413,18 @@ class ContractMaster extends Model
             ->join('cm_contract_master', function ($query) use ($selectedCompanyID, $isPending)
             {
                 $query->on('erp_documentapproved.documentSystemCode', '=', 'cm_contract_master.id')
-                ->when($isPending == 1, function ($query1)
-                {
-                    $query1->on('erp_documentapproved.rollLevelOrder', '=', 'cm_contract_master.rollLevelOrder');
-                    $query1->where('cm_contract_master.approved_yn', 0)
-                        ->where('cm_contract_master.confirmed_yn', 1);
-                })
-                ->when($isPending == 0, function ($query1)
-                {
-                    $query1->where('cm_contract_master.approved_yn', 1)
-                        ->where('cm_contract_master.confirmed_yn', 1);
-                })
-                ->where('cm_contract_master.companySystemID', $selectedCompanyID);
+                    ->when($isPending == 1, function ($query1)
+                    {
+                        $query1->on('erp_documentapproved.rollLevelOrder', '=', 'cm_contract_master.rollLevelOrder');
+                        $query1->where('cm_contract_master.approved_yn', 0)
+                            ->where('cm_contract_master.confirmed_yn', 1);
+                    })
+                    ->when($isPending == 0, function ($query1)
+                    {
+                        $query1->where('cm_contract_master.approved_yn', 1)
+                            ->where('cm_contract_master.confirmed_yn', 1);
+                    })
+                    ->where('cm_contract_master.companySystemID', $selectedCompanyID);
             })
             ->join('cm_contract_types',
                 'cm_contract_master.contractType', '=', 'cm_contract_types.contract_typeId')
@@ -754,7 +754,7 @@ class ContractMaster extends Model
 
         if ($filter && isset($filter['month']))
         {
-                $query->whereMonth('endDate', $filter['month']);
+            $query->whereMonth('endDate', $filter['month']);
         }
 
         return $query;

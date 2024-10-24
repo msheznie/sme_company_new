@@ -66,12 +66,12 @@ class contractStatusHistory extends Model
     public function getContractListStatus($id)
     {
         return contractStatusHistory::select('id','status','contract_id','created_at','created_by','system_user')
-        ->with(['employees' => function ($query)
-        {
-            $query->select('employeeSystemID','empName');
-        }])
-        ->where('contract_id', $id)
-        ->get();
+            ->with(['employees' => function ($query)
+            {
+                $query->select('employeeSystemID','empName');
+            }])
+            ->where('contract_id', $id)
+            ->get();
     }
 
     public function employees()
@@ -96,21 +96,21 @@ class contractStatusHistory extends Model
 
     public function getContractStatusHistory($contractId, $companySystemID)
     {
-         $query = self::getStatusData($contractId);
+        $query = self::getStatusData($contractId);
         return $query->map(function ($contract)
-    {
-        return [
-            'status' => $contract->status,
-            'systemUser' => $contract->system_user,
-            'empName' => $contract->employee->empName ?? null,
-            'createdAt' => $contract->created_at,
-            'contractCode' => ($contract->contract_history_id) ?  $contract->contractHistory
-                ->contractMaster->contractCode
-                : $contract->contractMaster->contractCode,
-            'title' => ($contract->contract_history_id) ?  $contract->contractHistory->contractMaster->title
-        : $contract->contractMaster->title,
-        ];
-    })->toArray();
+        {
+            return [
+                'status' => $contract->status,
+                'systemUser' => $contract->system_user,
+                'empName' => $contract->employee->empName ?? null,
+                'createdAt' => $contract->created_at,
+                'contractCode' => ($contract->contract_history_id) ?  $contract->contractHistory
+                    ->contractMaster->contractCode
+                    : $contract->contractMaster->contractCode,
+                'title' => ($contract->contract_history_id) ?  $contract->contractHistory->contractMaster->title
+                    : $contract->contractMaster->title,
+            ];
+        })->toArray();
 
 
     }

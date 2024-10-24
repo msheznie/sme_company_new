@@ -187,64 +187,64 @@ class MilestonePaymentSchedules extends Model
             'amount',
             'milestone_status'
         )
-        ->with([
-            'contractMaster' => function ($query) use($contractTypeID)
-            {
-                $query->select('id', 'contractCode', 'title', 'contractAmount', 'counterParty', 'counterPartyName',
-                    'contractType'
-                )
-                ->with([
-                    'contractUsers' => function ($query)
-                    {
-                        $query->select('id', 'uuid', 'contractUserId', 'contractUserType', 'contractUserName')
-                        ->with([
-                            'contractSupplierUser' => function ($q)
-                            {
-                                $q->select('supplierCodeSystem', 'supplierName');
-                            },
-                            'contractCustomerUser' => function ($q)
-                            {
-                                $q->select('customerCodeSystem', 'CustomerName');
-                            }
-                        ]);
-                    }, 'contractTypes' => function ($q)
-                    {
-                        $q->select('contract_typeId', 'cm_type_name', 'uuid');
-                    }
-                ])
-                ->when($contractTypeID > 0, function ($q) use ($contractTypeID)
+            ->with([
+                'contractMaster' => function ($query) use($contractTypeID)
                 {
-                    $q->where('contractType', $contractTypeID);
-                })
-                ->where('approved_yn', 1);
-            }, 'milestoneDetail' => function ($query) use ($milestoneStatus)
+                    $query->select('id', 'contractCode', 'title', 'contractAmount', 'counterParty', 'counterPartyName',
+                        'contractType'
+                    )
+                        ->with([
+                            'contractUsers' => function ($query)
+                            {
+                                $query->select('id', 'uuid', 'contractUserId', 'contractUserType', 'contractUserName')
+                                    ->with([
+                                        'contractSupplierUser' => function ($q)
+                                        {
+                                            $q->select('supplierCodeSystem', 'supplierName');
+                                        },
+                                        'contractCustomerUser' => function ($q)
+                                        {
+                                            $q->select('customerCodeSystem', 'CustomerName');
+                                        }
+                                    ]);
+                            }, 'contractTypes' => function ($q)
+                            {
+                                $q->select('contract_typeId', 'cm_type_name', 'uuid');
+                            }
+                        ])
+                        ->when($contractTypeID > 0, function ($q) use ($contractTypeID)
+                        {
+                            $q->where('contractType', $contractTypeID);
+                        })
+                        ->where('approved_yn', 1);
+                }, 'milestoneDetail' => function ($query) use ($milestoneStatus)
+                {
+                    $query->select('id', 'uuid', 'title', 'due_date', 'status');
+                    $query->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
+                    {
+                        $q->where('status', $milestoneStatus);
+                    });
+                }
+            ])
+            ->where(function ($query) use($contractTypeID, $milestoneStatus)
             {
-                $query->select('id', 'uuid', 'title', 'due_date', 'status');
+                $query->whereHas('contractMaster', function ($q) use ($contractTypeID)
+                {
+                    $q->where('approved_yn', 1);
+                    $q->when($contractTypeID > 0, function ($q) use ($contractTypeID)
+                    {
+                        $q->where('contractType', $contractTypeID);
+                        $q->whereHas('contractTypes');
+                    });
+                });
                 $query->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
                 {
-                    $q->where('status', $milestoneStatus);
-                });
-            }
-        ])
-        ->where(function ($query) use($contractTypeID, $milestoneStatus)
-        {
-            $query->whereHas('contractMaster', function ($q) use ($contractTypeID)
-            {
-                $q->where('approved_yn', 1);
-                $q->when($contractTypeID > 0, function ($q) use ($contractTypeID)
-                {
-                    $q->where('contractType', $contractTypeID);
-                    $q->whereHas('contractTypes');
+                    $q->whereHas('milestoneDetail', function ($q) use ($milestoneStatus)
+                    {
+                        $q->where('status', $milestoneStatus);
+                    });
                 });
             });
-            $query->when($milestoneStatus != 3, function ($q) use($milestoneStatus)
-            {
-                $q->whereHas('milestoneDetail', function ($q) use ($milestoneStatus)
-                {
-                    $q->where('status', $milestoneStatus);
-                });
-            });
-        });
 
         if ($search)
         {

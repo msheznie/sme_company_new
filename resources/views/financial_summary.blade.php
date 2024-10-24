@@ -196,113 +196,113 @@
                 @if($company)
                     <span style="font-size: 24px;font-weight: 400"> {{$company->CompanyName}}</span>
                 @endif
-                    <br>
-                    <table>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Contract Title:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                <br>
+                <table>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Contract Title:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                                 <span>@if($contract)
                                         {{$contract->title}}
                                     @endif
                                 </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Contract Type:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Contract Type:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                                 @if($contract)
                                     {{$contract->contractTypes->cm_type_name}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Counter Party:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Counter Party:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                               @if($contract)
                                     {{$contract->counterParties->cmCounterParty_name}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Contract Amount:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Contract Amount:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                                 @if($contract)
                                     {{number_format($contract->contractAmount, $decimalPlaces)}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Contract Code:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Contract Code:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                                 @if($contract)
                                     {{$contract->contractCode}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Contract Owner:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Contract Owner:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                                 @if($contract)
                                     {{$contract->contractOwners->contractUserName}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="150px">
-                                <span class="font-weight-bold">Counter Party Name:</span>
-                            </td>
-                            <td width="10px">
-                                <span class="font-weight-bold">:</span>
-                            </td>
-                            <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150px">
+                            <span class="font-weight-bold">Counter Party Name:</span>
+                        </td>
+                        <td width="10px">
+                            <span class="font-weight-bold">:</span>
+                        </td>
+                        <td>
                             <span>
                                 @if($contract)
                                     {{$contract->contractUsers->contractUserName}}
                                 @endif
                             </span>
-                            </td>
-                        </tr>
-                    </table>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
@@ -538,7 +538,7 @@
                     <th class="text-left" colspan="6">Invoice</th>
                 @endif
                 @if ($activeMilestonePS != 1)
-                        <th class="text-left" colspan="5">Invoice</th>
+                    <th class="text-left" colspan="5">Invoice</th>
                 @endif
             </tr>
             <tr class="theme-tr-head">
@@ -568,7 +568,7 @@
                         <td>
                             <strong>Code: </strong>{{$item->invoiceMaster->bookingInvCode}}<br>
                             <strong>Created Date: </strong>
-                                 {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
+                            {{ \App\helpers\General::dateFormat($item->invoiceMaster->createdDateAndTime)}}
 
                         </td>
                     @endif
@@ -617,7 +617,7 @@
                         <td colspan="6" class="text-center">No records found !</td>
                     @endif
                     @if ($activeMilestonePS != 1)
-                            <td colspan="5" class="text-center">No records found !</td>
+                        <td colspan="5" class="text-center">No records found !</td>
                     @endif
                 </tr>
             @endif

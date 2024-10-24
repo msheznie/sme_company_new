@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
  * Class ContractOverallPenaltyRepository
  * @package App\Repositories
  * @version July 23, 2024, 1:36 pm +04
-*/
+ */
 
 class ContractOverallPenaltyRepository extends BaseRepository
 {
