@@ -6,6 +6,7 @@ use App\Exceptions\CommonException;
 use App\Exceptions\ContractCreationException;
 use App\Http\Requests\API\ApproveDocumentRequest;
 use App\Http\Requests\API\CreateContractHistoryAPIRequest;
+use App\Http\Requests\API\ReferbackDocumentAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractHistoryAPIRequest;
 use App\Http\Requests\CreateContractRequest;
@@ -290,6 +291,22 @@ class ContractHistoryAPIController extends AppBaseController
             return $this->sendError($ex->getMessage(), 500);
         }
     }
+
+    public function referbackContract(ReferbackDocumentAPIRequest $request)
+    {
+        try
+        {
+            $this->contractHistoryService->referbackContract($request);
+            return $this->sendResponse([], trans('common.document_successfully_referedback'));
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
 
     public function updateExtendStatus(Request $request)
     {

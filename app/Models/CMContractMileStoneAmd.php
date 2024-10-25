@@ -75,18 +75,7 @@ class CMContractMileStoneAmd extends Model
      * @var array
      */
     public static $rules = [
-        'contract_history_id' => 'nullable|integer',
-        'uuid' => 'required|string|max:200',
-        'contractID' => 'required|integer',
-        'title' => 'required|string|max:255',
-        'status' => 'nullable|boolean',
-        'companySystemID' => 'required|integer',
-        'created_by' => 'nullable|integer',
-        'updated_by' => 'nullable|integer',
-        'deleted_at' => 'nullable',
-        'created_at' => 'nullable',
-        'updated_at' => 'nullable',
-        'description' => 'required|string|max:255'
+
     ];
 
     public function getMilestoneAmd($historyId,$companyId)
@@ -104,5 +93,15 @@ class CMContractMileStoneAmd extends Model
         ->first();
     }
 
-
+    public function milestonePaymentSchedules()
+    {
+        return $this->hasOne('App\Models\MilestonePaymentSchedules', 'milestone_id', 'id');
+    }
+    public static function getMilestoneAmountAmd($contractHistoryID)
+    {
+        return self::with('milestonePaymentSchedules')
+            ->where('contract_history_id', $contractHistoryID)
+            ->has('milestonePaymentSchedules')
+            ->get();
+    }
 }

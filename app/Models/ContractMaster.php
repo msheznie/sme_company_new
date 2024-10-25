@@ -225,6 +225,26 @@ class ContractMaster extends Model
     {
         return $this->belongsTo(ContractHistory::class, 'id', 'contract_id');
     }
+
+    public function tenderMaster()
+    {
+        return $this->belongsTo(TenderMaster::class, 'tender_id', 'id');
+    }
+
+    public function contractMilestone()
+    {
+        return $this->hasMany(ContractMilestone::class, 'contractID', 'id');
+    }
+
+    public function ContractDocument()
+    {
+        return $this->hasMany(ContractDocument::class, 'contractID', 'id');
+    }
+
+    public function ContractAdditionalDocuments()
+    {
+        return $this->hasMany(ContractAdditionalDocuments::class, 'contractID', 'id');
+    }
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;

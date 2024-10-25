@@ -49,12 +49,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class ErpDocumentApproved extends Model
 {
-    use HasFactory;
-
     public $table = 'erp_documentapproved';
 
-    const CREATED_AT = 'timeStamp';
-    const UPDATED_AT = 'timeStamp';
+    const CREATED_AT = 'timestamp';
+    const UPDATED_AT = 'timestamp';
 
 
     protected $primaryKey = 'documentApprovedID';
@@ -121,12 +119,10 @@ class ErpDocumentApproved extends Model
         'rollLevelOrder' => 'integer',
         'employeeSystemID' => 'integer',
         'employeeID' => 'string',
-        'docConfirmedDate' => 'datetime',
         'docConfirmedByEmpSystemID' => 'integer',
         'docConfirmedByEmpID' => 'string',
         'preRollApprovedDate' => 'datetime',
         'approvedYN' => 'integer',
-        'approvedDate' => 'datetime',
         'approvedComments' => 'string',
         'rejectedYN' => 'integer',
         'rejectedDate' => 'datetime',
@@ -137,7 +133,6 @@ class ErpDocumentApproved extends Model
         'isApprovedFromPC' => 'integer',
         'approvedPCID' => 'string',
         'reference_email' => 'string',
-        'timeStamp' => 'datetime',
         'status' => 'boolean'
     ];
 
@@ -230,5 +225,21 @@ class ErpDocumentApproved extends Model
     public function employee()
     {
         return $this->HasOne(Employees::class, 'employeeSystemID', 'employeeSystemID');
+    }
+
+    public static function getDocumentApprovedData($documentSystemID, $documentSystemCode, $companySystemID)
+    {
+        return ErpDocumentApproved::where('documentSystemCode', $documentSystemCode)
+            ->where('companySystemID', $companySystemID)
+            ->where('documentSystemID', $documentSystemID)
+            ->get();
+    }
+
+    public static function deleteDocumentApprovedData($documentSystemID, $documentSystemCode, $companySystemID)
+    {
+        return ErpDocumentApproved::where('documentSystemCode', $documentSystemCode)
+            ->where('companySystemID', $companySystemID)
+            ->where('documentSystemID', $documentSystemID)
+            ->delete();
     }
 }

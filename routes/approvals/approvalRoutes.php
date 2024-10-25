@@ -19,6 +19,11 @@ Route::group(['prefix' => 'approvals'], function ()
         'rejectContract'
     ])->name('Reject Contract');
 
+    Route::post('referback-contract', [
+        \App\Http\Controllers\API\ContractMasterAPIController::class,
+        'referbackContract'
+    ])->name('Referback Contract');
+
     Route::post('extend-contract-approvals', [
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'getContractApprovals'
@@ -49,6 +54,16 @@ Route::group(['prefix' => 'approvals'], function ()
         'rejectContract'
     ])->name('Reject Terminate Contract');
 
+    Route::post('referback-extend-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'referbackContract'
+    ])->name('Referback Extend Contract');
+
+    Route::post('referback-terminate-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'referbackContract'
+    ])->name('Referback Terminate Contract');
+
     Route::post('approved-records', [
         \App\Http\Controllers\API\ErpDocumentApprovedAPIController::class,
         'getApprovedRecords'
@@ -68,4 +83,9 @@ Route::group(['prefix' => 'approvals'], function ()
         \App\Http\Controllers\API\ContractHistoryAPIController::class,
         'rejectContract'
     ])->name('Reject contract amendment');
+
+    Route::post('referback-amendment-contract', [
+        \App\Http\Controllers\API\ContractHistoryAPIController::class,
+        'referbackContract'
+    ])->name('Referback Amendment Contract');
 });

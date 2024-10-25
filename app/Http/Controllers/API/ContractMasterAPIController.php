@@ -8,6 +8,7 @@ use App\Helpers\CreateExcel;
 use App\Helpers\General;
 use App\Helpers\inventory;
 use App\Http\Requests\API\CreateContractMasterAPIRequest;
+use App\Http\Requests\API\ReferbackDocumentAPIRequest;
 use App\Http\Requests\API\UpdateContractMasterAPIRequest;
 use App\Http\Requests\API\RejectDocumentAPIRequest;
 use App\Http\Requests\API\ApproveDocumentRequest;
@@ -347,8 +348,10 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getContractTypeSectionData(Request $request)
     {
-        $contractSecs = $this->contractMasterRepository->getContractTypeSectionData($request);
-        return $this->sendResponse($contractSecs, 'Retrieved successfully');
+        $input = $request->all();
+        $contractUuid = $input['contractId'];
+        $contractSectionData = $this->contractMasterRepository->getContractTypeSectionData($contractUuid);
+        return $this->sendResponse($contractSectionData, 'Retrieved successfully');
     }
 
     public function updateContractSettingDetails(Request $request)
@@ -516,7 +519,9 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getContractConfirmationData(Request $request)
     {
-        return $this->contractMasterRepository->getContractConfirmationData($request);
+        $input = $request->all();
+        $contractUuid = $input['contractUuid'];
+        return $this->contractMasterRepository->getContractConfirmationData($contractUuid);
     }
 
     public function confirmContract(ContractConfirmRequest $request)
@@ -557,6 +562,23 @@ class ContractMasterAPIController extends AppBaseController
         {
             $this->contractMasterRepository->rejectContract($request);
             return $this->sendResponse([], trans('common.document_successfully_rejected'));
+        }
+        catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+        catch (\Exception $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        }
+    }
+
+    public function referbackContract(ReferbackDocumentAPIRequest $request)
+    {
+        try
+        {
+            $this->contractMasterRepository->referbackContract($request);
+            return $this->sendResponse([], trans('common.document_successfully_referedback'));
         }
         catch (CommonException $ex)
         {
@@ -609,7 +631,8 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getHistoryId($id)
     {
-        return ContractManagementUtils::getContractHistoryData($id);
+        $history = ContractManagementUtils::getContractHistoryData($id);
+        return $history->id;
     }
 
     public function getContractData(Request $request)

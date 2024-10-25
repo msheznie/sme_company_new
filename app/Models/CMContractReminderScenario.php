@@ -58,10 +58,41 @@ class CMContractReminderScenario extends Model
         'updated_at' => 'nullable'
     ];
 
+    public function scenarioAssign()
+    {
+        return $this->belongsTo(CMContractScenarioAssign::class, 'id', 'scenario_id');
+    }
+
     public static function showReminders()
     {
       return self::select('id', 'title')
           ->get();
+    }
+
+    public function getContractExpiryData($contractId, $companyId)
+    {
+        return self::select('id', 'title')
+            ->with([
+                'scenarioAssign' => function ($q) use ($contractId, $companyId)
+                {
+                    $q->select('id', 'scenario_id', 'is_active')
+                        ->with([
+                            'contractScenarioSettings' => function ($q1)
+                            {
+                                $q1->select('value','id', 'scenario_assign_id', 'scenario_type')
+                                ->with([
+                                    'dropValue' => function ($q2)
+                                    {
+                                        $q2->select('description','id', 'scenario_type_id');
+                                    }
+                            ]);
+                            }
+                        ])
+                        ->where('contract_id', $contractId)
+                        ->where('company_id', $companyId);
+                }
+            ])
+            ->get();
     }
 
 }

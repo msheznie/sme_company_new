@@ -125,13 +125,19 @@ class ContractDocument extends Model
     }
     public function contractDocuments($selectedCompanyID, $contractID)
     {
-        return ContractDocument::select('uuid', 'documentType', 'documentName', 'documentDescription',
+        return ContractDocument::select('id', 'uuid', 'documentType', 'documentName', 'documentDescription',
             'followingRequest', 'attachedDate', 'status','documentExpiryDate', 'attach_after_approval',
-            'is_editable')
+            'is_editable', 'documentMasterID')
             ->with(['documentMaster' => function ($query)
             {
                 $query->select('id', 'uuid', 'documentType');
-            }])
+            },
+                'attachment' => function ($query)
+                {
+                    $query->select('attachmentID', 'myFileName', 'documentSystemID',
+                        'documentSystemCode','originalFileName','path');
+                }
+            ])
             ->where([
                 'contractID' => $contractID,
                 'companySystemID' => $selectedCompanyID
@@ -181,5 +187,27 @@ class ContractDocument extends Model
                 }
             ])
             ->first();
+    }
+
+    public static function getReminderDocumentExpiryData($type, $contractId, $settingValue)
+    {
+        $query = ContractDocument::select('id', 'documentType', 'contractID', 'documentName', 'documentExpiryDate')
+            ->where('contractID', $contractId)
+            ->with(['documentMaster' => function ($q)
+            {
+                $q->select('id', 'uuid', 'documentType');
+            }]);
+
+        if ($type == 1)
+        {
+            $query->whereRaw('DATEDIFF(documentExpiryDate, CURDATE()) > 0')
+                ->whereRaw('DATEDIFF(documentExpiryDate, CURDATE()) < ?', [$settingValue]);
+        } else
+        {
+            $query->whereRaw('DATEDIFF(CURDATE(), documentExpiryDate) % ? = 0', [$settingValue])
+                ->whereRaw('DATEDIFF(CURDATE(), documentExpiryDate) >= ?', [$settingValue]);
+        }
+
+        return $query->get();
     }
 }

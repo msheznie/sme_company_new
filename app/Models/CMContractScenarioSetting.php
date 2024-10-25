@@ -54,6 +54,11 @@ class CMContractScenarioSetting extends Model
         return $this->belongsTo(CMContractScenarioAssign::class, 'scenario_assign_id', 'id');
     }
 
+    public function dropValue()
+    {
+        return $this->belongsTo(CMContractDropValue::class, 'value', 'id');
+    }
+
     public static function getValue($id, $scenarioType)
     {
         $record = self::where('scenario_assign_id', $id)

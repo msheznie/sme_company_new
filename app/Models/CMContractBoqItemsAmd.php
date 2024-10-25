@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class CMContractBoqItemsAmd extends Model
 {
-
+    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_contract_boq_items_amd';
@@ -34,11 +34,13 @@ class CMContractBoqItemsAmd extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
+    protected $primaryKey = 'amd_id';
+    protected $dates = ['deleted_at'];
 
     public $fillable = [
         'id',
         'contract_history_id',
+        'level_no',
         'uuid',
         'price',
         'origin',
@@ -61,6 +63,7 @@ class CMContractBoqItemsAmd extends Model
     protected $casts = [
         'id' => 'integer',
         'amd_id' => 'integer',
+        'level_no' => 'integer',
         'contract_history_id' => 'integer',
         'uuid' => 'string',
         'contractId' => 'integer',
@@ -89,6 +92,11 @@ class CMContractBoqItemsAmd extends Model
         return $this->belongsTo(ItemMaster::class, 'itemId', 'itemCodeSystem');
     }
 
+    public function boqItem()
+    {
+        return $this->belongsTo(TenderBoqItems::class, 'itemId', 'id');
+    }
+
     public static function getBoqItemData($historyId,$uuid)
     {
             return self::where('contract_history_id',$historyId)
@@ -107,6 +115,60 @@ class CMContractBoqItemsAmd extends Model
             ->pluck('amd_id')
             ->toArray();
     }
+    public function getLevelNo($uuid, $contractId)
+    {
+        $levelNo = self::where('uuid',$uuid)
+                ->where('contractId', $contractId)
+                ->max('level_no') + 1;
 
+        return  max(1, $levelNo);
+    }
 
+    public function getBoqItemDetailsAmd($uuid)
+    {
+        return self::select('amd_id', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price', 'origin')
+            ->with([
+                'itemMaster' => function ($q)
+                {
+                    $q->select('itemCodeSystem', 'primaryCode', 'unit');
+                    $q->with([
+                        'itemAssigned' => function ($q)
+                        {
+                            $q->select('idItemAssigned', 'itemCodeSystem', 'wacValueLocal');
+                        }
+                    ]);
+                }, 'boqItem', 'boqItem.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
+                }
+            ])
+            ->where('uuid', $uuid)
+            ->first();
+    }
+    public static function checkExistsBOQ($historyID)
+    {
+        return self::where('contract_history_id', $historyID)->exists();
+    }
+    public static function checkValues($historyID, $companySystemID, $checkType)
+    {
+        return self::select('qty', 'price')
+            ->where('contract_history_id', $historyID)
+            ->where('companyId', $companySystemID)
+            ->where(function($query) use ($checkType)
+            {
+                if ($checkType == 'zero')
+                {
+                    $query->where('qty', 0)
+                        ->orWhere('price', 0);
+                }
+                if ($checkType == 'empty')
+                {
+                    $query->whereNull('qty')
+                        ->orWhereNull('price')
+                        ->orWhere('qty', '')
+                        ->orWhere('price', '');
+                }
+            })
+            ->get();
+    }
 }

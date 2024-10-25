@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateContractPaymentTermsAPIRequest;
 use App\Http\Requests\API\UpdateContractPaymentTermsAPIRequest;
 use App\Models\ContractPaymentTerms;
 use App\Repositories\ContractPaymentTermsRepository;
+use App\Services\ContractAmendmentOtherService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ContractPaymentTermsResource;
@@ -105,17 +107,19 @@ class ContractPaymentTermsAPIController extends AppBaseController
     public function update(UpdateContractPaymentTermsAPIRequest $request)
     {
         $input = $request->all();
-
+        $amendment = $input['amendment'] ?? false;
+        $contractHistoryUuid = $input['contractHistoryUuid'] ?? false;
         try
         {
-            $contractPaymentTerm = $this->contractPaymentTermsRepository->findByUuid($input['uuid'], ['id']);
+            $contractPaymentTerm = $amendment
+                ? ContractAmendmentOtherService::getContractPaymentTermAmd($contractHistoryUuid, $input['uuid'])
+                : $this->contractPaymentTermsRepository->findByUuid($input['uuid'], ['id']);
 
             if (empty($contractPaymentTerm))
             {
                 throw new CommonException(trans('common.contract_payment_term_not_found'));
             }
-
-            $this->contractPaymentTermsRepository->updatePaymentTerms($input, $contractPaymentTerm['id']);
+            $this->contractPaymentTermsRepository->updatePaymentTerms($input, $contractPaymentTerm);
             return $this->sendResponse([], trans('Contract payment term updated successfully.'));
 
         } catch (CommonException $ex)
@@ -137,16 +141,23 @@ class ContractPaymentTermsAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         /** @var ContractPaymentTerms $contractPaymentTerms */
-        $contractPaymentTerms = $this->contractPaymentTermsRepository->findByUuid($id, ['id']);
+        $input = $request->all();
+        $amendment = $input['amendment'] ?? false;
+        $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+        $contractPaymentTerms = $amendment ?
+            ContractAmendmentOtherService::getContractPaymentTermAmd($contractHistoryUuid,$id)
+            : $this->contractPaymentTermsRepository->findByUuid($id, ['id']);
 
         if (empty($contractPaymentTerms))
         {
             return $this->sendError(trans('common.contract_payment_term_not_found'));
         }
 
+        $contractPaymentTerms->deleted_by = General::currentEmployeeId();
+        $contractPaymentTerms->save();
         $contractPaymentTerms->delete();
 
         return $this->sendSuccess('Contract payment term deleted successfully');

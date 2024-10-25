@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateTimeMaterialConsumptionAPIRequest;
 use App\Http\Requests\API\UpdateTimeMaterialConsumptionAPIRequest;
 use App\Models\TimeMaterialConsumption;
+use App\Models\TimeMaterialConsumptionAmd;
 use App\Repositories\TimeMaterialConsumptionRepository;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\TimeMaterialConsumptionResource;
 use Response;
+use App\Services\GeneralService;
 
 /**
  * Class TimeMaterialConsumptionController
@@ -60,11 +63,15 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
         $input = $request->all();
         $selectedCompanyID = $request->input('selectedCompanyID') ?? 0;
         $contractUuid = $input['contract_id'] ?? null;
+        $historyUuid = $input['historyUuid'] ?? null;
+        $amendment = $input['amendment'] ?? false;
         try
         {
             $this->timeMaterialConsumptionRepository->createTimeMaterialConsumption(
                 $contractUuid,
-                $selectedCompanyID
+                $selectedCompanyID,
+                $historyUuid,
+                $amendment
             );
             return $this->sendResponse([], 'Time and material consumption created successfully.');
         } catch(CommonException $ex)
@@ -110,15 +117,24 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
     public function update($id, UpdateTimeMaterialConsumptionAPIRequest $request)
     {
         $input = $request->all();
+        $amendment = $input['amendment'] ?? false;
+        $historyUuid = $input['historyID'] ?? false;
         try
         {
-            $consumption = $this->timeMaterialConsumptionRepository->findByUuid($id, ['id']);
+            $historyID = $amendment
+                ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
+                    ?? GeneralService::sendException('Contract history not found.'))
+                : 0;
+
+            $consumption = $amendment ? TimeMaterialConsumptionAmd::findTimeMaterialConsumption($id, $historyID)
+                :$this->timeMaterialConsumptionRepository->findByUuid($id, ['id']);
 
             if (empty($consumption))
             {
-                throw new CommonException('Time and material consumption not found.');
+                GeneralService::sendException('Time and material consumption not found.');
             }
-            $this->timeMaterialConsumptionRepository->updateTimeMaterialConsumption($input, $consumption['id']);
+            $updateId = $amendment ? $consumption['amd_id'] : $consumption['id'];
+            $this->timeMaterialConsumptionRepository->updateTimeMaterialConsumption($input, $updateId);
             return $this->sendResponse([], trans('Time and material consumption saved successfully.'));
         } catch (CommonException $ex)
         {
@@ -139,19 +155,38 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         /** @var TimeMaterialConsumption $timeMaterialConsumption */
-        $consumption = $this->timeMaterialConsumptionRepository->findByUuid($id, ['id']);
-
-        if (empty($consumption))
+        $amendment = $request->input('amendment') ?? false;
+        $historyUuid = $request->input('contractHistoryUuid') ?? false;
+        try
         {
-            return $this->sendError(trans('common.time_material_consumption_not_found'));
+            $historyID = $amendment
+                ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
+                    ?? GeneralService::sendException('Contract history not found.'))
+                : 0;
+
+            $consumption = $amendment ? TimeMaterialConsumptionAmd::findTimeMaterialConsumption($id, $historyID)
+                : $this->timeMaterialConsumptionRepository->findByUuid($id, ['id', 'deleted_by']);
+
+            if (empty($consumption))
+            {
+                GeneralService::sendException(trans('common.time_material_consumption_not_found'));
+            }
+            $consumption->deleted_by = General::currentEmployeeId();
+            $consumption->save();
+            $consumption->delete();
+
+            return $this->sendSuccess('Time Material Consumption deleted successfully');
+        } catch (CommonException $ex)
+        {
+            return $this->sendError('Failed to delete time and material consumption: ' . $ex->getMessage());
+        } catch(\Exception $ex)
+        {
+            return $this->sendError('Failed to delete time and material consumption: ' . $ex->getMessage());
         }
 
-        $consumption->delete();
-
-        return $this->sendSuccess('Time Material Consumption deleted successfully');
     }
     public function getTimeConsumptionFormData(Request $request)
     {
@@ -163,11 +198,15 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
     {
         $selectedCompanyID = $request->input('selectedCompanyID') ??0;
         $contractUuid = $request->input('contract_id') ?? null;
+        $historyUuid = $request->input('historyUuid') ?? null;
+        $amendment = $request->input('amendment') ?? null;
         try
         {
             $response = $this->timeMaterialConsumptionRepository->getAllTimeMaterialConsumption(
                 $contractUuid,
-                $selectedCompanyID
+                $selectedCompanyID,
+                $historyUuid,
+                $amendment
             );
             return $this->sendResponse($response, 'Time material consumption retrieved successfully.');
         } catch(CommonException $ex)
@@ -182,17 +221,21 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
     {
         $selectedCompanyID = $request->input('selectedCompanyID') ??0;
         $contractUuid = $request->input('contract_id') ?? null;
+        $historyUuid = $request->input('historyUuid') ?? null;
+        $amendment = $request->input('amendment') ?? false;
         $formData = $request->input('formData') ?? [];
         if(empty($formData))
         {
-            throw new CommonException('Empty records found.');
+            GeneralService::sendException('Empty records found.');
         }
         try
         {
             $this->timeMaterialConsumptionRepository->pullItemsFromBOQ(
                 $selectedCompanyID,
                 $contractUuid,
-                $formData
+                $formData,
+                $amendment,
+                $historyUuid
             );
             return $this->sendResponse([], 'Items from BOQ pulled successfully.');
         } catch(CommonException $ex)

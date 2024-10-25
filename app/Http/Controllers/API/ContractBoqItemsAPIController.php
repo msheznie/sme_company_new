@@ -138,8 +138,7 @@ class ContractBoqItemsAPIController extends AppBaseController
      */
     public function destroy($id)
     {
-        $contractResult = ContractBoqItems::select('id')->where('uuid', $id)->first();
-        $contractBoqItems = $this->contractBoqItemsRepository->find($contractResult->id);
+        $contractBoqItems = $this->contractBoqItemsRepository->findByUuid($id);
 
         if (empty($contractBoqItems))
         {
@@ -153,7 +152,12 @@ class ContractBoqItemsAPIController extends AppBaseController
 
     public function getBoqItemsByCompany(Request $request)
     {
-        return $this->contractBoqItemsRepository->getBoqItems($request);
+        $input = $request->all();
+        $companyId = $input['companyId'];
+        $uuid = $input['uuid'];
+        $amendment = $input['amendment'];
+        $origin = $input['origin'] ?? 1;
+        return $this->contractBoqItemsRepository->getBoqItems($companyId,$uuid,$amendment, $origin);
     }
 
     public function updateBoqItemsQty(UpdateContractBoqItemsAPIRequest $request)
@@ -242,9 +246,10 @@ class ContractBoqItemsAPIController extends AppBaseController
         $id = ContractManagementUtils::getId($input['amendment'],$input['uuid'],$input['selectedCompanyID']);
         $modelClass = $input['amendment'] ? CMContractBoqItemsAmd::class : ContractBoqItems::class;
         $model = new $modelClass;
+        $uuid = ContractManagementUtils::generateUuid(16);
 
         $insertArray = [
-            'uuid' => bin2hex(random_bytes(16)),
+            'uuid' => $uuid,
             'itemId' => $input['itemId'],
             'description' => $input['description'],
             'origin' => ($input['isTender'] == 0) ? 1 : 2,
@@ -256,8 +261,10 @@ class ContractBoqItemsAPIController extends AppBaseController
         ];
         if($input['amendment'])
         {
+            $levelNo = $model->getLevelNo($uuid, $id->contract_id);
             $insertArray['contractId'] = $id->contract_id;
             $insertArray['contract_history_id'] = $id->id;
+            $insertArray['level_no'] = $levelNo;
         }else
         {
             $insertArray['contractId'] = $id;

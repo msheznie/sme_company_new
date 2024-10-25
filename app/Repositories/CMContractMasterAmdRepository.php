@@ -5,11 +5,14 @@ namespace App\Repositories;
 use App\Exceptions\ContractCreationException;
 use App\Helpers\General;
 use App\Models\CMContractMasterAmd;
+use App\Models\ContractAmendmentArea;
 use App\Models\ContractMaster;
+use App\Models\ContractSettingDetail;
 use App\Models\ContractUsers;
 use App\Models\TenderFinalBids;
 use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -153,17 +156,22 @@ class CMContractMasterAmdRepository extends BaseRepository
         $getContractHistoryData = ContractManagementUtils::getContractHistoryData($historyUuid);
         if (!$getContractHistoryData)
         {
-            throw new ContractCreationException('Record not found');
+            GeneralService::sendException('Record not found');
         }
 
         $contractMasterData = $this->model->getContractMasterData($getContractHistoryData->id);
         $contractMaster = $this->contractMasterRepo->unsetValues($contractMasterData);
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMasterData['counterPartyNameUuid']);
+        $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster->id);
         $response =
             $this->contractMasterRepo->getEditFormData($contractMasterData['counterParty'],$userUuid,$companyId);
 
         $editData = $contractMaster;
         $response['editData'] = $editData;
+        $response['activeMilestonePS'] = $activeMilestonePS['sectionDetailId'] ?? 0;
+        $activeAmdSettings = ContractAmendmentArea::getContractAmendAreas($contractMaster->id,
+            $getContractHistoryData->id);
+        $response['boqActive'] = in_array(1, $activeAmdSettings);
 
         return $response;
     }

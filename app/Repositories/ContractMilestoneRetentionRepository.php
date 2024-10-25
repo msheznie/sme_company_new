@@ -7,15 +7,19 @@ use App\Models\Company;
 use App\Models\ContractMaster;
 use App\Models\ContractMilestone;
 use App\Models\ContractMilestoneRetention;
+use App\Models\ContractMilestoneRetentionAmd;
 use App\Models\ContractOverallRetention;
 use App\Models\CurrencyMaster;
 use App\Repositories\BaseRepository;
+use App\Services\ContractAmendmentOtherService;
+use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
+use App\Traits\CrudOperations;
 
 /**
  * Class ContractMilestoneRetentionRepository
@@ -28,6 +32,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
     /**
      * @var array
      */
+    use CrudOperations;
     protected $fieldSearchable = [
         'uuid',
         'contractId',
@@ -60,6 +65,10 @@ class ContractMilestoneRetentionRepository extends BaseRepository
     {
         return ContractMilestoneRetention::class;
     }
+    protected function getModel()
+    {
+        return new ContractMilestoneRetention();
+    }
 
     public function getContractMilestoneRetentionData(Request $request)
     {
@@ -71,7 +80,18 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
         $contractId = $contract['id'];
 
-        $languages =  $this->model->ContractMilestoneRetention($companySystemID, $contractId);
+        $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+        if($contractHistoryUuid)
+        {
+            $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
+            $contractHistoryID = $contractHistory['id'] ?? 0;
+            $languages = ContractMilestoneRetentionAmd::getContractMilestoneRetentionAmd($contractHistoryID,
+                $contractId, $companySystemID);
+        } else
+        {
+            $languages =  $this->model->ContractMilestoneRetention($companySystemID, $contractId);
+        }
+
         return DataTables::eloquent($languages)
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
@@ -81,146 +101,173 @@ class ContractMilestoneRetentionRepository extends BaseRepository
     public function createMilestoneRetention(Request $request) {
 
         $input = $request->all();
-        $contractUuid = $input['contractUuid'];
-        $companySystemID = $input['selectedCompanyID'];
+        return DB::transaction(function () use ($input)
+        {
+            $contractUuid = $input['contractUuid'];
+            $companySystemID = $input['selectedCompanyID'];
+            $amendment = $input['amendment'] ?? false;
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+            $model = $amendment ? ContractMilestoneRetentionAmd::class : ContractMilestoneRetention::class;
 
-        $contract = ContractMaster::select('id')->where('uuid', $contractUuid)
-            ->where('companySystemID', $companySystemID)
-            ->first();
-
-        if(empty($contract)) {
-            return [
-                'status' => false,
-                'message' => trans('common.contract_id_not_found')
-            ];
-        }
-
-        $totalRecords = ContractManagementUtils::getMilestonesWithAmount($contract['id'], $companySystemID)->count();
-
-        if($totalRecords == 0){
-            return [
-                'status' => false,
-                'message' => trans('common.add_new_milestones')
-            ];
-        }
-        $recordsWithMilestoneId = ContractMilestoneRetention::
-            where('contractId', $contract['id'])
-            ->where('companySystemId', $companySystemID)
-            ->count();
-
-        if($totalRecords == $recordsWithMilestoneId){
-            return [
-                'status' => false,
-                'message' => trans('common.existing_milestones_are_already_used_for_retentions')
-            ];
-        }else{
-            try{
-                DB::beginTransaction();
-                $data = [
-                    'uuid' => bin2hex(random_bytes(16)),
-                    'contractId' => $contract['id'],
-                    'companySystemId' => $companySystemID,
-                    'created_by' => General::currentEmployeeId(),
-                    'created_at' => Carbon::now()
-                ];
-                $milestoneRetention = ContractMilestoneRetention::create($data);
-
-                $milestoneRetentionId = $milestoneRetention->id;
-
-                $firstRecord = ContractMilestoneRetention::where('contractId', $contract['id'])
-                    ->where('companySystemId', $companySystemID)
-                    ->first();
-
-                if($firstRecord){
-                    ContractMilestoneRetention::where('id',$milestoneRetentionId)
-                        ->where('companySystemId', $companySystemID)
-                        ->update(['retentionPercentage' => $firstRecord['retentionPercentage']]);
-                }
-
-                DB::commit();
-                return [
-                    'status' => true,
-                    'message' => trans('common.contract_milestone_retention_created_successfully')
-                ];
-            } catch (\Exception $ex){
-                DB::rollBack();
-                return ['status' => false, 'message' => $ex->getMessage(), 'line' => __LINE__];
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+            if(empty($contract))
+            {
+                GeneralService::sendException(trans('common.contract_id_not_found'));
             }
-        }
+            $contractID = $contract['id'];
+            $contractHistoryId = 0;
+            if($amendment)
+            {
+                $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
+                if(empty($contractHistory))
+                {
+                    GeneralService::sendException(trans('common.contract_history_not_found'));
+                }
+                $contractHistoryId = $contractHistory['id'];
+            }
+
+            $totalRecords = $amendment
+                ? ContractAmendmentOtherService::getMilestoneAmountAmd($contractHistoryId)->count()
+                : ContractManagementUtils::getMilestonesWithAmount($contractID, $companySystemID)->count();
+
+            if($totalRecords == 0)
+            {
+                GeneralService::sendException(trans('common.add_new_milestones'));
+            }
+            $recordsWithMilestoneId = $amendment ? ContractMilestoneRetentionAmd::getMilestoneRetentionAmdCount(
+                $contractHistoryId, $companySystemID) : ContractMilestoneRetention::getContractMilestoneRetentionCount(
+                $contractID, $companySystemID);
+
+            if($totalRecords == $recordsWithMilestoneId)
+            {
+                GeneralService::sendException(trans('common.existing_milestones_are_already_used_for_retentions'));
+            }
+
+            $uuid = ContractManagementUtils::generateUuid(16);
+            $uuidExists = $model::checkUuidExists($uuid);
+            if ($uuidExists)
+            {
+                GeneralService::sendException('Uuid already exists');
+            }
+
+            $data = [
+                'uuid' => $uuid,
+                'contractId' => $contractID,
+                'companySystemId' => $companySystemID,
+                'created_by' => General::currentEmployeeId(),
+                'created_at' => Carbon::now()
+            ];
+            if ($amendment)
+            {
+                $data['id'] = null;
+                $data['contract_history_id'] = $contractHistoryId;
+                $data['level_no'] = 1;
+            }
+            $milestoneRetention = $model::create($data);
+
+            $milestoneRetentionId = $amendment ? $milestoneRetention->amd_id : $milestoneRetention->id;
+
+            $firstRecord = $model::when($amendment, function ($q) use ($contractHistoryId)
+            {
+                $q->where('contract_history_id', $contractHistoryId);
+            })->when(!$amendment, function ($q) use ($contractID)
+            {
+                $q->where('contractId', $contractID);
+            })->where('companySystemId', $companySystemID)->first();
+
+
+            if($firstRecord)
+            {
+                $model::when($amendment, function ($q) use ($milestoneRetentionId)
+                {
+                    $q->where('amd_id',$milestoneRetentionId);
+                })->when(!$amendment, function ($q) use ($milestoneRetentionId)
+                {
+                    $q->where('id',$milestoneRetentionId);
+                })
+                    ->where('companySystemId', $companySystemID)
+                    ->update(['retentionPercentage' => $firstRecord['retentionPercentage']]);
+            }
+        });
     }
 
     public function updateMilestoneRetention(Request $request)
     {
         $input = $request->all();
-        $companySystemID = $input['selectedCompanyID'];
-        $milestoneUuid = $input['data']['milestoneId'] ?? null;
-        $milestoneRetentionUuid = $input['data']['uuid'];
-
-        $milestoneRetentionData = ContractMilestoneRetention::where('uuid', $milestoneRetentionUuid)->first();
-        $retentionPercentage = $milestoneRetentionData['retentionPercentage'];
-        $milestone = ContractMilestone::getContractMilestoneWithAmount($milestoneUuid);
-
-        if($input['value'] == 0)
+        return DB::transaction(function () use ($input)
         {
-            $duplicateMilestone = ContractMilestoneRetention::where('milestoneId', $milestone['id'])
-                ->where('contractId', $milestoneRetentionData['contractId'])
-                ->where('companySystemId', $companySystemID)
-                ->first();
+            $companySystemID = $input['selectedCompanyID'];
+            $milestoneUuid = $input['data']['milestoneId'] ?? null;
+            $milestoneRetentionUuid = $input['data']['uuid'];
+            $amendment = $input['amendment'] ?? false;
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? null;
+            $model = $amendment ? ContractMilestoneRetentionAmd::class : ContractMilestoneRetention::class;
 
-            if ($duplicateMilestone)
+            $contractHistoryID = 0;
+            if($amendment)
             {
-                return ['status' => false, 'message' => trans('common.milestone_titles_cannot_be_duplicated')];
+                $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
+                if(empty($contractHistory))
+                {
+                    GeneralService::sendException(trans('common.contract_not_found'));
+                }
+                $contractHistoryID = $contractHistory['id'];
             }
-        }
-
-        if($milestoneUuid)
-        {
-            $milestoneId = $milestone['id'];
-            $retentionAmount = $milestone['milestonePaymentSchedules']['amount'] * ($retentionPercentage / 100);
-        }else
-        {
-            $milestoneId = null;
-            $retentionAmount = 0;
-        }
-
-        if($input['data']['startDate'] == null && $input['data']['dueDate'] == null)
-        {
-            $startDate = $input['startDate'];
-            $dueDate = $input['dueDate'];
-            $withholdPeriod = 0;
-        }
-
-        if($input['startDate'] && $input['data']['dueDate'] == null)
-        {
-            $startDate = (new Carbon($input['startDate']))->format('Y-m-d');
-            $dueDate = $input['dueDate'];
-            $withholdPeriod = 0;
-        }
-
-        if($input['dueDate'] && $input['data']['startDate'] == null)
-        {
-            $startDate = $input['startDate'];
-            $dueDate = (new Carbon($input['dueDate']))->format('Y-m-d');
-            $withholdPeriod = 0;
-        }
-
-        if ($input['startDate'] && $input['dueDate'])
-        {
-            $startDate = (new Carbon($input['startDate']))->format('Y-m-d');
-            $dueDate = (new Carbon($input['dueDate']))->format('Y-m-d');
-            $newStartDate = new Carbon($startDate);
-            $newDueDate = new Carbon($dueDate);
-            $withholdPeriod = $newStartDate->diffInDays($newDueDate) . " Days";
-
-            if ($newDueDate->lessThanOrEqualTo($newStartDate))
+            $milestoneRetentionData = $amendment ? $model::getMilestoneRetentionAmdForUpdate($milestoneRetentionUuid,
+                $contractHistoryID) : $model::getMilestoneRetentionForUpdate($milestoneRetentionUuid);
+            if(empty($milestoneRetentionData))
             {
-                return ['status' => false, 'message' => trans('common.due_date_must_be_greater_than_start_date')];
+                GeneralService::sendException('Milestone retention not found.');
             }
-        }
+            $retentionPercentage = $milestoneRetentionData['retentionPercentage'];
 
-        DB::beginTransaction();
-        try
-        {
+            $milestone = ContractMilestone::getContractMilestoneWithAmount($milestoneUuid);
+            if(empty($milestone))
+            {
+                GeneralService::sendException(trans('common.milestone_not_found'));
+            }
+            $milestoneId = $milestone->id;
+            $contractId = $milestone->contractID ?? 0;
+            $retentionAmount = $milestoneId
+                ? $milestone['milestonePaymentSchedules']['amount'] * ($retentionPercentage / 100)
+                : 0;
+
+            if($input['value'] == 0)
+            {
+                $duplicateMilestone = $amendment
+                    ? $model::checkForDuplicateMilestoneRetentionAmd($milestoneId, $contractHistoryID, $companySystemID)
+                    : $model::checkForDuplicateMilestoneRetention($milestoneId, $contractId, $companySystemID);
+
+                if ($duplicateMilestone)
+                {
+                    GeneralService::sendException(trans('common.milestone_titles_cannot_be_duplicated'));
+                }
+            }
+
+            $startDate = $input['startDate'] ?? null;
+            $dueDate = $input['dueDate'] ?? null;
+            $withholdPeriod = 0;
+
+            if ($startDate && $dueDate)
+            {
+                $startDate = (new Carbon($startDate))->format('Y-m-d');
+                $dueDate = (new Carbon($dueDate))->format('Y-m-d');
+                $newStartDate = new Carbon($startDate);
+                $newDueDate = new Carbon($dueDate);
+
+                $withholdPeriod = $newStartDate->diffInDays($newDueDate) . " Days";
+
+                if ($newDueDate->lessThanOrEqualTo($newStartDate))
+                {
+                    GeneralService::sendException(trans('common.due_date_must_be_greater_than_start_date'));
+                }
+            } elseif ($startDate)
+            {
+                $startDate = (new Carbon($startDate))->format('Y-m-d');
+            } else
+            {
+                $dueDate = $dueDate ? (new Carbon($dueDate))->format('Y-m-d') : null;
+            }
 
             $data = [
                 'milestoneId' => $milestoneId,
@@ -232,37 +279,47 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                 'updated_at' => Carbon::now()
             ];
 
-            ContractMilestoneRetention::where('uuid',$milestoneRetentionUuid)
+            $model::where('uuid',$milestoneRetentionUuid)
+                ->when($amendment, function ($q) use ($contractHistoryID)
+                {
+                    $q->where('contract_history_id', $contractHistoryID);
+                })
                 ->where('companySystemId', $companySystemID)
                 ->update($data);
-
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.milestone_retention_updated_successfully')];
-
-        } catch (\Exception $ex)
-        {
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage()];
-        }
+        });
     }
 
-    public function updateRetentionPercentage(Request $request){
+    public function updateRetentionPercentage(Request $request)
+    {
         $input = $request->all();
-        $companySystemID = $input['selectedCompanyID'];
-        $contractUuid = $input['contractUuid'];
-        $retentionPercentage = $input['retentionPercentage'];
+        return DB::transaction( function () use ($input)
+        {
+            $companySystemID = $input['selectedCompanyID'];
+            $contractUuid = $input['contractUuid'];
+            $retentionPercentage = $input['retentionPercentage'];
+            $amendment = $input['amendment'] ?? false;
+            $contractHistoryUuid = $input['contractHistoryUuid'] ?? false;
+            $model = $amendment ? ContractMilestoneRetentionAmd::class : ContractMilestoneRetention::class;
 
-        $contract = ContractMaster::select('id')->where('uuid', $contractUuid)
-            ->where('companySystemID', $companySystemID)
-            ->first();
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+            if(empty($contract))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
+            $contractHistoryID = 0;
+            if($amendment)
+            {
+                $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
+                if(empty($contractHistory))
+                {
+                    GeneralService::sendException(trans('common.contract_history_not_found'));
+                }
+                $contractHistoryID = $contractHistory['id'];
+            }
 
-        $milestoneRetentionData = ContractMilestoneRetention::with(['milestone'])
-            ->where('contractId', $contract['id'])
-            ->where('companySystemId', $companySystemID)
-            ->get();
-
-        DB::beginTransaction();
-        try{
+            $milestoneRetentionData = $amendment
+                ? $model::getContractMilestoneRetentionAmdData($contractHistoryID, $companySystemID)
+                : $model::getContractMilestoneRetentionData($contract['id'], $companySystemID);
 
             $data = [
                 'retentionPercentage' => $retentionPercentage,
@@ -270,26 +327,24 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                 'updated_at' => Carbon::now()
             ];
 
-            ContractMilestoneRetention::where('contractId', $contract['id'])
-                ->where('companySystemId', $companySystemID)
-                ->update($data);
+            $amendment ? $model::updateMilestoneRetentionAmd($contractHistoryID, $companySystemID, $data)
+                : $model::updateMilestoneRetention($contract['id'], $companySystemID, $data);
 
-            foreach ($milestoneRetentionData as $milestoneRetention){
-                if($milestoneRetention['milestoneId'] != null){
-                    $retentionAmount = $milestoneRetention['milestone']['amount'];
-                    ContractMilestoneRetention::where('id', $milestoneRetention['id'])
+            foreach ($milestoneRetentionData as $milestoneRetention)
+            {
+                $retentionAmount = $milestoneRetention['milestone']['milestonePaymentSchedules']['amount'] ?? 0;
+                if($retentionAmount)
+                {
+                    $model::where('id', $milestoneRetention['id'])
+                        ->when($amendment, function ($q) use ($contractHistoryID)
+                        {
+                            $q->where('contract_history_id', $contractHistoryID);
+                        })
                         ->update(['retentionAmount' => $retentionAmount * ($retentionPercentage / 100)]);
                 }
 
             }
-
-            DB::commit();
-            return ['status' => true, 'message' => trans('common.retention_percentage_updated_successfully')];
-
-        } catch (\Exception $ex){
-            DB::rollBack();
-            return ['status' => false, 'message' => $ex->getMessage()];
-        }
+        });
     }
 
     public function exportMilestoneRetention(Request $request)
@@ -370,5 +425,9 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         }
 
         return false;
+    }
+    public function getMilestoneRetention($contractID)
+    {
+        return $this->model->getMilestoneRetention($contractID);
     }
 }

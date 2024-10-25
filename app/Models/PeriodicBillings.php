@@ -88,6 +88,11 @@ class PeriodicBillings extends Model
     {
         return $this->belongsTo(CurrencyMaster::class, 'currency_id', 'currencyID');
     }
+
+    public function billingFrequency()
+    {
+        return $this->belongsTo(BillingFrequencies::class, 'occurrence_type', 'id');
+    }
     public static function getContractPeriodicBilling($contractID)
     {
         return PeriodicBillings::select('uuid', 'amount', 'start_date', 'end_date', 'occurrence_type', 'due_in',
@@ -96,6 +101,10 @@ class PeriodicBillings extends Model
                 'currency' => function ($q)
                 {
                     $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
+                'billingFrequency' => function ($q)
+                {
+                    $q->select('id', 'description');
                 }
             ])
             ->where('contract_id', $contractID)->first();

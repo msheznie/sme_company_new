@@ -35,11 +35,13 @@ use App\Models\Employees;
 use App\Models\MilestonePaymentSchedules;
 use App\Models\PeriodicBillings;
 use App\Models\TenderFinalBids;
+use App\Models\TimeMaterialConsumption;
 use App\Repositories\BaseRepository;
 use App\Services\ContractAmendmentService;
 use App\Services\ContractHistoryService;
 use App\Services\ContractMasterService;
 use App\Services\GeneralService;
+use App\Services\ReferbackContractService;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -453,12 +455,9 @@ class ContractMasterRepository extends BaseRepository
                         $this->updatePenaltyAmounts($overallPenalty, $formData['contractAmount']);
                     }
                 }
-                catch (CommonException $ex)
+               catch (\Exception $ex)
                 {
-                    GeneralService::sendException(trans('Overall penalty not found.'));
-                } catch (\Exception $ex)
-                {
-                    GeneralService::sendException(trans('Overall penalty not found.'));
+                    GeneralService::sendException($ex->getMessage());
                 }
             }
 
@@ -578,10 +577,8 @@ class ContractMasterRepository extends BaseRepository
         return $contract;
     }
 
-    public function getContractTypeSectionData(Request $request)
+    public function getContractTypeSectionData($contractuuid)
     {
-        $input = $request->all();
-        $contractuuid = $input['contractId'];
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractuuid)->first();
 
@@ -640,7 +637,9 @@ class ContractMasterRepository extends BaseRepository
         $formData = $request->input('formData') ?? null;
         $settingMasters = $formData['settingMasters'] ?? [];
         $effectiveDateType = $formData['effectiveDateType'] ?? 1;
-        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType )
+        $companySystemID = $request->input('selectedCompanyID');
+
+        return DB::transaction(function () use ( $contractUuid, $settingMasters, $effectiveDateType, $companySystemID )
         {
             $contractMaster = self::findByUuid($contractUuid, ['id', 'startDate']);
             if(empty($contractMaster))
@@ -677,6 +676,12 @@ class ContractMasterRepository extends BaseRepository
                                 $details['settingDetailUuid']);
                         }
 
+                        if(in_array($details['description'], ['Milestone Payment', 'Time and Material',
+                                'Periodic Billing']) && ($details['isActive'] ?? false))
+                        {
+                            $this->existMilestonePayment($contractUuid, $companySystemID, $details['description']);
+                        }
+
                         $isActive = $details['isActive'] ?? 0;
                         $settingDetail->update(['isActive' => $isActive ? 1 : 0]);
                     }
@@ -703,31 +708,31 @@ class ContractMasterRepository extends BaseRepository
 
         $contractId = ContractMaster::select('id')->where('uuid', $contractUuid)->first();
 
-        $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
+         $activeSetting = ContractSettingMaster::where('contractId', $contractId['id'])
             ->where('isActive', 1)
             ->with([
-                'contractTypeSection' => function ($q)
+                'contractTypeSection' => function ($q) use ($isDrop)
                 {
                     $q->select('ct_sectionId', 'cmSection_id')
-                        ->with(['contractSectionWithTypes']);
+                        ->with(['contractSectionWithTypes'])
+                        ->when($isDrop, function ($q)
+                        {
+                            $q->whereIn('cmSection_id', [1, 4, 6]);
+                        });
                 }
             ])
+             ->where(function($q) use ($isDrop)
+             {
+                 $q->when($isDrop, function ($q)
+                 {
+                     $q->whereHas('contractTypeSection', function($q)
+                     {
+                         $q->whereIn('cmSection_id', [1, 4, 6]);
+                     });
+                 });
+             })
             ->get();
         $pluckedData = [];
-        foreach ($activeSetting as $setting)
-        {
-            if ($isDrop)
-            {
-                $pluckedData = [];
-               /* $pluckedData[] = [
-                    'id' => $setting->contractTypeSection->cmSection_id,
-                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
-                ];*/
-            } else
-            {
-                $pluckedData[] = $setting->contractTypeSection->cmSection_id;
-            }
-        }
 
         if ($isDrop)
         {
@@ -735,13 +740,24 @@ class ContractMasterRepository extends BaseRepository
                 'id' => 12,
                 'description' => 'Contract Info',
             ];
-           /* $pluckedData[] = [
-                'id' => 13,
-                'description' => 'User & User Group',
-            ];*/
+            /* $pluckedData[] = [
+                 'id' => 13,
+                 'description' => 'User & User Group',
+             ];*/
         }
-
-
+        foreach ($activeSetting as $setting)
+        {
+            if ($isDrop)
+            {
+                $pluckedData[] = [
+                    'id' => $setting->contractTypeSection->cmSection_id,
+                    'description' => $setting->contractTypeSection->contractSectionWithTypes->cmSection_detail,
+                ];
+            } else
+            {
+                $pluckedData[] = $setting->contractTypeSection->cmSection_id;
+            }
+        }
 
         return [
             'status' => true ,
@@ -794,6 +810,10 @@ class ContractMasterRepository extends BaseRepository
                     }
                 }
             ])
+            ->when($amendment, function ($q) use ($historyId)
+            {
+                $q->where('contract_history_id', $historyId);
+            })
             ->first();
 
 
@@ -835,7 +855,9 @@ class ContractMasterRepository extends BaseRepository
             :
             ContractManagementUtils::checkContractExist($contractUuid,$companySystemID);
 
-        $overallRetention = $contractOverallModel::where($contractCol, $contract['id'])
+        $contractID = $amendment ? $contract['contract_history_id'] : $contract['id'];
+
+        $overallRetention = $contractOverallModel::where($contractCol, $contractID)
             ->where('companySystemId', $companySystemID)
             ->first();
 
@@ -891,8 +913,17 @@ class ContractMasterRepository extends BaseRepository
 
                 $data = array_merge($data, $additionalData);
 
-                $contractOverallModel::updateOrCreate(
-                    ['contractId' => $contract['id'], 'companySystemId' => $companySystemID],$data);
+                $condition = [
+                    'contractId' => $contract['id'],
+                    'companySystemId' => $companySystemID,
+                ];
+
+                if ($amendment)
+                {
+                    $condition['contract_history_id'] = $historyId;
+                }
+
+                $contractOverallModel::updateOrCreate($condition,$data);
 
                 DB::commit();
                 return ['status' => true, 'message' => trans('common.overall_retention_updated_successfully')];
@@ -905,10 +936,8 @@ class ContractMasterRepository extends BaseRepository
         }
     }
 
-    public function getContractConfirmationData(Request $request)
+    public function getContractConfirmationData($contractUuid)
     {
-        $input = $request->all();
-        $contractUuid = $input['contractUuid'];
 
         $contractConfirmation = ContractMaster::select('confirmed_yn', 'confirmed_date', 'confirm_by')
             ->with(['confirmedBy'])
@@ -1308,6 +1337,23 @@ class ContractMasterRepository extends BaseRepository
         });
     }
 
+    public function referbackContract(Request $request)
+    {
+        $input = $request->all();
+
+        return DB::transaction(function () use ($input)
+        {
+            $contractUuid = $input['contractUuid'] ?? null;
+            $contractMaster = $this->findByUuid($contractUuid);
+            if(empty($contractMaster))
+            {
+                GeneralService::sendException(trans('common.contract_not_found'));
+            }
+
+            return ReferbackContractService::referbackContract($input, $contractMaster);
+        });
+    }
+
     public function getContractMasterId($formData,$id,$selectedCompanyID)
     {
         if($formData['amendment'])
@@ -1361,6 +1407,50 @@ class ContractMasterRepository extends BaseRepository
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
             ->make(true);
+    }
+
+    private function existMilestonePayment($contractUuid, $companySystemID, $description)
+    {
+        try
+        {
+            $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+            $contractId = $contract['id'];
+            $existMilestonePayment = MilestonePaymentSchedules::existMilestonePayment($contractId, $companySystemID);
+            $existPeriodicBilling = PeriodicBillings::existPeriodicBilling($contractId, $companySystemID);
+            $existTimeMaterialConsumption = TimeMaterialConsumption::existTimeMaterialConsumption(
+                $contractId, $companySystemID);
+
+            $deletionMappings = [
+                'Milestone Payment' => [
+                    'condition' => $existPeriodicBilling || $existTimeMaterialConsumption,
+                    'deleteFirst' =>
+                        $existPeriodicBilling ? 'App\\Models\\PeriodicBillings' : 'App\\Models\\TimeMaterialConsumption'
+                ],
+                'Periodic Billing' => [
+                    'condition' => $existMilestonePayment || $existTimeMaterialConsumption,
+                    'deleteFirst' => $existMilestonePayment ?
+                        'App\\Models\\MilestonePaymentSchedules' : 'App\\Models\\TimeMaterialConsumption'
+                ],
+                'Time and Material' => [
+                    'condition' => $existMilestonePayment || $existPeriodicBilling,
+                    'deleteFirst' => $existMilestonePayment ?
+                        'App\\Models\\MilestonePaymentSchedules' : 'App\\Models\\PeriodicBillings'
+                ]
+            ];
+
+            if (isset($deletionMappings[$description]) && $deletionMappings[$description]['condition'])
+            {
+                $model = $deletionMappings[$description]['deleteFirst'];
+                $model::where('contract_id', $contractId)
+                    ->where('company_id', $companySystemID)
+                    ->delete();
+            }
+        }
+        catch (\Exception $ex)
+        {
+            GeneralService::sendException('Failed to delete milestone and payment schedule', $ex);
+        }
+
     }
 }
 

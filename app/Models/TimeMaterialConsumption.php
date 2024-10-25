@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TimeMaterialConsumption
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class TimeMaterialConsumption extends Model
 {
+    use SoftDeletes;
     use HasFactory;
 
     public $table = 'cm_time_material_consumption';
@@ -34,6 +36,7 @@ class TimeMaterialConsumption extends Model
     const UPDATED_AT = 'updated_at';
 
     protected $hidden = ['id', 'boq_id'];
+    protected $dates = ['deleted_at'];
 
     public $fillable = [
         'uuid',
@@ -50,7 +53,8 @@ class TimeMaterialConsumption extends Model
         'currency_id',
         'company_id',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
@@ -74,7 +78,8 @@ class TimeMaterialConsumption extends Model
         'currency_id' => 'integer',
         'company_id' => 'integer',
         'created_by' => 'integer',
-        'updated_by' => 'integer'
+        'updated_by' => 'integer',
+        'deleted_by' => 'integer'
     ];
 
     /**
@@ -86,10 +91,21 @@ class TimeMaterialConsumption extends Model
 
     ];
 
+    public function units()
+    {
+        return $this->belongsTo(Unit::class, 'uom_id', 'UnitID');
+    }
+
     public function getAllTimeMaterialConsumption($contractID)
     {
         return TimeMaterialConsumption::select('uuid', 'item', 'description', 'min_quantity', 'max_quantity', 'price',
                 'amount', 'quantity', 'uom_id')
+            ->with([
+                "units" => function ($q)
+                {
+                    $q->select('UnitID', 'UnitDes');
+                },
+            ])
             ->where('contract_id', $contractID)
             ->get();
     }
@@ -105,5 +121,20 @@ class TimeMaterialConsumption extends Model
                 ->orWhere('price', '=', 0);
             })
             ->exists();
+    }
+
+    public static function existTimeMaterialConsumption($contractId, $companySystemID)
+    {
+        return TimeMaterialConsumption::where('contract_id', $contractId)
+            ->where('company_id', $companySystemID)
+            ->first();
+    }
+    public static function getTimeMaterialConsumptionToAmd($contractID)
+    {
+        return self::where('contract_id', $contractID)->get();
+    }
+    public static function checkUuidExists($uuid)
+    {
+        return self::where('uuid', $uuid)->exists();
     }
 }

@@ -62,7 +62,7 @@ class ContractAmendmentArea extends Model
      */
     public static $rules = [];
 
-    public function getContractAmendAreas($contractId,$historyId)
+    public static function getContractAmendAreas($contractId,$historyId)
     {
         return self::select('section_id')
         ->where('contract_id', $contractId)
