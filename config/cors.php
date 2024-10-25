@@ -21,7 +21,7 @@ return [
 
     'allowed_origins' => ['http://localhost:4200'],
 
-    'allowed_origins_patterns' => ['^https:\/\/.*\.gears-int\.com$'],
+    'allowed_origins_patterns' => ['/^https:\/\/(?:[a-zA-Z0-9-]+\.)+gears-int\.com$/'],
 
     'allowed_headers' => ['*'],
 
