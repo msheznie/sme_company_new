@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['tenant']], function ()
 {
-    Route::post('login', 'AuthAPIController@auth');
+    Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
     Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
 
     Route::resource('c_m_parties_masters', App\Http\Controllers\API\CMPartiesMasterAPIController::class);
