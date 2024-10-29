@@ -80,4 +80,10 @@ class Users extends Authenticatable
         return $this->hasOne(Employees::class,'employeeSystemID','employee_id');
     }
 
+    public static function getUsers($username)
+    {
+        return self::select('id', 'employee_id')
+            ->where('email', $username)
+            ->first();
+    }
 }

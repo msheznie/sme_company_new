@@ -239,5 +239,7 @@ return [
     "data_retrieved_successfully" => "Data retrieved successfully",
     'user_list_retrieved_successfully' => 'User list retrieved successfully',
     'fcm_token_not_found' => 'Fcm Token not found AR',
-    'commencement_date_not_found' => 'Commencement date not found AR'
+    'commencement_date_not_found' => 'Commencement date not found AR',
+    'login_failed_the_user_is_not_activated_please_contact_admin' =>
+        'Login failed! The user is not activated. Please contact admin. AR'
 ];
