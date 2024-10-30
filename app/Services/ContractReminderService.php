@@ -265,7 +265,7 @@ class ContractReminderService
             This is a reminder that the project milestone " . $text . " its due date. Please review the deliverables
             and tasks and ensure timely completion.</p>
             <p><li>Contract Title  : " . $title . "</li></p>
-            <p><li>Contract ID : " . $contractCode . "</li></p>
+            <p><li>Contract Code : " . $contractCode . "</li></p>
             <p><li>Milestone Title : " . $milestoneTitle . "</li></p>
             <p><li>Milestone Description : " . $milestoneDescription . "</li></p>
             <p><li>Milestone Due Date : " . $endDate . "</li></p>
@@ -286,7 +286,7 @@ class ContractReminderService
             This is to inform you that below attached document in the system " . $text . ". Please upload the updated
              versions at your earliest convenience to maintain the compliance.</p>
             <p><li>Contract Title  : " . $title . "</li></p>
-            <p><li>Contract ID : " . $contractCode . "</li></p>
+            <p><li>Contract Code : " . $contractCode . "</li></p>
             <p><li>Document Type : " . $documentType . "</li></p>
             <p><li>Document Name : " . $documentName . "</li></p>
             <p><li>Expiry Date : " . $endDate . "</li></p>

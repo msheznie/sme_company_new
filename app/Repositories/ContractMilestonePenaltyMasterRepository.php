@@ -69,7 +69,7 @@ class ContractMilestonePenaltyMasterRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                throw new CommonException('Contract Code not found.');
             }
             if($input['minimum_penalty_percentage'] > $input['maximum_penalty_percentage'])
             {

@@ -85,7 +85,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
             $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
 
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
-                ?? GeneralService::sendException(trans('common.contract_id_not_found'));
+                ?? GeneralService::sendException(trans('common.contract_code_not_found'));
 
             $historyID = $amendment
                 ? ContractManagementUtils::getContractHistoryData($historyUuid)['id']
@@ -120,7 +120,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
     public function getAllTimeMaterialConsumption($contractUuid, $selectedCompanyID, $historyUuid, $amendment)
     {
         $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
-            ?? GeneralService::sendException(trans('common.contract_id_not_found'));
+            ?? GeneralService::sendException(trans('common.contract_code_not_found'));
 
         $contractID = $contract['id'];
 
@@ -170,7 +170,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
             $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
 
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
-                ?? GeneralService::sendException('Contract ID not found.');
+                ?? GeneralService::sendException('Contract Code not found.');
 
             $historyID = $amendment
                 ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']

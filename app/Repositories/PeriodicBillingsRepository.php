@@ -71,7 +71,7 @@ class PeriodicBillingsRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                throw new CommonException('Contract Code not found.');
             }
             $currencyId = Company::getLocalCurrencyID($companyId);
             $postData = [

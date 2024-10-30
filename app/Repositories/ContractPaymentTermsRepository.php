@@ -89,7 +89,7 @@ class ContractPaymentTermsRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($input['contract_id'], $companySystemID);
             if(empty($contract))
             {
-                GeneralService::sendException('Contract ID not found.');
+                GeneralService::sendException('Contract Code not found.');
             }
             $uuidExists = $model::checkUuidExists($uuid);
             if ($uuidExists)

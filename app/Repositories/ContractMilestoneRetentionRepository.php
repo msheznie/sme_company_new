@@ -112,7 +112,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
             if(empty($contract))
             {
-                GeneralService::sendException(trans('common.contract_id_not_found'));
+                GeneralService::sendException(trans('common.contract_code_not_found'));
             }
             $contractID = $contract['id'];
             $contractHistoryId = 0;
@@ -410,7 +410,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
 

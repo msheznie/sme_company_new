@@ -46,7 +46,7 @@ class CreatePeriodicBillingsAPIRequest extends APIRequest
     {
         return [
             'selectedCompanyID.required' => 'Company Id is required.',
-            'contractUuid.required' => 'Contract ID is required.',
+            'contractUuid.required' => 'Contract Code is required.',
             'amount.required' => 'amount is required.',
             'start_date.title' => 'Start date is required.',
             'end_date.required' => 'End date is required.',
