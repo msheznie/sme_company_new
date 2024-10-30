@@ -110,7 +110,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                throw new CommonException('Contract Code not found.');
             }
             $milestone = ContractMilestone::checkContractMilestoneExists($input['milestone_id']);
             if(empty($milestone))

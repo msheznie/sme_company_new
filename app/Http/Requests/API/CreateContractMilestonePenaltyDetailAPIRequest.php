@@ -48,7 +48,7 @@ class CreateContractMilestonePenaltyDetailAPIRequest extends APIRequest
     {
         return [
             'selectedCompanyID.required' => 'Company Id is required.',
-            'contract_id.required' => 'Contract ID is required.',
+            'contract_id.required' => 'Contract Code is required.',
             'milestone_title.required' => 'Milestone title is required.',
             'penalty_percentage.required' => 'Penalty percentage is required.',
             'penalty_start_date.title' => 'Penalty start date is required.',

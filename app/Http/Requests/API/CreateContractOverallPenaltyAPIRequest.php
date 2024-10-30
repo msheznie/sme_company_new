@@ -49,7 +49,7 @@ class CreateContractOverallPenaltyAPIRequest extends APIRequest
     {
         return [
             'selectedCompanyID.required' => 'Company Id is required.',
-            'contractUuid.required' => 'Contract ID is required.',
+            'contractUuid.required' => 'Contract Code is required.',
             'minimum_penalty_percentage.required' => 'Minimum penalty percentage is required.',
             'maximum_penalty_percentage.required' => 'Maximum penalty percentage is required.',
             'actual_percentage.required' => 'Actual penalty percentage is required.',

@@ -37,7 +37,7 @@ class UpdateContractDeliverablesAPIRequest extends APIRequest
     {
         return [
             'companySystemID.required' => 'Company ID is required',
-            'contractUuid.required' => 'Contract ID is required',
+            'contractUuid.required' => 'Contract Code is required',
             'uuid.required' => 'Deliverable ID is required',
             'description.required' => 'Description is required',
             'title.required' => 'Deliverable Title is required',
