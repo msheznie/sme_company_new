@@ -170,7 +170,15 @@ class MilestonePaymentSchedules extends Model
     public function milestonePaymentSchedulesReport($search, $companyId, $filter)
     {
         $contractTypeUuid = $filter['contractTypeID'] ?? null;
+        $counterPartyNameIds = $filter['counterPartyNameIds'] ?? [];
         $milestoneStatus = $filter['milestoneStatus'] ?? 3;
+
+        $counterPartyIDs = ContractUsers::select('id')
+            ->whereIn('uuid', $counterPartyNameIds)
+            ->where('companySystemId', $companyId)
+            ->pluck('id')
+            ->toArray();
+
         $contractType = CMContractTypes::select('contract_typeId')
             ->where('uuid',$contractTypeUuid)
             ->where('companySystemID', $companyId)
@@ -188,7 +196,7 @@ class MilestonePaymentSchedules extends Model
             'milestone_status'
         )
         ->with([
-            'contractMaster' => function ($query) use($contractTypeID)
+            'contractMaster' => function ($query) use($contractTypeID,$counterPartyIDs)
             {
                 $query->select('id', 'contractCode', 'title', 'contractAmount', 'counterParty', 'counterPartyName',
                     'contractType'
@@ -212,6 +220,9 @@ class MilestonePaymentSchedules extends Model
                         $q->select('contract_typeId', 'cm_type_name', 'uuid');
                     }
                 ])
+                ->when(!empty($counterPartyIDs), function ($q) use ($counterPartyIDs) {
+                   $q->whereIn('counterPartyName', $counterPartyIDs);
+                })
                 ->when($contractTypeID > 0, function ($q) use ($contractTypeID)
                 {
                     $q->where('contractType', $contractTypeID);
@@ -226,11 +237,14 @@ class MilestonePaymentSchedules extends Model
                 });
             }
         ])
-        ->where(function ($query) use($contractTypeID, $milestoneStatus)
+        ->where(function ($query) use($counterPartyIDs, $contractTypeID, $milestoneStatus)
         {
-            $query->whereHas('contractMaster', function ($q) use ($contractTypeID)
+            $query->whereHas('contractMaster', function ($q) use ($counterPartyIDs, $contractTypeID)
             {
                 $q->where('approved_yn', 1);
+                $q->when(!empty($counterPartyIDs), function ($q) use ($counterPartyIDs) {
+                   $q->whereIn('counterPartyName', $counterPartyIDs);
+                });
                 $q->when($contractTypeID > 0, function ($q) use ($contractTypeID)
                 {
                     $q->where('contractType', $contractTypeID);
