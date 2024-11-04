@@ -110,6 +110,18 @@ class ContractMasterRepository extends BaseRepository
         $filter = $input['filter'] ?? null;
         $languages =  $this->model->contractMaster($search_keyword, $companyId, $filter);
         return DataTables::eloquent($languages)
+            ->addColumn('counterPartyUsername', function ($row)
+            {
+                switch ($row->counterParty)
+                {
+                    case 1:
+                        return $row->contractUsers->contractSupplierUser->supplierName ?? '';
+                    case 2:
+                        return $row->contractUsers->contractCustomerUser->CustomerName ?? '';
+                    default:
+                        return '';
+                }
+            })
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
             ->make(true);
