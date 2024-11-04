@@ -225,7 +225,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     if ($contractMaster['counterParty'] == 1)
                     {
                         $contractPartyName = $contractUsers['contractSupplierUser']['supplierName'] ?? '-';
-                    } else if ($contractMaster['counterParty'] == 2)
+                    } elseif ($contractMaster['counterParty'] == 2)
                     {
                         $contractPartyName = $contractUsers['contractCustomerUser']['CustomerName'] ?? '-';
                     }

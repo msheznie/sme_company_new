@@ -229,12 +229,12 @@ class ContractMasterService
     public function getContractReportFormData($request)
     {
         $selectedCompanyID = $request->input('selectedCompanyID');
-        $contractTypes = ContractManagementUtils::getContractTypes();
         $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         return [
             'decimalPlace' => $decimalPlaces,
-            'contractTypes' => $contractTypes
+            'counterPartiesName' => ContractManagementUtils::counterPartyNames(1),
+            'contractTypes' => ContractManagementUtils::getContractTypes()
         ];
     }
     public function exportContractDetailsReport($request)
