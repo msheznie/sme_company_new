@@ -189,7 +189,8 @@ class ErpEmployeesDepartments extends Model
             ->with(['employee' => function ($query)
             {
                 $query->select('employeeSystemID', 'empName')
-                    ->where('discharegedYN', 0);
+                    ->where('discharegedYN', 0)
+                    ->where('isEmailVerified', 1);
             }])
             ->where('companySystemID', $companySystemID)
             ->where('documentSystemID', $documentSystemID)
