@@ -157,7 +157,8 @@ class Employees extends Model
         'timestamp',
         'createdFrom',
         'isNewPortal',
-        'uuid'
+        'uuid',
+        'isEmailVerified'
     ];
 
     /**
@@ -234,7 +235,8 @@ class Employees extends Model
         'timestamp' => 'datetime',
         'createdFrom' => 'integer',
         'isNewPortal' => 'integer',
-        'uuid' => 'string'
+        'uuid' => 'string',
+        'isEmailVerified' => 'integer'
     ];
 
     /**
@@ -267,9 +269,10 @@ class Employees extends Model
     }
     public static function getEmployee($empSystemID)
     {
-        return Employees::select('empID', 'empName', 'empEmail')
+        return Employees::select('empID', 'empName', 'empEmail','isEmailVerified')
             ->where('employeeSystemID', $empSystemID)
             ->where('discharegedYN',0)
+            ->where('isEmailVerified',1)
             ->first();
     }
 }
