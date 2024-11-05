@@ -266,6 +266,10 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             {
                 $noOfInstallments = $daysDifference / 180;
             }
+            if($penaltyCirculationFrequency == 8)
+            {
+                $noOfInstallments = $daysDifference / 1;
+            }
             if($penaltyCirculationFrequency == 7)
             {
                 $noOfInstallments = $daysDifference / $penaltyDetails['due_in'];
