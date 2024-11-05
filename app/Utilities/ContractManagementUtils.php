@@ -261,6 +261,7 @@ class ContractManagementUtils
     public static function getBillingFrequencies()
     {
         return BillingFrequencies::select('id', 'description')
+            ->orderBy('sort_order', 'asc')
             ->get();
     }
 
@@ -411,5 +412,5 @@ class ContractManagementUtils
             })
             ->get();
     }
-    
+
 }
