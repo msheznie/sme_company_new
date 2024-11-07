@@ -33,7 +33,8 @@ class Email
                 $dataMail['empEmail'] = $employee['empEmail'];
             } else
             {
-                throw new CommonException('Employee Not Found');
+                Log::info('Employee not found for the system ID: ' . $dataMail['empSystemID']);
+                continue;
             }
             $body = '<p>Dear ' . $dataMail['empName'] . ', </p>' . $dataMail['emailAlertMessage'];
             $hasPolicy = CompanyPolicyMaster::checkActiveCompanyPolicy($dataMail['companySystemID'], 37);
@@ -67,7 +68,8 @@ class Email
                     $supplier = SupplierMaster::getSupplierBySupplierCodeSystem($contractUserResult->contractUserId);
                     if (empty($supplier))
                     {
-                        throw new CommonException('Supplier Not Found');
+                        Log::info('Supplier not found for the system ID: ' . $dataMail['empSystemID']);
+                        continue;
                     }
                     $dataMail = array_merge($dataMail, [
                         'empID' => $supplier['supplierCodeSystem'],
@@ -80,7 +82,8 @@ class Email
                     $employee = Employees::getEmployee($contractUserResult->contractUserId);
                     if (empty($employee))
                     {
-                        throw new CommonException('Employee Not Found');
+                        Log::info('Employee not found for the system ID: ' . $dataMail['empSystemID']);
+                        continue;
                     }
                     $dataMail = array_merge($dataMail, [
                         'empID' => $employee['empID'],
