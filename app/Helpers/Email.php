@@ -33,7 +33,7 @@ class Email
                 $dataMail['empEmail'] = $employee['empEmail'];
             } else
             {
-                Log::info('Employee not found for the system ID: ' . $dataMail['empSystemID']);
+                Log::info('Email verification for the Employee ID ' . $dataMail['empSystemID'] . ' is pending!');
                 continue;
             }
             $body = '<p>Dear ' . $dataMail['empName'] . ', </p>' . $dataMail['emailAlertMessage'];
@@ -68,7 +68,7 @@ class Email
                     $supplier = SupplierMaster::getSupplierBySupplierCodeSystem($contractUserResult->contractUserId);
                     if (empty($supplier))
                     {
-                        Log::info('Supplier not found for the system ID: ' . $dataMail['empSystemID']);
+                        Log::info('Email verification for the Supplier ID ' . $dataMail['empSystemID'] . ' is pending!');
                         continue;
                     }
                     $dataMail = array_merge($dataMail, [
@@ -82,7 +82,7 @@ class Email
                     $employee = Employees::getEmployee($contractUserResult->contractUserId);
                     if (empty($employee))
                     {
-                        Log::info('Employee not found for the system ID: ' . $dataMail['empSystemID']);
+                        Log::info('Email verification for the Employee ID ' . $dataMail['empSystemID'] . ' is pending!');
                         continue;
                     }
                     $dataMail = array_merge($dataMail, [
@@ -98,6 +98,7 @@ class Email
             }
             else
             {
+                Log::info($dataMail['error_tag'] . ' ' . $dataMail['error_msg']);
                 continue;
             }
 
