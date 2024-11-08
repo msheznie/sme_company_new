@@ -22,6 +22,7 @@ class AttachmentService
                 break;
             case 124:
             case 125:
+            case 126:
                 $ids = ContractHistory::getContractHistory($uuid, $companySystemID);
                 break;
             default:

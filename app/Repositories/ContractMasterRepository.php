@@ -169,8 +169,8 @@ class ContractMasterRepository extends BaseRepository
         $data[0]['Contract Code'] = "Contract Code";
         $data[0]['Title'] = "Title";
         $data[0]['Contract Type'] = "Contract Type";
-        $data[0]['Counter Party'] = "Counter Party";
-        $data[0]['Counter Party Name'] = "Counter Party Name";
+        $data[0]['Counter Party'] = "Counterparty";
+        $data[0]['Counter Party Name'] = "Counterparty Name";
         $data[0]['Reference Code'] = "Reference Code";
         $data[0]['Start Date'] = "Start Date";
         $data[0]['End Date'] = "End Date";

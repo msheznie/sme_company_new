@@ -229,7 +229,7 @@
                         </tr>
                         <tr>
                             <td width="150px">
-                                <span class="font-weight-bold">Counter Party:</span>
+                                <span class="font-weight-bold">Counterparty:</span>
                             </td>
                             <td width="10px">
                                 <span class="font-weight-bold">:</span>
@@ -289,7 +289,7 @@
                         </tr>
                         <tr>
                             <td width="150px">
-                                <span class="font-weight-bold">Counter Party Name:</span>
+                                <span class="font-weight-bold">Counterparty Name:</span>
                             </td>
                             <td width="10px">
                                 <span class="font-weight-bold">:</span>

@@ -338,7 +338,23 @@ class ContractHistoryAPIController extends AppBaseController
                     ->updateDocumentAttachments($request, $request->input('attachmentID'));
             } else
             {
-                $documentSystemCode = $formData['contractHistoryId'] ?? $currentContractDetails->id;
+                if($formData['contractCategory'] == 1)
+                {
+                    $contractHistoryDetails = ContractHistory::getContractHistory(
+                        $formData['contractHistoryId'],
+                        $companySystemID);
+
+                    if (!$contractHistoryDetails)
+                    {
+                        throw new CommonException(trans('common.contract_history_not_found'));
+                    }
+
+                    $documentSystemCode = $contractHistoryDetails->id;
+                }
+                else
+                {
+                    $documentSystemCode = $formData['contractHistoryId'] ?? $currentContractDetails->id;
+                }
                 $attachment = $this->erpDocumentAttachmentsRepository
                     ->saveDocumentAttachments($request, $documentSystemCode);
             }
