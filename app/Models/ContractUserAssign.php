@@ -78,7 +78,7 @@ class ContractUserAssign extends Model
         $subquery = ContractUserAssign::select('userGroupId', DB::raw('MIN(id) as min_id'))
             ->where('userGroupId', '!=', 0)
             ->where('contractId', $contractResults->id)
-            ->groupBy('userGroupId', 'status', 'created_at');
+            ->groupBy('userGroupId');
 
         $distinctRecords = ContractUserAssign::with(['userGroup', 'assignedUsers', 'employee', 'updatedByEmployee'])
             ->select('cm_contract_user_assign.*')
