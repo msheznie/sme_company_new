@@ -118,6 +118,7 @@ class ContractMasterAPIController extends AppBaseController
     {
         $input = $request->all();
         $comapnyId = $input['selectedCompanyID'];
+        $category = $input['category'] ?? 0;
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
             [   'id', 'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName',
                 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
@@ -149,9 +150,11 @@ class ContractMasterAPIController extends AppBaseController
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
         $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid, $comapnyId);
-        $contactMaster = new ContractMaster();
-        $lastSerialNumber  = $contactMaster->getMaxContractId();
-        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+
+        $contractCode = ($category == 2)
+            ? ContractMasterService::getAddendumCode($contractMaster['id'], $category, $contractMaster['contractCode'])
+            : (ContractMasterService::generateContractCode($comapnyId)['contractCode'] ?? '');
+
         $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
         $activePenalty = ContractSettingDetail::getActiveContractPenalty($contractMaster['id']);
         $response['editData'] = $editData;
