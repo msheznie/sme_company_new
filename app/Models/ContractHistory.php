@@ -303,4 +303,8 @@ class ContractHistory extends Model
             ->whereNotNull('status')
             ->get();
     }
+    public static function getContractHistoryCategoryWise($contractID, $category)
+    {
+        return self::where('cloning_contract_id', $contractID)->where('category', $category);
+    }
 }

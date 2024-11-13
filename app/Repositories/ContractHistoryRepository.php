@@ -196,9 +196,21 @@ class ContractHistoryRepository extends BaseRepository
 
     private function createContractInfo($currentContractDetails, $companyId, $categoryId)
     {
-        $contractCodeData = ContractMasterService::generateContractCode($companyId);
-        $lastSerialNumber  = $contractCodeData['lastSerialNumber'];
-        $contractCode = $contractCodeData['contractCode'];
+        if ($categoryId == 2)
+        {
+            $contractCode = ContractMasterService::getAddendumCode(
+                $currentContractDetails['id'],
+                $categoryId,
+                $currentContractDetails['contractCode']
+            );
+            $lastSerialNumber = ContractMasterService::getContractLastSerialNumber($companyId);
+        } else
+        {
+            $contractCodeData = ContractMasterService::generateContractCode($companyId);
+            $contractCode = $contractCodeData['contractCode'];
+            $lastSerialNumber = $contractCodeData['lastSerialNumber'];
+        }
+
         $uuid = ContractManagementUtils::generateUuid();
 
         $insert = [

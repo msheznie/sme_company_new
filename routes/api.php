@@ -54,6 +54,7 @@ Route::group(['middleware' => ['tenant']], function ()
             require_once __DIR__.'/../routes/common/commonRoutes.php';
             require_once __DIR__.'/../routes/reports/reportRoutes.php';
             require_once __DIR__.'/../routes/amendment/amendmentRoutes.php';
+            require_once __DIR__.'/../routes/admin_settings/AdminSettingsRoute.php';
 
 
             Route::post('/save-contract-type', [CMContractTypesAPIController::class, 'saveContractType'])
