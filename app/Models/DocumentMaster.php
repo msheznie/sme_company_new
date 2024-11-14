@@ -83,7 +83,8 @@ class DocumentMaster extends Model
     }
     public function documentMaster($companySystemID)
     {
-        return DocumentMaster::where('companySystemID', $companySystemID)->orderBy('id', 'desc');
+        return DocumentMaster::select('uuid', 'documentType', 'description', 'status')
+        ->where('companySystemID', $companySystemID)->orderBy('id', 'desc');
     }
 
     public static function documentMasterByUuid($uuid)

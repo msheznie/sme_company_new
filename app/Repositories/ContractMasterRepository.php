@@ -599,7 +599,10 @@ class ContractMasterRepository extends BaseRepository
                 'contractTypeSection' => function ($q) {
                     $q->select('ct_sectionId', 'uuid', 'contract_typeId', 'cmSection_id', 'is_enabled');
                     $q->with([
-                        'contractSectionWithTypes'
+                        'contractSectionWithTypes' => function ($q)
+                        {
+                            $q->select('cmSection_id', 'cmSection_detail', 'csm_active');
+                        }
                     ]);
                 },
                 'contractSettingDetails' => function ($q)

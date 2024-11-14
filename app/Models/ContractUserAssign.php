@@ -80,17 +80,43 @@ class ContractUserAssign extends Model
             ->where('contractId', $contractResults->id)
             ->groupBy('userGroupId');
 
-        $distinctRecords = ContractUserAssign::with(['userGroup', 'assignedUsers', 'employee', 'updatedByEmployee'])
-            ->select('cm_contract_user_assign.*')
+        $distinctRecords = ContractUserAssign::select('id', 'contractId', 'cm_contract_user_assign.userGroupId', 'userId', 'created_at', 'updated_at',
+            'status', 'updatedBy', 'createdBy', 'uuid')
+        ->with(['userGroup' => function ($q2)
+        {
+            $q2->select('id', 'groupName', 'uuid');
+        }, 'assignedUsers' => function ($q3)
+        {
+            $q3->select('id', 'contractUserName');
+        }, 'employee' => function ($q4)
+        {
+            $q4->select('employeeSystemID', 'empFullName');
+        }, 'updatedByEmployee' => function ($q5)
+        {
+            $q5->select('employeeSystemID', 'empFullName');
+        }])
             ->joinSub($subquery, 'sub', function ($join)
             {
                 $join->on('cm_contract_user_assign.userGroupId', '=', 'sub.userGroupId')
                     ->on('cm_contract_user_assign.id', '=', 'sub.min_id');
             });
 
-        $allRecords = ContractUserAssign::with(['userGroup', 'assignedUsers', 'employee', 'updatedByEmployee'])
-            ->select('cm_contract_user_assign.*')
-            ->where('userGroupId', '=', 0)
+        $allRecords = ContractUserAssign::select('id', 'contractId', 'cm_contract_user_assign.userGroupId', 'userId', 'created_at', 'updated_at',
+            'status', 'updatedBy', 'createdBy', 'uuid')
+            ->with(['userGroup' => function ($q2)
+            {
+                $q2->select('id', 'groupName', 'uuid');
+            }, 'assignedUsers' => function ($q3)
+            {
+                $q3->select('id', 'contractUserName');
+            }, 'employee' => function ($q4)
+            {
+                $q4->select('employeeSystemID', 'empName');
+            }, 'updatedByEmployee' => function ($q5)
+            {
+                $q5->select('employeeSystemID', 'empName');
+            }])
+            ->where('cm_contract_user_assign.userGroupId', '=', 0)
             ->where('contractId', $contractResults->id)
             ->orderBy('id', 'desc');
 

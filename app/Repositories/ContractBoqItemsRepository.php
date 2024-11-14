@@ -77,9 +77,13 @@ class ContractBoqItemsRepository extends BaseRepository
             ->with(['itemMaster.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
-            }, 'itemMaster.itemAssigned.local_currency', 'boqItem', 'boqItem.unit' => function ($query)
+            }, 'itemMaster.itemAssigned.local_currency' => function ($qiu) {
+                $qiu->select('currencyID','DecimalPlaces');
+            }, 'boqItem' => function ($qiu2) {
+                $qiu2->select('id','item_name', 'description');
+            }, 'boqItem.unit' => function ($qiu3)
             {
-                $query->select('UnitShortCode');
+                $qiu3->select('UnitShortCode');
             }])
             ->where('companyId', $companyId)
             ->where($colName, $id)
@@ -202,11 +206,22 @@ class ContractBoqItemsRepository extends BaseRepository
         $companyId = $input['selectedCompanyID'];
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
-        $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency',
-            'boqItem', 'boqItem.unit' => function ($query)
+        $lotData = ContractBoqItems::select('uuid', 'origin', 'itemId', 'description', 'minQty', 'maxQty', 'qty', 'price',
+            'contractId', 'companyId')
+            ->with(['itemMaster.unit' => function ($q1)
             {
-            $query->select('UnitShortCode');
-        }])
+              $q1->select('UnitShortCode');
+            }, 'itemMaster.itemAssigned.local_currency' => function ($q2)
+            {
+              $q2->select('currencyID','DecimalPlaces');
+            },
+            'boqItem' => function ($q3)
+            {
+                $q3->select('id','item_name', 'description');
+            }, 'boqItem.unit' => function ($q4)
+            {
+               $q4->select('UnitShortCode');
+            }])
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id)
             ->get();

@@ -236,8 +236,13 @@ class ContractAmendmentService
 
     public static function getAmendmentDeliverables($historyId)
     {
-        $deliverables = CMContractDeliverableAmd::where('contract_history_id', $historyId)
-            ->with(['milestone'])
+        $deliverables = CMContractDeliverableAmd::select('id', 'uuid', 'contractID', 'description', 'title',
+            'contract_history_id', 'milestoneID', 'dueDate')
+            ->where('contract_history_id', $historyId)
+            ->with(['milestone' => function ($q)
+            {
+                $q->select('uuid');
+            }])
             ->get();
 
         $deliverablesArray = [];
@@ -259,7 +264,8 @@ class ContractAmendmentService
 
     public static function getAmendmentMilestones($historyId)
     {
-        return CMContractMileStoneAmd::where('contract_history_id', $historyId)->get();
+        return CMContractMileStoneAmd::select('id', 'contractID', 'uuid', 'title', 'contract_history_id')
+        ->where('contract_history_id', $historyId)->get();
     }
 
     public function deleteContractDeliverablesAmd($input)
