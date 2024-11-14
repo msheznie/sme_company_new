@@ -173,7 +173,7 @@ class ContractManagementUtils
 
     public static function getMilestonesWithAmount($contractId, $companySystemID)
     {
-        return ContractMilestone::with('milestonePaymentSchedules')
+        return ContractMilestone::select('id', 'contractID', 'uuid', 'title')->with('milestonePaymentSchedules')
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->has('milestonePaymentSchedules')
@@ -191,7 +191,10 @@ class ContractManagementUtils
 
     public static function checkContractExist($contractUuid, $companySystemID)
     {
-        return ContractMaster::where('uuid', $contractUuid)
+        return ContractMaster::select('id', 'contractType', 'counterParty', 'counterPartyName','contractOwner',
+            'parent_id', 'tender_id', 'contractCode', 'title', 'referenceCode', 'startDate',
+            'endDate', 'uuid', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'status', 'confirm_by', 'created_by')
+            ->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
             ->with([
                 "contractTypes" => function ($q)
@@ -267,7 +270,8 @@ class ContractManagementUtils
 
     public static function getContractHistoryData($uuid)
     {
-        return ContractHistory::Where('uuid', $uuid)
+        return ContractHistory::select('id')
+            ->where('uuid', $uuid)
             ->first();
     }
     public static function getPaymentScheduleMilestone($contractID, $companySystemID, $editMilestoneID = null)
