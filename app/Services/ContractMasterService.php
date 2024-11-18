@@ -309,25 +309,18 @@ class ContractMasterService
         $year = Carbon::now()->year;
         $serialNumberFormatted = str_pad($serialNumber, 4, '0', STR_PAD_LEFT);
 
+        preg_match('/#_([A-Za-z0-9]+)\b/', $pattern, $matches);
+        $prefix = $matches[1] ?? "";
+
         $replacements = [
-            'Company ID' => $companyId,
-            'Year' => $year
+            '#Company ID' => $companyId,
+            '#Year' => $year,
+            "#_{$prefix}" => $prefix,
+            '#SN' => $serialNumberFormatted,
+            '#/' => '/',
+            '#-' => '-'
         ];
-
-        $code = preg_replace_callback('/#([^#]+)#/', function ($matches) use ($replacements)
-        {
-            $placeholder = $matches[1];
-            return $placeholder[0] === '_'
-                ? strtoupper(substr($placeholder, 1))
-                : ($replacements[$placeholder] ?? '');
-        }, $pattern);
-
-        if (str_contains($code, '#SN'))
-        {
-            $code = str_replace('#SN', $serialNumberFormatted, $code);
-        }
-
-        return $code;
+        return  strtr($pattern, $replacements);
     }
 
     public function getSupplierContactDetails($request)
