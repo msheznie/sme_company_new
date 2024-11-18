@@ -192,7 +192,7 @@ class ContractManagementUtils
     public static function checkContractExist($contractUuid, $companySystemID)
     {
         return ContractMaster::select('id', 'contractType', 'counterParty', 'counterPartyName','contractOwner',
-            'parent_id', 'tender_id', 'contractCode', 'title', 'referenceCode', 'startDate',
+            'parent_id', 'tender_id', 'contractCode', 'title', 'referenceCode', 'startDate', 'contractAmount',
             'endDate', 'uuid', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'status', 'confirm_by', 'created_by')
             ->where('uuid', $contractUuid)
             ->where('companySystemID', $companySystemID)
