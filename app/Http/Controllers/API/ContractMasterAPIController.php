@@ -470,7 +470,8 @@ class ContractMasterAPIController extends AppBaseController
         } else
         {
             $itemMasters = ItemAssigned::select('idItemAssigned' ,'itemUnitOfMeasure', 'financeCategoryMaster',
-             'financeCategorySub', 'itemPrimaryCode', 'secondaryItemCode', 'itemDescription', 'barcode', 'companySystemID')
+             'financeCategorySub', 'itemPrimaryCode', 'secondaryItemCode', 'itemDescription', 'barcode',
+                'companySystemID', 'itemCodeSystem')
              ->with(['unit' => function ($q)
             {
                 $q->select('UnitID', 'UnitShortCode');
