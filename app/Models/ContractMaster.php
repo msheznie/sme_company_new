@@ -792,42 +792,32 @@ class ContractMaster extends Model
         {
             $categoryId = 6;
         }
-        $currentEmployeeId = General::currentEmployeeId();
 
         $contractId = CMContractTypes::getContractTypeIdByName($contractType, $companyId);
 
-        $contractUserId = ContractUsers::getUserId($currentEmployeeId);
-
-        $query = ContractMaster::select('id', 'contractType', 'counterParty', 'counterPartyName','contractOwner',
-            'parent_id', 'tender_id', 'contractCode', 'title', 'referenceCode', 'startDate',
-            'endDate', 'uuid', 'confirmed_yn', 'approved_yn', 'refferedBackYN', 'status', 'confirm_by', 'created_by')
+        $query = ContractMaster::select('id', 'contractType', 'counterParty', 'counterPartyName', 'contractCode',
+            'title', 'referenceCode', 'startDate', 'endDate', 'uuid', 'confirmed_yn', 'approved_yn', 'refferedBackYN',
+            'status')
          ->with(['contractTypes' => function ($q)
         {
             $q->select('contract_typeId', 'cm_type_name', 'uuid');
         }, 'counterParties' => function ($q1)
         {
             $q1->select('cmCounterParty_id', 'cmCounterParty_name');
-        }, 'createdUser' => function ($q2)
-        {
-            $q2->select('employeeSystemID', 'empName');
         }, 'contractUsers' => function ($q3)
         {
-            $q3->with(['contractSupplierUser','contractCustomerUser']);
-        }, 'contractAssignedUsers' => function ($q4) use ($contractUserId)
-        {
-            $q4->select('contractId', 'userId')
-                ->where('userId', $contractUserId->id)
-                ->where('status', 1);
-        },'contractHistoryStatus' => function ($q5) use ($companyId)
-        {
-            $q5->select(DB::raw('MIN(id) as id'), 'contract_id', 'status')
-                ->where('company_id', $companyId)
-                ->groupBy('contract_id', 'status')
-                ->orderBy('id', 'asc');
-
-        },'contractAssignedUsers.contractUserGroupAssignedUser' => function ($q6) {
-            $q6->select('id', 'contractUserId', 'userGroupId');
-         }
+            $q3->select('id', 'contractUserId', 'contractUserType', 'contractUserCode', 'contractUserName')
+                ->with([
+                    'contractSupplierUser' => function ($q6)
+                    {
+                        $q6->select('supplierCodeSystem', 'supplierName');
+                    },
+                    'contractCustomerUser' => function ($q7)
+                    {
+                        $q7->select('customerCodeSystem', 'CustomerName');
+                    }
+                ]);
+        }
         ])->where('companySystemID', $companyId);
 
         if($categoryId != 0)
