@@ -87,6 +87,7 @@ class Employees extends Model
     protected $primaryKey = 'employeeSystemID';
     const CREATED_AT = 'timestamp';
     const UPDATED_AT = 'timestamp';
+    protected $hidden = ['empEmail', 'empUserName'];
 
 
     public $fillable = [
