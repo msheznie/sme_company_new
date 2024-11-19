@@ -74,16 +74,34 @@ class ContractBoqItemsRepository extends BaseRepository
         $id = $amendment ? self::getHistoryId($uuid) : $contractId->id;
 
         $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price', 'origin')
-            ->with(['itemMaster.unit' => function ($query)
+            ->with([
+                'itemMaster.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
+                },
+                'itemMaster' => function ($q)
+                {
+                    $q->select('itemCodeSystem', 'unit', 'itemDescription', 'primaryCode');
+                    $q->with([
+                        'itemAssigned' => function ($q)
+                        {
+                            $q->select('itemCodeSystem', 'wacValueLocalCurrencyID');
+                            $q->with([
+                                'local_currency' => function ($q)
+                                {
+                                    $q->select('currencyID','DecimalPlaces');
+                                }
+                            ]);
+                        }
+                    ]);
+                },
+                'boqItem' => function ($q)
+                {
+                    $q->select('id', 'uom', 'description', 'item_name');
+                },
+                'boqItem.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
-            }, 'itemMaster.itemAssigned.local_currency' => function ($qiu) {
-                $qiu->select('currencyID','DecimalPlaces');
-            }, 'boqItem' => function ($qiu2) {
-                $qiu2->select('id','item_name', 'description');
-            }, 'boqItem.unit' => function ($qiu3)
-            {
-                $qiu3->select('UnitShortCode');
             }])
             ->where('companyId', $companyId)
             ->where($colName, $id)
