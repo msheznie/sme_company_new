@@ -40,7 +40,7 @@ class ContractMilestonePenaltyDetail extends Model
 
 
     protected $dates = ['deleted_at'];
-    protected $hidden = ['id' , 'uuid'];
+    protected $hidden = ['id'];
 
 
     public $fillable = [
