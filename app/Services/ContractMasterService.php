@@ -309,17 +309,22 @@ class ContractMasterService
         $year = Carbon::now()->year;
         $serialNumberFormatted = str_pad($serialNumber, 4, '0', STR_PAD_LEFT);
 
-        preg_match('/#_([A-Za-z0-9]+)\b/', $pattern, $matches);
-        $prefix = $matches[1] ?? "";
+        preg_match_all('/#_([A-Za-z0-9]+)\b/', $pattern, $matches);
+        $prefixes = $matches[1] ?? [];
 
         $replacements = [
             '#Company ID' => $companyId,
             '#Year' => $year,
-            "#_{$prefix}" => $prefix,
             '#SN' => $serialNumberFormatted,
             '#/' => '/',
             '#-' => '-'
         ];
+
+        $prefixReplacements = array_combine(
+            array_map(fn($prefix) => "#_{$prefix}", $prefixes),
+            $prefixes
+        );
+        $replacements = array_merge($replacements, $prefixReplacements);
         return  strtr($pattern, $replacements);
     }
 
