@@ -237,7 +237,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     2 => 'Completed',
                 ];
 
-                $status = $statusMap[$value['milestoneDetail']['status']] ?? '-';
+                $status = $value['milestoneDetail'] ? $statusMap[$value['milestoneDetail']['status']] ?? '-' : '-';
                 $data[$count] = [
                     trans('common.contract_code') => $contractMaster['contractCode'] ?? '-',
                     trans('common.title') => $contractMaster['title'] ?? '-',
