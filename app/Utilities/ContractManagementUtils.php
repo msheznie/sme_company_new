@@ -267,8 +267,7 @@ class ContractManagementUtils
 
     public static function getContractHistoryData($uuid)
     {
-        return ContractHistory::select('id')
-            ->where('uuid', $uuid)
+        return ContractHistory::where('uuid', $uuid)
             ->first();
     }
     public static function getPaymentScheduleMilestone($contractID, $companySystemID, $editMilestoneID = null)
