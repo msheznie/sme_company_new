@@ -38,8 +38,8 @@ class CreateContractAdditionalDocumentsAPIRequest extends APIRequest
             'documentTypes.required' => trans('common.document_type_is_required'),
             'documentTypes.required' => trans('common.document_type_is_required'),
             'selectedCompanyID.required' => trans('common.company_id_is_required'),
-             'documentName.required' => 'Document Name is required',
-             'file.required' => 'File is required',
+            'documentName.required' => 'Document Name is required',
+            'file.required' => 'File is required',
         ];
     }
 }

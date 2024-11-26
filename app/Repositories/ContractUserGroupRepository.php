@@ -20,7 +20,7 @@ use Yajra\DataTables\DataTables;
  * Class ContractUserGroupRepository
  * @package App\Repositories
  * @version May 7, 2024, 10:59 am +04
-*/
+ */
 
 class ContractUserGroupRepository extends BaseRepository
 {

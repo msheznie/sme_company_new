@@ -147,7 +147,7 @@ class ContractDocument extends Model
 
     public static function getContractDocuments($contractId, $selectedCompanyID)
     {
-            return self::where('companySystemID',$selectedCompanyID)
+        return self::where('companySystemID',$selectedCompanyID)
             ->where('contractID',$contractId)
             ->get();
     }
