@@ -86,7 +86,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                throw new CommonException('Contract Code not found.');
             }
 
             $milestonePenaltyMaster = ContractMilestonePenaltyMaster::getMilestonePenaltyMaster(
@@ -265,6 +265,10 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             if($penaltyCirculationFrequency == 6)
             {
                 $noOfInstallments = $daysDifference / 180;
+            }
+            if($penaltyCirculationFrequency == 8)
+            {
+                $noOfInstallments = $daysDifference / 1;
             }
             if($penaltyCirculationFrequency == 7)
             {

@@ -39,7 +39,7 @@ class EmailUtils
                    </p> <p><span style="text-decoration: underline;">Contract Details</span></p>
                    <p>
                     <span style="margin-bottom: 10px;"><b>Contract Title: </b>'. $masterData->title .'</span><br>
-                    <span style="margin-bottom: 10px;"><b>Contract ID: </b>'. $masterData->contractCode .' </span><br>
+                    <span style="margin-bottom: 10px;"><b>Contract Code: </b>'. $masterData->contractCode .' </span><br>
                     <span style="margin-bottom: 10px;"><b>Contract Type: </b>'. $contractType .' </span><br>
                     <span style="margin-bottom: 10px;"><b>Created By: </b>'. $contractUser .' </span><br>
                     <span style="margin-bottom: 10px;"><b>Parties Invlolved: </b></span> <br>

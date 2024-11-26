@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\ContractCreationException;
 use App\Models\FormTemplateMaster;
+use App\Models\CodeConfigurations;
 use App\Models\{Navigation, Permission, PermissionsModel, Role, RoleHasPermissions, Tenant, UserTenant};
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -100,5 +101,14 @@ class GeneralService
     {
         throw new ContractCreationException($message . ($e ? $e->getMessage() : ''));
     }
-
+    public static function getDocumentCodePattern($companySystemID, $serializationOn)
+    {
+        $codeConfig = CodeConfigurations::select('code_pattern')->where(
+            [
+                'company_system_id' => $companySystemID,
+                'serialization_based_on' => $serializationOn
+            ]
+        )->first();
+        return $codeConfig->code_pattern ?? null;
+    }
 }

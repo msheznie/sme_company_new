@@ -118,6 +118,7 @@ class ContractMasterAPIController extends AppBaseController
     {
         $input = $request->all();
         $comapnyId = $input['selectedCompanyID'];
+        $category = $input['category'] ?? 0;
         $contractMaster = $this->contractMasterRepository->findByUuid($id,
             [   'id', 'uuid', 'contractCode', 'title', 'contractType', 'counterParty', 'counterPartyName',
                 'referenceCode', 'startDate', 'endDate', 'status', 'contractOwner', 'contractAmount', 'description',
@@ -149,9 +150,11 @@ class ContractMasterAPIController extends AppBaseController
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
         $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid, $comapnyId);
-        $contactMaster = new ContractMaster();
-        $lastSerialNumber  = $contactMaster->getMaxContractId();
-        $contractCode = ContractManagementUtils::generateCode($lastSerialNumber, 'CO');
+
+        $contractCode = ($category == 2)
+            ? ContractMasterService::getAddendumCode($contractMaster['id'], $category, $contractMaster['contractCode'])
+            : (ContractMasterService::generateContractCode($comapnyId)['contractCode'] ?? '');
+
         $activeMilestonePS = ContractSettingDetail::getActiveContractPaymentSchedule($contractMaster['id']);
         $activePenalty = ContractSettingDetail::getActiveContractPenalty($contractMaster['id']);
         $response['editData'] = $editData;
@@ -395,8 +398,9 @@ class ContractMasterAPIController extends AppBaseController
 
     public function getItemMasterFormData(Request $request)
     {
-        $itemCategory = FinanceItemCategoryMaster::all();
-        $itemCategorySubArray = FinanceItemCategorySub::where('isActive',1)->get();
+        $itemCategory = FinanceItemCategoryMaster::select('itemCategoryID', 'categoryDescription')->get();
+        $itemCategorySubArray = FinanceItemCategorySub::select('itemCategorySubID', 'categoryDescription', 'isActive')
+            ->where('isActive',1)->get();
 
         $output = [
             'financeItemCategoryMaster' => $itemCategory,
@@ -465,7 +469,19 @@ class ContractMasterAPIController extends AppBaseController
             $itemMasters = TenderBoqItems::getBoqItemList($finalBidResult->bid_id);
         } else
         {
-            $itemMasters = ItemAssigned::with(['unit', 'financeMainCategory', 'financeSubCategory'])
+            $itemMasters = ItemAssigned::select('idItemAssigned' ,'itemUnitOfMeasure', 'financeCategoryMaster',
+             'financeCategorySub', 'itemPrimaryCode', 'secondaryItemCode', 'itemDescription', 'barcode',
+                'companySystemID', 'itemCodeSystem')
+             ->with(['unit' => function ($q)
+            {
+                $q->select('UnitID', 'UnitShortCode');
+            }, 'financeMainCategory' => function ($q2)
+            {
+                $q2->select('itemCategoryID', 'categoryDescription');
+            }, 'financeSubCategory' => function ($q3)
+            {
+                $q3->select('itemCategorySubID', 'categoryDescription');
+            }])
                 ->whereIn('companySystemID', $childCompanies)
                 ->where('financeCategoryMaster', 1)
                 ->whereDoesntHave($relationShip, function ($query) use ($id , $colName)

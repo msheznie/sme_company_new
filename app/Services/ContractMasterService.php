@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\General;
 use App\Models\CMContractReminderScenario;
 use App\Models\CMContractTypes;
 use App\Models\CMContractTypeSections;
@@ -229,12 +230,12 @@ class ContractMasterService
     public function getContractReportFormData($request)
     {
         $selectedCompanyID = $request->input('selectedCompanyID');
-        $contractTypes = ContractManagementUtils::getContractTypes();
         $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         return [
             'decimalPlace' => $decimalPlaces,
-            'contractTypes' => $contractTypes
+            'counterPartiesName' => ContractManagementUtils::counterPartyNames(1),
+            'contractTypes' => ContractManagementUtils::getContractTypes()
         ];
     }
     public function exportContractDetailsReport($request)
@@ -289,11 +290,42 @@ class ContractMasterService
             ->max('serial_no');
 
         $lastSerialNumber = $lastSerialNumber ? intval($lastSerialNumber) + 1 : 1;
-
-        $contractCode =  ContractManagementUtils::generateCode($lastSerialNumber,'CO',4);
+        $codePattern = GeneralService::getDocumentCodePattern($companySystemID, 1);
+        if($codePattern)
+        {
+            $companyId = General::getCompanyById($companySystemID);
+            $contractCode = self::generateDocumentCode($codePattern, $companyId, $lastSerialNumber);
+        } else
+        {
+            $contractCode =  ContractManagementUtils::generateCode($lastSerialNumber,'CO',4);
+        }
 
         return ['contractCode' => $contractCode, 'lastSerialNumber' => $lastSerialNumber];
 
+    }
+
+    public function generateDocumentCode($pattern, $companyId, $serialNumber = 1)
+    {
+        $year = Carbon::now()->year;
+        $serialNumberFormatted = str_pad($serialNumber, 4, '0', STR_PAD_LEFT);
+
+        preg_match_all('/#_([A-Za-z0-9]+)\b/', $pattern, $matches);
+        $prefixes = $matches[1] ?? [];
+
+        $replacements = [
+            '#Company ID' => $companyId,
+            '#Year' => $year,
+            '#SN' => $serialNumberFormatted,
+            '#/' => '/',
+            '#-' => '-'
+        ];
+
+        $prefixReplacements = array_combine(
+            array_map(fn($prefix) => "#_{$prefix}", $prefixes),
+            $prefixes
+        );
+        $replacements = array_merge($replacements, $prefixReplacements);
+        return  strtr($pattern, $replacements);
     }
 
     public function getSupplierContactDetails($request)
@@ -331,5 +363,18 @@ class ContractMasterService
     public static function updateContractMaster($id, $field)
     {
         return ContractMaster::where('id', $id)->update($field);
+    }
+
+    public static function getAddendumCode($contractID, $category, $contractMasterCode)
+    {
+        $contractAddendumCount = ContractHistory::getContractHistoryCategoryWise($contractID, $category)->count();
+        $addCode = ContractManagementUtils::generateCode($contractAddendumCount + 1, 'Add', 2);
+        return $contractMasterCode . ' | ' . $addCode;
+    }
+    public static function getContractLastSerialNumber($companySystemID)
+    {
+        $lastSerialNumber = ContractMaster::where('companySystemID', $companySystemID)
+            ->max('serial_no');
+        return $lastSerialNumber ? $lastSerialNumber + 1 : 1;
     }
 }

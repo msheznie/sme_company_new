@@ -34,6 +34,7 @@ class Users extends Authenticatable
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    protected $hidden = ['email' , 'username', 'password'];
 
     public $fillable = [
         'employee_id',
@@ -80,4 +81,10 @@ class Users extends Authenticatable
         return $this->hasOne(Employees::class,'employeeSystemID','employee_id');
     }
 
+    public static function getUsers($username)
+    {
+        return self::select('id', 'employee_id')
+            ->where('email', $username)
+            ->first();
+    }
 }

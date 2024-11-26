@@ -74,10 +74,32 @@ class ContractBoqItemsRepository extends BaseRepository
         $id = $amendment ? self::getHistoryId($uuid) : $contractId->id;
 
         $query = $model::select('uuid', 'minQty', 'maxQty', 'qty', 'companyId', 'itemId','price', 'origin')
-            ->with(['itemMaster.unit' => function ($query)
-            {
-                $query->select('UnitShortCode');
-            }, 'itemMaster.itemAssigned.local_currency', 'boqItem', 'boqItem.unit' => function ($query)
+            ->with([
+                'itemMaster.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
+                },
+                'itemMaster' => function ($q)
+                {
+                    $q->select('itemCodeSystem', 'unit', 'itemDescription', 'primaryCode');
+                    $q->with([
+                        'itemAssigned' => function ($q)
+                        {
+                            $q->select('itemCodeSystem', 'wacValueLocalCurrencyID');
+                            $q->with([
+                                'local_currency' => function ($q)
+                                {
+                                    $q->select('currencyID','DecimalPlaces');
+                                }
+                            ]);
+                        }
+                    ]);
+                },
+                'boqItem' => function ($q)
+                {
+                    $q->select('id', 'uom', 'description', 'item_name');
+                },
+                'boqItem.unit' => function ($query)
             {
                 $query->select('UnitShortCode');
             }])
@@ -202,11 +224,37 @@ class ContractBoqItemsRepository extends BaseRepository
         $companyId = $input['selectedCompanyID'];
         $uuid = $input['uuid'];
         $contractId = ContractMaster::select('id')->where('uuid', $uuid)->first();
-        $lotData = ContractBoqItems::with(['itemMaster.unit', 'itemMaster.itemAssigned.local_currency',
-            'boqItem', 'boqItem.unit' => function ($query)
-            {
-            $query->select('UnitShortCode');
-        }])
+        $lotData = ContractBoqItems::select('uuid', 'origin', 'itemId', 'description', 'minQty', 'maxQty', 'qty',
+            'price', 'contractId', 'companyId')
+            ->with([
+                'itemMaster.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
+                },
+                'itemMaster' => function ($q)
+                {
+                    $q->select('itemCodeSystem', 'unit', 'itemDescription', 'primaryCode');
+                    $q->with([
+                        'itemAssigned' => function ($q)
+                        {
+                            $q->select('itemCodeSystem', 'wacValueLocalCurrencyID');
+                            $q->with([
+                                'local_currency' => function ($q)
+                                {
+                                    $q->select('currencyID','DecimalPlaces');
+                                }
+                            ]);
+                        }
+                    ]);
+                },
+                'boqItem' => function ($q)
+                {
+                    $q->select('id', 'uom', 'description', 'item_name');
+                },
+                'boqItem.unit' => function ($query)
+                {
+                    $query->select('UnitShortCode');
+                }])
             ->where('companyId', $companyId)
             ->where('contractId', $contractId->id)
             ->get();

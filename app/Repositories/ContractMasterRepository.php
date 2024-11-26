@@ -110,6 +110,18 @@ class ContractMasterRepository extends BaseRepository
         $filter = $input['filter'] ?? null;
         $languages =  $this->model->contractMaster($search_keyword, $companyId, $filter);
         return DataTables::eloquent($languages)
+            ->addColumn('counterPartyUsername', function ($row)
+            {
+                switch ($row->counterParty)
+                {
+                    case 1:
+                        return $row->contractUsers->contractSupplierUser->supplierName ?? '';
+                    case 2:
+                        return $row->contractUsers->contractCustomerUser->CustomerName ?? '';
+                    default:
+                        return '';
+                }
+            })
             ->addColumn('Actions', 'Actions', "Actions")
             ->addIndexColumn()
             ->make(true);
@@ -157,8 +169,8 @@ class ContractMasterRepository extends BaseRepository
         $data[0]['Contract Code'] = "Contract Code";
         $data[0]['Title'] = "Title";
         $data[0]['Contract Type'] = "Contract Type";
-        $data[0]['Counter Party'] = "Counter Party";
-        $data[0]['Counter Party Name'] = "Counter Party Name";
+        $data[0]['Counter Party'] = "Counterparty";
+        $data[0]['Counter Party Name'] = "Counterparty Name";
         $data[0]['Reference Code'] = "Reference Code";
         $data[0]['Start Date'] = "Start Date";
         $data[0]['End Date'] = "End Date";
@@ -587,7 +599,10 @@ class ContractMasterRepository extends BaseRepository
                 'contractTypeSection' => function ($q) {
                     $q->select('ct_sectionId', 'uuid', 'contract_typeId', 'cmSection_id', 'is_enabled');
                     $q->with([
-                        'contractSectionWithTypes'
+                        'contractSectionWithTypes' => function ($q)
+                        {
+                            $q->select('cmSection_id', 'cmSection_detail', 'csm_active');
+                        }
                     ]);
                 },
                 'contractSettingDetails' => function ($q)

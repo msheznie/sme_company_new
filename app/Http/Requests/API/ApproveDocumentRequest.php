@@ -44,7 +44,7 @@ class ApproveDocumentRequest extends APIRequest
     {
         return [
             'approvalLevelID.required' => trans('common.approval_level_id_is_required'),
-            'contractUuid.required' => trans('common.contract_id_is_required'),
+            'contractUuid.required' => trans('common.contract_code_is_required'),
             'contractHistoryUuid.required' => trans('common.contract_history_id_is_required'),
             'documentApprovedID.required' => trans('common.document_approved_id_is_required'),
             'documentSystemID.required' => trans('common.document_system_id_is_required'),

@@ -39,7 +39,7 @@ class CreateContractMilestoneAPIRequest extends APIRequest
         return [
             'formData.required' => 'Fill all required fields',
             'companySystemID.required' => 'Company Id is required.',
-            'contractUuid.required' => 'Contract ID is required.',
+            'contractUuid.required' => 'Contract Code is required.',
             'formData.title.required' => 'Milestone Title is required.',
             'formData.description.required' => 'Description is required.',
         ];

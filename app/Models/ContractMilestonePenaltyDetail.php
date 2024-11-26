@@ -40,7 +40,7 @@ class ContractMilestonePenaltyDetail extends Model
 
 
     protected $dates = ['deleted_at'];
-
+    protected $hidden = ['id'];
 
 
     public $fillable = [
@@ -113,7 +113,9 @@ class ContractMilestonePenaltyDetail extends Model
 
     public function ContractMilestonePenaltyDetail($contractId, $companySystemID, $milestonePenaltyMasterId, $search)
     {
-        $query = ContractMilestonePenaltyDetail::with([
+        $query = ContractMilestonePenaltyDetail::select('id', 'uuid', 'penalty_percentage', 'penalty_amount', 'penalty_start_date',
+            'penalty_frequency', 'due_in', 'due_penalty_amount', 'actual_due_penalty_amount', 'milestone_title', 'milestone_amount',
+            'status')->with([
             'milestone' => function ($q)
             {
                 $q->select('title', 'id', 'uuid')
@@ -126,7 +128,7 @@ class ContractMilestonePenaltyDetail extends Model
             },
             'billingFrequencies' => function ($q)
             {
-                $q->select('description', 'id',);
+                $q->select('description', 'id');
             },
         ])->where('contract_id', $contractId)
             ->where('milestone_penalty_master_id', $milestonePenaltyMasterId)

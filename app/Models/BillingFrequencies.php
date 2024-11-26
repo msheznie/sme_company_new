@@ -34,6 +34,7 @@ class BillingFrequencies extends Model
 
     public $fillable = [
         'description',
+        'sort_order',
         'company_id',
         'created_by',
         'updated_by'
@@ -47,6 +48,7 @@ class BillingFrequencies extends Model
     protected $casts = [
         'id' => 'integer',
         'description' => 'string',
+        'sort_order' => 'integer',
         'company_id' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'

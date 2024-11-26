@@ -173,7 +173,7 @@ class ContractManagementUtils
 
     public static function getMilestonesWithAmount($contractId, $companySystemID)
     {
-        return ContractMilestone::with('milestonePaymentSchedules')
+        return ContractMilestone::select('id', 'contractID', 'uuid', 'title')->with('milestonePaymentSchedules')
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->has('milestonePaymentSchedules')
@@ -261,12 +261,13 @@ class ContractManagementUtils
     public static function getBillingFrequencies()
     {
         return BillingFrequencies::select('id', 'description')
+            ->orderBy('sort_order', 'asc')
             ->get();
     }
 
     public static function getContractHistoryData($uuid)
     {
-        return ContractHistory::Where('uuid', $uuid)
+        return ContractHistory::where('uuid', $uuid)
             ->first();
     }
     public static function getPaymentScheduleMilestone($contractID, $companySystemID, $editMilestoneID = null)
@@ -411,4 +412,5 @@ class ContractManagementUtils
             })
             ->get();
     }
+
 }

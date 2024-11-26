@@ -210,7 +210,7 @@ class ActivateContractService
             }
             else
             {
-                $body = "<p>Please be reminded that Contract ID " . $contractCode . ", titled " . $title .",
+                $body = "<p>Please be reminded that Contract Code " . $contractCode . ", titled " . $title .",
                 has expired on " . $endDateFormatted .".
                 Kindly review and renew the contract at your earliest convenience to
                 ensure uninterrupted service.</p>
