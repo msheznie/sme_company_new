@@ -17,13 +17,13 @@
      "contract_not_found" => "Contract Not found",
      "contract_retrieved_successfully" => "Contract retrieved successfully",
      "contract_deleted_successfully" => "Contract deleted successfully",
-     "counter_party_name_is_required", "Counter Party Name is required",
+     "counter_party_name_is_required", "Counterparty Name is required",
      "counter_party_email_validation" =>
-         "Secondary Counter Party Email must be different from Primary Counter Party Email",
+         "Secondary Counterparty Email must be different from Primary Counterparty Email",
      "contract_type_not_found" => "Contract Type not found",
      "contract_form_data_retrieved" => "Contract form data retrieved successfully",
      "contract_owner_not_found" => "Contract Owner not found.",
-     "counter_party_name_not_found" => "Counter Party Name not found",
+     "counter_party_name_not_found" => "Counterparty Name not found",
      "contract_updated_successfully" => "Contract updated successfully",
      "primary_email_already_exists" => "Primary Email already exists",
      "secondary_email_already_exists" => "Secondary Email already exists",
@@ -43,7 +43,7 @@
      "milestone_updated_successfully" => "Milestone updated successfully",
      "milestone_created_successfully" => "Milestone created successfully",
      "milestone_uuid_exists" => "Milestone Uuid already exists",
-     "contract_id_not_found" => "Contract ID not found",
+     "contract_code_not_found" => "Contract Code not found",
      "deliverable_updated_successfully" => "Deliverable updated successfully",
      "deliverable_deleted_successfully" => "Deliverable deleted successfully",
      "deliverable_retrieved_successfully" => "Deliverable retrieved successfully",
@@ -52,7 +52,7 @@
      "deliverable_uuid_already_exists" => "Deliverable Uuid already exists",
      "successfully_data_loaded" => "Successfully data loaded",
      "contract_document_form_data_retrieved_successfully" => "Contract document form data retrieved successfully",
-     "contract_id_is_required" => "Contract ID is required",
+     "contract_code_is_required" => "Contract Code is required",
      "document_type_is_required" => "Document Type is required",
      "contract_document_uuid_already_exists" => "Contract document Uuid already exists",
      "contract_document_created_successfully" => "Contract document created successfully",
@@ -247,5 +247,8 @@
      'milestone_due_date' => 'Milestone Due Date',
      'fcm_token_not_found' => 'Fcm Token not found',
      'commencement_date_not_found' => 'Commencement date not found',
-     'record_retrieved_successfully' => 'Record retrieved successfully'
+     'record_retrieved_successfully' => 'Record retrieved successfully',
+     'login_failed_the_user_is_not_activated_please_contact_admin' =>
+         'Login failed! The user is not activated. Please contact admin.',
+     'code_configurations_not_found' => 'Code configurations not found AR'
  ];

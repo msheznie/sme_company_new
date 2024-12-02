@@ -38,7 +38,7 @@ class CreateMilestonePaymentSchedulesAPIRequest extends APIRequest
     {
         return [
             'selectedCompanyID.required' => 'Company ID is required.',
-            'contract_id.required' => 'Contract ID is required.',
+            'contract_id.required' => 'Contract Code is required.',
             'milestone_id.required' => 'Milestone title is required.',
             'description.title' => 'Description is required.',
             'percentage.required' => 'Percentage is required.',

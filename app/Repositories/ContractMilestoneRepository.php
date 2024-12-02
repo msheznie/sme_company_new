@@ -125,7 +125,7 @@ class ContractMilestoneRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
 
@@ -206,7 +206,7 @@ class ContractMilestoneRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
 
@@ -337,7 +337,7 @@ class ContractMilestoneRepository extends BaseRepository
         if (empty($contractMaster)) {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
         $contractID = $contractMaster['id'];

@@ -31,7 +31,7 @@ class ContractConfirmRequest extends APIRequest
     public function messages()
     {
         return [
-            'contractUuid.required' => trans('common.contract_id_is_required'),
+            'contractUuid.required' => trans('common.contract_code_is_required'),
             'documentSystemID.required' => trans('common.document_system_id_is_required')
         ];
     }

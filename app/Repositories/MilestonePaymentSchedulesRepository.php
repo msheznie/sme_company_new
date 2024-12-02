@@ -110,7 +110,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID);
             if(empty($contract))
             {
-                throw new CommonException('Contract ID not found.');
+                throw new CommonException('Contract Code not found.');
             }
             $milestone = ContractMilestone::checkContractMilestoneExists($input['milestone_id']);
             if(empty($milestone))
@@ -225,7 +225,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     if ($contractMaster['counterParty'] == 1)
                     {
                         $contractPartyName = $contractUsers['contractSupplierUser']['supplierName'] ?? '-';
-                    } else if ($contractMaster['counterParty'] == 2)
+                    } elseif ($contractMaster['counterParty'] == 2)
                     {
                         $contractPartyName = $contractUsers['contractCustomerUser']['CustomerName'] ?? '-';
                     }
@@ -237,7 +237,7 @@ class MilestonePaymentSchedulesRepository extends BaseRepository
                     2 => 'Completed',
                 ];
 
-                $status = $statusMap[$value['milestoneDetail']['status']] ?? '-';
+                $status = $value['milestoneDetail'] ? $statusMap[$value['milestoneDetail']['status']] ?? '-' : '-';
                 $data[$count] = [
                     trans('common.contract_code') => $contractMaster['contractCode'] ?? '-',
                     trans('common.title') => $contractMaster['title'] ?? '-',

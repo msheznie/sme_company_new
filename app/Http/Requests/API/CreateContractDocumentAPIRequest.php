@@ -43,7 +43,7 @@ class CreateContractDocumentAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'contractUUid.required' => trans('common.contract_id_is_required'),
+            'contractUUid.required' => trans('common.contract_code_is_required'),
             'documentTypes.required' => trans('common.document_type_is_required'),
             'selectedCompanyID.required' => trans('common.company_id_is_required'),
             'attachedDate.required' => 'Due Date is required',

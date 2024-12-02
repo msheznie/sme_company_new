@@ -107,7 +107,7 @@ class ContractDeliverablesRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
         if($milestone != null)
@@ -171,7 +171,7 @@ class ContractDeliverablesRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
 
@@ -260,7 +260,7 @@ class ContractDeliverablesRepository extends BaseRepository
         {
             return [
                 'status' => false,
-                'message' => trans('common.contract_id_not_found')
+                'message' => trans('common.contract_code_not_found')
             ];
         }
         $contractID = $contractMaster['id'];
