@@ -356,11 +356,11 @@ class ContractMaster extends Model
             {
                 $query->whereIn('status', $filter['is_status'] == -1 ? [-1, 1, 2, 4] : [$filter['is_status']]);
             }
-            if (isset($filter['contractTypeID']))
+            if ($contractId)
             {
                 $query->where('contractType', $contractId['contract_typeId']);
             }
-            if (isset($filter['counterPartyNameID']))
+            if ($counterPartyID)
             {
                 $query->where('counterPartyName', $counterPartyID['id']);
             }
@@ -687,7 +687,8 @@ class ContractMaster extends Model
                             }
                         ]);
                 }
-            ]);
+            ])
+        ->where('companySystemID', $companyId);
         if($contractTypeId)
         {
             $results->where('contractType', $contractTypeId['contract_typeId']);
@@ -746,9 +747,10 @@ class ContractMaster extends Model
         ];
     }
 
-    public static function getContractTypeWiseActiveContracts()
+    public static function getContractTypeWiseActiveContracts($selectedCompanyID)
     {
         $contracts = ContractMaster::with('contractTypes')
+            ->where('companySystemID', $selectedCompanyID)
             ->where('status', -1)
             ->get();
 
