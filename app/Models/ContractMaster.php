@@ -356,11 +356,11 @@ class ContractMaster extends Model
             {
                 $query->whereIn('status', $filter['is_status'] == -1 ? [-1, 1, 2, 4] : [$filter['is_status']]);
             }
-            if ($contractId)
+            if (isset($filter['contractTypeID']))
             {
                 $query->where('contractType', $contractId['contract_typeId']);
             }
-            if ($counterPartyID)
+            if (isset($filter['counterPartyNameID']))
             {
                 $query->where('counterPartyName', $counterPartyID['id']);
             }
