@@ -134,31 +134,31 @@ class ContractManagementUtils
             ->where('companySystemId', $companySystemID)
             ->get();
 
-            $supplier = array();
+        $supplier = array();
 
-            foreach ($users as $user)
+        foreach ($users as $user)
+        {
+            $uuid = $user->uuid;
+            $name = '';
+
+            if($counterPartyId == 1)
             {
-                $uuid = $user->uuid;
-                $name = '';
-
-                if($counterPartyId == 1)
-                {
-                    $name = $user['contractSupplierUser']['name'];
-                } elseif($counterPartyId == 2)
-                {
-                    $name = $user['contractCustomerUser']['name'] ?? null;
-                } else
-                {
-                    $name = $user['contractInternalUser']['name'];
-                }
-
-                $supplier[] = [
-                    "uuid" => $uuid,
-                    'name' => $name
-                ];
-
+                $name = $user['contractSupplierUser']['name'];
+            } elseif($counterPartyId == 2)
+            {
+                $name = $user['contractCustomerUser']['name'] ?? null;
+            } else
+            {
+                $name = $user['contractInternalUser']['name'];
             }
-            return $supplier;
+
+            $supplier[] = [
+                "uuid" => $uuid,
+                'name' => $name
+            ];
+
+        }
+        return $supplier;
     }
 
     public static function getCounterParty()

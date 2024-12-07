@@ -63,13 +63,13 @@ class ActivateContractService
 
     public function updateContractMaster($status, $companyId, $contractId)
     {
-            $data = [
-                'status'  => $status
-            ];
+        $data = [
+            'status'  => $status
+        ];
 
-            ContractMaster::where('companySystemID', $companyId)
-                ->where('id', $contractId)
-                ->update($data);
+        ContractMaster::where('companySystemID', $companyId)
+            ->where('id', $contractId)
+            ->update($data);
 
     }
 
