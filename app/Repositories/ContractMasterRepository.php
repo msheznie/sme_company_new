@@ -129,9 +129,10 @@ class ContractMasterRepository extends BaseRepository
 
     public function getAllContractMasterFilters($request)
     {
+        $companySystemID = $request->input('selectedCompanyID');
         $allTypes = [
             "counter-parties" => ContractManagementUtils::getCounterParties(),
-            "contract_types" => ContractManagementUtils::getContractTypes(),
+            "contract_types" => ContractManagementUtils::getContractTypes($companySystemID),
             "default_user_group_count" => ContractManagementUtils::getContractDefaultUserGroup($request)
         ];
         return $allTypes;
@@ -141,9 +142,10 @@ class ContractMasterRepository extends BaseRepository
     {
         $input = $request->all();
         $counterPartyId = $input['counterPartyId'];
+        $companySystemID = $input['companySystemID'];
 
         $allTypes = [
-            "counter-party-names" => ContractManagementUtils::counterPartyNames($counterPartyId),
+            "counter-party-names" => ContractManagementUtils::counterPartyNames($counterPartyId, $companySystemID),
         ];
         return $allTypes;
     }
@@ -306,19 +308,20 @@ class ContractMasterRepository extends BaseRepository
             $tenderList = [];
         }
         return [
-            'contractType' => ContractManagementUtils::getContractTypes(),
+            'contractType' => ContractManagementUtils::getContractTypes($companyId),
             'contractOwners' => ContractManagementUtils::getContractUsers($companyId),
             'counterPartyType' => ContractManagementUtils::getCounterParty(),
-            'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType),
+            'counterPartyNames' => ContractManagementUtils::counterPartyNames($counterPartyType, $companyId),
             'tenderList' => $tenderList
         ];
     }
 
-    public function userFormData($value, $fromContractType)
+    public function userFormData($value, $fromContractType, $selectedCompanyID)
     {
         if($fromContractType)
         {
-            $checkCounterParty = CMContractTypes::where('uuid', $value)->pluck('cmCounterParty_id')->first();
+            $checkCounterParty = CMContractTypes::where('uuid', $value)
+                ->where('companySystemID', $selectedCompanyID)->pluck('cmCounterParty_id')->first();
             if(empty($checkCounterParty))
             {
                 return ['status' => false, 'message' => trans('common.contract_type_not_found')];
@@ -330,7 +333,7 @@ class ContractMasterRepository extends BaseRepository
 
         $response = [
             'counterParty' =>  $checkCounterParty,
-            'counterPartyNames' => ContractManagementUtils::counterPartyNames($checkCounterParty)
+            'counterPartyNames' => ContractManagementUtils::counterPartyNames($checkCounterParty, $selectedCompanyID)
         ];
 
         return ['status' => true , 'message' => trans('common.contract_form_data_retrieved'), 'data' => $response];
@@ -1391,9 +1394,10 @@ class ContractMasterRepository extends BaseRepository
         return ContractMaster::getContractStatusWise($companyId);
     }
 
-    public static function getContractTypeWiseActiveContracts($input)
+    public static function getContractTypeWiseActiveContracts($request)
     {
-        return ContractMaster::getContractTypeWiseActiveContracts();
+        $selectedCompanyID = $request->input('selectedCompanyID');
+        return ContractMaster::getContractTypeWiseActiveContracts($selectedCompanyID);
     }
 
     public function getContractExpiryListGraph(Request $request)

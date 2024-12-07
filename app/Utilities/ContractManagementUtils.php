@@ -92,12 +92,15 @@ class ContractManagementUtils
         return  Company::with(['reporting_currency'])->where('companySystemID', $companySystemID)->first();
     }
 
-    public static function getContractTypes()
+    public static function getContractTypes($companySystemID)
     {
-        return CMContractTypes::select('uuid', 'cm_type_name', 'ct_active')->where('ct_active', 1)->get();
+        return CMContractTypes::select('uuid', 'cm_type_name', 'ct_active')
+            ->where('companySystemID', $companySystemID)
+            ->where('ct_active', 1)
+            ->get();
     }
 
-    public static function counterPartyNames($counterPartyId)
+    public static function counterPartyNames($counterPartyId, $companySystemID)
     {
 
         $users = ContractUsers::where('contractUserType', $counterPartyId)
@@ -128,6 +131,7 @@ class ContractManagementUtils
                     }
                 ]);
             })
+            ->where('companySystemId', $companySystemID)
             ->get();
 
         $supplier = array();

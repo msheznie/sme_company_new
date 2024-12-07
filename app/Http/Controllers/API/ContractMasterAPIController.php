@@ -316,10 +316,11 @@ class ContractMasterAPIController extends AppBaseController
     public function getUserFormDataContractEdit(Request $request)
     {
         $contractType = $request->input('search');
+        $selectedCompanyID = $request->input('selectedCompanyID');
         $fromContractType = $request->input('fromContractType');
         $value = $contractType['value'];
 
-        $fromData = $this->contractMasterRepository->userFormData($value, $fromContractType);
+        $fromData = $this->contractMasterRepository->userFormData($value, $fromContractType, $selectedCompanyID);
 
         if($fromData['status'])
         {

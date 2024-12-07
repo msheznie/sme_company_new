@@ -1,5 +1,82 @@
 # Changelog
 
+## [1.5.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.4.0...v1.5.0) (2024-12-02)
+
+
+### Features
+
+* **CM:** Any user can access and extract sensitive information through the linked API by browsing the URL [CM-680] ([#325](https://github.com/pbsgears/Contract_Management_Backend/issues/325)) ([f373d35](https://github.com/pbsgears/Contract_Management_Backend/commit/f373d358a88cca4a3732d7e23931265c38009edf))
+* **CM:** Contract and Milestone Detail Report Enhancement [CM-387] ([#317](https://github.com/pbsgears/Contract_Management_Backend/issues/317)) ([11cf155](https://github.com/pbsgears/Contract_Management_Backend/commit/11cf155c9f6ca4a66213d99419927df0a7b33eba))
+* **CM:** emp verivied checking [CM-557] ([#318](https://github.com/pbsgears/Contract_Management_Backend/issues/318)) ([0cebf2a](https://github.com/pbsgears/Contract_Management_Backend/commit/0cebf2a14855e2bc62c2edd3825f908efa80eb8f))
+* **CM:** Penalty Calculation Frequency [CM-627] ([#319](https://github.com/pbsgears/Contract_Management_Backend/issues/319)) ([ba0fe3f](https://github.com/pbsgears/Contract_Management_Backend/commit/ba0fe3f8793ab7a40143df1729b94001754c9e3a))
+* **cms:** remove sesitive information login [CM-643] ([#314](https://github.com/pbsgears/Contract_Management_Backend/issues/314)) ([60cc015](https://github.com/pbsgears/Contract_Management_Backend/commit/60cc0154787bf302aee9a908bfcfa5fed67aa226))
+* **contract:** contract view page filter [CM-408] ([#316](https://github.com/pbsgears/Contract_Management_Backend/issues/316)) ([a516ab9](https://github.com/pbsgears/Contract_Management_Backend/commit/a516ab9cbe00213f21d572feb38468197f4ef9c6))
+* **contract:** document code configuration [CM-637] ([#324](https://github.com/pbsgears/Contract_Management_Backend/issues/324)) ([79d178a](https://github.com/pbsgears/Contract_Management_Backend/commit/79d178a7f084ea91ffcbfa8337198837556183c5))
+* **contracts:** Contract | Amendment | Attachment Option [CM-610] ([#320](https://github.com/pbsgears/Contract_Management_Backend/issues/320)) ([b2f6162](https://github.com/pbsgears/Contract_Management_Backend/commit/b2f616220394bae8ba4942c0e650485b4bb5aa23))
+* **contracts:** Description Change from "Contract ID" to "Contract Code" [CM-507] ([#315](https://github.com/pbsgears/Contract_Management_Backend/issues/315)) ([779bd0d](https://github.com/pbsgears/Contract_Management_Backend/commit/779bd0d8dcd4360cf4cbb1756db78a9e901f4401))
+* **srm:** All the forms are vulnerable to CSRF [CM-642] ([#308](https://github.com/pbsgears/Contract_Management_Backend/issues/308)) ([a8e553c](https://github.com/pbsgears/Contract_Management_Backend/commit/a8e553c96b067f2abc293b87944ce1b72bfd2827))
+
+
+### Bug Fixes
+
+* **CM:** EMP VERIFY control issue altered [CM-557] ([#321](https://github.com/pbsgears/Contract_Management_Backend/issues/321)) ([bcae64d](https://github.com/pbsgears/Contract_Management_Backend/commit/bcae64d57a3c7da3222abad2c9a0f0d1435150aa))
+* **CM:** EMP VERIFY control issue altered 3 [CM-557] ([#323](https://github.com/pbsgears/Contract_Management_Backend/issues/323)) ([8bc18c3](https://github.com/pbsgears/Contract_Management_Backend/commit/8bc18c35f9011ba64212a75263cf3f57ce71140c))
+* **contract:** amount not displaying in payment schedule [CM-699] ([#329](https://github.com/pbsgears/Contract_Management_Backend/issues/329)) ([df0f27e](https://github.com/pbsgears/Contract_Management_Backend/commit/df0f27e6d38e83a6c3207cebf5c05f8f320bce21))
+* **contract:** In contract amendment, display error message when pulling BOQ items [CM-720] ([#338](https://github.com/pbsgears/Contract_Management_Backend/issues/338)) ([6e03481](https://github.com/pbsgears/Contract_Management_Backend/commit/6e03481587b75de0cca97334f9e7aa43ca3a2034))
+* **contracts:** 'Contract Amount' field is not auto populated in the 'Overall Retention' [CM-702] ([#330](https://github.com/pbsgears/Contract_Management_Backend/issues/330)) ([6d81a09](https://github.com/pbsgears/Contract_Management_Backend/commit/6d81a0998b88e68e4c84439cbe7ecf7111ff0105))
+* **contracts:** Cannot pull BOQ items from master table and pulled items from tender not display [CM-697] ([#328](https://github.com/pbsgears/Contract_Management_Backend/issues/328)) ([c44ad73](https://github.com/pbsgears/Contract_Management_Backend/commit/c44ad73d4318660226f3eb32d94a47138074844a))
+* **contracts:** Display invalid item code for BOQ items in the 'Amendment Contract History' popup [CM-724] ([#340](https://github.com/pbsgears/Contract_Management_Backend/issues/340)) ([8e0c3d5](https://github.com/pbsgears/Contract_Management_Backend/commit/8e0c3d5ea4a2d6c30a3a9a68d0db16e601462baf))
+* **contracts:** Display sensitive information when retrieving data for the 'Dashboard' [CM-696] ([#327](https://github.com/pbsgears/Contract_Management_Backend/issues/327)) ([f31507a](https://github.com/pbsgears/Contract_Management_Backend/commit/f31507a637a4463c765f06a076d1f9cfe3ed78d5))
+* **contracts:** Duplicate the assigned default user group when adding a new user to that default user group [CM-173] ([#322](https://github.com/pbsgears/Contract_Management_Backend/issues/322)) ([4bf91ad](https://github.com/pbsgears/Contract_Management_Backend/commit/4bf91adb16287e094eb1a117d59066934b468721))
+* **contracts:** User cannot export the excel file in the 'Contract and Milestone Details' page [CM-712] ([#336](https://github.com/pbsgears/Contract_Management_Backend/issues/336)) ([2832d2c](https://github.com/pbsgears/Contract_Management_Backend/commit/2832d2c029d05caa02fa2951f678d47f52e26469))
+* **contracts:** User not display added details for a milestone penalty record when editing the record [CM-709] ([#335](https://github.com/pbsgears/Contract_Management_Backend/issues/335)) ([b47006c](https://github.com/pbsgears/Contract_Management_Backend/commit/b47006c789c7bfe5cc685e085d736c3cdc92c8bc))
+* **contract:** User cannot create an addendum from parent contract [CM-713] ([#337](https://github.com/pbsgears/Contract_Management_Backend/issues/337)) ([32f4e28](https://github.com/pbsgears/Contract_Management_Backend/commit/32f4e28837dad191923d43f9d1ae0eb1cc00c593))
+
+## [1.4.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.3.0...v1.4.0) (2024-10-25)
+
+
+### Features
+
+* **contract:** amendment | contract payment terms [CM-405] ([#287](https://github.com/pbsgears/Contract_Management_Backend/issues/287)) ([c8e6764](https://github.com/pbsgears/Contract_Management_Backend/commit/c8e6764fb405dae7219a028c1f3f54106c477259))
+* **contract:** contract amendment | BOQ [CM-406] ([#295](https://github.com/pbsgears/Contract_Management_Backend/issues/295)) ([ab4e1b2](https://github.com/pbsgears/Contract_Management_Backend/commit/ab4e1b2e14a98e5a33931c5c275f45a397c5e43d))
+* **contract:** Contract Amendment | Retention [CM-412] ([#289](https://github.com/pbsgears/Contract_Management_Backend/issues/289)) ([c6daac3](https://github.com/pbsgears/Contract_Management_Backend/commit/c6daac3a092bcc318d1a3b20d60d784dc6f0ffb2))
+* **contract:** Enhancement | Due Penalty Amount field | Overall & Milestone Penalty [CM-394] ([#285](https://github.com/pbsgears/Contract_Management_Backend/issues/285)) ([003349f](https://github.com/pbsgears/Contract_Management_Backend/commit/003349f4e98655ebf7409aa0a648d804795f3065))
+* **contracts:** Contract Approval Enhancement [CM-494] ([#291](https://github.com/pbsgears/Contract_Management_Backend/issues/291)) ([9d9ae74](https://github.com/pbsgears/Contract_Management_Backend/commit/9d9ae7459a4a2d43dc4c19841d0d5a4dda5d3593))
+* **contracts:** Contract Referback Option [CM-458] ([#286](https://github.com/pbsgears/Contract_Management_Backend/issues/286)) ([5feb770](https://github.com/pbsgears/Contract_Management_Backend/commit/5feb7703318365f64ddd1c66798ad69b41b4c0cb))
+* **contract:** show contract amendment history in amendment approved tab [CM-496] ([#302](https://github.com/pbsgears/Contract_Management_Backend/issues/302)) ([13cd561](https://github.com/pbsgears/Contract_Management_Backend/commit/13cd5619bd8366be245d568fdf4c8aab4a46a2e6))
+* **contracts:** Reminder Configuration for Document Expiry [CM-437] ([#298](https://github.com/pbsgears/Contract_Management_Backend/issues/298)) ([2805569](https://github.com/pbsgears/Contract_Management_Backend/commit/28055691644cd72c35e0a56cb48192350a6b62d4))
+* **contracts:** Reminder Configuration for Milestone Completion [CM-438] ([#293](https://github.com/pbsgears/Contract_Management_Backend/issues/293)) ([4309fdc](https://github.com/pbsgears/Contract_Management_Backend/commit/4309fdc38bcca2ce7a988a558ab149758acf6a82))
+
+
+### Bug Fixes
+
+* **contract:** Retention End Date Validation [CM-639] ([#306](https://github.com/pbsgears/Contract_Management_Backend/issues/306)) ([574516f](https://github.com/pbsgears/Contract_Management_Backend/commit/574516fef84e3273448339949c894fb29315ae3e))
+* **contracts:** If there is already data added for 'Milestone and Payment Schedules', delete the existing data before changing to another option [CM-391] ([#284](https://github.com/pbsgears/Contract_Management_Backend/issues/284)) ([43741b7](https://github.com/pbsgears/Contract_Management_Backend/commit/43741b7f9d538ca30103db2aca801de589d6af80))
+* **contracts:** When creating a milestone penalty, user cannot get milestone amount when selecting a milestone title [CM-618] ([#303](https://github.com/pbsgears/Contract_Management_Backend/issues/303)) ([8651293](https://github.com/pbsgears/Contract_Management_Backend/commit/86512935c7a274c61eb724309bbf4ef54ce53acf))
+
+## [1.3.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.2.0...v1.3.0) (2024-10-09)
+
+
+### Features
+
+* **contract:** contract effective date settings [CM-456] ([#273](https://github.com/pbsgears/Contract_Management_Backend/issues/273)) ([1e37ffc](https://github.com/pbsgears/Contract_Management_Backend/commit/1e37ffc89af9992e2723b86ff3e785c370c53531))
+* **contract:** Enhancement | attach document [CM-307] ([#262](https://github.com/pbsgears/Contract_Management_Backend/issues/262)) ([5c9cce1](https://github.com/pbsgears/Contract_Management_Backend/commit/5c9cce134d405ffcf00f8908e7319a563c4271b7))
+* **contract:** finance document enhancement [CM-410] ([#271](https://github.com/pbsgears/Contract_Management_Backend/issues/271)) ([395dddf](https://github.com/pbsgears/Contract_Management_Backend/commit/395dddf55e142888436516c09e131102dd5248b6))
+* **contract:** milestone & payment schedule finance integration enhancement [CM-415] ([#267](https://github.com/pbsgears/Contract_Management_Backend/issues/267)) ([70567e4](https://github.com/pbsgears/Contract_Management_Backend/commit/70567e4463e802b0b0269d185f0f825baeda869f))
+* **contract:** Milestone Deliverable Status [CM-420] ([#264](https://github.com/pbsgears/Contract_Management_Backend/issues/264)) ([f0bbfec](https://github.com/pbsgears/Contract_Management_Backend/commit/f0bbfececd88fb6ccc39373afa03518ca9e09999))
+* **contracts:** Capturing Milestone Due Date [CM-413] ([#261](https://github.com/pbsgears/Contract_Management_Backend/issues/261)) ([aab9a5d](https://github.com/pbsgears/Contract_Management_Backend/commit/aab9a5d6bd1e55a2a9ab269bd0b19544506da24f))
+* **contracts:** Contract Termination Chrone Job [CM-510] ([#275](https://github.com/pbsgears/Contract_Management_Backend/issues/275)) ([072d7b2](https://github.com/pbsgears/Contract_Management_Backend/commit/072d7b2498fbfe49e6b5cc7472d17c8870bd5b33))
+* **contracts:** EEnhancement | Milestone Status [CM-419] ([#257](https://github.com/pbsgears/Contract_Management_Backend/issues/257)) ([6cd97b1](https://github.com/pbsgears/Contract_Management_Backend/commit/6cd97b1081971073a4c9068808854b727389d62b))
+* **contracts:** Enhancement | Contract Info | Supplier Details [CM-418] ([#259](https://github.com/pbsgears/Contract_Management_Backend/issues/259)) ([4b9f06e](https://github.com/pbsgears/Contract_Management_Backend/commit/4b9f06ec18e5e5a9d6aec9ba646495d579197212))
+* **contracts:** Enhancement | Contract Users | Department [CM-416] ([#256](https://github.com/pbsgears/Contract_Management_Backend/issues/256)) ([b915736](https://github.com/pbsgears/Contract_Management_Backend/commit/b915736ab74a33623fa6405535879fa060e5064b))
+* **contracts:** Enhancement | Users & User Group | Department [CM-417] ([#258](https://github.com/pbsgears/Contract_Management_Backend/issues/258)) ([43fab40](https://github.com/pbsgears/Contract_Management_Backend/commit/43fab40555a792809ea1e7c4a166c975698bf3c8))
+* **contracts:** Enhancement to the Contract History Workflow - Amendment [CM-444] ([#270](https://github.com/pbsgears/Contract_Management_Backend/issues/270)) ([790d35d](https://github.com/pbsgears/Contract_Management_Backend/commit/790d35d8d1d369732494bfe1a1626b0c9f50eeee))
+* **contracts:** Enhancement to the Contract History Workflow - Extension [CM-447] ([#272](https://github.com/pbsgears/Contract_Management_Backend/issues/272)) ([1ce1781](https://github.com/pbsgears/Contract_Management_Backend/commit/1ce1781e77dad865f4210224cd0c777a74cac858))
+* **contracts:** Enhancement to the Contract History Workflow - Renew… ([#268](https://github.com/pbsgears/Contract_Management_Backend/issues/268)) ([954b4da](https://github.com/pbsgears/Contract_Management_Backend/commit/954b4da4924b78916f707452dfe93fcd7ac2b1a0))
+* **contracts:** Enhancement to the Contract History Workflow - Termi… ([#269](https://github.com/pbsgears/Contract_Management_Backend/issues/269)) ([829949b](https://github.com/pbsgears/Contract_Management_Backend/commit/829949b377f922fe2d85140e876287b2bc316730))
+* **contracts:** Milestone Due Date Validation - RC [CM-471] ([#265](https://github.com/pbsgears/Contract_Management_Backend/issues/265)) ([645908f](https://github.com/pbsgears/Contract_Management_Backend/commit/645908fef229c8946cb1355abe4514e284cbfd54))
+* **contract:** SSO issue and remove the logging page when logging via the portal [CM-515] ([#274](https://github.com/pbsgears/Contract_Management_Backend/issues/274)) ([3f99676](https://github.com/pbsgears/Contract_Management_Backend/commit/3f996766224848679e825da4e141533005146876))
+
 ## [1.2.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.1.0...v1.2.0) (2024-08-20)
 
 
