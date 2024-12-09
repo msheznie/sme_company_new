@@ -258,7 +258,8 @@ class MilestonePaymentSchedules extends Model
                     $q->where('status', $milestoneStatus);
                 });
             });
-        });
+        })
+        ->where('company_id', $companyId);
 
         if ($search)
         {

@@ -717,7 +717,7 @@ class ContractAmendmentService
                         'attribute' => 'primaryCode',
                         'attribute_tender' => 'item_primary_code',
                         'colName'=> 'itemCodeSystem',
-                        'colName_tender'=> 'id',
+                        'colName_tender'=> 'id'
                     ]
                 ]
             ],

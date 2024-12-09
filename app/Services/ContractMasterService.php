@@ -219,7 +219,7 @@ class ContractMasterService
     {
         $input  = $request->all();
         $searchKeyword = $request->input('search.value');
-        $companyId =  $input['companyId'];
+        $companyId =  $input['selectedCompanyID'];
         $filter = $input['filter'] ?? null;
         $languages =  ContractMaster::contractDetailReport($searchKeyword, $companyId, $filter);
         return DataTables::eloquent($languages)
@@ -234,8 +234,8 @@ class ContractMasterService
         $decimalPlaces = CurrencyMaster::getDecimalPlaces($currencyId);
         return [
             'decimalPlace' => $decimalPlaces,
-            'counterPartiesName' => ContractManagementUtils::counterPartyNames(1),
-            'contractTypes' => ContractManagementUtils::getContractTypes()
+            'counterPartiesName' => ContractManagementUtils::counterPartyNames(1, $selectedCompanyID),
+            'contractTypes' => ContractManagementUtils::getContractTypes($selectedCompanyID)
         ];
     }
     public function exportContractDetailsReport($request)
