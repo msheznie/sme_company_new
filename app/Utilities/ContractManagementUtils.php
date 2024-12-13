@@ -100,7 +100,7 @@ class ContractManagementUtils
             ->get();
     }
 
-    public static function counterPartyNames($counterPartyId, $companySystemID)
+    public static function counterPartyNames($counterPartyId, $companySystemID, $isEdit = false, $uuid = null)
     {
 
         $users = ContractUsers::where('contractUserType', $counterPartyId)
@@ -130,6 +130,14 @@ class ContractManagementUtils
                         $q->selectRaw("employeeSystemID, CONCAT(empID, ' | ', empName) as name");
                     }
                 ]);
+            })
+            ->when($isEdit, function ($q)
+            {
+                $q->where('isActive', 1);
+            })
+            ->when($uuid, function ($q) use ($uuid)
+            {
+                $q->where('uuid', $uuid);
             })
             ->where('companySystemId', $companySystemID)
             ->get();
