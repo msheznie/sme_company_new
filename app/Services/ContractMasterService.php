@@ -32,6 +32,7 @@ use App\Models\CurrencyMaster;
 use App\Models\Company;
 use App\Repositories\ContractMilestonePenaltyDetailRepository;
 use App\Repositories\ContractOverallPenaltyRepository;
+use App\Repositories\TemplateMasterRepository;
 use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -44,18 +45,21 @@ class ContractMasterService
     protected $contractMilestonePenaltyDetailRepository;
     protected $contractOverallPenaltyRepository;
     protected $contractDocumentRepository;
+    protected $templateMasterRepository;
 
     public function __construct(ContractMasterRepository $contractMasterRepository,
                                 ContractBoqItemsRepository $contractBoqItemsRepository,
     ContractMilestonePenaltyDetailRepository $contractMilestonePenaltyDetailRepository,
     ContractOverallPenaltyRepository $contractOverallPenaltyRepository,
-    ContractDocumentRepository $contractDocumentRepository)
+    ContractDocumentRepository $contractDocumentRepository,
+                                TemplateMasterRepository $templateMasterRepository)
     {
         $this->contractMasterRepository = $contractMasterRepository;
-        $this->ContractBoqItemsRepository = $contractBoqItemsRepository;
+        $this->contractBoqItemsRepository = $contractBoqItemsRepository;
         $this->contractMilestonePenaltyDetailRepository = $contractMilestonePenaltyDetailRepository;
         $this->contractOverallPenaltyRepository = $contractOverallPenaltyRepository;
         $this->contractDocumentRepository = $contractDocumentRepository;
+        $this->templateMasterRepository = $templateMasterRepository;
     }
 
     public function getContractViewData($contractUUid, $selectedCompanyID, $historyUuid)
@@ -99,7 +103,7 @@ class ContractMasterService
             null, $selectedCompanyID, $contractUUid)->get();
         $timeAndMaterial = TimeMaterialConsumption::getAllTimeMaterialConsumption($contractMaster['id']);
         $periodicBilling = PeriodicBillings::getContractPeriodicBilling($contractMaster['id']);
-        $boqItems = $this->ContractBoqItemsRepository->getBoqItems($selectedCompanyID, $contractUUid, false, 0);
+        $boqItems = $this->contractBoqItemsRepository->getBoqItems($selectedCompanyID, $contractUUid, false, 0);
         $overallRetention = ContractOverallRetention::getContractOverall($contractMaster['id'],$selectedCompanyID);
         $milestoneRetention = ContractMilestoneRetention::ContractMilestoneRetention(
             $selectedCompanyID, $contractMaster['id'])->get();

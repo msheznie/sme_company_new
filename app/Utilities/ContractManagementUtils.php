@@ -151,13 +151,13 @@ class ContractManagementUtils
 
                 if($counterPartyId == 1)
                 {
-                    $name = $user['contractSupplierUser']['name'];
+                    $name = $user['contractSupplierUser']['name'] ?? null;
                 } elseif($counterPartyId == 2)
                 {
                     $name = $user['contractCustomerUser']['name'] ?? null;
                 } else
                 {
-                    $name = $user['contractInternalUser']['name'];
+                    $name = $user['contractInternalUser']['name'] ?? null;
                 }
 
                 $supplier[] = [

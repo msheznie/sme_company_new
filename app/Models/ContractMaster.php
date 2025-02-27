@@ -245,6 +245,10 @@ class ContractMaster extends Model
     {
         return $this->hasMany(ContractAdditionalDocuments::class, 'contractID', 'id');
     }
+
+    public function templateMaster(){
+        return $this->belongsTo(TemplateMaster::class, 'id', 'contract_id');
+    }
     public function contractMaster($search, $companyId, $filter)
     {
         $contractTypeID = $filter['contractTypeID'] ?? 0;
@@ -316,7 +320,9 @@ class ContractMaster extends Model
 
             },'contractAssignedUsers.contractUserGroupAssignedUser' => function ($q6) {
             $q6->select('id', 'contractUserId', 'userGroupId');
-            }
+        }, 'templateMaster' => function ($q) {
+            $q->select('id', 'contract_id', 'uuid');
+        }
         ])->where('companySystemID', $companyId);
 
         if(isset($filter['status']) && $categoryId != 0)

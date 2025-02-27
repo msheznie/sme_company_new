@@ -594,6 +594,16 @@ Route::
     Route::post('/finance-milestone-deliverable',
         [\App\Http\Controllers\API\FinanceMilestoneDeliverableAPIController::class, 'store'])
         ->name('store finance milestone deliverable');
+
+    Route::post('/template-master',
+        [\App\Http\Controllers\API\TemplateMasterAPIController::class, 'store'])
+        ->name('save template master');
+    Route::get('/template-master/{id}', [
+        \App\Http\Controllers\API\TemplateMasterAPIController::class, 'show'])
+        ->name('get template master');
+    Route::put('/template-master/{id}', [
+        \App\Http\Controllers\API\TemplateMasterAPIController::class, 'update'])
+        ->name('get template master');
 });
 
 
