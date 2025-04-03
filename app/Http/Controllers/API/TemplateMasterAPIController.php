@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\TemplateMasterResource;
 use App\Services\ContractMasterService;
+use Illuminate\Support\Facades\File;
 use Response;
 
 /**
@@ -99,9 +100,12 @@ class TemplateMasterAPIController extends AppBaseController
 
         $contractMaster = $this->contractMasterService->getContractViewData($contractUuid, $companySystemID, null);
 
+        $fileContent = File::get(public_path($templateMaster->content));
+
         $tempData = [
             'template_master' => $templateMaster,
-            'contract_master' => $contractMaster
+            'contract_master' => $contractMaster,
+            'file_content' => $fileContent
         ];
 
         return $this->sendResponse($tempData, 'Template Master retrieved successfully');

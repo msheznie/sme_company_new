@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Traits\CrudOperations;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 /**
  * Class TemplateMasterRepository
@@ -66,7 +67,8 @@ class TemplateMasterRepository extends BaseRepository
         {
             $companySystemID = $input['companySystemID'] ?? 0;
             $contractUUID = $input['contractUUID'] ?? null;
-            $content = $input['content'] ?? null;
+            $fileName = $input['fileName'] ?? null;
+            $fileData = base64_decode($input['fileData']) ?? null;
 
             $contract = ContractManagementUtils::checkContractExist($contractUUID, $companySystemID);
             if(empty($contract))
@@ -86,10 +88,18 @@ class TemplateMasterRepository extends BaseRepository
                 GeneralService::sendException('Uuid already exists');
             }
 
+            $folderPath = public_path('template');
+            if (!File::exists($folderPath)) {
+                File::makeDirectory($folderPath, 0755, true);
+            }
+
+            $path = $folderPath . '/' . $fileName;
+            File::put($path, $fileData);
+
             $insertArray = [
                 'uuid' => $uuid,
                 'contract_id' => $contractID,
-                'content' => $content,
+                'content' => 'template/' . $fileName,
                 'company_id' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
