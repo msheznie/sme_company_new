@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\CommonException;
+use App\Helpers\General;
 use App\Http\Requests\API\CreateTemplateMasterAPIRequest;
 use App\Http\Requests\API\UpdateTemplateMasterAPIRequest;
+use App\Jobs\DeleteFileJob;
 use App\Models\ContractMaster;
 use App\Models\TemplateMaster;
 use App\Repositories\TemplateMasterRepository;
@@ -14,6 +16,7 @@ use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\TemplateMasterResource;
 use App\Services\ContractMasterService;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Response;
 
 /**
@@ -89,7 +92,7 @@ class TemplateMasterAPIController extends AppBaseController
     {
         /** @var TemplateMaster $templateMaster */
         $companySystemID = $request->input('selectedCompanyID') ?? 0;
-        $templateMaster = $this->templateMasterRepository->findByUuid($id, ['id', 'uuid', 'contract_id', 'content']);
+        $templateMaster = $this->templateMasterRepository->findByUuid($id, ['id', 'uuid', 'contract_id', 'filePath', 'content']);
 
         if (empty($templateMaster)) {
             return $this->sendError('Template Master not found');
@@ -100,7 +103,25 @@ class TemplateMasterAPIController extends AppBaseController
 
         $contractMaster = $this->contractMasterService->getContractViewData($contractUuid, $companySystemID, null);
 
-        $fileContent = File::get(public_path($templateMaster->content));
+        $disk = 's3';
+        $fileContent = '';
+
+        if (Storage::disk($disk)->exists($templateMaster->filePath))
+        {
+            $downloadedFile = Storage::disk($disk)->get($templateMaster->filePath);
+            $fileName = basename($templateMaster->filePath); // Get the file name from the path
+            $publicPath = public_path('uploads/templates');
+
+            if (!File::exists($publicPath)) {
+                File::makeDirectory($publicPath, 0755, true);
+            }
+
+            $path = $publicPath . '/' . $fileName;
+            File::put($path, $downloadedFile);
+
+            $fileContent = File::get(public_path('uploads/templates/' . $fileName));
+            DeleteFileJob::dispatch(public_path('uploads/templates/' . $fileName))->delay(now()->addMinute(2));
+        }
 
         $tempData = [
             'template_master' => $templateMaster,
@@ -133,7 +154,7 @@ class TemplateMasterAPIController extends AppBaseController
                 GeneralService::sendException('Template master not found');
             }
 
-            $this->templateMasterRepository->updateTemplateMaster($input, $templateMaster->id);
+            $this->templateMasterRepository->updateTemplateMaster($input, $templateMaster->id, $templateMaster->filePath);
             return $this->sendResponse([], 'Template master updated successfully');
 
         } catch (CommonException $ex)

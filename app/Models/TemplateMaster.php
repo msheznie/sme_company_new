@@ -40,6 +40,7 @@ class TemplateMaster extends Model
         'uuid',
         'contract_id',
         'content',
+        'filePath',
         'company_id',
         'created_by',
         'updated_by'
@@ -55,6 +56,7 @@ class TemplateMaster extends Model
         'uuid' => 'string',
         'contract_id' => 'integer',
         'content' => 'string',
+        'filePath' => 'string',
         'company_id' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'

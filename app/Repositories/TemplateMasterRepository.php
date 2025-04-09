@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Traits\CrudOperations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class TemplateMasterRepository
@@ -87,19 +88,12 @@ class TemplateMasterRepository extends BaseRepository
             {
                 GeneralService::sendException('Uuid already exists');
             }
-
-            $folderPath = public_path('template');
-            if (!File::exists($folderPath)) {
-                File::makeDirectory($folderPath, 0755, true);
-            }
-
-            $path = $folderPath . '/' . $fileName;
-            File::put($path, $fileData);
-
+            $filePath = self::storeTemplateToS3($fileName, $fileData);
             $insertArray = [
                 'uuid' => $uuid,
                 'contract_id' => $contractID,
-                'content' => 'template/' . $fileName,
+                'content' => $fileName,
+                'filePath' => $filePath,
                 'company_id' => $companySystemID,
                 'created_by' => General::currentEmployeeId(),
                 'created_at' => Carbon::now()
@@ -108,19 +102,33 @@ class TemplateMasterRepository extends BaseRepository
         });
     }
 
-    public function updateTemplateMaster($input, $id)
+    public function updateTemplateMaster($input, $id, $previousFile)
     {
-        return DB::transaction(function () use ($input, $id)
+        return DB::transaction(function () use ($input, $id, $previousFile)
         {
             $content = $input['content'] ?? null;
+            $fileName = $input['fileName'] ?? null;
+            $fileData = base64_decode($input['fileData']) ?? null;
 
+            if (Storage::disk('s3')->exists($previousFile))
+            {
+                Storage::disk('s3')->delete($previousFile);
+            }
+
+            $filePath = self::storeTemplateToS3($fileName, $fileData);
             $updateArray = [
-
-                'content' => $content,
+                'content' => $fileName,
+                'filePath' => $filePath,
                 'updated_by' => General::currentEmployeeId(),
                 'updated_at' => Carbon::now()
             ];
             return TemplateMaster::where('id', $id)->update($updateArray);
         });
+    }
+    public static function storeTemplateToS3($fileName, $fileData){
+        $disk = 's3';
+        $newFilePath = 'CMS/template/'. $fileName;
+        Storage::disk($disk)->put($newFilePath, $fileData);
+        return $newFilePath;
     }
 }
