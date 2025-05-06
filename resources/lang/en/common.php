@@ -10,7 +10,7 @@
      "contract_user_code_is_required" => "Contract User Code is required",
      "contract_user_name_is_required" => "Contract User Name is required",
      "contract_user_not_found" => "Contract User not found",
-     "contract_user_retrieved_successfully" => "Contract User retrieved successfully",
+     "contract_user_retrieved_successfully" => "Contract User data retrieved successfully",
      "contract_user_updated_successfully" => "Contract User updated successfully",
      "contract_user_deleted_successfully" => "Contract User deleted successfully",
      "contract_master_created_successfully" => "Contract Master created successfully",
