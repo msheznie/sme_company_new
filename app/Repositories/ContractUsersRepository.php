@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\General;
 use App\Models\ContractUsers;
-use App\Models\Employees;
+use App\Models\ContractUserGroupAssignedUser;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -144,5 +144,19 @@ class ContractUsersRepository extends BaseRepository
         $companyId =  $input['selectedCompanyID'];
         $filter = $input['filter'] ?? null;
         return $this->model->getContractUserList($searchKeyword, $companyId, $filter);
+    }
+
+    public function deleteContractUser($contractUserID){
+        $userInUserGroup = ContractUserGroupAssignedUser::checkContractUser($contractUserID);
+        if($userInUserGroup) {
+            return [
+                'status' => false,
+                'message' => 'Cannot delete, user already exists in contract user group.'
+            ];
+        }
+        return [
+            'status' => true,
+            'message' => 'Validation success.'
+        ];
     }
 }
