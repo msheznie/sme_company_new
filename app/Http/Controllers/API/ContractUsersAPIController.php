@@ -131,7 +131,10 @@ class ContractUsersAPIController extends AppBaseController
         if (empty($contractUsers)) {
             return $this->sendError(trans('common.contract_user_not_found'));
         }
-
+        $validation = $this->contractUsersRepository->deleteContractUser($contractUsers['id']);
+        if(!$validation['status']){
+            return $this->sendError($validation['message']);
+        }
         $contractUsers->delete();
 
         return $this->sendSuccess( trans('common.contract_user_deleted_successfully'));

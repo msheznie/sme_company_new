@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.5.0...v1.6.0) (2024-12-09)
+
+
+### Miscellaneous Chores
+
+* release 1.5.0 ([4d63be2](https://github.com/pbsgears/Contract_Management_Backend/commit/4d63be20b08e2364603d64ba1d2b333c98870ff2))
+
 ## [1.5.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.4.0...v1.5.0) (2024-12-02)
 
 
