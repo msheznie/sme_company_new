@@ -33,6 +33,7 @@ class CreateContractUsersAPIRequest extends APIRequest
                 'required',
                 Rule::unique('cm_contract_users', 'contractUserId')
                     ->where('contractUserType', $this->input('userType'))
+                    ->where('companySystemId', $this->input('selectedCompanyID'))
             ],
             'userList.*.contractUserCode' => 'required',
             'userList.*.contractUserName' => 'required'

@@ -140,12 +140,13 @@ class ContractUsers extends Model
     public function getInternalUserList($companySystemId, $searchKeyword)
     {
         $employees = Employees::selectRaw('employeeSystemID as id, empName as name, empID as code')
-            ->where('empCompanySystemID', $companySystemId)
             ->where('discharegedYN', 0)
             ->where('empActive', 1)
-            ->where(function ($q)
+            ->where(function ($q) use ($companySystemId)
             {
-                $q->whereDoesntHave('pulledContractUser');
+                $q->whereDoesntHave('pulledContractUser', function ($q) use ($companySystemId) {
+                    $q->where('companySystemId', $companySystemId);
+                });
             })
             ->with([
                 'employeeDepartment' => function ($q)

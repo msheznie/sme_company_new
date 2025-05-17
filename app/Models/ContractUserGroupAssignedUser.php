@@ -66,4 +66,8 @@ class ContractUserGroupAssignedUser extends Model
     public function employee(){
         return $this->belongsTo(Employees::class, 'created_by', 'employeeSystemID');
     }
+
+    public static function checkContractUser($contractUserID){
+        return self::where('contractUserId', $contractUserID)->exists();
+    }
 }
