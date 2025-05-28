@@ -145,7 +145,10 @@ class ContractUsers extends Model
             ->where(function ($q) use ($companySystemId)
             {
                 $q->whereDoesntHave('pulledContractUser', function ($q) use ($companySystemId) {
-                    $q->where('companySystemId', $companySystemId);
+                    $q->where([
+                        'companySystemId' => $companySystemId,
+                        'contractUserType' => 3
+                    ]);
                 });
             })
             ->with([
@@ -183,7 +186,9 @@ class ContractUsers extends Model
             ->where('approvedYN', 1)
             ->where('isActive', 1)
             ->where(function ($q) {
-                $q->whereDoesntHave('pulledContractUser');
+                $q->whereDoesntHave('pulledContractUser', function ($q) {
+                    $q->where('contractUserType', 1);
+                });
             })
             ->orderBy('id', 'desc');
         if ($searchKeyword) {
@@ -203,7 +208,9 @@ class ContractUsers extends Model
             ->where('isCustomerActive', 1)
             ->where('approvedYN', 1)
             ->where(function ($q) {
-                $q->whereDoesntHave('pulledContractUser');
+                $q->whereDoesntHave('pulledContractUser', function ($q) {
+                    $q->where('contractUserType', 2);
+                });
             })
             ->orderBy('id', 'desc');
 
