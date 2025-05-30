@@ -182,11 +182,16 @@ class ContractUsers extends Model
     public function getSupplierUserList($companySystemId, $searchKeyword){
         $supplierMaster = SupplierMaster::selectRaw
         ('supplierCodeSystem as id, supplierName as name, primarySupplierCode as code')
-            ->where('primaryCompanySystemID', $companySystemId)
             ->where('approvedYN', 1)
             ->where('isActive', 1)
-            ->where(function ($q) {
-                $q->whereDoesntHave('pulledContractUser', function ($q) {
+            ->where(function ($q) use ($companySystemId){
+                $q->whereHas('assignedSuppliers', function ($q) use ($companySystemId) {
+                    $q->where('companySystemID', $companySystemId);
+                });
+            })
+            ->where(function ($q) use ($companySystemId) {
+                $q->whereDoesntHave('pulledContractUser', function ($q) use ($companySystemId) {
+                    $q->where('companySystemId', $companySystemId);
                     $q->where('contractUserType', 1);
                 });
             })
