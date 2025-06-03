@@ -186,7 +186,11 @@ class ContractUsers extends Model
             ->where('isActive', 1)
             ->where(function ($q) use ($companySystemId){
                 $q->whereHas('assignedSuppliers', function ($q) use ($companySystemId) {
-                    $q->where('companySystemID', $companySystemId);
+                    $q->where([
+                        'companySystemID'  => $companySystemId,
+                        'isActive' => 1,
+                        'isAssigned' => -1
+                    ]);
                 });
             })
             ->where(function ($q) use ($companySystemId) {
