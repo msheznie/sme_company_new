@@ -100,7 +100,7 @@ class ContractManagementUtils
             ->get();
     }
 
-    public static function counterPartyNames($counterPartyId, $companySystemID)
+    public static function counterPartyNames($counterPartyId, $companySystemID, $isEdit = false, $uuid = null)
     {
 
         $users = ContractUsers::where('contractUserType', $counterPartyId)
@@ -112,6 +112,7 @@ class ContractManagementUtils
                         $q->selectRaw("supplierCodeSystem, CONCAT(primarySupplierCode, ' | ', supplierName) as name");
                     }
                 ]);
+                $q->whereHas('contractSupplierUser');
             })
             ->when($counterPartyId == 2, function ($q)
             {
@@ -121,6 +122,7 @@ class ContractManagementUtils
                         $q->selectRaw("customerCodeSystem, CONCAT(CutomerCode, ' | ', CustomerName) as name");
                     }
                 ]);
+                $q->whereHas('contractCustomerUser');
             })
             ->when($counterPartyId == 3, function ($q)
             {
@@ -130,6 +132,15 @@ class ContractManagementUtils
                         $q->selectRaw("employeeSystemID, CONCAT(empID, ' | ', empName) as name");
                     }
                 ]);
+                $q->whereHas('contractInternalUser');
+            })
+            ->when($isEdit, function ($q)
+            {
+                $q->where('isActive', 1);
+            })
+            ->when($uuid, function ($q) use ($uuid)
+            {
+                $q->where('uuid', $uuid);
             })
             ->where('companySystemId', $companySystemID)
             ->get();
@@ -417,4 +428,12 @@ class ContractManagementUtils
             ->get();
     }
 
+    public static function getExistsSupplierContracts($contractUserID){
+        return ContractMaster::select('uuid')
+            ->where([
+                'counterParty' => 1,
+                'counterPartyName' => $contractUserID
+            ])
+            ->exists();
+    }
 }

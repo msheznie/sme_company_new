@@ -249,6 +249,7 @@
      'commencement_date_not_found' => 'Commencement date not found',
      'record_retrieved_successfully' => 'Record retrieved successfully',
      'login_failed_the_user_is_not_activated_please_contact_admin' =>
-         'Login failed! The user is not activated. Please contact admin.',
-     'code_configurations_not_found' => 'Code configurations not found AR'
+     'Login failed! The user is not activated. Please contact admin.',
+     'code_configurations_not_found' => 'Code configurations not found',
+     'supplier_assigned_not_found' => 'Supplier assigned not found',
  ];

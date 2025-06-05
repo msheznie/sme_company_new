@@ -149,7 +149,22 @@ class ContractMasterAPIController extends AppBaseController
         $contractMaster = $this->contractMasterRepository->unsetValues($contractMaster);
         $userUuid = ContractUsers::getContractUserIdByUuid($contractMaster['counterPartyNameUuid']);
         $editData = $contractMaster;
-        $response = $this->contractMasterRepository->getEditFormData($editData['counterParty'], $userUuid, $comapnyId);
+
+        $response = $this->contractMasterRepository->getEditFormData(
+            $editData['counterParty'], $userUuid, $comapnyId, true);
+
+        if($contractMaster['counterPartyNameUuid'])
+        {
+            $uuid = $contractMaster['counterPartyNameUuid'];
+            $inactiveUser = ContractManagementUtils::counterPartyNames($editData['counterParty'], $comapnyId,
+                false, $uuid);
+
+            $uuids = array_column($response['counterPartyNames'], 'uuid');
+            if (!in_array($contractMaster['counterPartyNameUuid'], $uuids))
+            {
+                $response['counterPartyNames'] = array_merge($response['counterPartyNames'], $inactiveUser);
+            }
+        }
 
         $contractCode = ($category == 2)
             ? ContractMasterService::getAddendumCode($contractMaster['id'], $category, $contractMaster['contractCode'])

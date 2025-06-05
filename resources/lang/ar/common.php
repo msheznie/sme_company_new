@@ -242,5 +242,6 @@ return [
     'commencement_date_not_found' => 'Commencement date not found AR',
     'login_failed_the_user_is_not_activated_please_contact_admin' =>
         'Login failed! The user is not activated. Please contact admin. AR',
-    'code_configurations_not_found' => 'Code configurations not found AR'
+    'code_configurations_not_found' => 'Code configurations not found AR',
+    'supplier_assigned_not_found' => 'Supplier assigned not found AR',
 ];

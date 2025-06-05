@@ -6,6 +6,7 @@ use App\Helpers\General;
 use App\Models\ContractUsers;
 use App\Models\ContractUserGroupAssignedUser;
 use App\Repositories\BaseRepository;
+use App\Utilities\ContractManagementUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,17 +147,26 @@ class ContractUsersRepository extends BaseRepository
         return $this->model->getContractUserList($searchKeyword, $companyId, $filter);
     }
 
-    public function deleteContractUser($contractUserID){
-        $userInUserGroup = ContractUserGroupAssignedUser::checkContractUser($contractUserID);
-        if($userInUserGroup) {
+    public function deleteContractUser($contractUserID, $contractUserType)
+    {
+        if ($contractUserType == 1 && ContractManagementUtils::getExistsSupplierContracts($contractUserID)) {
+            return [
+                'status' => false,
+                'message' => 'Cannot delete, user already exists in contract/s.'
+            ];
+        }
+
+        if ($contractUserType != 1 && ContractUserGroupAssignedUser::checkContractUser($contractUserID)) {
             return [
                 'status' => false,
                 'message' => 'Cannot delete, user already exists in contract user group.'
             ];
         }
+
         return [
             'status' => true,
             'message' => 'Validation success.'
         ];
     }
+
 }
