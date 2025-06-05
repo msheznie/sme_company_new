@@ -28,7 +28,7 @@ use Exception;
  * Class ContractDocumentRepository
  * @package App\Repositories
  * @version May 8, 2024, 5:23 pm +04
-*/
+ */
 
 class ContractDocumentRepository extends BaseRepository implements ContractDocumentRepositoryInterface
 {
@@ -320,11 +320,11 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
         $contractDocument = $amendment
             ?
-                 ContractAmendmentService::getcontractDocumentDataAmd($historyId,$formData['uuid'])
+            ContractAmendmentService::getcontractDocumentDataAmd($historyId,$formData['uuid'])
             :
             ContractDocument::select('id')
-            ->where('uuid', $formData['uuid'])
-            ->where('companySystemID', $companySystemID)->first();
+                ->where('uuid', $formData['uuid'])
+                ->where('companySystemID', $companySystemID)->first();
 
 
 
@@ -420,8 +420,8 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
         }
 
         return [
-          'status' => true,
-          'message' => trans('common.document_received_validation_success')
+            'status' => true,
+            'message' => trans('common.document_received_validation_success')
         ];
     }
 
@@ -433,7 +433,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
             ->with([
                 'attachment' => function ($q) use ($id){
                     $q->select('attachmentID', 'myFileName', 'documentSystemID', 'documentSystemCode')
-                    ->where('documentSystemCode', $id);
+                        ->where('documentSystemCode', $id);
                 }
             ])
             ->where('id', $id)
@@ -474,8 +474,8 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
             ContractAmendmentService::getcontractDocumentDataAmd($historyId,$formData['uuid'])
             :
             ContractDocument::select('id')
-            ->where('uuid', $formData['uuid'])
-            ->where('companySystemID', $companySystemID)->first();
+                ->where('uuid', $formData['uuid'])
+                ->where('companySystemID', $companySystemID)->first();
 
 
         if(empty($contractDocument)) {
@@ -538,21 +538,21 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
     public function getContractDocumentByUuid($request)
     {
-      try
-      {
-        $input = $request->all();
-        $contractDocument = ContractDocument::fetchByUuid($input['contractDocumentUuid']);
-          if (!$contractDocument)
-          {
-              GeneralService::sendException('Document Tracing Not Found');
-          }
+        try
+        {
+            $input = $request->all();
+            $contractDocument = ContractDocument::fetchByUuid($input['contractDocumentUuid']);
+            if (!$contractDocument)
+            {
+                GeneralService::sendException('Document Tracing Not Found');
+            }
 
-        return $contractDocument;
-      }
-      catch (\Exception $ex)
-      {
-          GeneralService::sendException('Failed to get Document tracing data', $ex);
-      }
+            return $contractDocument;
+        }
+        catch (\Exception $ex)
+        {
+            GeneralService::sendException('Failed to get Document tracing data', $ex);
+        }
     }
 
     public function getContractDocumentPath($request)

@@ -64,7 +64,7 @@ Route::group(['prefix' => 'contract'], function (){
         ->name('delete contract deliverable');
     Route::delete('/milestone/{id}', [\App\Http\Controllers\API\ContractMilestoneAPIController::class, 'destroy'])
         ->name('delete contract milestones');
-Route::
+    Route::
     post('/milestone_retention',
         [\App\Http\Controllers\API\ContractMilestoneRetentionAPIController::class, 'store'])
         ->name('store contract milestone retention');
@@ -178,8 +178,8 @@ Route::
         [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'store'])
         ->name('Create Document Master');
     Route::post('/document-status_update',
-            [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'documentStatusUpdate'])
-            ->name('Update Document Status');
+        [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'documentStatusUpdate'])
+        ->name('Update Document Status');
     Route::
     delete('/delete-document-master/{id}',
         [\App\Http\Controllers\API\DocumentMasterAPIController::class, 'destroy'])
@@ -190,9 +190,9 @@ Route::
         [\App\Http\Controllers\API\ContractMasterAPIController::class, 'getContractConfirmationData'])
         ->name('Contract Confirmation Data');
     Route::
-        post('/confirm-contract',
-            [\App\Http\Controllers\API\ContractMasterAPIController::class, 'confirmContract'])
-            ->name('Contract Confirm');
+    post('/confirm-contract',
+        [\App\Http\Controllers\API\ContractMasterAPIController::class, 'confirmContract'])
+        ->name('Contract Confirm');
     Route::post('/user-group', [
         \App\Http\Controllers\API\ContractUserGroupAPIController::class,
         'contractUserGroupList'
@@ -595,6 +595,5 @@ Route::
         [\App\Http\Controllers\API\FinanceMilestoneDeliverableAPIController::class, 'store'])
         ->name('store finance milestone deliverable');
 });
-
 
 

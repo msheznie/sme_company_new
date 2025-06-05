@@ -263,18 +263,18 @@ class ContractUsers extends Model
     {
         return ContractUsers::with([
             'contractSupplierUser' => function ($q)
-                {
-                    $q->with([
-                        'supplierContactDetails' => function ($q)
-                        {
-                         $q->select
-                         ('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonFax', 'isDefault');
-                         $q->orderBy('supplierContactID', 'desc');
-                        }
-                    ]);
-                    $q->select('supplierCodeSystem');
-                }
-            ])
+            {
+                $q->with([
+                    'supplierContactDetails' => function ($q)
+                    {
+                        $q->select
+                        ('supplierID', 'contactPersonName', 'contactPersonEmail', 'contactPersonFax', 'isDefault');
+                        $q->orderBy('supplierContactID', 'desc');
+                    }
+                ]);
+                $q->select('supplierCodeSystem');
+            }
+        ])
             ->select('uuid', 'contractUserId')
             ->where('uuid', $uuid)
             ->first();
