@@ -145,7 +145,10 @@ class ContractUsers extends Model
             ->where(function ($q) use ($companySystemId)
             {
                 $q->whereDoesntHave('pulledContractUser', function ($q) use ($companySystemId) {
-                    $q->where('companySystemId', $companySystemId);
+                    $q->where([
+                        'companySystemId' => $companySystemId,
+                        'contractUserType' => 3
+                    ]);
                 });
             })
             ->with([
@@ -179,11 +182,22 @@ class ContractUsers extends Model
     public function getSupplierUserList($companySystemId, $searchKeyword){
         $supplierMaster = SupplierMaster::selectRaw
         ('supplierCodeSystem as id, supplierName as name, primarySupplierCode as code')
-            ->where('primaryCompanySystemID', $companySystemId)
             ->where('approvedYN', 1)
             ->where('isActive', 1)
-            ->where(function ($q) {
-                $q->whereDoesntHave('pulledContractUser');
+            ->where(function ($q) use ($companySystemId){
+                $q->whereHas('assignedSuppliers', function ($q) use ($companySystemId) {
+                    $q->where([
+                        'companySystemID'  => $companySystemId,
+                        'isActive' => 1,
+                        'isAssigned' => -1
+                    ]);
+                });
+            })
+            ->where(function ($q) use ($companySystemId) {
+                $q->whereDoesntHave('pulledContractUser', function ($q) use ($companySystemId) {
+                    $q->where('companySystemId', $companySystemId);
+                    $q->where('contractUserType', 1);
+                });
             })
             ->orderBy('id', 'desc');
         if ($searchKeyword) {
@@ -203,7 +217,9 @@ class ContractUsers extends Model
             ->where('isCustomerActive', 1)
             ->where('approvedYN', 1)
             ->where(function ($q) {
-                $q->whereDoesntHave('pulledContractUser');
+                $q->whereDoesntHave('pulledContractUser', function ($q) {
+                    $q->where('contractUserType', 2);
+                });
             })
             ->orderBy('id', 'desc');
 
