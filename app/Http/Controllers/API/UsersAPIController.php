@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateUsersAPIRequest;
 use App\Http\Requests\API\UpdateUsersAPIRequest;
+use App\Models\ERPLanguageMaster;
 use App\Models\Users;
 use App\Models\WebEmployeeProfile;
 use App\Repositories\UsersRepository;
@@ -151,6 +152,22 @@ class UsersAPIController extends AppBaseController
         $user['profile_url'] = $this->usersRepository->getEmployeeImage($user['employee_id']);
         $navigations = $this->navigationUserGroupSetup->userMenusByCompany($companySystemID, $user['employee_id']);
         $user['navigations'] = $navigations;
+        $user['getActiveLangs'] =  $this->getAvailableLanguages();
+        $data['userDefaultLanguage'] =  $this->getUserDefaultLanguage($user['employee_id']);
         return $user;
+    }
+
+    protected function getAvailableLanguages()
+    {
+        return ERPLanguageMaster::getActiveERPLanguages();
+    }
+
+    public static function getUserDefaultLanguage($authUserId)
+    {
+        try {
+            return ['defLangValues' => []];
+        } catch (\Exception $exception) {
+            return ['defLangValues' => []];
+        }
     }
 }
