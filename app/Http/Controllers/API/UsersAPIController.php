@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CommonException;
 use App\Helpers\General;
 use App\Http\Requests\API\CreateUsersAPIRequest;
 use App\Http\Requests\API\UpdateUsersAPIRequest;
+use App\Http\Requests\LanguageRequest;
 use App\Models\ERPLanguageMaster;
 use App\Models\Users;
 use App\Models\WebEmployeeProfile;
@@ -153,7 +155,7 @@ class UsersAPIController extends AppBaseController
         $navigations = $this->navigationUserGroupSetup->userMenusByCompany($companySystemID, $user['employee_id']);
         $user['navigations'] = $navigations;
         $user['getActiveLangs'] =  $this->getAvailableLanguages();
-        $data['userDefaultLanguage'] =  $this->getUserDefaultLanguage($user['employee_id']);
+        $user['userDefaultLanguage'] =  $this->usersRepository->getUserLanguage($user['employee_id']);
         return $user;
     }
 
@@ -168,6 +170,21 @@ class UsersAPIController extends AppBaseController
             return ['defLangValues' => []];
         } catch (\Exception $exception) {
             return ['defLangValues' => []];
+        }
+    }
+
+    public function updateUserLanguage(LanguageRequest $request)
+    {
+        try
+        {
+            $data = $this->usersRepository->updateUserLanguage($request);
+            return $this->sendResponse([],$data['message']);
+        } catch (CommonException $ex)
+        {
+            return $this->sendError($ex->getMessage(), 500);
+        } catch (\Exception $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
         }
     }
 }
