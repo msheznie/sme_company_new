@@ -45,6 +45,7 @@ Route::group(['middleware' => ['tenant']], function ()
         Route::get('get-company-list', 'ErpEmployeeNavigationAPIController@getCompanyList');
         Route::get('get-configuration-info', 'ConfigurationAPIController@getConfigurationInfo');
         Route::post('/get-branding', 'AppearanceSettingsAPIController@getBranding');
+        Route::post('/update-language', 'UsersAPIController@updateUserLanguage');
 
         Route::group(['middleware' => ['company']], function ()
         {
@@ -135,3 +136,6 @@ Route::get('/document-expiry-reminder', function ()
     \Artisan::call('ReminderDocumentExpiry');
     return 'Document Expiry Reminder Send Successfully!';
 });
+
+
+Route::resource('employees_languages', App\Http\Controllers\API\EmployeesLanguageAPIController::class);
