@@ -54,4 +54,9 @@ class ERPLanguageMaster extends Model
             ->where('isActive', 1)->get();
     }
 
+    public function languages()
+    {
+        return $this->hasOne(EmployeesLanguage::class,  'languageID', 'languageID');
+    }
+
 }
