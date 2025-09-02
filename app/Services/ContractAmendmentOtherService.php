@@ -24,7 +24,7 @@ class ContractAmendmentOtherService
         $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
         if(empty($contractHistory))
         {
-            GeneralService::sendException('Contract history not found.');
+            GeneralService::sendException(trans('common.contract_history_not_found'));
         }
         return ContractPaymentTermsAmd::getContractPaymentTermAmd($contractHistory['id'], $amdUuid);
     }
@@ -71,7 +71,7 @@ class ContractAmendmentOtherService
         $contractHistory = ContractManagementUtils::getContractHistoryData($contractHistoryUuid);
         if(empty($contractHistory))
         {
-            GeneralService::sendException('Contract history not found.');
+            GeneralService::sendException(trans('common.contract_history_not_found'));
         }
         return ContractMilestoneRetentionAmd::getMilestoneRetentionAmdForUpdate($amdUuid, $contractHistory['id']);
     }
@@ -90,8 +90,7 @@ class ContractAmendmentOtherService
             $paymentTerms = ContractPaymentTermsAmd::checkPaymentTermsExists($contractHistoryID);
             if(!$paymentTerms)
             {
-                GeneralService::sendException('At least one payment term should be available to send contract history
-                 for approval.');
+                GeneralService::sendException(trans('common.at_least_one_payment_term_should_be_available_to_send_contract_history_for_approval'));
             }
         }
     }
@@ -112,8 +111,7 @@ class ContractAmendmentOtherService
                 );
                 if($checkValidRetentionStartDate)
                 {
-                    GeneralService::sendException('Overall retention start date should be equal to or after the
-                     contract commencement date');
+                    GeneralService::sendException(trans('common.overall_retention_start_date_should_be_equal_to_or_after_the_contract_commencement_date'));
                 }
             }
             else
@@ -128,7 +126,7 @@ class ContractAmendmentOtherService
                     $companySystemID);
                 if($checkMRIsFilled)
                 {
-                    GeneralService::sendException('Please fill all required fields in milestone retention.');
+                    GeneralService::sendException(trans('common.please_fill_all_required_fields_in_milestone_retention'));
                 }
 
                 $checkValidRetentionStartDate = ContractMilestoneRetentionAmd::checkValidDate(
@@ -136,8 +134,7 @@ class ContractAmendmentOtherService
                 );
                 if($checkValidRetentionStartDate)
                 {
-                    GeneralService::sendException('Milestone retention start date should be equal to or after the
-                     contract commencement date');
+                    GeneralService::sendException(trans('common.milestone_retention_start_date_should_be_equal_to_or_after_the_contract_commencement_date'));
                 }
             }
         }

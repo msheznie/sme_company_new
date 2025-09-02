@@ -54,8 +54,7 @@ class ConfirmDocument
                     $amount = $params["amount"];
                     if($output->valueWise == 1 && ($amount < $output->valueFrom || $amount > $output->valueTo))
                     {
-                        throw new CommonException('Contract amount is not within the specified approval
-                        setup value range');
+                        throw new CommonException(trans('common.contract_amount_is_not_within_the_specified_approval_setup_value_range'));
                     }
                 } else
                 {
