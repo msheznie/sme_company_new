@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
  * Class UsersRepository
  * @package App\Repositories
  * @version February 13, 2024, 6:08 pm +04
-*/
+ */
 
 class UsersRepository extends BaseRepository
 {
@@ -66,8 +66,8 @@ class UsersRepository extends BaseRepository
     {
         $userLangData = EmployeesLanguage::getUserLanguage($employeeId);
         $language =  ($userLangData && $userLangData->languages)
-        ? $userLangData->languages->languageShortCode
-        : 'en';
+            ? $userLangData->languages->languageShortCode
+            : 'en';
 
 
         $userLanguage = [
