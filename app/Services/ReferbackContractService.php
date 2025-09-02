@@ -26,12 +26,12 @@ class ReferbackContractService
     {
         if ($masterRecord->approved_yn == 1)
         {
-            GeneralService::sendException('You cannot reopen this contract it is already fully approved');
+            GeneralService::sendException(trans('common.you_cannot_reopen_this_contract_it_is_already_fully_approved'));
         }
 
         if ($masterRecord->confirmed_yn == 0)
         {
-            GeneralService::sendException('You cannot reopen this contract, it is not confirmed');
+            GeneralService::sendException(trans('common.you_cannot_reopen_this_contract_it_is_not_confirmed'));
         }
 
         if(isset($formData["categoryId"]) && in_array($formData["categoryId"], [4, 6]))
@@ -56,7 +56,7 @@ class ReferbackContractService
 
         if(!$masterUpdate)
         {
-            GeneralService::sendException('Unable to referback contract');
+            GeneralService::sendException(trans('common.unable_to_referback_contract'));
         }
 
         self::updateReferedHistory($formData, $masterRecord);
@@ -82,7 +82,7 @@ class ReferbackContractService
 
         if(!$referedHistory)
         {
-            GeneralService::sendException('Unable to create referback history');
+            GeneralService::sendException(trans('common.unable_to_create_referback_history'));
         }
 
         $employeeSystemID = General::currentEmployeeId();
@@ -101,7 +101,7 @@ class ReferbackContractService
 
         if(!$updateHistory)
         {
-            GeneralService::sendException('Unable to update referback history');
+            GeneralService::sendException(trans('common.unable_to_update_referback_history'));
         }
 
         $deleteApproved =  ErpDocumentApproved::deleteDocumentApprovedData(
@@ -109,7 +109,7 @@ class ReferbackContractService
         );
         if(!$deleteApproved)
         {
-            GeneralService::sendException('Unable to delete approval document');
+            GeneralService::sendException(trans('common.unable_to_delete_approval_document'));
         }
 
         if(isset($formData["categoryId"]) && in_array($formData["categoryId"], [4, 6]))
