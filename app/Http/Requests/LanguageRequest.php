@@ -2,36 +2,33 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ERPLanguageMaster;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Models\Language;
 
 class LanguageRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
-         return [
-            'languageID' => 'required',
+        return [
+            'languageID' => [
+                'required',
+                Rule::exists(ERPLanguageMaster::class, 'languageID')->where(fn($query) => $query->where('isActive', 1)),
+            ],
         ];
     }
 
     public function messages()
     {
         return [
-            'languageID.required' =>  'language id is required'
+            'languageID.required' => 'Language ID is required',
+            'languageID.exists' => 'Selected language does not exist or is not active',
         ];
     }
 }
