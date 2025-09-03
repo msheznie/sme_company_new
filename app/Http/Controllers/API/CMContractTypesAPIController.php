@@ -156,7 +156,7 @@ class CMContractTypesAPIController extends AppBaseController
         $contractType = $this->cMContractTypesRepository->deleteContractType($request);
 
         if ($contractType['status']) {
-            return $this->sendResponse([], 'The Contract Type has been deleted successfully !');
+            return $this->sendResponse([], trans('common.contract_type_deleted'));
         } else {
             $statusCode = $catMaster['code'] ?? 404;
             return $this->sendError($contractType['message'], $statusCode);
@@ -184,9 +184,9 @@ class CMContractTypesAPIController extends AppBaseController
         $basePath = CreateExcel::process($type, $docName, $detailArray, $export, $disk);
 
         if ($basePath == '') {
-            return $this->sendError('unable_to_export_excel');
+            return $this->sendError('common.unable_to_export_excel');
         } else {
-            return $this->sendResponse($basePath, trans('success_export'));
+            return $this->sendResponse($basePath, trans('common.success_export'));
         }
     }
 

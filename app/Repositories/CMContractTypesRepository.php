@@ -112,14 +112,14 @@ class CMContractTypesRepository extends BaseRepository
                 $insertResp = CMContractTypes::where('contract_typeId', $contractTypeID)
                     ->update($storeContractType);
 
-                $message = "Update successfully.";
+                $message = trans('common.update_successfully');
             } else {
                 $storeContractType['created_by'] = $empId;
                 $storeContractType['uuid'] = bin2hex(random_bytes(16));
 
                 $insertResp = CMContractTypes::create($storeContractType);
                 $contractTypeID = $insertResp->id;
-                $message = "Saved successfully.";
+                $message = trans('common.saved_successfully');
             }
 
             if ($insertResp) {
@@ -161,16 +161,16 @@ class CMContractTypesRepository extends BaseRepository
 
         $existContractID = CMContractTypes::where('uuid', $contractID)->pluck('contract_typeId')->first();
         if(empty($existContractID)) {
-            return ['status' => false, 'code' => 404, 'message' => 'Contract Type not found.'];
+            return ['status' => false, 'code' => 404, 'message' => trans('common.contract_type_not_found')];
         }
 
         $result = CMContractTypeSections::where('contract_typeId', $existContractID)->delete();
         $result3 = CMContractTypes::where('contract_typeId', $existContractID)->delete();
 
         if ($result3) {
-            return ['status' => true, 'code' => 422, 'message' => 'Contract Type has been deleted successfully.'];
+            return ['status' => true, 'code' => 422, 'message' => trans('common.contract_type_deleted')];
         } else {
-            return ['status' => false, 'code' => 422, 'message' => 'Contract Type Deletion Failed'];
+            return ['status' => false, 'code' => 422, 'message' => trans('common.contract_type_deletion_failed')];
         }
     }
 

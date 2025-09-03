@@ -314,5 +314,11 @@
      'contract_milestone_retention_updated_successfully' => 'Contract milestone retention updated successfully',
      'failed_to_update_milestone_retention' => 'Failed to update milestone retention: ',
      'failed_to_update_milestone_retention_percentage' => 'Failed to update milestone retention percentage: ',
-     'milestone_retention_not_found' => 'Milestone retention not found'
+     'milestone_retention_not_found' => 'Milestone retention not found',
+     'saved_successfully' => "Saved Successfully",
+     "update_successfully" => "Update successfully.",
+     "contract_type_deleted" => "Contract Type has been deleted successfully !",
+     "contract_type_deletion_failed" => "Contract Type Deletion Failed.",
+     "success_export" => "Export to Excel",
+     "unable_to_export_excel" => "Export to Excel"
  ];

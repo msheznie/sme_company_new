@@ -288,4 +288,10 @@ return [
     'contract_milestone_retention_updated_successfully' => 'تم تحديث احتجاز معلم العقد بنجاح',
     'failed_to_update_milestone_retention' => 'فشل في تحديث احتجاز المعالم: ',
     'failed_to_update_milestone_retention_percentage' => 'فشل في تحديث نسبة احتجاز المعالم: ',
+    "saved_successfully" => "تم الحفظ بنجاح",
+    "update_successfully" => "تم التحديث بنجاح.",
+    "contract_type_deleted" => "تم حذف نوع العقد بنجاح.",
+    "contract_type_deletion_failed" => "فشل حذف نوع العقد.",
+    "success_export" => "تصدير إلى Excel",
+    "unable_to_export_excel" => "غير قادر على تصدير ملف Excel"
 ];
