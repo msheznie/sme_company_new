@@ -255,5 +255,37 @@ return [
     "unable_to_referback_contract" => "غير قادر على إعادة العقد",
     "unable_to_create_referback_history" => "غير قادر على إنشاء سجل الإرجاع",
     "unable_to_update_referback_history" => "غير قادر على تحديث سجل الإرجاع",
-    "unable_to_delete_approval_document" => "غير قادر على حذف مستند الموافقة"
+    "unable_to_delete_approval_document" => "غير قادر على حذف مستند الموافقة",
+    'contract_milestone_retrieved_successfully' => 'تم استرجاع معلم العقد بنجاح',
+    'cannot_delete_milestone_payment' => 'لا يمكن حذف المعلم. تم تعيين المعلم بالفعل لجدول دفع المعالم.',
+    'cannot_delete_milestone_retention' => 'لا يمكن حذف المعلم. تم تعيين المعلم بالفعل لاحتجاز المعالم.',
+    'time_and_material_consumption_created_successfully_dot' => 'تم إنشاء استهلاك الوقت والمواد بنجاح.',
+    'time_material_consumption_retrieved_successfully' => 'تم استرجاع استهلاك الوقت والمواد بنجاح',
+    'time_and_material_consumption_saved_successfully' => 'تم حفظ استهلاك الوقت والمواد بنجاح',
+    'time_material_consumption_deleted_successfully' => 'تم حذف استهلاك الوقت والمواد بنجاح',
+    'failed_to_delete_time_and_material_consumption' => 'فشل في حذف استهلاك الوقت والمواد: ',
+    'empty_records_found' => 'تم العثور على سجلات فارغة',
+    'items_from_boq_pulled_successfully' => 'تم سحب العناصر من BOQ بنجاح',
+    'please_fill_all_required_fields' => 'يرجى ملء جميع الحقول المطلوبة',
+    'boq_not_found' => 'لم يتم العثور على BOQ',
+    'uuid_already_exists' => 'UUID موجود بالفعل',
+
+    //milestone payment schedule
+    'milestone_payment_schedule_created_successfully' => 'تم إنشاء جدول دفع المعلم بنجاح',
+    'milestone_payment_schedules_retrieved_successfully' => 'تم استرجاع جداول دفع المعلم بنجاح',
+    'milestone_payment_schedule_updated_successfully' => 'تم تحديث جدول دفع المعلم بنجاح',
+    'milestone_payment_schedules_not_found' => 'لم يتم العثور على جداول دفع المعلم',
+    'cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_retention' =>
+        'لا يمكن حذف جدول دفع المعلم. تم استخدام المعلم في احتجاز المعالم',
+    'cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_penalty' =>
+        'لا يمكن حذف جدول دفع المعلم. تم استخدام المعلم في غرامة المعالم',
+    'milestone_payment_schedules_deleted_successfully' => 'تم حذف جداول دفع المعلم بنجاح',
+
+    // milestone retention
+    'failed_to_create_milestone_retention' => 'فشل في إنشاء احتجاز المعالم: ',
+    'contract_milestone_retention_not_found' => 'لم يتم العثور على احتجاز معلم العقد',
+    'contract_milestone_retention_retrieved_successfully' => 'تم استرجاع احتجاز معلم العقد بنجاح',
+    'contract_milestone_retention_updated_successfully' => 'تم تحديث احتجاز معلم العقد بنجاح',
+    'failed_to_update_milestone_retention' => 'فشل في تحديث احتجاز المعالم: ',
+    'failed_to_update_milestone_retention_percentage' => 'فشل في تحديث نسبة احتجاز المعالم: ',
 ];
