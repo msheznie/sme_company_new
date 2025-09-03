@@ -58,11 +58,11 @@ class CreateContractRequest extends FormRequest
     public function messages()
     {
         return [
-            'companySystemId.required' =>  'Company id is required',
-            'contractCategoryId.required' => 'Category id is different',
-            'contractUuid.required' => 'contract uuid is required',
-            'revisedEndDate.required' => 'Revised end date is required',
-            'reason.required' => 'Reason is required',
+            'companySystemId.required' =>  trans('common.company_id_is_required'),
+            'contractCategoryId.required' => trans('common.category_id_is_different'),
+            'contractUuid.required' => trans('common.contract_uuid_is_required'),
+            'revisedEndDate.required' => trans('common.revised_end_date_is_required'),
+            'reason.required' => trans('common.reason_is_required'),
         ];
     }
 }
