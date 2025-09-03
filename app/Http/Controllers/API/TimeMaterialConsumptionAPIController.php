@@ -73,7 +73,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
                 $historyUuid,
                 $amendment
             );
-            return $this->sendResponse([], 'Time and material consumption created successfully.');
+            return $this->sendResponse([], trans('common.time_and_material_consumption_created_successfully_dot'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -98,11 +98,11 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
 
         if (empty($timeMaterialConsumption))
         {
-            return $this->sendError('Time Material Consumption not found');
+            return $this->sendError(trans('common.time_material_consumption_not_found'));
         }
 
         return $this->sendResponse(new TimeMaterialConsumptionResource($timeMaterialConsumption),
-            'Time Material Consumption retrieved successfully');
+            trans('common.time_material_consumption_retrieved_successfully'));
     }
 
     /**
@@ -123,7 +123,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
         {
             $historyID = $amendment
                 ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
-                    ?? GeneralService::sendException('Contract history not found.'))
+                    ?? GeneralService::sendException(trans('common.contract_history_not_found')))
                 : 0;
 
             $consumption = $amendment ? TimeMaterialConsumptionAmd::findTimeMaterialConsumption($id, $historyID)
@@ -131,11 +131,11 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
 
             if (empty($consumption))
             {
-                GeneralService::sendException('Time and material consumption not found.');
+                GeneralService::sendException(trans('common.time_material_consumption_not_found'));
             }
             $updateId = $amendment ? $consumption['amd_id'] : $consumption['id'];
             $this->timeMaterialConsumptionRepository->updateTimeMaterialConsumption($input, $updateId);
-            return $this->sendResponse([], trans('Time and material consumption saved successfully.'));
+            return $this->sendResponse([], trans('common.time_and_material_consumption_saved_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -164,7 +164,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
         {
             $historyID = $amendment
                 ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
-                    ?? GeneralService::sendException('Contract history not found.'))
+                    ?? GeneralService::sendException(trans('common.contract_history_not_found')))
                 : 0;
 
             $consumption = $amendment ? TimeMaterialConsumptionAmd::findTimeMaterialConsumption($id, $historyID)
@@ -178,13 +178,13 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
             $consumption->save();
             $consumption->delete();
 
-            return $this->sendSuccess('Time Material Consumption deleted successfully');
+            return $this->sendSuccess(trans('common.time_material_consumption_deleted_successfully'));
         } catch (CommonException $ex)
         {
-            return $this->sendError('Failed to delete time and material consumption: ' . $ex->getMessage());
+            return $this->sendError(trans('common.failed_to_delete_time_and_material_consumption') . $ex->getMessage());
         } catch(\Exception $ex)
         {
-            return $this->sendError('Failed to delete time and material consumption: ' . $ex->getMessage());
+            return $this->sendError(trans('common.failed_to_delete_time_and_material_consumption') . $ex->getMessage());
         }
 
     }
@@ -208,7 +208,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
                 $historyUuid,
                 $amendment
             );
-            return $this->sendResponse($response, 'Time material consumption retrieved successfully.');
+            return $this->sendResponse($response, trans('common.time_material_consumption_retrieved_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -226,7 +226,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
         $formData = $request->input('formData') ?? [];
         if(empty($formData))
         {
-            GeneralService::sendException('Empty records found.');
+            GeneralService::sendException(trans('common.empty_records_found'));
         }
         try
         {
@@ -237,7 +237,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
                 $amendment,
                 $historyUuid
             );
-            return $this->sendResponse([], 'Items from BOQ pulled successfully.');
+            return $this->sendResponse([], tran('common.items_from_boq_pulled_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');

@@ -75,7 +75,7 @@ class ContractMilestoneRepository extends BaseRepository
             ->first();
 
         if (empty($contractMaster)) {
-            return ['status' => false, 'message' => 'Contract Master not found'];
+            return ['status' => false, 'message' => trans('common.contract_not_found')];
         }
 
         $contractMilestones = ContractMilestone::getContractMilestone($contractMaster['id'], $companySystemID);
@@ -89,7 +89,7 @@ class ContractMilestoneRepository extends BaseRepository
 
         return [
             'status' => true,
-            'message' => 'Contract Milestone retrieved successfully',
+            'message' => trans('common.contract_milestone_retrieved_successfully'),
             'data' => $response
         ];
     }
@@ -136,7 +136,7 @@ class ContractMilestoneRepository extends BaseRepository
             {
                 return [
                     'status' => false,
-                    'message' => 'Contract history not found'
+                    'message' => trans('common.contract_history_not_found')
                 ];
             }
             $contractHistoryId = $contractHistory['id'];
@@ -217,7 +217,7 @@ class ContractMilestoneRepository extends BaseRepository
             {
                 return [
                     'status' => false,
-                    'message' => 'Contract history not found'
+                    'message' => trans('common.contract_history_not_found')
                 ];
             }
 

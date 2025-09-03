@@ -281,5 +281,38 @@
      "unable_to_referback_contract" => "Unable to referback contract",
      "unable_to_create_referback_history" => "Unable to create referback history",
      "unable_to_update_referback_history" => "Unable to update referback history",
-     "unable_to_delete_approval_document" => "Unable to delete approval document"
+     "unable_to_delete_approval_document" => "Unable to delete approval document",
+     'contract_milestone_retrieved_successfully' => 'Contract Milestone retrieved successfully',
+     'cannot_delete_milestone_payment' => 'Cannot delete milestone. Milestone already assigned to milestone payment schedule.',
+     'cannot_delete_milestone_retention' => 'Cannot delete milestone. Milestone already assigned to milestone retention.',
+     'time_and_material_consumption_created_successfully_dot' => 'Time and material consumption created successfully.',
+     'time_material_consumption_retrieved_successfully' => 'Time Material Consumption retrieved successfully',
+     'time_and_material_consumption_saved_successfully' => 'Time and material consumption saved successfully',
+     'time_material_consumption_deleted_successfully' => 'Time Material Consumption deleted successfully',
+     'failed_to_delete_time_and_material_consumption' => 'Failed to delete time and material consumption: ',
+     'empty_records_found' => 'Empty records found',
+     'items_from_boq_pulled_successfully' => 'Items from BOQ pulled successfully',
+     'please_fill_all_required_fields' => 'Please fill all required fields',
+     'boq_not_found' => 'BOQ not found',
+     'uuid_already_exists' => 'UUID already exists',
+
+     //milestone payment schedule
+     'milestone_payment_schedule_created_successfully' => 'Milestone payment schedule created successfully',
+     'milestone_payment_schedules_retrieved_successfully' => 'Milestone Payment Schedules retrieved successfully',
+     'milestone_payment_schedule_updated_successfully' => 'Milestone payment schedule updated successfully',
+     'milestone_payment_schedules_not_found' => 'Milestone Payment Schedules not found',
+     'cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_retention' =>
+         'Cannot delete milestone payment schedule. Milestone is used in milestone retention',
+     'cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_penalty' =>
+         'Cannot delete milestone payment schedule. Milestone is used in milestone penalty',
+     'milestone_payment_schedules_deleted_successfully' => 'Milestone Payment Schedules deleted successfully',
+
+     // milestone retention
+     'failed_to_create_milestone_retention' => 'Failed to create milestone retention: ',
+     'contract_milestone_retention_not_found' => 'Contract Milestone Retention not found',
+     'contract_milestone_retention_retrieved_successfully' => 'Contract Milestone Retention retrieved successfully',
+     'contract_milestone_retention_updated_successfully' => 'Contract milestone retention updated successfully',
+     'failed_to_update_milestone_retention' => 'Failed to update milestone retention: ',
+     'failed_to_update_milestone_retention_percentage' => 'Failed to update milestone retention percentage: ',
+     'milestone_retention_not_found' => 'Milestone retention not found'
  ];
