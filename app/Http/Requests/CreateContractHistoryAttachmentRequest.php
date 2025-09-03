@@ -34,10 +34,10 @@ class CreateContractHistoryAttachmentRequest extends FormRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' =>  'Company id is required',
-            'contractCategory.required' => 'Category id is different',
-            'uuid.required' => 'contract uuid is required',
-            'file.required' => 'File is required'
+            'selectedCompanyID.required' =>  trans('common.company_id_is_required'),
+            'contractCategory.required' => trans('common.category_id_is_different'),
+            'uuid.required' => trans('common.contract_uuid_is_required'),
+            'file.required' => trans('common.file_is_required')
         ];
     }
 }
