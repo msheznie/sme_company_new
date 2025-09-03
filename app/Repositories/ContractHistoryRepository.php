@@ -134,7 +134,7 @@ class ContractHistoryRepository extends BaseRepository
             $currentContractDetails = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if (!$currentContractDetails)
             {
-                throw new ContractCreationException('Contract not found');
+                throw new ContractCreationException(trans('common.contract_not_found'));
             }
             switch ($categoryId)
             {
@@ -262,7 +262,7 @@ class ContractHistoryRepository extends BaseRepository
 
             if (!$insertResponse)
             {
-                throw new ContractCreationException('Something went wrong while creating the contract.');
+                throw new ContractCreationException(trans('common.something_went_wrong_while_creating_the_contract'));
             }
             return
                 [
@@ -272,7 +272,7 @@ class ContractHistoryRepository extends BaseRepository
                 ];
         } catch (Exception $e)
         {
-            throw new ContractCreationException('Failed to create contract header '.$e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_contract_header').$e->getMessage());
         }
     }
 
@@ -316,7 +316,7 @@ class ContractHistoryRepository extends BaseRepository
 
         } catch (Exception $e)
         {
-            throw new ContractCreationException('Failed to create contract settings '.$e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_contract_settings').$e->getMessage());
         }
     }
 
@@ -347,7 +347,7 @@ class ContractHistoryRepository extends BaseRepository
 
         }catch (Exception $e)
         {
-            throw new ContractCreationException('Failed to create user settings '.$e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_user_settings').$e->getMessage());
         }
     }
 
@@ -382,7 +382,7 @@ class ContractHistoryRepository extends BaseRepository
         }
         catch (Exception $e)
         {
-            throw new ContractCreationException('Failed to add section wise records: ' . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_add_section_wise_records') . $e->getMessage());
         }
 
         return $createdIds;
@@ -431,7 +431,7 @@ class ContractHistoryRepository extends BaseRepository
         }
         catch (Exception $e)
         {
-            throw new ContractCreationException("Failed to create data for model $modelName: " . $e->getMessage());
+            throw new ContractCreationException(trans('custom.failed_to_create_data_for_model', ['modelName' => $modelName]) . $e->getMessage());
         }
 
         return $createdIds;
@@ -469,7 +469,7 @@ class ContractHistoryRepository extends BaseRepository
         {
             throw new ContractCreationException
             (
-                "Failed to create data for document attachment table: " . $e->getMessage()
+                trans('common.failed_to_create_data_for_document_attachment_table') . $e->getMessage()
             );
         }
 
@@ -551,7 +551,7 @@ class ContractHistoryRepository extends BaseRepository
             $insertResponse = ContractHistory::create($insert);
             if (!$insertResponse)
             {
-                throw new ContractCreationException('Something went wrong while creating the contract history.');
+                throw new ContractCreationException(trans('common.something_went_wrong_while_creating_the_contract_history'));
             }
             if($contractCategoryId == 4 || $contractCategoryId == 6)
             {
@@ -570,7 +570,7 @@ class ContractHistoryRepository extends BaseRepository
 
         } catch (Exception $e)
         {
-            throw new ContractCreationException('Failed to create contract history '.$e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_contract_history').$e->getMessage());
         }
     }
     private function cloneContractSettingMaster($cmSectionId, $cloningContractId, $contractId, $companyId)

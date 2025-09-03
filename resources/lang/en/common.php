@@ -320,5 +320,25 @@
      "contract_type_deleted" => "Contract Type has been deleted successfully !",
      "contract_type_deletion_failed" => "Contract Type Deletion Failed.",
      "success_export" => "Export to Excel",
-     "unable_to_export_excel" => "Export to Excel"
+     "unable_to_export_excel" => "Export to Excel",
+
+     // contract history
+     "contract_extension_record_successfully_deleted" => "Contract extension record successfully deleted",
+     "category_id_is_different" => "Category id is different",
+     "contract_uuid_is_required" => "contract uuid is required",
+     "file_is_required" => "File is required",
+     "document_updated_successfully" => "Document updated successfully",
+     "successfully_created" => "Successfully Created",
+     "revised_end_date_is_required" => "Revised end date is required",
+     "reason_is_required" => "Reason is required",
+     "something_went_wrong_while_creating_the_contract" => "Something went wrong while creating the contract.",
+     "failed_to_create_contract_header" => "Failed to create contract header ",
+     "failed_to_create_contract_settings" => "Failed to create contract settings ",
+     "failed_to_create_user_settings" => "Failed to create user settings ",
+     "failed_to_add_section_wise_records" => "Failed to add section wise records: ",
+     "failed_to_create_data_for_model" => "Failed to create data for model (:modelName )",
+     "failed_to_create_data_for_document_attachment_table" => "Failed to create data for document attachment table: ",
+     "something_went_wrong_while_creating_the_contract_history" => "Something went wrong while creating the contract history.",
+     "failed_to_create_contract_history" => "Failed to create contract history ",
+     "successfully_deleted" => "Successfully deleted"
  ];

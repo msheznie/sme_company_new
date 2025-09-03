@@ -293,5 +293,25 @@ return [
     "contract_type_deleted" => "تم حذف نوع العقد بنجاح.",
     "contract_type_deletion_failed" => "فشل حذف نوع العقد.",
     "success_export" => "تصدير إلى Excel",
-    "unable_to_export_excel" => "غير قادر على تصدير ملف Excel"
+    "unable_to_export_excel" => "غير قادر على تصدير ملف Excel",
+
+    // contract history
+    "contract_extension_record_successfully_deleted" => "تم حذف سجل تمديد العقد بنجاح",
+    "category_id_is_different" => "معرّف الفئة مختلف",
+    "contract_uuid_is_required" => "معرّف العقد (UUID) مطلوب",
+    "file_is_required" => "الملف مطلوب",
+    "document_updated_successfully" => "تم تحديث المستند بنجاح",
+    "successfully_created" => "تم الإنشاء بنجاح",
+    "revised_end_date_is_required" => "تاريخ الانتهاء المعدل مطلوب",
+    "reason_is_required" => "السبب مطلوب",
+    "something_went_wrong_while_creating_the_contract" => "حدث خطأ أثناء إنشاء العقد.",
+    "failed_to_create_contract_header" => "فشل في إنشاء رأس العقد",
+    "failed_to_create_contract_settings" => "فشل في إنشاء إعدادات العقد",
+    "failed_to_create_user_settings" => "فشل في إنشاء إعدادات المستخدم",
+    "failed_to_add_section_wise_records" => "فشل في إضافة السجلات حسب القسم:",
+    "failed_to_create_data_for_model" => "فشل في إنشاء بيانات للنموذج (:modelName)",
+    "failed_to_create_data_for_document_attachment_table" => "فشل في إنشاء بيانات لجدول مرفقات المستند:",
+    "something_went_wrong_while_creating_the_contract_history" => "حدث خطأ أثناء إنشاء سجل العقد.",
+    "failed_to_create_contract_history" => "فشل في إنشاء سجل العقد",
+    "successfully_deleted" => "تم الحذف بنجاح"
 ];
