@@ -340,6 +340,18 @@
      "failed_to_create_data_for_document_attachment_table" => "Failed to create data for document attachment table: ",
      "something_went_wrong_while_creating_the_contract_history" => "Something went wrong while creating the contract history.",
      "failed_to_create_contract_history" => "Failed to create contract history ",
+     "successfully_deleted" => "Successfully deleted",
+     "contract_amendment_document_confirmed_successfully" => "Contract amendment document confirmed successfully",
+     "failed_to_create_contract_amendment" => "Failed to create contract amendment: ",
+     "milestone_retention_data_saving_failed" => "Milestone retention data saving failed ",
+     "contract_retention_failed" => "Contract Retention failed :",
+     "payment_terms_data_saving_failed" => "Payment terms data saving failed ",
+     "failed_to_create_original_contract_amendment" => "Failed to create original contract amendment: ",
+     "time_and_material_consumption_data_saving_failed" => "Time and material consumption data saving failed ",
+     "boq_data_saving_failed" => "BOQ data saving failed ",
+     "user_assign_data_saving_failed" => "User assign data saving failed ",
+     "contract_document_failed" => "Contract Document failed: ",
+     "contract_additional_document_failed" => "Contract additional document failed: ",
 
      //periodic billing
      'periodic_billing_created_successfully' => 'Periodic billing created successfully',

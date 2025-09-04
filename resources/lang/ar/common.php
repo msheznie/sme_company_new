@@ -313,6 +313,18 @@ return [
     "failed_to_create_data_for_document_attachment_table" => "فشل في إنشاء بيانات لجدول مرفقات المستند:",
     "something_went_wrong_while_creating_the_contract_history" => "حدث خطأ أثناء إنشاء سجل العقد.",
     "failed_to_create_contract_history" => "فشل في إنشاء سجل العقد",
+    "successfully_deleted" => "تم الحذف بنجاح",
+    "contract_amendment_document_confirmed_successfully" => "تم تأكيد مستند تعديل العقد بنجاح",
+    "failed_to_create_contract_amendment" => "فشل في إنشاء تعديل العقد: ",
+    "milestone_retention_data_saving_failed" => "فشل حفظ بيانات احتجاز المراحل",
+    "contract_retention_failed" => "فشل احتجاز العقد:",
+    "payment_terms_data_saving_failed" => "فشل حفظ بيانات شروط الدفع",
+    "failed_to_create_original_contract_amendment" => "فشل في إنشاء تعديل العقد الأصلي: ",
+    "time_and_material_consumption_data_saving_failed" => "فشل حفظ بيانات استهلاك الوقت والمواد",
+    "boq_data_saving_failed" => "فشل حفظ بيانات جدول الكميات",
+    "user_assign_data_saving_failed" => "فشل حفظ بيانات تعيين المستخدم",
+    "contract_document_failed" => "فشل مستند العقد: ",
+    "contract_additional_document_failed" => "فشل المستند الإضافي للعقد: ",
 
     // periodic billing
     'periodic_billing_created_successfully' => 'تم إنشاء الفوترة الدورية بنجاح',
@@ -394,5 +406,5 @@ return [
     'milestone_uuid_required_dot' => '.المعرّف الفريد للمرحلة مطلوب',
     'description_is_required_dot' => '.الوصف مطلوب',
     'deliverable_title_is_required_dot' => '.عنوان المستند مطلوب',
-    'deliverable_id_is_required_dot' => '.معرّف المستند مطلوب',
+    'deliverable_id_is_required_dot' => '.معرّف المستند مطلوب'
 ];

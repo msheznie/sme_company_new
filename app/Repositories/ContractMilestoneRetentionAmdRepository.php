@@ -92,7 +92,7 @@ class ContractMilestoneRetentionAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Milestone retention data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.milestone_retention_data_saving_failed') . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId)
@@ -116,7 +116,7 @@ class ContractMilestoneRetentionAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Milestone retention data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.milestone_retention_data_saving_failed') . $e->getMessage());
         }
     }
 }
