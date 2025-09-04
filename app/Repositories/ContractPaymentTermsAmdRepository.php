@@ -90,7 +90,7 @@ class ContractPaymentTermsAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Payment terms data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.payment_terms_data_saving_failed') . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId)
@@ -114,7 +114,7 @@ class ContractPaymentTermsAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Payment terms data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.payment_terms_data_saving_failed') . $e->getMessage());
         }
     }
     public function getContractPaymentTermsAmd($historyUuid, Request $request)
