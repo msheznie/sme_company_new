@@ -27,8 +27,8 @@ class LanguageRequest extends FormRequest
     public function messages()
     {
         return [
-            'languageID.required' => 'Language ID is required',
-            'languageID.exists' => 'Selected language does not exist or is not active',
+            'languageID.required' => trans('common.language_id_is_required'),
+            'languageID.exists' => trans('common.selected_language_does_not_exist_or_is_not_active'),
         ];
     }
 }

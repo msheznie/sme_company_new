@@ -36,9 +36,9 @@ class CreateCodeConfigurationsAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'code_pattern.required' => 'Code pattern is required.',
-            'serialization_based_on.required' => 'Serialization based on is required.',
-            'serialization_based_on.unique' => 'The serialization based on value must be unique'
+            'code_pattern.required' => trans('common.code_pattern_is_required_dot'),
+            'serialization_based_on.required' => trans('common.serialization_based_on_is_required_dot'),
+            'serialization_based_on.unique' => trans('common.the_serialization_based_on_value_must_be_unique_dot')
         ];
     }
 }
