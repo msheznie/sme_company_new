@@ -86,7 +86,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if(empty($contract))
             {
-                throw new CommonException('Contract Code not found.');
+                throw new CommonException(trans('common.contract_code_not_found'));
             }
 
             $milestonePenaltyMaster = ContractMilestonePenaltyMaster::getMilestonePenaltyMaster(
@@ -110,13 +110,13 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
 
             if(empty($milestonePenaltyMaster))
             {
-                throw new CommonException('Please fill all the mandatory fields in milestone master.');
+                throw new CommonException(trans('common.please_fill_all_the_mandatory_fields_in_milestone'));
             }
 
             if($milestonePenaltyMaster['minimum_penalty_percentage'] > $input['penalty_percentage'] ||
                 $milestonePenaltyMaster['maximum_penalty_percentage'] < $input['penalty_percentage'])
             {
-                throw new CommonException('Penalty percentage should be within the min and max penalty percentages.');
+                throw new CommonException(trans('common.penalty_percentage_should_be_within_the_min_and_max_penalty_percentages_dot'));
             }
             else
             {
@@ -328,7 +328,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             $milestone = ContractMilestone::checkContractMilestoneExists($input['milestone_title']);
             if(empty($milestone))
             {
-                throw new CommonException('Contract milestone not found.');
+                throw new CommonException(trans('common.milestone_not_found'));
             }
 
             $milestoneUuid = $input['milestone_title'];
@@ -340,7 +340,7 @@ class ContractMilestonePenaltyDetailRepository extends BaseRepository
             if($milestonePenaltyMaster['minimum_penalty_percentage'] > $input['penalty_percentage'] ||
                 $milestonePenaltyMaster['maximum_penalty_percentage'] < $input['penalty_percentage'])
             {
-                throw new CommonException('Penalty percentage should be within the min and max penalty percentages.');
+                throw new CommonException(trans('common.penalty_percentage_should_be_within_the_min_and_max_penalty_percentages_dot'));
             }
             else
             {

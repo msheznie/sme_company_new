@@ -62,7 +62,7 @@ class ContractOverallPenaltyAPIController extends AppBaseController
         try
         {
             $this->contractOverallPenaltyRepository->createOverallPenalty($input, $contractUuid, $selectedCompanyID);
-            return $this->sendResponse([], 'Overall penalty created successfully');
+            return $this->sendResponse([], trans('common.overall_penalty_created_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -87,11 +87,11 @@ class ContractOverallPenaltyAPIController extends AppBaseController
 
         if (empty($contractOverallPenalty))
         {
-            return $this->sendError('Contract Overall Penalty not found');
+            return $this->sendError(trans('common.overall_penalty_not_found_dot'));
         }
 
         return $this->sendResponse(new ContractOverallPenaltyResource($contractOverallPenalty),
-            'Contract Overall Penalty retrieved successfully');
+            trans('common.overall_penalty_retrieved_successfully'));
     }
 
     /**
@@ -112,10 +112,10 @@ class ContractOverallPenaltyAPIController extends AppBaseController
 
             if (empty($overallPenalty))
             {
-                throw new CommonException('Overall penalty not found.');
+                throw new CommonException(trans('common.overall_penalty_not_found_dot'));
             }
             $this->contractOverallPenaltyRepository->updateOverallPenalty($input, $overallPenalty['id']);
-            return $this->sendResponse(['id' => $id], trans('Overall penalty updated successfully.'));
+            return $this->sendResponse(['id' => $id], trans('common.overall_penalty_updated_successfully_dot'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -142,12 +142,12 @@ class ContractOverallPenaltyAPIController extends AppBaseController
 
         if (empty($contractOverallPenalty))
         {
-            return $this->sendError('Contract Overall Penalty not found');
+            return $this->sendError(trans('common.overall_penalty_not_found_dot'));
         }
 
         $contractOverallPenalty->delete();
 
-        return $this->sendSuccess('Contract Overall Penalty deleted successfully');
+        return $this->sendSuccess(trans('common.overall_penalty_deleted_successfully'));
     }
 
     public function overallPenaltyData(Request $request)
@@ -177,10 +177,10 @@ class ContractOverallPenaltyAPIController extends AppBaseController
 
             if (empty($overallPenalty))
             {
-                throw new CommonException('Overall penalty not found.');
+                throw new CommonException(trans('common.overall_penalty_not_found_dot'));
             }
             $this->contractOverallPenaltyRepository->updatePenaltyStatus($input, $overallPenalty['id']);
-            return $this->sendResponse(['id' => $uuid], trans('Penalty status updated successfully.'));
+            return $this->sendResponse(['id' => $uuid], trans('common.overall_penalty_status_updated_successfully_dot'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());

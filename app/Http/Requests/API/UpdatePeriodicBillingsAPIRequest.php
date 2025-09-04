@@ -34,7 +34,7 @@ class UpdatePeriodicBillingsAPIRequest extends APIRequest
                 'required_if:occurrence_type,7',
                 function ($attribute, $value, $fail) {
                     if ($this->input('occurrence_type') == 7 && $value <= 0) {
-                        $fail('The due in field must be greater than 0.');
+                        $fail(trans('common.the_due_in_field_must_be_greater_than_zero'));
                     }
                 },
             ],
@@ -44,12 +44,12 @@ class UpdatePeriodicBillingsAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company Id is required.',
-            'amount.required' => 'amount is required.',
-            'start_date.title' => 'Start date is required.',
-            'end_date.required' => 'End date is required.',
-            'occurrence_type.required' => 'Valid occurrence is required.',
-            'due_in.required_if' => 'Due in field is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'amount.required' => trans('common.amount_is_required_dot'),
+            'start_date.title' => trans('common.start_date_is_required_dot'),
+            'end_date.required' => trans('common.end_date_is_required_dot'),
+            'occurrence_type.required' => trans('common.valid_occurrence_is_required_dot'),
+            'due_in.required_if' => trans('common.due_in_field_is_required_dot'),
         ];
     }
 }

@@ -35,10 +35,10 @@ class CreateContractPaymentTermsAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company ID is required.',
-            'contract_id.required' => 'Contract Code is required.',
-            'title.required' => 'Title is required.',
-            'description.title' => 'Term Description is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'contract_id.required' => trans('common.contract_code_is_required_dot'),
+            'title.required' => trans('common.title_is_required_dot'),
+            'description.title' => trans('common.term_description_is_required_dot'),
         ];
     }
 }

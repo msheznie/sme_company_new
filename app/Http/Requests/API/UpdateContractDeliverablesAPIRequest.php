@@ -36,11 +36,11 @@ class UpdateContractDeliverablesAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'companySystemID.required' => 'Company ID is required',
-            'contractUuid.required' => 'Contract Code is required',
-            'uuid.required' => 'Deliverable ID is required',
-            'description.required' => 'Description is required',
-            'title.required' => 'Deliverable Title is required',
+            'uuid.required' => trans('common.deliverable_id_is_required_dot'),
+            'companySystemID.required' => trans('common.company_id_is_required_dot'),
+            'contractUuid.required' => trans('common.contract_code_is_required_dot'),
+            'title.required' => trans('common.deliverable_title_is_required_dot'),
+            'description.required' => trans('common.description_is_required_dot'),
         ];
     }
 }
