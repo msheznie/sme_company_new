@@ -87,7 +87,7 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
         } catch
         (Exception $e)
         {
-            GeneralService::sendException("Contract Retention failed :" . $e->getMessage());
+            GeneralService::sendException(trans('common.contract_retention_failed') . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId, $selectedCompanyID)
@@ -109,7 +109,7 @@ class CMContractOverallRetentionAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Contract Retention failed :" . $e->getMessage());
+            GeneralService::sendException(trans('common.contract_retention_failed') . $e->getMessage());
         }
     }
 }

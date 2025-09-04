@@ -121,7 +121,7 @@ class CMContractDocumentAmdRepository extends BaseRepository
             }
         } catch (Exception $e)
         {
-            throw new ContractCreationException("Contract Document failed: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.contract_document_failed') . $e->getMessage());
         }
     }
 

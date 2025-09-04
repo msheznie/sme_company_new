@@ -690,7 +690,7 @@ class ContractHistoryRepository extends BaseRepository
         }
         catch (Exception $e)
         {
-            throw new ContractCreationException("Failed to create contract amendment: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_contract_amendment') . $e->getMessage());
         }
 
         return $historyData['uuid'];

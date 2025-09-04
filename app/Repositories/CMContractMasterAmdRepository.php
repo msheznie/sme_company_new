@@ -116,7 +116,7 @@ class CMContractMasterAmdRepository extends BaseRepository
             return CMContractMasterAmd::create($recordData);
         } catch (\Exception $e)
         {
-            throw new ContractCreationException('Failed to create contract amendment: ' . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_contract_amendment') . $e->getMessage());
         }
     }
 
@@ -144,7 +144,7 @@ class CMContractMasterAmdRepository extends BaseRepository
             return CMContractMasterAmd::create($recordData);
         } catch (\Exception $e)
         {
-            throw new ContractCreationException('Failed to create original contract amendment: ' . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_create_original_contract_amendment') . $e->getMessage());
         }
     }
 

@@ -531,7 +531,7 @@ class ContractHistoryAPIController extends AppBaseController
                 $getContractHistory->id,$getContractData->id,$companyId,1
             );
 
-            return $this->sendSuccess('Contract amendment document confirmed successfully');
+            return $this->sendSuccess(trans('common.contract_amendment_document_confirmed_successfully'));
         }
         catch (ContractCreationException $e)
         {
