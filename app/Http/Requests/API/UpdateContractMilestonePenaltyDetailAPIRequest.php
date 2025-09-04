@@ -36,7 +36,7 @@ class UpdateContractMilestonePenaltyDetailAPIRequest extends APIRequest
                 {
                     if ($this->input('penalty_frequency') == 7 && $value <= 0)
                     {
-                        $fail('The due in field must be greater than 0.');
+                        $fail(trans('common.the_due_in_field_must_be_greater_than_zero'));
                     }
                 },
             ],
@@ -46,12 +46,12 @@ class UpdateContractMilestonePenaltyDetailAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company Id is required.',
-            'milestone_title.required' => 'Milestone title is required.',
-            'penalty_percentage.required' => 'Penalty percentage is required.',
-            'penalty_start_date.title' => 'Penalty start date is required.',
-            'penalty_frequency.required' => 'Penalty frequency is required.',
-            'due_in.required_if' => 'Due in field is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'milestone_title.required' => trans('common.milestone_title_is_required_dot'),
+            'penalty_percentage.required' => trans('common.penalty_percentage_is_required_dot'),
+            'penalty_start_date.title' => trans('common.penalty_start_date_is_required_dot'),
+            'penalty_frequency.required' => trans('common.penalty_frequency_is_required_dot'),
+            'due_in.required_if' => trans('common.due_in_field_is_required_dot'),
         ];
     }
 }

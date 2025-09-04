@@ -36,10 +36,9 @@ class CreateContractAdditionalDocumentsAPIRequest extends APIRequest
         return [
             'contractUUid.required' => trans('common.contract_code_is_required'),
             'documentTypes.required' => trans('common.document_type_is_required'),
-            'documentTypes.required' => trans('common.document_type_is_required'),
             'selectedCompanyID.required' => trans('common.company_id_is_required'),
-             'documentName.required' => 'Document Name is required',
-             'file.required' => 'File is required',
+             'documentName.required' => trans('common.document_name_is_required_dot'),
+             'file.required' => trans('common.file_is_required_dot'),
         ];
     }
 }

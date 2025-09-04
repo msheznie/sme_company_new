@@ -161,7 +161,7 @@ class ContractMilestoneRetentionAPIController extends AppBaseController
         try
         {
             $this->contractMilestoneRetentionRepository->updateMilestoneRetention($request);
-            return $this->sendResponse([], 'Milestone retention updated successfully');
+            return $this->sendResponse([], trans('common.milestone_retention_updated_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError(trans('common.failed_to_update_milestone_retention') . $ex->getMessage());

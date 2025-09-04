@@ -340,5 +340,86 @@
      "failed_to_create_data_for_document_attachment_table" => "Failed to create data for document attachment table: ",
      "something_went_wrong_while_creating_the_contract_history" => "Something went wrong while creating the contract history.",
      "failed_to_create_contract_history" => "Failed to create contract history ",
-     "successfully_deleted" => "Successfully deleted"
+
+     //periodic billing
+     'periodic_billing_created_successfully' => 'Periodic billing created successfully',
+     'periodic_billing_not_found' => 'Periodic billing not found',
+     'periodic_billing_retrieved_successfully' => 'Periodic billing retrieved successfully',
+     'periodic_billing_updated_successfully' => 'Periodic billing updated successfully',
+     'periodic_billing_deleted_successfully' => 'Periodic Billing deleted successfully',
+     'amount_is_required_dot' => 'Amount is required.',
+     'start_date_is_required_dot' => 'Start date is required.',
+     'end_date_is_required_dot' => 'End date is required.',
+     'valid_occurrence_is_required_dot' => 'Valid occurrence is required.',
+
+     //overall penalty
+     'overall_penalty_created_successfully' => 'Overall penalty created successfully',
+     'overall_penalty_not_found_dot' => 'Overall penalty not found.',
+     'overall_penalty_retrieved_successfully' => 'Overall penalty retrieved successfully',
+     'overall_penalty_updated_successfully_dot' => 'Overall penalty updated successfully.',
+     'overall_penalty_deleted_successfully' => 'Overall penalty deleted successfully',
+     'overall_penalty_status_updated_successfully_dot' => 'Overall penalty status updated successfully.',
+     'the_due_in_field_must_be_greater_than_zero' => 'The due in field must be greater than 0.',
+     'actual_penalty_percentage_is_required_dot' => 'Actual penalty percentage is required.',
+     'actual_penalty_start_date_is_required_dot' => 'Actual penalty start date is required.',
+     'penalty_circulation_frequency_is_required_dot' => 'Penalty circulation frequency is required.',
+
+     // milestone penalty
+     'milestone_penalty_created_successfully_dot' => 'Milestone penalty created successfully.',
+     'milestone_penalty_not_found_dot' => 'Milestone penalty not found.',
+     'milestone_penalty_retrieved_successfully_dot' => 'Milestone penalty retrieved successfully.',
+     'milestone_penalty_updated_successfully_dot' => 'Milestone penalty updated successfully.',
+     'milestone_penalty_deleted_successfully_dot' => 'Milestone penalty deleted successfully.',
+     'minimum_penalty_percentage_should_be_less_than_maximum_penalty_percentage' =>
+         'Minimum penalty percentage should be less than maximum penalty percentage',
+     'delete_milestone_penalty_records_to_update_milestone_penalty_details' =>
+         'If you want to update milestone penalty master details, Please delete already added milestone penalty records first',
+     'milestone_penalty_details_retrieved_successfully' => 'Milestone penalty details retrieved successfully',
+     'milestone_penalty_detail_created_successfully' => 'Milestone penalty detail created successfully',
+     'milestone_penalty_detail_not_found_dot' => 'Milestone penalty detail not found.',
+     'milestone_penalty_detail_retrieved_successfully' => 'Milestone penalty detail retrieved successfully',
+     'milestone_penalty_detail_updated_successfully_dot' => 'Milestone penalty detail updated successfully.',
+     'milestone_penalty_detail_deleted_successfully' => 'Milestone penalty detail deleted successfully',
+     'milestone_penalty_status_updated_successfully_dot' => 'Milestone penalty status updated successfully.',
+     'please_fill_all_the_mandatory_fields_in_milestone' => 'Please fill all the mandatory fields in milestone',
+     'penalty_percentage_should_be_within_the_min_and_max_penalty_percentages_dot' =>
+         'Penalty percentage should be within the min and max penalty percentages.',
+     'milestone_title_is_required_dot' => 'Milestone title is required.',
+     'penalty_percentage_is_required_dot' => 'Penalty percentage is required.',
+     'penalty_start_date_is_required_dot' => 'Penalty start date is required.',
+     'penalty_frequency_is_required_dot' => 'Penalty frequency is required.',
+     'due_in_field_is_required_dot' => 'Due in field is required.',
+     'minimum_penalty_percentage_is_required_dot' => 'Minimum penalty percentage is required.',
+     'Maximum_penalty_percentage_is_required_dot' => 'Maximum penalty percentage is required.',
+
+     //attach document
+     'an_unexpected_error_occurred_dot' => 'An unexpected error occurred.',
+     'successfully_deleted' => 'Successfully deleted',
+     'successfully_updated' => 'Successfully updated',
+     'failed_to_create_document_tracing' => 'Failed to create Document tracing: ',
+     'document_tracing_not_found' => 'Document tracing not found',
+     'failed_to_delete_document_tracing_data' => 'Failed to delete document tracing data: ',
+     'failed_to_update_document_tracing' => 'Failed to update document tracing: ',
+     'failed_to_get_contract_document_data' => 'Failed to get contract document data: ',
+     'failed_to_update_document_contract' => 'Failed to update document contract: ',
+     'document_name_is_required_dot' => 'Document Name is required.',
+     'file_is_required_dot' => 'File is required.',
+     'due_date_is_required_dot' => 'Due date is required.',
+
+     //payment terms
+     'payment_terms_retrieved_successfully' => 'Payment terms retrieved successfully',
+     'payment_term_created_successfully' => 'Payment term created successfully',
+     'payment_terms_not_found' => 'Payment terms not found',
+     'payment_term_updated_successfully' => 'Payment term updated successfully',
+     'payment_term_deleted_successfully' => 'Payment term deleted successfully',
+     "company_id_is_required_dot" => "Company ID is required.",
+     'contract_code_is_required_dot' => 'Contract code is required.',
+     'title_is_required_dot' => 'Title is required.',
+     'term_description_is_required_dot' => 'Term Description is required.',
+     'uuid_is_required_dot' => 'UUID is required.',
+     'value_is_required_dot' => 'Value is required.',
+     'milestone_uuid_required_dot' => 'Milestone uuid required.',
+     'description_is_required_dot' => 'Description is required.',
+     'deliverable_title_is_required_dot' => 'Deliverable Title is required.',
+     'deliverable_id_is_required_dot' => 'Deliverable ID is required.'
  ];

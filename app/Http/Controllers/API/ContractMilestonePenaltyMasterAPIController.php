@@ -63,7 +63,7 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
         {
             $this->contractMilestonePenaltyMasterRepository->createMilestonePenalty(
                 $input, $contractUuid, $selectedCompanyID);
-            return $this->sendResponse([], 'Milestone penalty master created successfully');
+            return $this->sendResponse([], trans('common.milestone_penalty_created_successfully_dot'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -88,11 +88,11 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
 
         if (empty($contractMilestonePenaltyMaster))
         {
-            return $this->sendError('Contract Milestone Penalty Master not found');
+            return $this->sendError(trans('common.milestone_penalty_not_found_dot'));
         }
 
         return $this->sendResponse(new ContractMilestonePenaltyMasterResource($contractMilestonePenaltyMaster),
-            'Contract Milestone Penalty Master retrieved successfully');
+            trans('common.milestone_penalty_retrieved_successfully_dot'));
     }
 
     /**
@@ -113,10 +113,10 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
 
             if (empty($milestonePenalty))
             {
-                throw new CommonException('Milestone penalty not found.');
+                throw new CommonException(trans('common.milestone_penalty_not_found_dot'));
             }
             $this->contractMilestonePenaltyMasterRepository->updateMilestonePenalty($input, $milestonePenalty['id']);
-            return $this->sendResponse(['id' => $id], trans('Milestone penalty master updated successfully.'));
+            return $this->sendResponse(['id' => $id], trans('common.milestone_penalty_updated_successfully_dot'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -143,12 +143,12 @@ class ContractMilestonePenaltyMasterAPIController extends AppBaseController
 
         if (empty($contractMilestonePenaltyMaster))
         {
-            return $this->sendError('Contract Milestone Penalty Master not found');
+            return $this->sendError(trans('common.milestone_penalty_not_found_dot'));
         }
 
         $contractMilestonePenaltyMaster->delete();
 
-        return $this->sendSuccess('Contract Milestone Penalty Master deleted successfully');
+        return $this->sendSuccess(trans('common.milestone_penalty_deleted_successfully_dot'));
     }
 
     public function milestonePenaltyMasterData(Request $request)
