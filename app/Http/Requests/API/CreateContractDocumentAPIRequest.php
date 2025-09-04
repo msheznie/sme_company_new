@@ -46,8 +46,8 @@ class CreateContractDocumentAPIRequest extends APIRequest
             'contractUUid.required' => trans('common.contract_code_is_required'),
             'documentTypes.required' => trans('common.document_type_is_required'),
             'selectedCompanyID.required' => trans('common.company_id_is_required'),
-            'attachedDate.required' => 'Due Date is required',
-            'documentName.required' => 'Document Name is required',
+            'attachedDate.required' => trans('common.due_date_is_required_dot'),
+            'documentName.required' => trans('common.document_name_is_required_dot')
         ];
     }
 }

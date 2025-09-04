@@ -121,7 +121,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
 
                 if (!$contractData)
                 {
-                    GeneralService::sendException('Contract Not Found');
+                    GeneralService::sendException(trans('common.contract_not_found'));
                 }
 
                 $insertData = [
@@ -158,7 +158,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
         }
         catch (Exception $e)
         {
-            GeneralService::sendException('Failed to create Document tracing', $e);
+            GeneralService::sendException(trans('common.failed_to_create_document_tracing'), $e);
         }
     }
     private function getInsertData($contractMaster, $documentTypeId, $selectedCompanyID,$historyId): array {
@@ -317,14 +317,14 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
             $contractDocument = ContractAdditionalDocuments::fetchByUuid($input['additionalDocumentUuid']);
             if (!$contractDocument)
             {
-                GeneralService::sendException('Contract Document Not Found');
+                GeneralService::sendException(trans('common.contract_document_not_found'));
             }
 
             return $contractDocument;
         }
         catch (\Exception $ex)
         {
-            GeneralService::sendException('Failed to get contract document data', $ex);
+            GeneralService::sendException(trans('common.failed_to_get_contract_document_data'), $ex);
         }
     }
 
@@ -341,7 +341,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
 
                 if (!$additionalDocument)
                 {
-                    GeneralService::sendException('Contract document not found.'. $additionalDocumentuuid);
+                    GeneralService::sendException(trans('common.contract_document_not_found'));
                 }
 
                 $additionalDocument->update([
@@ -355,7 +355,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
 
         } catch (\Exception $e)
         {
-            GeneralService::sendException('Failed to Delete Document tracing data', $e);
+            GeneralService::sendException(trans('common.failed_to_delete_document_tracing_data'), $e);
         }
     }
 
@@ -402,7 +402,7 @@ class ContractAdditionalDocumentsRepository extends BaseRepository implements Ad
         }
         catch (Exception $e)
         {
-            GeneralService::sendException('Failed to update Document Contract ', $e);
+            GeneralService::sendException(trans('common.failed_to_update_document_contract'), $e);
         }
     }
 }

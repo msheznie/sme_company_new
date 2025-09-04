@@ -45,7 +45,7 @@ class ContractPaymentTermsAPIController extends AppBaseController
         );
 
         return $this->sendResponse(ContractPaymentTermsResource::
-        collection($contractPaymentTerms), 'Contract Payment Terms retrieved successfully');
+        collection($contractPaymentTerms), trans('common.payment_terms_retrieved_successfully'));
     }
 
     /**
@@ -63,7 +63,7 @@ class ContractPaymentTermsAPIController extends AppBaseController
         try
         {
             $this->contractPaymentTermsRepository->createPaymentTerm($input, $companySystemID);
-            return $this->sendResponse([], 'Contract payment term created successfully');
+            return $this->sendResponse([], trans('common.payment_term_created_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -88,11 +88,11 @@ class ContractPaymentTermsAPIController extends AppBaseController
 
         if (empty($contractPaymentTerms))
         {
-            return $this->sendError('Contract Payment Terms not found');
+            return $this->sendError(trans('common.payment_terms_not_found'));
         }
 
         return $this->sendResponse
-        (new ContractPaymentTermsResource($contractPaymentTerms), 'Contract Payment Terms retrieved successfully');
+        (new ContractPaymentTermsResource($contractPaymentTerms), trans('common.payment_terms_retrieved_successfully'));
     }
 
     /**
@@ -117,10 +117,10 @@ class ContractPaymentTermsAPIController extends AppBaseController
 
             if (empty($contractPaymentTerm))
             {
-                throw new CommonException(trans('common.contract_payment_term_not_found'));
+                throw new CommonException(trans('common.payment_terms_not_found'));
             }
             $this->contractPaymentTermsRepository->updatePaymentTerms($input, $contractPaymentTerm);
-            return $this->sendResponse([], trans('Contract payment term updated successfully.'));
+            return $this->sendResponse([], trans(trans('common.payment_term_updated_successfully')));
 
         } catch (CommonException $ex)
         {
@@ -153,14 +153,14 @@ class ContractPaymentTermsAPIController extends AppBaseController
 
         if (empty($contractPaymentTerms))
         {
-            return $this->sendError(trans('common.contract_payment_term_not_found'));
+            return $this->sendError(trans('common.payment_terms_not_found'));
         }
 
         $contractPaymentTerms->deleted_by = General::currentEmployeeId();
         $contractPaymentTerms->save();
         $contractPaymentTerms->delete();
 
-        return $this->sendSuccess('Contract payment term deleted successfully');
+        return $this->sendSuccess(trans('common.payment_term_deleted_successfully'));
     }
 
     public function getContractPaymentTerms($id, Request $request)
@@ -185,11 +185,11 @@ class ContractPaymentTermsAPIController extends AppBaseController
 
             if (empty($contractPaymentTerm))
             {
-                throw new CommonException('Contract payment term not found');
+                throw new CommonException(trans('common.payment_terms_not_found'));
             }
 
             $this->contractPaymentTermsRepository->updatePaymentTerms($input, $contractPaymentTerm['id']);
-            return $this->sendResponse([], trans('Contract payment term updated successfully.'));
+            return $this->sendResponse([], trans('common.payment_term_updated_successfully'));
 
         } catch (CommonException $ex)
         {

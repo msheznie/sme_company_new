@@ -62,7 +62,7 @@ class PeriodicBillingsAPIController extends AppBaseController
         try
         {
             $this->periodicBillingsRepository->createPeriodicBilling($input, $contractUuid, $selectedCompanyID);
-            return $this->sendResponse([], 'Periodic billing created successfully');
+            return $this->sendResponse([], trans('common.periodic_billing_created_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -87,11 +87,11 @@ class PeriodicBillingsAPIController extends AppBaseController
 
         if (empty($periodicBillings))
         {
-            return $this->sendError('Periodic Billings not found');
+            return $this->sendError(trans('common.periodic_billing_not_found'));
         }
 
         return $this->sendResponse(new PeriodicBillingsResource($periodicBillings),
-            'Periodic Billings retrieved successfully');
+            trans('common.periodic_billing_retrieved_successfully'));
     }
 
     /**
@@ -112,10 +112,10 @@ class PeriodicBillingsAPIController extends AppBaseController
 
             if (empty($periodicBilling))
             {
-                throw new CommonException('Periodic billing not found.');
+                throw new CommonException(trans('common.periodic_billing_not_found'));
             }
             $this->periodicBillingsRepository->updatePeriodicBilling($input, $periodicBilling['id']);
-            return $this->sendResponse(['id' => $id], trans('Periodic billing updated successfully.'));
+            return $this->sendResponse(['id' => $id], trans('common.periodic_billing_updated_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -143,12 +143,12 @@ class PeriodicBillingsAPIController extends AppBaseController
 
         if (empty($periodicBillings))
         {
-            return $this->sendError('Periodic Billings not found');
+            return $this->sendError(trans('common.periodic_billing_not_found'));
         }
 
         $periodicBillings->delete();
 
-        return $this->sendSuccess('Periodic Billings deleted successfully');
+        return $this->sendSuccess(trans('common.periodic_billing_deleted_successfully'));
     }
     public function periodicBillingFormData(Request $request)
     {
