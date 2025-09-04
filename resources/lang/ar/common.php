@@ -406,5 +406,14 @@ return [
     'milestone_uuid_required_dot' => '.المعرّف الفريد للمرحلة مطلوب',
     'description_is_required_dot' => '.الوصف مطلوب',
     'deliverable_title_is_required_dot' => '.عنوان المستند مطلوب',
-    'deliverable_id_is_required_dot' => '.معرّف المستند مطلوب'
+    'deliverable_id_is_required_dot' => '.معرّف المستند مطلوب',
+
+    'language_id_is_required' => "معرّف اللغة مطلوب",
+    'selected_language_does_not_exist_or_is_not_active' => "اللغة المحددة غير موجودة أو غير مفعّلة",
+    'code_pattern_is_required_dot' => ".نمط الكود مطلوب",
+    'serialization_based_on_is_required_dot' => ".التسلسل بناءً على مطلوب",
+    'the_serialization_based_on_value_must_be_unique_dot' => ".قيمة التسلسل بناءً على يجب أن تكون فريدة",
+    'document_type_is_required_dot' => ".نوع المستند مطلوب",
+    'selected_type_is_required_dot' => ".النوع المحدد مطلوب",
+    'percentage_is_required_dot' => ".النسبة المئوية مطلوبة"
 ];
