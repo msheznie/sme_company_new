@@ -31,7 +31,7 @@ class UpdateTimeMaterialConsumptionAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company ID is required.'
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot')
         ];
     }
 }

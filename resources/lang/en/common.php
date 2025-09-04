@@ -433,5 +433,14 @@
      'milestone_uuid_required_dot' => 'Milestone uuid required.',
      'description_is_required_dot' => 'Description is required.',
      'deliverable_title_is_required_dot' => 'Deliverable Title is required.',
-     'deliverable_id_is_required_dot' => 'Deliverable ID is required.'
+     'deliverable_id_is_required_dot' => 'Deliverable ID is required.',
+
+     'language_id_is_required' => "Language ID is required",
+     'selected_language_does_not_exist_or_is_not_active' => 'Selected language does not exist or is not active',
+     'code_pattern_is_required_dot' => 'Code pattern is required.',
+     'serialization_based_on_is_required_dot' => 'Serialization based on is required.',
+     'the_serialization_based_on_value_must_be_unique_dot' => 'The serialization based on value must be unique.',
+     'document_type_is_required_dot' => 'Document type is required.',
+     'selected_type_is_required_dot' => 'Selected type is required.',
+     'percentage_is_required_dot' => 'Percentage is required.'
  ];

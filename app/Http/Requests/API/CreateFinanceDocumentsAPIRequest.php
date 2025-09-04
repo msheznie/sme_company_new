@@ -35,10 +35,10 @@ class CreateFinanceDocumentsAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company Id is required.',
-            'contractUuid.required' => 'Contract Code is required.',
-            'documentType.required' => 'Document type is required.',
-            'selectedType.required' => 'Selected type is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'contractUuid.required' => trans('common.contract_code_is_required_dot'),
+            'documentType.required' => trans('common.document_type_is_required_dot'),
+            'selectedType.required' => trans('common.selected_type_is_required_dot'),
         ];
     }
 }

@@ -32,8 +32,8 @@ class CreateTimeMaterialConsumptionAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company ID is required.',
-            'contract_id.required' => 'Contract Code is required.'
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'contract_id.required' => trans('common.contract_code_is_required_dot')
         ];
     }
 }
