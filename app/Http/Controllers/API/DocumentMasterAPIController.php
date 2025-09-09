@@ -57,7 +57,7 @@ class DocumentMasterAPIController extends AppBaseController
      *
      * @return Response
      */
-    public function store(Request $request)
+    public function store(CreateDocumentMasterAPIRequest $request)
     {
         $input = $request->all();
 
