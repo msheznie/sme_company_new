@@ -210,7 +210,7 @@ class CMContractTypesAPIController extends AppBaseController
     public function updateDynamicFieldDetail(Request $request){
         $updateDynamicField = $this->cMContractTypesRepository->updateDynamicFieldDetail($request);
         if ($updateDynamicField['status']) {
-            return $this->sendResponse([], 'Successfully updated');
+            return $this->sendResponse([], trans('common.successfully_updated'));
         } else {
             $statusCode = $updateDynamicField['code'] ?? 404;
             return $this->sendError($updateDynamicField['message'], $statusCode);

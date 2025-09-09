@@ -24,6 +24,17 @@ class CreateContractUserGroupAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return ContractUserGroup::$rules;
+        return [
+            'selectedCompanyID' => 'required',
+            'groupName' => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'groupName.required' => trans('common.user_group_name_is_required'),
+        ];
     }
 }

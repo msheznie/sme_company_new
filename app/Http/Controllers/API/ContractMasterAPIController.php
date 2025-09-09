@@ -710,10 +710,10 @@ class ContractMasterAPIController extends AppBaseController
 
         if ($basePath == '')
         {
-            return $this->sendError('unable_to_export_excel');
+            return $this->sendError(trans('common.unable_to_export_excel'));
         } else
         {
-            return $this->sendResponse($basePath, trans('success_export'));
+            return $this->sendResponse($basePath, trans('common.success_export'));
         }
     }
 

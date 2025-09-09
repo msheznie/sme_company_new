@@ -256,7 +256,7 @@ class CMContractTypesRepository extends BaseRepository
             $updateResp = CMContractTypeSections::where('ct_sectionId', $checkDetailExistID)->update($postData);
             if ($updateResp) {
                 DB::commit();
-                return ['status' => true, 'message' => "Successfully updated!"];
+                return ['status' => true, 'message' => trans('common.successfully_updated')];
             }
         } catch (\Exception $exception) {
             DB::rollBack();
