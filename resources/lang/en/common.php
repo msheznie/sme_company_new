@@ -442,5 +442,7 @@
      'the_serialization_based_on_value_must_be_unique_dot' => 'The serialization based on value must be unique.',
      'document_type_is_required_dot' => 'Document type is required.',
      'selected_type_is_required_dot' => 'Selected type is required.',
-     'percentage_is_required_dot' => 'Percentage is required.'
+     'percentage_is_required_dot' => 'Percentage is required.',
+     'contract_type_section_not_found' => 'Contract Type Section not found',
+     "user_group_name_is_required" => "User Group Name is required"
  ];

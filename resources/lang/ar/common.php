@@ -415,5 +415,7 @@ return [
     'the_serialization_based_on_value_must_be_unique_dot' => ".قيمة التسلسل بناءً على يجب أن تكون فريدة",
     'document_type_is_required_dot' => ".نوع المستند مطلوب",
     'selected_type_is_required_dot' => ".النوع المحدد مطلوب",
-    'percentage_is_required_dot' => ".النسبة المئوية مطلوبة"
+    'percentage_is_required_dot' => ".النسبة المئوية مطلوبة",
+    'contract_type_section_not_found' => 'قسم نوع العقد غير موجود',
+    "user_group_name_is_required" => "اسم مجموعة المستخدم مطلوب"
 ];

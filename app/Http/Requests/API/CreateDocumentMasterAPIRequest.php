@@ -24,6 +24,17 @@ class CreateDocumentMasterAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return DocumentMaster::$rules;
+        return [
+            'selectedCompanyID' => 'required',
+            'documentType' => 'required',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'documentType.required' => trans('common.document_type_is_required'),
+        ];
     }
 }
