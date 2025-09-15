@@ -38,7 +38,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepo;
         $this->contractAdditionalDocumentService = $contractAdditionalDocumentService;
     }
-    const UNEXPECTED_ERROR_MESSAGE = 'An unexpected error occurred.';
+    const UNEXPECTED_ERROR_MESSAGE = 'common.an_unexpected_error_occurred_dot';
     /**
      * Display a listing of the ContractAdditionalDocuments.
      * GET|HEAD /contractAdditionalDocuments
@@ -79,7 +79,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         }
         catch (\Exception $e)
         {
-            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
         }
     }
 
@@ -224,7 +224,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
             return $this->contractAdditionalDocumentService->getAdditionalDocumentByUuid($request);
         } catch (\Exception $e)
         {
-            return $this->sendError( 'Something Went Wrong' . $e->getMessage(), 500);
+            return $this->sendError( trans('common.something_went_wrong') . $e->getMessage(), 500);
         }
     }
 
@@ -233,7 +233,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         try
         {
             $this->contractAdditionalDocumentService->deleteContractDocument($request);
-            return $this->sendResponse([],'Successfully Deleted');
+            return $this->sendResponse([],trans('common.successfully_deleted'));
         }
         catch (ContractCreationException $e)
         {
@@ -241,7 +241,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         }
         catch (\Exception $e)
         {
-            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
         }
     }
 
@@ -250,7 +250,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         try
         {
             $contractId = $this->contractAdditionalDocumentService->updateAdditionalDoc($request);
-            return $this->sendResponse($contractId,'Successfully updated');
+            return $this->sendResponse($contractId,trans('common.successfully_updated'));
         }
         catch (ContractCreationException $e)
         {
@@ -258,7 +258,7 @@ class ContractAdditionalDocumentsAPIController extends AppBaseController
         }
         catch (\Exception $e)
         {
-            return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE, 500);
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
         }
     }
 

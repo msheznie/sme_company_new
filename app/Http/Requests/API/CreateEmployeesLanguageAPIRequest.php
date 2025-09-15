@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\TimeMaterialConsumption;
+use App\Models\EmployeesLanguage;
 use InfyOm\Generator\Request\APIRequest;
 
-class UpdateTimeMaterialConsumptionAPIRequest extends APIRequest
+class CreateEmployeesLanguageAPIRequest extends APIRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +24,6 @@ class UpdateTimeMaterialConsumptionAPIRequest extends APIRequest
      */
     public function rules()
     {
-        return [
-            'selectedCompanyID' => 'required',
-        ];
-    }
-    public function messages()
-    {
-        return [
-            'selectedCompanyID.required' => trans('common.company_id_is_required_dot')
-        ];
+        return EmployeesLanguage::$rules;
     }
 }

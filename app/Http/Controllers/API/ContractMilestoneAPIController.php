@@ -160,13 +160,11 @@ class ContractMilestoneAPIController extends AppBaseController
             }
             if(MilestonePaymentSchedules::where('milestone_id', $contractMilestone['id'])->exists())
             {
-                throw new CommonException('Cannot delete milestone. Milestone already assigned to milestone
-                 payment schedule');
+                throw new CommonException(trans('common.cannot_delete_milestone_payment'));
             }
             if(ContractMilestoneRetention::where('milestoneId', $contractMilestone['id'])->exists())
             {
-                throw new CommonException('Cannot delete milestone. Milestone already assigned to milestone
-                 retention');
+                throw new CommonException(trans('common.cannot_delete_milestone_retention'));
             }
 
             $contractMilestone->delete();

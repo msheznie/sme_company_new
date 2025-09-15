@@ -34,9 +34,9 @@ class UpdateContractMilestonePenaltyMasterAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company Id is required.',
-            'minimum_penalty_percentage.required' => 'Minimum penalty percentage is required.',
-            'maximum_penalty_percentage.required' => 'Maximum penalty percentage is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'minimum_penalty_percentage.required' => trans('common.minimum_penalty_percentage_is_required_dot'),
+            'maximum_penalty_percentage.required' => trans('common.Maximum_penalty_percentage_is_required_dot'),
         ];
     }
 }

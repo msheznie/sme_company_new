@@ -76,7 +76,7 @@ class ContractHistoryService
             });
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete contract history: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_history') . $e->getMessage());
         }
     }
 
@@ -153,7 +153,7 @@ class ContractHistoryService
         $contractData = ContractManagementUtils::checkContractExist($uuid,$companyId);
         if (!$contractData)
         {
-            throw new ContractCreationException('Contract not found');
+            throw new ContractCreationException(trans('common.contract_not_found'));
         }
         return ContractHistory::addendumData($contractData->id,$companyId,$contractCategory);
     }
@@ -286,7 +286,7 @@ class ContractHistoryService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException(trans('common.failed_to_update_contract_status: ' . $e->getMessage()));
+            throw new ContractCreationException(trans('common.failed_to_update_contract_status: ') . $e->getMessage());
         }
     }
 
@@ -305,7 +305,7 @@ class ContractHistoryService
 
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_master') . $e->getMessage());
         }
     }
 
@@ -325,7 +325,7 @@ class ContractHistoryService
 
         catch (\Exception $e)
         {
-            throw new ContractCreationException(trans('common.failed_to_update_contract: ' . $e->getMessage()));
+            throw new ContractCreationException(trans('common.failed_to_update_contract_master') . $e->getMessage());
         }
 
     }
@@ -513,7 +513,7 @@ class ContractHistoryService
                 $checkHistoryExists = ContractHistory::getContractHistory($contractHistoryUuid, $companyId);
                 if(empty($checkHistoryExists))
                 {
-                    throw new ContractCreationException('Contract history not found');
+                    throw new ContractCreationException(trans('common.contract_history_not_found'));
                 }
                 if (!$getContractId)
                 {
@@ -526,7 +526,7 @@ class ContractHistoryService
             });
         }catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update status: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_status') . $e->getMessage());
         }
     }
 
@@ -563,7 +563,7 @@ class ContractHistoryService
 
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_master') . $e->getMessage());
         }
     }
 
@@ -629,7 +629,7 @@ class ContractHistoryService
             });
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete contract history: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_history') . $e->getMessage());
         }
     }
 
@@ -676,7 +676,7 @@ class ContractHistoryService
             });
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to insert contract statuss: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_insert_contract_status') . $e->getMessage());
         }
     }
     public static function checkContractDateBetween($startDate, $endDate)
@@ -706,7 +706,7 @@ class ContractHistoryService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete contract status history: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_history_status') . $e->getMessage());
         }
 
     }
@@ -725,7 +725,7 @@ class ContractHistoryService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete contract status history: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_history_status') . $e->getMessage());
         }
 
     }
@@ -790,7 +790,7 @@ class ContractHistoryService
             });
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to insert contract statuss: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_insert_contract_status') . $e->getMessage());
         }
     }
 

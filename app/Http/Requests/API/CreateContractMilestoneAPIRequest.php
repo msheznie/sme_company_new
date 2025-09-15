@@ -37,11 +37,11 @@ class CreateContractMilestoneAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'formData.required' => 'Fill all required fields',
-            'companySystemID.required' => 'Company Id is required.',
-            'contractUuid.required' => 'Contract Code is required.',
-            'formData.title.required' => 'Milestone Title is required.',
-            'formData.description.required' => 'Description is required.',
+            'formData.required' => trans('common.please_fill_all_required_fields'),
+            'companySystemID.required' => trans('common.company_id_is_required_dot'),
+            'contractUuid.required' => trans('common.contract_code_is_required_dot'),
+            'formData.title.required' => trans('common.milestone_title_is_required_dot'),
+            'formData.description.required' => trans('common.description_is_required_dot'),
         ];
     }
 }

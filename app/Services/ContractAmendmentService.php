@@ -65,7 +65,7 @@ class ContractAmendmentService
 
         } catch (\Exception $e)
         {
-            throw new ContractCreationException(trans('common.failed_to_update_contract_status: ' . $e->getMessage()));
+            throw new ContractCreationException(trans('common.failed_to_update_contract_status') . $e->getMessage());
         }
     }
 
@@ -76,13 +76,13 @@ class ContractAmendmentService
         {
             if (!$getContractMasterAmdRecords)
             {
-                throw new ContractCreationException("No record found in contractmaster amendment: ");
+                throw new ContractCreationException(trans('common.no_record_found_in_contract_master_amendment'));
             }
 
             $contractmasterRecord = ContractMaster::find($contractId);
             if (!$contractmasterRecord)
             {
-                throw new ContractCreationException("No record found in contractmaster");
+                throw new ContractCreationException(trans('common.no_record_found_in_contract_master'));
             }
 
             $attributes = $getContractMasterAmdRecords->getAttributes();
@@ -94,7 +94,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update ContractMaster: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_master') . $e->getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update Contract user assing: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_user_assign') . $e->getMessage());
         }
     }
 
@@ -148,7 +148,7 @@ class ContractAmendmentService
             $boqAmd = CMContractBoqItemsAmd::getBoqItemData($getContractHistoryData->id, $data['uuid']);
             if(empty($boqAmd))
             {
-                GeneralService::sendException('Boq item not found');
+                GeneralService::sendException(trans('common.boq_item_not_found'));
             }
             $boqAmd->deleted_by = General::currentEmployeeId();
             $boqAmd->save();
@@ -156,7 +156,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            GeneralService::sendException("Failed to delete contract boq items: " . $e->getMessage());
+            GeneralService::sendException(trans('common.failed_to_delete_contract_boq_items') . $e->getMessage());
         }
     }
 
@@ -207,7 +207,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update Contract boq items: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_boq_items') . $e->getMessage());
         }
     }
 
@@ -230,7 +230,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete Contract milestone: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_milestone') . $e->getMessage());
         }
     }
 
@@ -279,7 +279,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to delete Contract deliverables: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_delete_contract_deliverables') . $e->getMessage());
         }
     }
 
@@ -343,7 +343,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update Contract deliverable: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_deliverables') . $e->getMessage());
         }
 
     }
@@ -415,7 +415,7 @@ class ContractAmendmentService
         }
         catch (\Exception $e)
         {
-            throw new ContractCreationException("Failed to update Contract deliverable: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.failed_to_update_contract_retention') . $e->getMessage());
         }
 
     }
@@ -462,13 +462,13 @@ class ContractAmendmentService
                 }
                 catch (\Exception $e)
                 {
-                    throw new ContractCreationException("Contract document failed: " . $e->getMessage());
+                    throw new ContractCreationException(trans('common.contract_document_failed') . $e->getMessage());
                 }
 
             }
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Contract document failed: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.contract_document_failed') . $e->getMessage());
         }
     }
 
@@ -921,13 +921,13 @@ class ContractAmendmentService
                 }
                 catch (\Exception $e)
                 {
-                    throw new ContractCreationException("Contract additional document failed: " . $e->getMessage());
+                    throw new ContractCreationException(trans('common.contract_additional_document_failed') . $e->getMessage());
                 }
 
             }
         } catch (\Exception $e)
         {
-            throw new ContractCreationException("Contract additional document failed: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.contract_additional_document_failed') . $e->getMessage());
         }
     }
 }

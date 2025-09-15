@@ -87,7 +87,7 @@ class ContractAdditionalDocumentAmdRepository extends BaseRepository
             }
         } catch (Exception $e)
         {
-            throw new ContractCreationException("Contract additional document failed: " . $e->getMessage());
+            throw new ContractCreationException(trans('common.contract_additional_document_failed') . $e->getMessage());
         }
     }
     private function insertErpDocumentAmd($newContractId, $oldContractId, $historyId)

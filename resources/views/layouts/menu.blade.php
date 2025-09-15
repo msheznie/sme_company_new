@@ -463,3 +463,9 @@
         <span>Contract Milestone Penalty Masters</span>
     </a>
 </li>
+<li class="nav-item {{ Request::is('employeesLanguages*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('employeesLanguages.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Employees Languages</span>
+    </a>
+</li>

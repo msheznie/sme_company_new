@@ -407,8 +407,7 @@ class ContractMasterRepository extends BaseRepository
 
             if($startDate > $milestoneDueDate || $endDate < $milestoneDueDate)
             {
-                GeneralService::sendException(trans('Commencement date should be less than milestone due date and
-                contract end date should be greater than milestone due date'));
+                GeneralService::sendException(trans('Commencement date should be less than milestone due date and contract end date should be greater than milestone due date'));
             }
         }
 

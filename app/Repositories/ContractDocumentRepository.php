@@ -104,7 +104,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
                 if (!$contractData)
                 {
-                    GeneralService::sendException('Contract Not Found');
+                    GeneralService::sendException(trans('common.contract_not_found'));
                 }
 
                 $insertData = [
@@ -150,7 +150,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
         }
         catch (Exception $e)
         {
-            GeneralService::sendException('Failed to create Document tracing', $e);
+            GeneralService::sendException(trans('common.failed_to_create_document_tracing'), $e);
         }
 
     }
@@ -538,21 +538,21 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
     public function getContractDocumentByUuid($request)
     {
-        try
-        {
-            $input = $request->all();
-            $contractDocument = ContractDocument::fetchByUuid($input['contractDocumentUuid']);
-            if (!$contractDocument)
-            {
-                GeneralService::sendException('Document Tracing Not Found');
-            }
+      try
+      {
+        $input = $request->all();
+        $contractDocument = ContractDocument::fetchByUuid($input['contractDocumentUuid']);
+          if (!$contractDocument)
+          {
+              GeneralService::sendException(trans('common.document_tracing_not_found'));
+          }
 
-            return $contractDocument;
-        }
-        catch (\Exception $ex)
-        {
-            GeneralService::sendException('Failed to get Document tracing data', $ex);
-        }
+        return $contractDocument;
+      }
+      catch (\Exception $ex)
+      {
+          GeneralService::sendException(trans('common.failed_to_get_document_tracing_data'), $ex->getMessage());
+      }
     }
 
     public function getContractDocumentPath($request)
@@ -564,7 +564,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
             $attachment = ErpDocumentAttachments::getErpAttachmentsById($attachmentId);
             if (!$attachment)
             {
-                GeneralService::sendException('Attachment Not Found');
+                GeneralService::sendException(trans('common.attachment_not_found'));
             }
             $basePath = General::getFileUrlFromS3($attachment['path']);
             return [
@@ -573,7 +573,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
         }
         catch (\Exception $ex)
         {
-            GeneralService::sendException('Failed to get Document tracing data', $ex);
+            GeneralService::sendException(trans('common.failed_to_get_document_tracing_data'), $ex->getMessage());
         }
     }
 
@@ -591,7 +591,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
                 if (!$contractDocument)
                 {
-                    GeneralService::sendException('Contract document not found.');
+                    GeneralService::sendException(trans('common.contract_document_not_found'));
                 }
 
                 $contractDocument->update([
@@ -607,7 +607,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
         } catch (\Exception $e)
         {
-            GeneralService::sendException('Failed to Delete Document tracing data', $e);
+            GeneralService::sendException(trans('common.failed_to_delete_document_tracing_data'), $e);
         }
     }
 
@@ -624,7 +624,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
 
                 if (!$contractDocument)
                 {
-                    GeneralService::sendException('Contract document not found.');
+                    GeneralService::sendException(trans('common.contract_document_not_found'));
                 }
 
                 if (isset($input['attachedDate']) && $input['attachedDate'])
@@ -672,7 +672,7 @@ class ContractDocumentRepository extends BaseRepository implements ContractDocum
         }
         catch (Exception $e)
         {
-            GeneralService::sendException('Failed to update Document tracing ', $e);
+            GeneralService::sendException(trans('common.failed_to_update_document_tracing'), $e);
         }
     }
 }

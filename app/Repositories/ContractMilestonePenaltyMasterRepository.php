@@ -69,11 +69,11 @@ class ContractMilestonePenaltyMasterRepository extends BaseRepository
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $companyId);
             if(empty($contract))
             {
-                throw new CommonException('Contract Code not found.');
+                throw new CommonException(trans('common.contract_code_not_found'));
             }
             if($input['minimum_penalty_percentage'] > $input['maximum_penalty_percentage'])
             {
-                throw new CommonException('Minimum penalty percentage should be less than maximum penalty percentage');
+                throw new CommonException(trans('common.minimum_penalty_percentage_should_be_less_than_maximum_penalty_percentage'));
             } else
             {
                 $postData = [
@@ -129,7 +129,7 @@ class ContractMilestonePenaltyMasterRepository extends BaseRepository
 
             if($input['minimum_penalty_percentage'] > $input['maximum_penalty_percentage'])
             {
-                throw new CommonException('Minimum penalty percentage should be less than maximum penalty percentage');
+                throw new CommonException(trans('common.minimum_penalty_percentage_should_be_less_than_maximum_penalty_percentage'));
             }
 
             $penaltyDetails =  ContractMilestonePenaltyDetail::getRecordsWithMilestone($contract['id'], $companyId);
@@ -139,8 +139,7 @@ class ContractMilestonePenaltyMasterRepository extends BaseRepository
                 if ($penaltyPercentage < $input['minimum_penalty_percentage'] ||
                     $penaltyPercentage > $input['maximum_penalty_percentage'])
                 {
-                    throw new CommonException('If you want to update milestone penalty master details,
-                    Please delete already added milestone penalty records first');
+                    throw new CommonException(trans('common.delete_milestone_penalty_records_to_update_milestone_penalty_details'));
                 }
             }
 

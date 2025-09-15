@@ -173,7 +173,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $contractUuid =  $this->contractHistoryRepository->createContractHistory($request);
-            return $this->sendResponse($contractUuid,'Successfully Created');
+            return $this->sendResponse($contractUuid,trans('common.successfully_created'));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -202,7 +202,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $this->contractHistoryService->deleteContractHistory($request->all());
-            return $this->sendSuccess('Successfully deleted');
+            return $this->sendSuccess(trans('common.successfully_deleted'));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -366,7 +366,7 @@ class ContractHistoryAPIController extends AppBaseController
             }
 
 
-            return $this->sendResponse([], 'Successfully Created');
+            return $this->sendResponse([], trans('common.successfully_created'));
         } catch (\Exception $e)
         {
             return $this->sendError(self::UNEXPECTED_ERROR_MESSAGE . ' ' . $e->getMessage(), 500);
@@ -405,7 +405,7 @@ class ContractHistoryAPIController extends AppBaseController
         try
         {
             $this->contractHistoryService->contractHistoryDelete($request->all());
-            return $this->sendSuccess('Contract extension record successfully deleted');
+            return $this->sendSuccess(trans('common.contract_extension_record_successfully_deleted'));
         } catch (ContractCreationException $e)
         {
             return $this->sendError($e->getMessage(), 500);
@@ -531,7 +531,7 @@ class ContractHistoryAPIController extends AppBaseController
                 $getContractHistory->id,$getContractData->id,$companyId,1
             );
 
-            return $this->sendSuccess('Contract amendment document confirmed successfully');
+            return $this->sendSuccess(trans('common.contract_amendment_document_confirmed_successfully'));
         }
         catch (ContractCreationException $e)
         {
