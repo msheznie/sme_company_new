@@ -69,10 +69,7 @@ class ContractMilestoneRepository extends BaseRepository
     public function getContractMilestones($id, Request $request)
     {
         $companySystemID = $request->input('selectedCompanyID');
-        $contractMaster = ContractMaster::where('uuid', $id)
-            ->where('companySystemID', $companySystemID)
-            ->select('*')
-            ->first();
+        $contractMaster = ContractMaster::getContractDates($id, $companySystemID);
 
         if (empty($contractMaster)) {
             return ['status' => false, 'message' => trans('common.contract_not_found')];

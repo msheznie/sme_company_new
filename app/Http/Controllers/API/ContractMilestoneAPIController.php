@@ -87,7 +87,7 @@ class ContractMilestoneAPIController extends AppBaseController
     public function show($id)
     {
         /** @var ContractMilestone $contractMilestone */
-        $contractMilestone = $this->contractMilestoneRepository->findByUuid($id);
+        $contractMilestone = $this->contractMilestoneRepository->findByUuid($id, ['due_date', 'status']);
 
         if (empty($contractMilestone))
         {

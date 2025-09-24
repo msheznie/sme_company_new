@@ -102,8 +102,11 @@ class ContractUserGroup extends Model
                            ]);
                            $q->select('employeeSystemID');
                        }
-                   ]);
-               }, 'employee'
+                   ])->select('id','uuid', 'contractUserId', 'contractUserType', 'contractUserName', 'isActive');
+               }, 'employee'  => function ($q)
+               {
+                   $q->select('employeeSystemID', 'empName');
+               }
            ])
             ->where('userGroupId', $userGroupId)
             ->where('companySystemID', $companySystemId)

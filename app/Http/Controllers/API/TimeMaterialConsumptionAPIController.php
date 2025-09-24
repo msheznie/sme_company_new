@@ -237,7 +237,7 @@ class TimeMaterialConsumptionAPIController extends AppBaseController
                 $amendment,
                 $historyUuid
             );
-            return $this->sendResponse([], tran('common.items_from_boq_pulled_successfully'));
+            return $this->sendResponse([], trans('common.items_from_boq_pulled_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
