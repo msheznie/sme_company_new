@@ -287,7 +287,7 @@ class ContractMasterRepository extends BaseRepository
                 DB::commit();
                 return [
                     'status' => true,
-                    'message' => trans('common.contract_master_created_successfully'), 'data' => $insertResponse
+                    'message' => trans('common.contract_master_created_successfully'), 'data' => $insertResponse->uuid
                 ];
             }
 
