@@ -147,6 +147,27 @@ class UsersAPIController extends AppBaseController
         if($companySystemID == 0){
             $companySystemID = $user['employee']['empCompanySystemID'] ?? 0;
         }
+
+        $user = collect($user)->except([
+            'uuid', 'created_at', 'updated_at',
+            'employee.empTitle', 'employee.empInitial', 'employee.empSurname',
+            'employee.serial', 'employee.empLeadingText', 'employee.empName_O', 'employee.empSurname_O',
+            'employee.empFirstName', 'employee.empFirstName_O', 'employee.empFamilyName', 'employee.empFamilyName_O',
+            'employee.empFatherName', 'employee.empFatherName_O', 'employee.empManagerAttached',
+            'employee.empDateRegistered', 'employee.empTelOffice', 'employee.empTelMobile', 'employee.empLandLineNo',
+            'employee.extNo', 'employee.empFax', 'employee.empEmail', 'employee.empLocation', 'employee.empDateTerminated',
+            'employee.empLoginActive', 'employee.empActive', 'employee.userGroupID', 'employee.empCompanyID', 'employee.religion',
+            'employee.isLoggedIn', 'employee.isLoggedOutFailYN', 'employee.logingFlag', 'employee.isSuperAdmin',
+            'employee.discharegedYN', 'employee.isFinalSettlementDone', 'employee.hrusergroupID', 'employee.employmentType',
+            'employee.isConsultant', 'employee.isTrainee', 'employee.is3rdParty', 'employee.3rdPartyCompanyName',
+            'employee.gender', 'employee.designation', 'employee.nationality', 'employee.isManager', 'employee.isApproval',
+            'employee.isDashBoard', 'employee.isAdmin', 'employee.isBasicUser', 'employee.ActivationCode',
+            'employee.ActivationFlag', 'employee.isHR_admin', 'employee.isLock', 'employee.basicDataIngCount',
+            'employee.opRptManagerAccess', 'employee.isSupportAdmin', 'employee.isHSEadmin', 'employee.excludeObjectivesYN',
+            'employee.machineID', 'employee.timestamp', 'employee.createdFrom', 'employee.isNewPortal', 'employee.uuid',
+            'employee.isEmailVerified'
+        ])->toArray();
+        
         $companySystemID;
         $user['companies'] = [];
         $user['tenant_id'] = $user['employee']['empCompanySystemID'] ?? 0;

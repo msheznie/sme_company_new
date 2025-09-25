@@ -97,7 +97,9 @@ class ContractOverallRetention extends Model
 
     public function getContractOverall($contractId,$companyId)
     {
-      return self::where('companySystemId',$companyId)
+      return self::select('id', 'uuid', 'contractId', 'contractAmount', 'retentionPercentage', 'retentionAmount',
+          'startDate', 'dueDate', 'retentionWithholdPeriod')
+            ->where('companySystemId',$companyId)
             ->where('contractId',$contractId)
             ->first();
     }
