@@ -834,6 +834,10 @@ class ContractMasterRepository extends BaseRepository
             })
             ->first();
 
+        if ($overallRetention)
+        {
+            $overallRetention->makeHidden(['created_by', 'updated_by', 'created_at', 'updated_at']);
+        }
 
 
         $currencyId = Company::getLocalCurrencyID($companySystemID);
@@ -958,7 +962,10 @@ class ContractMasterRepository extends BaseRepository
     {
 
         $contractConfirmation = ContractMaster::select('confirmed_yn', 'confirmed_date', 'confirm_by')
-            ->with(['confirmedBy'])
+            ->with(['confirmedBy' => function ($q1)
+            {
+                $q1->select('employeeSystemID', 'empName');
+            }])
             ->where('uuid', $contractUuid)->first();
 
         return [
