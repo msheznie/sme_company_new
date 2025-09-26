@@ -532,10 +532,20 @@ class PaySpplierInvoiceMaster extends Model
     }
     public function paymentVoucherMaster($paymentVoucherID)
     {
-        return PaySpplierInvoiceMaster::where('PayMasterAutoId', $paymentVoucherID)
+        return PaySpplierInvoiceMaster::select('PayMasterAutoId', 'directPayeeCurrency', 'companySystemID',
+            'payment_mode', 'BPVsupplierID', 'BPVAccount', 'localCurrencyID', 'companyRptCurrencyID', 'localCurrencyID',
+            'confirmedByEmpSystemID', 'BPVbankCurrency', 'supplierTransCurrencyID', 'BPVcode', 'BPVdate', 'invoiceType',
+            'directPaymentPayee', 'BPVNarration', 'BPVchequeNo', 'BPVchequeDate', 'retentionVatAmount')
+            ->where('PayMasterAutoId', $paymentVoucherID)
             ->with([
-                'company',
-                'paymentMode',
+                'company' => function ($q)
+                {
+                    $q->select('companySystemID', 'CompanyName', 'logoPath', 'masterCompanySystemIDReorting');
+                },
+                'paymentMode' => function ($q)
+                {
+                    $q->select('id', 'description');
+                },
                 'supplierDetail' => function ($q)
                 {
                     $q->select('PayMasterAutoId', 'bookingInvDocCode', 'purchaseOrderID', 'supplierInvoiceNo',
@@ -553,19 +563,32 @@ class PaySpplierInvoiceMaster extends Model
                 },
                 'bankAccount' => function ($q)
                 {
-                    $q->with([
+                    $q->select('bankAccountAutoID', 'bankName', 'AccountNo', 'accountCurrencyID')
+                        ->with([
                         'currency' => function ($q)
                         {
                             $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
                         }
                     ]);
                 },
-                'currency',
+                'currency' => function ($q)
+                {
+                    $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+                },
                 'directDetail' => function ($q)
                 {
-                    $q->with([
-                        'project',
-                        'segment'
+                    $q->select('directPaymentAutoID', 'serviceLineSystemID', 'serviceLineSystemID', 'DPAmount',
+                        'vatAmount', 'localAmount', 'VATAmountLocal', 'comRptAmount', 'VATAmountRpt', 'glCode',
+                        'glCodeDes')
+                        ->with([
+                        'project' => function ($q)
+                        {
+                            $q->select('id', 'projectCode', 'description');
+                        },
+                        'segment' => function ($q)
+                        {
+                            $q->select('serviceLineSystemID', 'ServiceLineDes');
+                        }
                     ]);
                 },
                 'localCurrency' => function ($q)
@@ -578,7 +601,8 @@ class PaySpplierInvoiceMaster extends Model
                 },
                 'approvedBy' => function ($q)
                 {
-                    $q->with([
+                    $q->select('documentSystemCode', 'approvedDate', 'employeeSystemID')
+                        ->with([
                         'employee' => function ($q)
                         {
                             $q->select('employeeSystemID', 'empName', 'empFullName');
