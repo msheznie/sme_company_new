@@ -240,6 +240,17 @@ class FinanceDocumentsRepository extends BaseRepository
             throw new CommonException(trans('common.contract_not_found'));
         }
 
+        $contract = collect($contract)->except([
+            'serial_no', 'description', 'referenceCode', 'effective_date', 'startDate', 'endDate', 'agreementSignDate',
+            'contractTermPeriod', 'contractRenewalDate', 'contractExtensionDate', 'contractTerminateDate',
+            'contractRevisionDate', 'primaryCounterParty', 'primaryEmail', 'primaryPhoneNumber','secondaryCounterParty',
+            'secondaryEmail', 'secondaryPhoneNumber', 'status', 'confirmed_yn', 'confirmed_date', 'confirm_by',
+            'confirmed_comment', 'rollLevelOrder', 'refferedBackYN', 'approved_yn', 'approved_by', 'approved_date',
+            'timesReferred', 'companySystemID', 'created_by', 'updated_by', 'is_amendment', 'is_addendum', 'is_renewal',
+            'is_extension', 'is_revision', 'is_termination', 'parent_id', 'tender_id', 'contract_history_id',
+            'deleted_at', 'created_at', 'updated_at',
+        ])->toArray();
+
         $purchaseOrder = PurchaseOrderMaster::getPurchaseOrder($uuid, $companySystemID);
         $createdAt = Carbon::now();
         $company = Company::getCompanyData($companySystemID);

@@ -469,7 +469,8 @@ class Company extends Model
 
     public static function getCompanyData($id)
     {
-        return self::where([
+        return self::select('companySystemID', 'CompanyName', 'logoPath', 'masterCompanySystemIDReorting')
+        ->where([
             ['companySystemID', '=', $id],
             ['isActive', '=', 1]
         ])->first();
