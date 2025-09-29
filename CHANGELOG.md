@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.7.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.6.0...v1.7.0) (2025-09-29)
+
+
+### Features
+
+* **CM:** Show Supplier in all the subsidiaries Supplier Master [CM-768] ([#357](https://github.com/pbsgears/Contract_Management_Backend/issues/357)) ([62314b4](https://github.com/pbsgears/Contract_Management_Backend/commit/62314b41392836cd48647e586b46918b8ebeba8c))
+* **contract:** Giving Contract Access to other subsidiary employees [CM-745] ([ec55bed](https://github.com/pbsgears/Contract_Management_Backend/commit/ec55bed104c570a8818be58f45b0c9a0c68eb8e2))
+* **contract:** initializing language swith in backend [CM-791] ([#367](https://github.com/pbsgears/Contract_Management_Backend/issues/367)) ([b89f9d9](https://github.com/pbsgears/Contract_Management_Backend/commit/b89f9d97da523c40310e93615408e374143455a0))
+
+
+### Bug Fixes
+
+* **CMS:** users not loading to the contract users [CM-767] ([#356](https://github.com/pbsgears/Contract_Management_Backend/issues/356)) ([de1a94d](https://github.com/pbsgears/Contract_Management_Backend/commit/de1a94dc1d422d26fde99d0f0fb0b1871744d03a))
+* **contracts:** Inactive users are displaying for the Counterparty Name dropdown [CM-732] ([#350](https://github.com/pbsgears/Contract_Management_Backend/issues/350)) ([b876424](https://github.com/pbsgears/Contract_Management_Backend/commit/b876424a5446a7970d7900f464b3f36f249a4a63))
+
+
+### Miscellaneous Chores
+
+* release 1.6.0 ([de293ec](https://github.com/pbsgears/Contract_Management_Backend/commit/de293ecb9bb4f5c59137f279bde41f0dccb39587))
+* release 1.6.0 ([28f100f](https://github.com/pbsgears/Contract_Management_Backend/commit/28f100f58a38745c820e17d0f50ac1247881e4ae))
+
 ## [1.6.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.5.0...v1.6.0) (2024-12-09)
 
 
