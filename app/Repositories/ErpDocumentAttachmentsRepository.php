@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Exceptions\CommonException;
+use App\Exceptions\HttpError;
 use App\Helpers\General;
 use App\Models\ContractHistory;
 use App\Models\DocumentAttachments;
@@ -11,11 +12,13 @@ use App\Models\ErpDocumentAttachments;
 use App\Models\ErpDocumentAttachmentsAmd;
 use App\Models\ErpDocumentMaster;
 use App\Repositories\BaseRepository;
+use App\Rules\SafeFile;
 use App\Services\AttachmentService;
 use App\Services\GeneralService;
 use App\Utilities\ContractManagementUtils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 
@@ -350,6 +353,15 @@ class ErpDocumentAttachmentsRepository extends BaseRepository
         try
         {
             $decodeFile = base64_decode($file);
+
+            $validator = \Validator::make(
+                ['file' => $decodeFile],
+                ['file' => [new SafeFile]]
+            );
+
+            if ($validator->fails()) {
+                throw new \Exception($validator->errors()->first());
+            }
 
             $myFileName = $documentAttachment->companyID . '_' .
                 $documentAttachment->documentSystemCode . '_' .
