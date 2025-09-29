@@ -39,7 +39,6 @@ class Unit extends Model
     const UPDATED_AT = 'timeStamp';
     protected $dates = ['deleted_at'];
     protected $primaryKey  = 'UnitID';
-    protected $hidden  = ['UnitID'];
 
 
     public $fillable = [
