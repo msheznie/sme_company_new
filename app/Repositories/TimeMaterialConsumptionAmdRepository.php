@@ -93,7 +93,7 @@ class TimeMaterialConsumptionAmdRepository extends BaseRepository
         } catch
         (Exception $e)
         {
-            GeneralService::sendException("Time and material consumption data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.time_and_material_consumption_data_saving_failed') . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId)
@@ -117,7 +117,7 @@ class TimeMaterialConsumptionAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("Time and material consumption data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.time_and_material_consumption_data_saving_failed') . $e->getMessage());
         }
     }
 }

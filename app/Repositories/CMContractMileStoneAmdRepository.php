@@ -83,7 +83,7 @@ class CMContractMileStoneAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            throw new ContractCreationException("User assign data saving failed " . $e->getMessage());
+            throw new ContractCreationException(trans('common.user_assign_data_saving_failed') . $e->getMessage());
         }
     }
 

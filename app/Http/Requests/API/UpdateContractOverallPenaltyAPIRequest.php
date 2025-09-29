@@ -37,7 +37,7 @@ class UpdateContractOverallPenaltyAPIRequest extends APIRequest
                 {
                     if ($this->input('penalty_circulation_frequency') == 7 && $value <= 0)
                     {
-                        $fail('The due in field must be greater than 0.');
+                        $fail(trans('common.the_due_in_field_must_be_greater_than_zero'));
                     }
                 },
             ],
@@ -47,13 +47,13 @@ class UpdateContractOverallPenaltyAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company Id is required.',
-            'minimum_penalty_percentage.required' => 'Minimum penalty percentage is required.',
-            'maximum_penalty_percentage.required' => 'Maximum penalty percentage is required.',
-            'actual_percentage.required' => 'Actual penalty percentage is required.',
-            'actual_penalty_start_date.title' => 'Actual penalty start date is required.',
-            'penalty_circulation_frequency.required' => 'Penalty circulation frequency is required.',
-            'due_in.required_if' => 'Due in field is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'minimum_penalty_percentage.required' => trans('common.minimum_penalty_percentage_is_required_dot'),
+            'maximum_penalty_percentage.required' => trans('common.Maximum_penalty_percentage_is_required_dot'),
+            'actual_percentage.required' => trans('common.actual_penalty_percentage_is_required_dot'),
+            'actual_penalty_start_date.title' => trans('common.actual_penalty_start_date_is_required_dot'),
+            'penalty_circulation_frequency.required' => trans('common.penalty_circulation_frequency_is_required_dot'),
+            'due_in.required_if' => trans('common.due_in_field_is_required_dot'),
         ];
     }
 }

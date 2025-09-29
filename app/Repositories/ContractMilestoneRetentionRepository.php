@@ -147,7 +147,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
             $uuidExists = $model::checkUuidExists($uuid);
             if ($uuidExists)
             {
-                GeneralService::sendException('Uuid already exists');
+                GeneralService::sendException(trans('common.uuid_already_exists'));
             }
 
             $data = [
@@ -217,7 +217,7 @@ class ContractMilestoneRetentionRepository extends BaseRepository
                 $contractHistoryID) : $model::getMilestoneRetentionForUpdate($milestoneRetentionUuid);
             if(empty($milestoneRetentionData))
             {
-                GeneralService::sendException('Milestone retention not found.');
+                GeneralService::sendException(trans('common.milestone_retention_not_found'));
             }
             $retentionPercentage = $milestoneRetentionData['retentionPercentage'];
 

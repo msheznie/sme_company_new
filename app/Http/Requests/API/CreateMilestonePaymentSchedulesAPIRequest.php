@@ -37,12 +37,12 @@ class CreateMilestonePaymentSchedulesAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company ID is required.',
-            'contract_id.required' => 'Contract Code is required.',
-            'milestone_id.required' => 'Milestone title is required.',
-            'description.title' => 'Description is required.',
-            'percentage.required' => 'Percentage is required.',
-            'amount.required' => 'Amount is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'contract_id.required' => trans('common.contract_code_is_required_dot'),
+            'milestone_id.required' => trans('common.milestone_title_is_required_dot'),
+            'description.title' => trans('common.description_is_required_dot'),
+            'percentage.required' => trans('common.percentage_is_required_dot'),
+            'amount.required' => trans('common.amount_is_required_dot'),
         ];
     }
 }

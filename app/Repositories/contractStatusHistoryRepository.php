@@ -74,7 +74,7 @@ class contractStatusHistoryRepository extends BaseRepository
 
             if (!$contractData)
             {
-                GeneralService::sendException('Contract Not Found');
+                GeneralService::sendException(trans('common.contract_not_found'));
             }
 
 
@@ -82,7 +82,7 @@ class contractStatusHistoryRepository extends BaseRepository
         }
         catch (\Exception $ex)
         {
-            GeneralService::sendException('Failed to get Document tracing data', $ex);
+            GeneralService::sendException(trans('common.failed_to_get_document_tracing_data'), $ex);
         }
     }
 
@@ -112,7 +112,7 @@ class contractStatusHistoryRepository extends BaseRepository
 
             if(!$contract)
             {
-                GeneralService::sendException('Contract Not Found');
+                GeneralService::sendException(trans('common.contract_not_found'));
             }
 
             $contractHistoryData = self::exportContractHistoryStatusReport($contract['id'],$companySystemID);
@@ -125,7 +125,7 @@ class contractStatusHistoryRepository extends BaseRepository
         }
         catch (\Exception $e)
         {
-            GeneralService::sendException('Failed to generate the excel : ', $e);
+            GeneralService::sendException(trans('common.failed_to_generate_the_excel'), $e);
         }
 
     }

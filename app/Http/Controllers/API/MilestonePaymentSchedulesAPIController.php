@@ -71,7 +71,7 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
                 $contractUuid,
                 $selectedCompanyID
             );
-            return $this->sendResponse([], 'Milestone payment schedule created successfully');
+            return $this->sendResponse([], trans('common.milestone_payment_schedule_created_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -100,7 +100,7 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
         }
 
         return $this->sendResponse(new MilestonePaymentSchedulesResource($milestonePaymentSchedules),
-            'Milestone Payment Schedules retrieved successfully');
+            trans('common.milestone_payment_schedules_retrieved_successfully'));
     }
 
     /**
@@ -121,10 +121,10 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
 
             if (empty($paymentSchedule))
             {
-                throw new CommonException('Milestone payment schedule not found.');
+                throw new CommonException(trans('common.milestone_payment_schedule_not_found'));
             }
             $this->milestonePaymentSchedulesRepository->updateMilestonePaymentSchedule($input, $paymentSchedule['id']);
-            return $this->sendResponse([], trans('Milestone payment schedule updated successfully.'));
+            return $this->sendResponse([], trans('common.milestone_payment_schedule_updated_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -153,15 +153,18 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
         {
             if (empty($milestonePaymentSchedules))
             {
-                throw new CommonException('Milestone Payment Schedules not found');
+                throw new CommonException(trans('common.milestone_payment_schedules_not_found'));
             }
             $checkMilestonePRUsed = MilestonePaymentSchedules::checkMilestoneUsedInRetention(
                 $milestonePaymentSchedules['milestone_id']
             );
             if($checkMilestonePRUsed)
             {
-                throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
-                 milestone retention');
+                throw new CommonException(
+                    trans(
+                        'common.cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_retention'
+                    )
+                );
             }
             $penaltyExists = ContractMilestonePenaltyDetail::getMilestoneTitle(
                 $milestonePaymentSchedules['milestone_id'],
@@ -169,12 +172,15 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
                 $milestonePaymentSchedules['company_id']);
             if($penaltyExists)
             {
-                throw new CommonException('Cannot delete milestone payment schedule. Milestone is used in
-                 milestone penalty');
+                throw new CommonException(
+                    trans(
+                        'common.cannot_delete_milestone_payment_schedule_dot_milestone_is_used_in_milestone_penalty'
+                    )
+                );
             }
             $milestonePaymentSchedules->delete();
 
-            return $this->sendSuccess('Milestone Payment Schedules deleted successfully');
+            return $this->sendSuccess(trans('common.milestone_payment_schedules_deleted_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -228,10 +234,10 @@ class MilestonePaymentSchedulesAPIController extends AppBaseController
 
         if ($basePath == '')
         {
-            return $this->sendError('unable_to_export_excel');
+            return $this->sendError(trans('common.unable_to_export_excel'));
         } else
         {
-            return $this->sendResponse($basePath, trans('success_export'));
+            return $this->sendResponse($basePath, trans('common.success_export'));
         }
     }
 }

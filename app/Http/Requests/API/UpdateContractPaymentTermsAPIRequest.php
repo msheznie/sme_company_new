@@ -34,9 +34,9 @@ class UpdateContractPaymentTermsAPIRequest extends APIRequest
     public function messages()
     {
         return [
-            'selectedCompanyID.required' => 'Company ID is required.',
-            'uuid.required' => 'Uuid is required.',
-            'value.required' => 'Value is required.',
+            'selectedCompanyID.required' => trans('common.company_id_is_required_dot'),
+            'uuid.required' => trans('common.uuid_is_required_dot'),
+            'value.required' => trans('common.value_is_required_dot'),
         ];
     }
 }

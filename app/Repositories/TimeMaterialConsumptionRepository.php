@@ -89,7 +89,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
 
             $historyID = $amendment
                 ? ContractManagementUtils::getContractHistoryData($historyUuid)['id']
-                ?? GeneralService::sendException('Contract history not found.')
+                ?? GeneralService::sendException(trans('common.contract_history_not_found'))
                 : 0;
 
             $checkPreviousEmptyValues = $amendment ? $model::checkExistRecordEmpty($contract['id'],
@@ -97,7 +97,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
 
             if($checkPreviousEmptyValues)
             {
-                GeneralService::sendException('Please fill all required fields.');
+                GeneralService::sendException(trans('common.please_fill_all_required_fields'));
             }
 
             $postData = [
@@ -170,11 +170,11 @@ class TimeMaterialConsumptionRepository extends BaseRepository
             $model = $amendment ? TimeMaterialConsumptionAmd::class : TimeMaterialConsumption::class;
 
             $contract = ContractManagementUtils::checkContractExist($contractUuid, $selectedCompanyID)
-                ?? GeneralService::sendException('Contract Code not found.');
+                ?? GeneralService::sendException(trans('common.contract_code_not_found'));
 
             $historyID = $amendment
                 ? (ContractManagementUtils::getContractHistoryData($historyUuid)['id']
-                    ?? GeneralService::sendException('Contract history not found.'))
+                    ?? GeneralService::sendException(trans('common.contract_history_not_found')))
                 : 0;
 
             $currencyId = Company::getLocalCurrencyID($selectedCompanyID);
@@ -187,7 +187,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
 
                 if (empty($boq))
                 {
-                    GeneralService::sendException('BOQ not found.');
+                    GeneralService::sendException(trans('common.boq_not_found'));
                 }
 
                 $amount = ($boq['qty'] ?? 0) * ($boq['price'] ?? 0);
@@ -195,7 +195,7 @@ class TimeMaterialConsumptionRepository extends BaseRepository
 
                 if ($model::checkUuidExists($uuid))
                 {
-                    GeneralService::sendException('Uuid already exists.');
+                    GeneralService::sendException(trans('common.uuid_already_exists'));
                 }
 
                 $postData = [

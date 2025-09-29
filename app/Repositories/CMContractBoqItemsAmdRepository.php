@@ -89,7 +89,7 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
         } catch
         (Exception $e)
         {
-            throw new ContractCreationException("BOQ data saving failed " . $e->getMessage());
+            throw new ContractCreationException(trans('common.boq_data_saving_failed') . $e->getMessage());
         }
     }
     public function saveInitialRecord($contractId)
@@ -113,7 +113,7 @@ class CMContractBoqItemsAmdRepository extends BaseRepository
         catch
         (Exception $e)
         {
-            GeneralService::sendException("BOQ data saving failed " . $e->getMessage());
+            GeneralService::sendException(trans('common.boq_data_saving_failed') . $e->getMessage());
         }
     }
 

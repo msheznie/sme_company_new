@@ -46,7 +46,7 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
         );
 
         return $this->sendResponse(ContractMilestonePenaltyDetailResource::collection($contractMilestonePenaltyDetails),
-            'Contract Milestone Penalty Details retrieved successfully');
+            trans('common.milestone_penalty_details_retrieved_successfully'));
     }
 
     /**
@@ -62,7 +62,7 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
         try
         {
             $this->contractMilestonePenaltyDetailRepository->createMilestonePenaltyDetail($request);
-            return $this->sendResponse([], 'Milestone penalty detail created successfully');
+            return $this->sendResponse([], trans('common.milestone_penalty_detail_created_successfully'));
         } catch(CommonException $ex)
         {
             return $this->sendError($ex->getMessage(), '404');
@@ -87,11 +87,11 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
 
         if (empty($contractMilestonePenaltyDetail))
         {
-            return $this->sendError('Contract Milestone Penalty Detail not found');
+            return $this->sendError(trans('common.milestone_penalty_detail_not_found_dot'));
         }
 
         return $this->sendResponse(new ContractMilestonePenaltyDetailResource($contractMilestonePenaltyDetail),
-            'Contract Milestone Penalty Detail retrieved successfully');
+            trans('common.milestone_penalty_detail_retrieved_successfully'));
     }
 
     /**
@@ -112,11 +112,11 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
 
             if (empty($milestonePenaltyDetail))
             {
-                throw new CommonException('Milestone Penalty Detail not found.');
+                throw new CommonException(trans('common.milestone_penalty_detail_not_found_dot'));
             }
             $this->contractMilestonePenaltyDetailRepository->updateMilestonePenaltyDetail(
                 $input, $milestonePenaltyDetail['id']);
-            return $this->sendResponse([], trans('Milestone Penalty Detail updated successfully.'));
+            return $this->sendResponse([], trans('common.milestone_penalty_detail_updated_successfully_dot'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -144,10 +144,10 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
         {
             if (empty($contractMilestonePenaltyDetail))
             {
-                throw new CommonException('Milestone Penalty Detail not found');
+                throw new CommonException(trans('common.milestone_penalty_detail_not_found_dot'));
             }
             $contractMilestonePenaltyDetail->delete();
-            return $this->sendSuccess('Milestone penalty detail deleted successfully');
+            return $this->sendSuccess(trans('common.milestone_penalty_detail_deleted_successfully'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
@@ -225,11 +225,11 @@ class ContractMilestonePenaltyDetailAPIController extends AppBaseController
 
             if (empty($milestonePenaltyDetail))
             {
-                throw new CommonException('Milestone penalty not found.');
+                throw new CommonException(trans('common.milestone_penalty_not_found_dot'));
             }
             $this->contractMilestonePenaltyDetailRepository->updateMilestonePenaltyStatus(
                 $input, $milestonePenaltyDetail['id']);
-            return $this->sendResponse(['id' => $uuid], trans('Milestone penalty status updated successfully.'));
+            return $this->sendResponse(['id' => $uuid], trans('common.milestone_penalty_status_updated_successfully_dot'));
         } catch (CommonException $ex)
         {
             return $this->sendError($ex->getMessage());
