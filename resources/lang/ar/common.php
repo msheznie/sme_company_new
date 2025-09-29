@@ -417,5 +417,6 @@ return [
     'selected_type_is_required_dot' => ".النوع المحدد مطلوب",
     'percentage_is_required_dot' => ".النسبة المئوية مطلوبة",
     'contract_type_section_not_found' => 'قسم نوع العقد غير موجود',
-    "user_group_name_is_required" => "اسم مجموعة المستخدم مطلوب"
+    "user_group_name_is_required" => "اسم مجموعة المستخدم مطلوب",
+    "the_file_contains_malicious_or_unsafe_content" => "الملف يحتوي على محتوى ضار أو غير آمن",
 ];
