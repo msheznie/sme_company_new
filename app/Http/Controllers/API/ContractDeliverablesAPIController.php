@@ -164,7 +164,7 @@ class ContractDeliverablesAPIController extends AppBaseController
         $companySystemID = $request->input('companySystemID');
         $amendment = $request->input('amendment');
 
-        $contractMaster = ContractManagementUtils::checkContractExist($contractUuid, $companySystemID);
+        $contractMaster = ContractMaster::getContractDates($contractUuid, $companySystemID);
         if(empty($contractMaster))
         {
             return $this->sendError(trans('common.contract_not_found'));

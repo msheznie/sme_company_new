@@ -541,7 +541,9 @@ class PurchaseOrderMaster extends Model
 
     public static function getPurchaseOrder($contractID, $companyId)
     {
-        return PurchaseOrderMaster::where('companySystemID', $companyId)
+        return PurchaseOrderMaster::select('purchaseOrderID', 'purchaseOrderCode', 'poTotalSupplierTransactionCurrency',
+            'poConfirmedYN', 'approved', 'refferedBackYN', 'createdDateTime', 'supplierTransactionCurrencyID')
+            ->where('companySystemID', $companyId)
             ->whereHas('purchaseOrderDetails', function ($q) use ($contractID)
             {
                 $q->where('contractID', $contractID);
@@ -550,7 +552,11 @@ class PurchaseOrderMaster extends Model
             {
                 $q->select('purchaseOrderDetailsID', 'purchaseOrderMasterID')
                 ->where('contractID', $contractID);
-            },'currency'])
+            },'currency' => function ($q)
+            {
+                $q->select('currencyID', 'CurrencyCode', 'DecimalPlaces');
+            }
+            ])
             ->get();
     }
 }

@@ -249,7 +249,7 @@
      'commencement_date_not_found' => 'Commencement date not found',
      'record_retrieved_successfully' => 'Record retrieved successfully',
      'login_failed_the_user_is_not_activated_please_contact_admin' =>
-     'Login failed! The user is not activated. Please contact admin.',
+         'Login failed! The user is not activated. Please contact admin.',
      'code_configurations_not_found' => 'Code configurations not found',
      'supplier_assigned_not_found' => 'Supplier assigned not found',
      'failed_to_delete_contract_history' => 'Failed to delete contract history: ',
@@ -444,5 +444,6 @@
      'selected_type_is_required_dot' => 'Selected type is required.',
      'percentage_is_required_dot' => 'Percentage is required.',
      'contract_type_section_not_found' => 'Contract Type Section not found',
-     "user_group_name_is_required" => "User Group Name is required"
+     "user_group_name_is_required" => "User Group Name is required",
+     "the_file_contains_malicious_or_unsafe_content" => "The file contains malicious or unsafe content"
  ];

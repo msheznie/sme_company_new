@@ -53,7 +53,7 @@ class ContractMaster extends Model
     const STATUS_COMPLETED = 7;
 
     protected $dates = ['deleted_at'];
-    protected $hidden = ['contractType' , 'created_by'];
+    protected $hidden = ['id', 'contractType' , 'created_by'];
 
 
 
@@ -782,6 +782,14 @@ class ContractMaster extends Model
         }
 
         return $query;
+    }
+
+    public static function getContractDates($id, $companySystemID)
+    {
+        return ContractMaster::where('uuid', $id)
+            ->where('companySystemID', $companySystemID)
+            ->select('id','startDate', 'endDate')
+            ->first();
     }
 
     public function contractMasterForGraph($search, $companyId, $filter, $category, $contractType)

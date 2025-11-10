@@ -188,7 +188,11 @@ class ContractManagementUtils
 
     public static function getMilestonesWithAmount($contractId, $companySystemID)
     {
-        return ContractMilestone::select('id', 'contractID', 'uuid', 'title')->with('milestonePaymentSchedules')
+        return ContractMilestone::select('id', 'contractID', 'uuid', 'title')
+            ->with(['milestonePaymentSchedules' => function ($q)
+            {
+                $q->select('id', 'uuid', 'milestone_id', 'description', 'percentage', 'amount',);
+            }])
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->has('milestonePaymentSchedules')
@@ -403,7 +407,16 @@ class ContractManagementUtils
 
     public static function getPenaltyMilestones($contractId, $companySystemID, $milestonePenaltyUuid, $isEdit = false)
     {
-        return ContractMilestone::with('milestonePaymentSchedules', 'milestonePenalty')
+        return ContractMilestone::select('uuid', 'title', 'id')
+            ->with(['milestonePaymentSchedules' => function ($q)
+            {
+                $q->select('id', 'uuid', 'milestone_id', 'description', 'percentage', 'amount',);
+            },
+                'milestonePenalty'  => function ($q)
+                {
+                    $q->select('id', 'uuid', 'milestone_penalty_master_id', 'milestone_title', 'milestone_amount');
+                }
+            ])
             ->where('contractID', $contractId)
             ->where('companySystemID', $companySystemID)
             ->when($isEdit, function($query) use ($milestonePenaltyUuid)

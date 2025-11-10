@@ -174,7 +174,11 @@ class ContractDocument extends Model
 
     public function fetchByUuid($uuid)
     {
-        return self::where('uuid',$uuid)
+        return self::select('id','uuid', 'contractID', 'documentMasterID', 'documentType', 'documentName',
+            'documentDescription', 'attachedDate', 'followingRequest', 'status', 'receivedBy', 'receivedDate',
+            'receivedFormat', 'documentVersionNumber', 'documentResponsiblePerson', 'documentExpiryDate', 'returnedBy',
+            'returnedDate', 'returnedTo', 'attach_after_approval', 'is_editable')
+            ->where('uuid',$uuid)
             ->with([
                 'attachment' => function ($q)
                 {

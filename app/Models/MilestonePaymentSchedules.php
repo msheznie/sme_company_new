@@ -41,6 +41,8 @@ class MilestonePaymentSchedules extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected $hidden = ['id', 'contract_id', 'milestone_id'];
+
 
 
     public $fillable = [
@@ -297,8 +299,7 @@ class MilestonePaymentSchedules extends Model
     public static function getContractMilestone($companyId, $filter)
     {
         $query = MilestonePaymentSchedules::select('uuid', 'contract_id', 'milestone_id', 'description',
-            'percentage', 'amount', 'payment_due_date', 'actual_payment_date', 'milestone_due_date', 'currency_id',
-            'milestone_status')
+            'percentage', 'payment_due_date', 'actual_payment_date', 'milestone_due_date')
             ->where('company_id', $companyId)
             ->with([
                 'milestoneDetail' => function ($q)
