@@ -549,7 +549,7 @@ class PaySpplierInvoiceMaster extends Model
                 'supplierDetail' => function ($q)
                 {
                     $q->select('PayMasterAutoId', 'bookingInvDocCode', 'purchaseOrderID', 'supplierInvoiceNo',
-                    'supplierInvoiceDate', 'supplierInvoiceAmount', 'supplierPaymentAmount', 'paymentBalancedAmount');
+                        'supplierInvoiceDate', 'supplierInvoiceAmount', 'supplierPaymentAmount', 'paymentBalancedAmount');
                     $q->with([
                         'poMaster' => function ($q)
                         {

@@ -31,7 +31,7 @@ use App\Traits\CrudOperations;
  * Class FinanceDocumentsRepository
  * @package App\Repositories
  * @version August 8, 2024, 2:17 pm +04
-*/
+ */
 
 class FinanceDocumentsRepository extends BaseRepository
 {
@@ -116,7 +116,7 @@ class FinanceDocumentsRepository extends BaseRepository
             }
             self::insertOrDeleteInvoice($invoices, $contractMaster['id'], $documentType, $selectedCompanyID);
             self::insertOrDeletePaymentVoucher($paymentVoucher, $contractMaster['id'],
-            $documentType, $selectedCompanyID);
+                $documentType, $selectedCompanyID);
         });
     }
     public function insertOrDeleteInvoice($invoices, $contractID, $documentType, $selectedCompanyID)
