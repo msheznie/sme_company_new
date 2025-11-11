@@ -28,8 +28,6 @@ Route::get('server-configurations', [ServerConfigController::class, 'getServerTi
 Route::group(['middleware' => ['tenant', 'csrf.api']], function ()
 {
     Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
-
-
     Route::resource('c_m_parties_masters', App\Http\Controllers\API\CMPartiesMasterAPIController::class);
     Route::resource('c_m_intents_masters', App\Http\Controllers\API\CMIntentsMasterAPIController::class);
     Route::resource('c_m_counter_parties_masters', App\Http\Controllers\API\CMCounterPartiesMasterAPIController::class);
@@ -111,7 +109,9 @@ Route::group(['middleware' => ['tenant', 'csrf.api']], function ()
     ]);
 });
 
-Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
+Route::group(['middleware' => ['tenant']], function () {
+    Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
+});
 
 Route::get('/activate-contract', function ()
 {
