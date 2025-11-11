@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.7.0...v1.8.0) (2025-11-11)
+
+
+### Features
+
+* **cm:** CMS | Mitigate XSS via malicious PDF upload by enforcing strict file validation, sanitization, and safe file serving [CM-924] ([#383](https://github.com/pbsgears/Contract_Management_Backend/issues/383)) ([eb730f6](https://github.com/pbsgears/Contract_Management_Backend/commit/eb730f601ac829b320c0a2f12add607902938e4c))
+* **cm:** Remove unnecessary parameters from API requests and responses [CM-879] ([#380](https://github.com/pbsgears/Contract_Management_Backend/issues/380)) ([3897085](https://github.com/pbsgears/Contract_Management_Backend/commit/38970859141c0c05d866862be01121df4566b33a))
+* **contract:** CSRF Implementation [CM-878] ([#379](https://github.com/pbsgears/Contract_Management_Backend/issues/379)) ([f29cf99](https://github.com/pbsgears/Contract_Management_Backend/commit/f29cf993d78b50463d8dc62e2fced571c802617a))
+
 ## [1.7.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.6.0...v1.7.0) (2025-09-29)
 
 
