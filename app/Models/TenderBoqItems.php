@@ -152,7 +152,10 @@ class TenderBoqItems extends Model
         ])
             ->join('srm_bid_boq', 'srm_tender_boq_items.id', '=', 'srm_bid_boq.boq_id')
             ->where('srm_bid_boq.bid_master_id', $bidMasterId)
-            ->with('unit');
+            ->with(['unit' => function ($q)
+            {
+                $q->select('UnitID', 'UnitShortCode');
+            }]);
     }
 
 }

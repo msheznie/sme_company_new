@@ -9,6 +9,7 @@ use App\Http\Controllers\User\API\RegisterController;
 use App\Http\Controllers\User\API\ResetPasswordController;
 use App\Http\Controllers\User\API\UserController;
 use App\Http\Controllers\User\API\VerificationController;
+use App\Http\Controllers\ServerConfigController;
 use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
@@ -21,11 +22,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['tenant']], function ()
+// Server time endpoint for timezone synchronization (no CSRF protection needed)
+Route::get('server-configurations', [ServerConfigController::class, 'getServerTime']);
+
+Route::group(['middleware' => ['tenant', 'csrf.api']], function ()
 {
     Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
-    Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
-
     Route::resource('c_m_parties_masters', App\Http\Controllers\API\CMPartiesMasterAPIController::class);
     Route::resource('c_m_intents_masters', App\Http\Controllers\API\CMIntentsMasterAPIController::class);
     Route::resource('c_m_counter_parties_masters', App\Http\Controllers\API\CMCounterPartiesMasterAPIController::class);
@@ -105,6 +107,10 @@ Route::group(['middleware' => ['tenant']], function ()
         \App\Http\Controllers\API\FcmTokenAPIController::class,
         'getPortalRedirectUrl'
     ]);
+});
+
+Route::group(['middleware' => ['tenant']], function () {
+    Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
 });
 
 Route::get('/activate-contract', function ()

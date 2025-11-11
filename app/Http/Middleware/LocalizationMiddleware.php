@@ -17,8 +17,15 @@ class LocalizationMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        $lang = $request->header('accept-language', 'en');
-        App::setLocale($lang);
+        $acceptLang = $request->header('accept-language', 'en');
+        $locale = preg_split('/[,;]+/', $acceptLang)[0] ?? 'en';
+        $locale = str_replace('-', '_', $locale);
+
+        if (in_array($locale, ['en', 'en_US'])) {
+            $locale = 'en';
+        }
+
+        App::setLocale($locale);
 
         return $next($request);
     }

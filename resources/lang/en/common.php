@@ -444,5 +444,6 @@
      'selected_type_is_required_dot' => 'Selected type is required.',
      'percentage_is_required_dot' => 'Percentage is required.',
      'contract_type_section_not_found' => 'Contract Type Section not found',
-     "user_group_name_is_required" => "User Group Name is required"
+     "user_group_name_is_required" => "User Group Name is required",
+     "the_file_contains_malicious_or_unsafe_content" => "The file contains malicious or unsafe content"
  ];

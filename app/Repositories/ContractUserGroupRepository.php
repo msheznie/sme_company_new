@@ -156,7 +156,8 @@ class ContractUserGroupRepository extends BaseRepository
             }
 
             DB::commit();
-            return ['success' => true, 'data' => new ContractUserGroupResource($contractUserGroup)];
+            return ['success' => true, 'data' => collect(new ContractUserGroupResource($contractUserGroup))
+                ->only(['uuid', 'group_name', 'status', 'isDefault'])];
 
         } catch (QueryException $e)
         {

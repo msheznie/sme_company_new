@@ -36,7 +36,7 @@ class ContractMilestone extends Model
     const UPDATED_AT = 'updated_at';
 
 
-    protected $hidden = ['id', 'contractID'];
+    protected $hidden = ['id', 'contractID', 'created_at', 'updated_at'];
 
     public $fillable = [
         'uuid',

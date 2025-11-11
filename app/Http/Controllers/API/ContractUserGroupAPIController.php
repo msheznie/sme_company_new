@@ -156,8 +156,7 @@ class ContractUserGroupAPIController extends AppBaseController
             $contractUserGroup->status = $status;
             $contractUserGroup->save();
 
-            return $this->sendResponse(
-                new ContractUserGroupResource($contractUserGroup),
+            return $this->sendResponse([],
                 trans('common.user_group_status_updated_successfully')
             );
         }

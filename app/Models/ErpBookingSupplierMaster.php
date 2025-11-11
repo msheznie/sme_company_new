@@ -386,21 +386,13 @@ class ErpBookingSupplierMaster extends Model
     public function getInvoiceMasterDetails($invoiceID)
     {
         return ErpBookingSupplierMaster::where('bookingSuppMasInvAutoID', $invoiceID)
-            ->select('bookingSuppMasInvAutoID', 'documentSystemID', 'documentID', 'projectID', 'companyFinanceYearID',
-                'companyFinancePeriodID', 'bookingInvCode', 'bookingDate', 'comments', 'secondaryRefNo', 'supplierID',
-                'supplierGLCodeSystemID', 'supplierGLCode', 'supplierTransactionCurrencyID', 'supplierInvoiceNo',
-                'companyReportingCurrencyID', 'localCurrencyID', 'bookingAmountTrans', 'supplierInvoiceDate',
-                'bookingAmountLocal', 'bookingAmountRpt', 'confirmedYN', 'confirmedDate', 'approved', 'approvedDate',
-                'approvedByUserID', 'approvedByUserSystemID', 'documentType', 'refferedBackYN',
-                'timesReferred', 'RollLevForApp_curr', 'interCompanyTransferYN', 'createdUserGroup',
-                'createdUserSystemID', 'createdDateTime', 'cancelYN', 'cancelComment', 'cancelDate',
-                'canceledByEmpSystemID', 'canceledByEmpID', 'canceledByEmpName', 'rcmActivated', 'vatRegisteredYN',
-                'isLocalSupplier', 'VATAmount', 'VATAmountLocal', 'VATAmountRpt', 'retentionVatAmount',
-                'retentionDueDate', 'retentionAmount', 'retentionPercentage', 'netAmount', 'netAmountLocal',
-                'netAmountRpt', 'VATPercentage', 'serviceLineSystemID', 'wareHouseSystemCode', 'supplierVATEligible',
-                'employeeID', 'employeeControlAcID', 'createMonthlyDeduction', 'deliveryAppoinmentID',
-                'whtApplicableYN', 'whtType', 'whtApplicable', 'whtAmount', 'whtEdited', 'whtPercentage',
-                'isWHTApplicableVat', 'companySystemID', 'confirmedByEmpSystemID')
+            ->select('bookingSuppMasInvAutoID', 'documentSystemID', 'documentID', 'projectID', 'bookingInvCode',
+                'bookingDate', 'comments', 'secondaryRefNo', 'supplierID', 'supplierGLCodeSystemID', 'supplierGLCode',
+                'supplierTransactionCurrencyID', 'supplierInvoiceNo', 'companyReportingCurrencyID', 'localCurrencyID',
+                'bookingAmountTrans', 'supplierInvoiceDate', 'bookingAmountLocal', 'bookingAmountRpt', 'confirmedYN',
+                'confirmedDate', 'approved', 'approvedDate', 'documentType', 'rcmActivated', 'VATAmount',
+                'retentionPercentage', 'netAmount', 'VATPercentage', 'serviceLineSystemID', 'companySystemID',
+                'confirmedByEmpSystemID')
             ->with([
                 'detail' => function ($q)
                 {
@@ -422,12 +414,23 @@ class ErpBookingSupplierMaster extends Model
                 },
                 'directDetail' => function ($q)
                 {
-                    $q->with([
-                        'project',
-                        'segment'
+                    $q->select('directInvoiceAutoID', 'glCode', 'glCodeDes', 'serviceLineCode', 'DIAmount', 'VATAmount',
+                    'netAmount', 'serviceLineSystemID', 'detail_project_id')
+                        ->with([
+                        'project' => function ($q)
+                        {
+                            $q->select('id', 'projectCode', 'description');
+                        },
+                        'segment' => function ($q)
+                        {
+                            $q->select('serviceLineSystemID');
+                        }
                     ]);
                 },
-                'company',
+                'company' => function ($q)
+                {
+                    $q->select('companySystemID', 'CompanyName', 'logoPath', 'masterCompanySystemIDReorting');
+                },
                 'supplier' => function ($q)
                 {
                     $q->select('supplierCodeSystem', 'primarySupplierCode', 'supplierName');
@@ -446,7 +449,8 @@ class ErpBookingSupplierMaster extends Model
                 },
                 'approvedBy' => function ($q)
                 {
-                    $q->with([
+                    $q->select('documentSystemCode', 'approvedDate', 'employeeSystemID')
+                        ->with([
                         'employee' => function ($q)
                         {
                             $q->select('employeeSystemID', 'empName', 'empFullName');
