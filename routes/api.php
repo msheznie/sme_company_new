@@ -111,6 +111,11 @@ Route::group(['middleware' => ['tenant', 'csrf.api']], function ()
 
 Route::group(['middleware' => ['tenant']], function () {
     Route::post('oauth/login_with_token', 'AuthAPIController@authWithToken');
+
+    Route::group(['middleware' => ['third_party_integration']], function ()
+    {
+        Route::get('get_contract_data', 'ContractMasterAPIController@getContractData');
+    });
 });
 
 Route::get('/activate-contract', function ()
