@@ -36,11 +36,6 @@ Route::group(['middleware' => ['tenant', 'csrf.api']], function ()
     Route::resource('c_m_contract_type_sections', App\Http\Controllers\API\CMContractTypeSectionsAPIController::class);
 
 
-    Route::group(['middleware' => ['third_party_integration']], function ()
-    {
-        Route::get('get_contract_data', 'ContractMasterAPIController@getContractData');
-    });
-
     Route::group(['middleware' => ['auth:api']], function ()
     {
         Route::get('current/user', 'UsersAPIController@getCurrentUser');
