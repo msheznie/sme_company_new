@@ -1,0 +1,266 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Exceptions\ContractCreationException;
+use App\Http\Requests\API\CreateContractAdditionalDocumentsAPIRequest;
+use App\Http\Requests\API\UpdateContractAdditionalDocumentsAPIRequest;
+use App\Models\ContractAdditionalDocuments;
+use App\Models\ErpDocumentAttachmentsAmd;
+use App\Repositories\ContractAdditionalDocumentsRepository;
+use App\Repositories\ErpDocumentAttachmentsRepository;
+use App\Services\ContractAdditionalDocumentService;
+use App\Services\ContractAmendmentService;
+use App\Utilities\ContractManagementUtils;
+use Illuminate\Http\Request;
+use App\Http\Controllers\AppBaseController;
+use App\Http\Resources\ContractAdditionalDocumentsResource;
+use Response;
+
+/**
+ * Class ContractAdditionalDocumentsController
+ * @package App\Http\Controllers\API
+ */
+
+class ContractAdditionalDocumentsAPIController extends AppBaseController
+{
+    /** @var  ContractAdditionalDocumentsRepository */
+    private $contractAdditionalDocumentsRepository;
+    private $erpDocumentAttachmentsRepository;
+    protected $contractAdditionalDocumentService;
+    public function __construct(
+        ContractAdditionalDocumentsRepository $contractAdditionalDocumentsRepo,
+        ErpDocumentAttachmentsRepository $erpDocumentAttachmentsRepo,
+        ContractAdditionalDocumentService $contractAdditionalDocumentService
+    )
+    {
+        $this->contractAdditionalDocumentsRepository = $contractAdditionalDocumentsRepo;
+        $this->erpDocumentAttachmentsRepository = $erpDocumentAttachmentsRepo;
+        $this->contractAdditionalDocumentService = $contractAdditionalDocumentService;
+    }
+    const UNEXPECTED_ERROR_MESSAGE = 'common.an_unexpected_error_occurred_dot';
+    /**
+     * Display a listing of the ContractAdditionalDocuments.
+     * GET|HEAD /contractAdditionalDocuments
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function index(Request $request)
+    {
+        $contractAdditionalDocuments = $this->contractAdditionalDocumentsRepository->all(
+            $request->except(['skip', 'limit']),
+            $request->get('skip'),
+            $request->get('limit')
+        );
+
+        return $this->sendResponse(ContractAdditionalDocumentsResource::collection($contractAdditionalDocuments),
+            'Contract Additional Documents retrieved successfully');
+    }
+
+    /**
+     * Store a newly created ContractAdditionalDocuments in storage.
+     * POST /contractAdditionalDocuments
+     *
+     * @param CreateContractAdditionalDocumentsAPIRequest $request
+     *
+     * @return Response
+     */
+    public function store(CreateContractAdditionalDocumentsAPIRequest $request)
+    {
+        try
+        {
+            $contractId = $this->contractAdditionalDocumentService->createAdditionalDocument($request);
+            return $this->sendResponse($contractId,'Successfully Created');
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
+        }
+    }
+
+    /**
+     * Display the specified ContractAdditionalDocuments.
+     * GET|HEAD /contractAdditionalDocuments/{id}
+     *
+     * @param int $id
+     *
+     * @return Response
+     */
+    public function show($id)
+    {
+        /** @var ContractAdditionalDocuments $contractAdditionalDocuments */
+        $contractAdditionalDocuments = $this->contractAdditionalDocumentsRepository->findByUuid($id,
+            ['documentName']
+        );
+
+        if (empty($contractAdditionalDocuments)) {
+            return $this->sendError(trans('common.contract_additional_document_not_found'));
+        }
+
+        return $this->sendResponse($contractAdditionalDocuments,
+            trans('common.contract_additional_document_retrieved_successfully'));
+    }
+
+    /**
+     * Update the specified ContractAdditionalDocuments in storage.
+     * PUT/PATCH /contractAdditionalDocuments/{id}
+     *
+     * @param int $id
+     * @param UpdateContractAdditionalDocumentsAPIRequest $request
+     *
+     * @return Response
+     */
+    public function update($id, UpdateContractAdditionalDocumentsAPIRequest $request)
+    {
+        $input = $request->all();
+        $amendment = $input['amendment'];
+        /** @var ContractAdditionalDocuments $contractAdditionalDocuments */
+        $contractAdditionalDocuments =$amendment
+            ?
+            ContractAmendmentService::getContractAdditionalDocument($id, $input['contractHistoryUuid'])
+            :
+            $this->contractAdditionalDocumentsRepository->findByUuid($id, ['id']);
+
+        if (empty($contractAdditionalDocuments)) {
+            return $this->sendError(trans('common.contract_additional_document_not_found'));
+        }
+        $additionalDocument = $this->contractAdditionalDocumentsRepository
+            ->updateAdditionalDocumentHeader($input, $contractAdditionalDocuments['id']);
+        if (!$additionalDocument['status']) {
+            return $this->sendError($additionalDocument['message']);
+        } else {
+            return $this->sendResponse([], $additionalDocument['message']);
+        }
+    }
+
+    /**
+     * Remove the specified ContractAdditionalDocuments from storage.
+     * DELETE /contractAdditionalDocuments/{id}
+     *
+     * @param int $id
+     *
+     * @throws \Exception
+     *
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        /** @var ContractAdditionalDocuments $contractAdditionalDocuments */
+        $contractAdditionalDocuments = $this->contractAdditionalDocumentsRepository->findByUuid($id, ['id']);
+
+        if (empty($contractAdditionalDocuments)) {
+            return $this->sendError(trans('common.contract_additional_document_not_found'));
+        }
+        $contractAdditionalDocuments->delete();
+        return $this->sendSuccess(trans('common.contract_additional_document_deleted_successfully'));
+    }
+    public function  getAdditionalDocumentList(Request $request) {
+        return $this->contractAdditionalDocumentsRepository->additionalDocumentList($request);
+    }
+    public function addAdditionalAttachment(Request $request)
+    {
+        $documentMasterID = $request->input('documentMasterID') ?? 122;
+        $amendment = $request->input('amendment');
+        $uuid = $request->input('uuid');
+        $historyId = 0;
+
+        if($amendment)
+        {
+            $additionalDocument = ContractAmendmentService::getContractAdditionalDocument
+            (
+                $uuid, $request->input('contractHistoryUuid')
+            );
+            $historyData = ContractManagementUtils::getContractHistoryData($request->input('contractHistoryUuid'));
+            $historyId = $historyData->id;
+        }else
+        {
+            $additionalDocument =  $this->contractAdditionalDocumentsRepository->findByUuid(
+                $uuid,
+                ['id', 'documentName']);
+        }
+
+
+        if(empty($additionalDocument)) {
+            return $this->sendError(trans('common.contract_additional_document_not_found'));
+        }
+
+
+        if($amendment)
+        {
+            $deleteOldAttachment = ErpDocumentAttachmentsAmd::deleteAttachment($documentMasterID,
+                $additionalDocument['id'],$historyId);
+        }else
+        {
+            $deleteOldAttachment = $this->contractAdditionalDocumentsRepository->deleteFile($documentMasterID,
+                $additionalDocument['id']);
+        }
+
+        if(!$deleteOldAttachment['status']){
+            return $this->sendError($deleteOldAttachment['message']);
+        }
+
+        $attachment = $this->erpDocumentAttachmentsRepository
+            ->saveDocumentAttachments($request, $additionalDocument['id'], $historyId);
+
+
+
+        if(!$attachment['status']) {
+            $errorCode = $attachment['code'] ?? 404;
+            return $this->sendError($attachment['message'], $errorCode);
+        } else{
+            return $this->sendResponse([], $attachment['message']);
+        }
+    }
+
+    public function getAdditionalDocumentByUuid(Request $request)
+    {
+        try
+        {
+            return $this->contractAdditionalDocumentService->getAdditionalDocumentByUuid($request);
+        } catch (\Exception $e)
+        {
+            return $this->sendError( trans('common.something_went_wrong') . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteContractDocumentAttachment(Request $request)
+    {
+        try
+        {
+            $this->contractAdditionalDocumentService->deleteContractDocument($request);
+            return $this->sendResponse([],trans('common.successfully_deleted'));
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
+        }
+    }
+
+    public function updateAdditionalDoc(CreateContractAdditionalDocumentsAPIRequest $request)
+    {
+        try
+        {
+            $contractId = $this->contractAdditionalDocumentService->updateAdditionalDoc($request);
+            return $this->sendResponse($contractId,trans('common.successfully_updated'));
+        }
+        catch (ContractCreationException $e)
+        {
+            return $this->sendError($e->getMessage(), 500);
+        }
+        catch (\Exception $e)
+        {
+            return $this->sendError(trans(self::UNEXPECTED_ERROR_MESSAGE), 500);
+        }
+    }
+
+
+}

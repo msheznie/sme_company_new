@@ -1,0 +1,23 @@
+version: '3'
+
+networks:
+  gears_suite:
+
+services:
+    contract-mgmt-be:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: contract-mgmt-be
+        container_name: cms-backend
+        ports:
+            - '9049:80'
+#        environment:
+#            WWWUSER: '${WWWUSER}'
+#            LARAVEL_SAIL: 1
+        #volumes:
+        #    - '.:/var/www/html'
+networks:
+  default:
+      external:
+        name: gears_suite

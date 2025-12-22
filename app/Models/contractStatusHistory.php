@@ -1,0 +1,158 @@
+<?php
+
+namespace App\Models;
+
+use App\Services\ContractHistoryService;
+use Eloquent as Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Class contractStatusHistory
+ * @package App\Models
+ * @version June 26, 2024, 10:27 am +04
+ *
+ * @property integer $contract_id
+ * @property integer $contract_history_id
+ * @property integer $status
+ * @property integer $company_id
+ * @property integer $created_by
+ * @property integer $updated_by
+ */
+class contractStatusHistory extends Model
+{
+    use HasFactory;
+
+    public $table = 'cm_contract_status_history';
+
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+    public $fillable = [
+        'contract_id',
+        'status',
+        'company_id',
+        'contract_history_id',
+        'created_by',
+        'updated_by',
+        'system_user'
+    ];
+
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'integer',
+        'contract_id' => 'integer',
+        'contract_history_id' => 'integer',
+        'status' => 'integer',
+        'company_id' => 'integer',
+        'system_user' => 'boolean',
+        'created_by' => 'integer',
+        'updated_by' => 'integer'
+    ];
+
+    /**
+     * Validation rules
+     *
+     * @var array
+     */
+    public static $rules = [];
+
+
+    public function getContractListStatus($id)
+    {
+        return contractStatusHistory::select('id','status','contract_id','created_at','created_by','system_user')
+        ->with(['employees' => function ($query)
+        {
+            $query->select('employeeSystemID','empName');
+        }])
+        ->where('contract_id', $id)
+        ->get();
+    }
+
+    public function employees()
+    {
+        return $this->hasOne(Employees::class, 'employeeSystemID', 'created_by');
+    }
+
+    public static function updateTerminatedAddendum($contractId, $companyId, $status, $isSystemUser=0)
+    {
+        $data = [
+            'status'  => $status
+        ];
+
+        ContractMaster::updatedAddendumRecords($companyId, $contractId, $data);
+        $updatedIdList = ContractMaster::getAddendumRecordsId($companyId, $contractId);
+
+        foreach ($updatedIdList as $i)
+        {
+            ContractHistoryService::insertHistoryStatus($i['id'], $status, $companyId, null, $isSystemUser);
+        }
+    }
+
+    public function getContractStatusHistory($contractId, $companySystemID)
+    {
+         $query = self::getStatusData($contractId);
+        return $query->map(function ($contract)
+    {
+        return [
+            'status' => $contract->status,
+            'systemUser' => $contract->system_user,
+            'empName' => $contract->employee->empName ?? null,
+            'createdAt' => $contract->created_at,
+            'contractCode' => ($contract->contract_history_id) ?  $contract->contractHistory
+                ->contractMaster->contractCode
+                : $contract->contractMaster->contractCode,
+            'title' => ($contract->contract_history_id) ?  $contract->contractHistory->contractMaster->title
+        : $contract->contractMaster->title,
+        ];
+    })->toArray();
+
+
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employees::class,  'created_by', 'employeeSystemID');
+    }
+    public function getStatusData($contractId)
+    {
+        return self::with(['employee' => function ($query)
+        {
+            $query->select('employeeSystemID','empName');
+        },'contractHistory' => function ($query)
+        {
+            $query->select('id','contract_id')
+                ->with(['contractMaster' => function ($q)
+                {
+                    $q->select('id','contractCode','title');
+                }]);
+        },'contractMaster'=> function ($q)
+        {
+            $q->select('id','contractCode','title');
+        }])
+            ->where('contract_id',$contractId)
+            ->get();
+    }
+
+    public function contractHistory()
+    {
+        return $this->hasOne(ContractHistory::class, 'id', 'contract_history_id');
+    }
+
+    public function contractMaster()
+    {
+        return $this->hasOne(ContractMaster::class, 'id', 'contract_id');
+    }
+
+    public static function getTotalContractStatus($companyId, $filter)
+    {
+        return contractStatusHistory::select('uuid', 'contract_id')
+            ->where('company_id', $companyId);
+    }
+
+}
