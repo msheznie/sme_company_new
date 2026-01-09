@@ -275,6 +275,7 @@ class ContractMaster extends Model
 
         $contractUserId = ContractUsers::select('id')
             ->where('contractUserId',$currentEmployeeId)
+            ->where('contractUserType', 3)
             ->where('companySystemId', $companyId)
             ->first();
 
@@ -599,7 +600,9 @@ class ContractMaster extends Model
                 'retentionPercentage' => $contract->overallRetention->retentionPercentage ?? null,
                 'retentionAmount' => $contract->overallRetention->retentionAmount ?? null,
                 'retentionStartDate' => $contract->overallRetention->startDate ?? null,
-                'retentionDueDate' => $contract->overallRetention->dueDate ?? null
+                'retentionDueDate' => $contract->overallRetention->dueDate ?? null,
+                'referenceCode' => $contract->referenceCode ?? null,
+                'contractCode' => $contract->contractCode ?? null,
             ];
         })->toArray();
     }
@@ -619,7 +622,9 @@ class ContractMaster extends Model
             'counterParty',
             'counterPartyName',
             'startDate',
-            'endDate'
+            'endDate',
+            'referenceCode',
+            'contractCode'
         )
             ->with(['counterParties' => function ($q)
             {
@@ -630,7 +635,8 @@ class ContractMaster extends Model
                 $q->select('id', 'uuid', 'contractUserId', 'contractUserName');
                 if (!empty($input['supplierId']))
                 {
-                    $q->where('contractUserId', $input['supplierId']);
+                    $q->where('contractUserId', $input['supplierId'])
+                        ->where('contractUserType', 1);
                 }
             }])
             ->with(['overallRetention' => function ($q1)
