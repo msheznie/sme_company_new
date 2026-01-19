@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.8.0...v1.9.0) (2026-01-19)
+
+
+### Features
+
+* **cm:** Finance Integration Details [CM-1025] ([373e5a0](https://github.com/pbsgears/Contract_Management_Backend/commit/373e5a0e72be7332a9e7f8d7950f9f435c34f921))
+
 ## [1.8.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.7.0...v1.8.0) (2025-11-11)
 
 
