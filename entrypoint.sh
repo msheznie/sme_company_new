@@ -1,5 +1,5 @@
 #!/bin/bash
-# Sheznie  
+# Sheznie v2
 # turn on bash's job control
 set -m
   
