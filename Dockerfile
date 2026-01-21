@@ -1,5 +1,6 @@
 FROM php:7.4-apache
 # Install system dependencies
+# Sheznie
 RUN apt-get update && \
            apt-get install -y vim unzip curl openssl
 # Install system dependencies library
