@@ -1,3 +1,7 @@
+## 1.9.1 - 2026-01-29
+
+- chore: add migration files
+
 # Changelog
 
 ## [1.9.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.8.0...v1.9.0) (2026-01-19)
