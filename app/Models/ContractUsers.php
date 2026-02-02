@@ -256,6 +256,7 @@ class ContractUsers extends Model
     {
         return ContractUsers::select('id')
             ->where('contractUserId',$currentEmployeeId)
+            ->where('contractUserType', 3)
             ->first();
     }
 
