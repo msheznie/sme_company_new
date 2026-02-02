@@ -23,7 +23,6 @@ class SafeFile implements Rule
             '/\/JavaScript/i',
             '/\/OpenAction/i',
             '/\/Launch/i',
-            '/\/Action/i',
             '/\/EmbeddedFile/i',
         ];
 
