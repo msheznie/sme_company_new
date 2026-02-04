@@ -10,7 +10,7 @@ class SafeFile implements Rule
 
     public function passes($attribute, $value)
     {
-        if (!$value || !$value->isValid()) {
+        if (!$value) {
             $this->message = 'Invalid file uploaded.';
             return false;
         }
