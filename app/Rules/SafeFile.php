@@ -15,16 +15,19 @@ class SafeFile implements Rule
             return false;
         }
 
-        // Read the raw content
-        $content = is_string($value) ? $value : $value->get();
+        $content = file_get_contents(
+            $value->getRealPath(),
+            false,
+            null,
+            0,
+            200000 // scan first 200KB only
+        );
 
-        // Dangerous PDF patterns
         $maliciousPatterns = [
-            '/\/JavaScript/i',
-            '/\/OpenAction/i',
-            '/\/Launch/i',
-            '/\/Action/i',
-            '/\/EmbeddedFile/i',
+            '/\/JavaScript\b/i',
+            '/\/OpenAction\b/i',
+            '/\/Launch\b/i',
+            '/\/EmbeddedFile\b/i',
         ];
 
         foreach ($maliciousPatterns as $pattern) {
