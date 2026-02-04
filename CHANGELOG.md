@@ -1,3 +1,9 @@
+## 1.9.1 - 2026-02-04
+
+- Merge branch 'CM-1429-v1' into 'main'
+- chore(cms): Contracts not display to pull in the ERP side when creating records [CM-934] (#395)
+- chore: add migration files
+
 # Changelog
 
 ## [1.8.0](https://github.com/pbsgears/Contract_Management_Backend/compare/v1.7.0...v1.8.0) (2025-11-11)
