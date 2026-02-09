@@ -15,16 +15,29 @@ class SafeFile implements Rule
             return false;
         }
 
-        // Read the raw content
-        $content = is_string($value) ? $value : $value->get();
+        if (is_string($value)) {
+            $content = substr($value, 0, 200000);
+        }
+        else {
+            if (!$value->isValid()) {
+                $this->message = 'Invalid file uploaded.';
+                return false;
+            }
 
-        // Dangerous PDF patterns
+            $content = file_get_contents(
+                $value->getRealPath(),
+                false,
+                null,
+                0,
+                200000
+            );
+        }
+
         $maliciousPatterns = [
-            '/\/JavaScript/i',
-            '/\/OpenAction/i',
-            '/\/Launch/i',
-            '/\/Action/i',
-            '/\/EmbeddedFile/i',
+            '/\/JavaScript\b/i',
+            '/\/OpenAction\b/i',
+            '/\/Launch\b/i',
+            '/\/EmbeddedFile\b/i',
         ];
 
         foreach ($maliciousPatterns as $pattern) {
