@@ -15,13 +15,23 @@ class SafeFile implements Rule
             return false;
         }
 
-        $content = file_get_contents(
-            $value->getRealPath(),
-            false,
-            null,
-            0,
-            200000 // scan first 200KB only
-        );
+        if (is_string($value)) {
+            $content = substr($value, 0, 200000);
+        }
+        else {
+            if (!$value->isValid()) {
+                $this->message = 'Invalid file uploaded.';
+                return false;
+            }
+
+            $content = file_get_contents(
+                $value->getRealPath(),
+                false,
+                null,
+                0,
+                200000
+            );
+        }
 
         $maliciousPatterns = [
             '/\/JavaScript\b/i',
